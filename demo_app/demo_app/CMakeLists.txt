@@ -28,9 +28,9 @@ target_link_libraries(
     # PRIVATE
     # some_lib
 
-    # Quartz Utility
-    # PRIVATE
-    # UTIL_Logger
+    # Utility
+    PRIVATE
+    UTIL_Logger
 
     # Quartz
     # PRIVATE

@@ -15,7 +15,7 @@
 #endif
 
 /**
- * @brief A macro allowing us to assert at compile time that we have information about Gemstone's
+ * @brief A macro allowing us to assert at compile time that we have information about Quartz's
  * version from preprocessor directives. This is essentially just a check to ensure that we were
  * compiled correctly with all of the information that we need.
  */

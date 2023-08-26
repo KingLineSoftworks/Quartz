@@ -68,6 +68,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror)
 
 #====================================================================
+# Third party vendor libraries
+#====================================================================
+set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
+
+add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
+list(APPEND VENDOR_LIBS spdlog)
+
+#====================================================================
 # Define preprocessor directives for the Quartz libraries
 #====================================================================
 # @todo: only add these for Quartz libraries. We don't want to be setting these for the
@@ -86,18 +94,18 @@ add_compile_definitions(
 # Utility and Quartz libraries
 #====================================================================
 
-set(QUARTZ_ROOT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(QUARTZ_ROOT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 
 include_directories(
-    ${QUARTZ_ROOT_INCLUDE_DIR}
+    ${QUARTZ_ROOT_SOURCE_DIR}
 )
 
 # Utility
 
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
 
-# add_subdirectory("${UTIL_SOURCE_DIR}")
+add_subdirectory("${UTIL_SOURCE_DIR}/logger")
+list(APPEND UTIL_LIBS UTIL_Logger)
 
 # Quartz
 
