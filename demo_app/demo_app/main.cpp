@@ -15,15 +15,15 @@ int main() {
     ASSERT_APPLICATION_VERSION();
 
     /**
-     * @todo This should be done automatically by declaring the loggers in Loggers.hpp files
+     * @todo This should be done automatically by declaring the loggers in Loggers.hpp files.
+     * The default logging level should automatically be set upon declaration of the loggers so we don't
+     * have to risk accidentally setting the default level incorrectly with the levels we wish to pass to
+     * setLevels
+     * @todo When declaring the loggers via macro, we should define a macro that gives us REGISTER_QUARTZ_LOGGERS()
+     * and REGISTER_DEMO_APP_LOGGERS() so we don't have to risk this.
      */
-    quartz::util::Logger::registerLoggers(quartz::loggers::QUARTZ_LOGGER_INFOS);
-    quartz::util::Logger::registerLoggers(quartz::loggers::DEMO_APP_LOGGER_INFOS);
-
-    /**
-     * @todo Declare the logging levels for each of the loggers, each of the loggers whose level isn't specified
-     * here is going to use the default logging level
-     */
+    REGISTER_QUARTZ_LOGGERS();
+    REGISTER_DEMO_APP_LOGGERS();
 
     quartz::util::Logger::setLevels({
         {"GENERAL", quartz::util::Logger::Level::off},

@@ -15,5 +15,7 @@ constexpr std::array<const quartz::util::Logger::RegistrationInfo, 2> QUARTZ_LOG
     ANOTHER
 };
 
+#define REGISTER_QUARTZ_LOGGERS() quartz::util::Logger::registerLoggers(quartz::loggers::QUARTZ_LOGGER_INFOS)
+
 } // namespace loggers
 } // namespace quartz
