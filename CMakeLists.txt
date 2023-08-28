@@ -59,13 +59,22 @@ else ()
 endif ()
 
 #====================================================================
-# C++ 17 Support and compiler flags
+# C++ 20 Support and compiler flags
 #====================================================================
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(CustomPedanticFlags) # Gives us the CUSTOM_PEDANTIC_WARNING_FLAGS list
+
+set(CMAKE_CXX_DESIRED_WARNING_FLAGS
+    -Wall
+    -Wextra
+    -Werror
+)
+
 # Only set the c++ flags for Quartz and not for everything because we want the vendor libraries to be compiled normally
-set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror)
+# set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror)
+set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_DESIRED_WARNING_FLAGS} ${CUSTOM_PEDANTIC_WARNING_FLAGS})
 
 #====================================================================
 # Third party vendor libraries
@@ -111,7 +120,8 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
 
-# add_subdirectory("${QUARTZ_SOURCE_DIR}")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/something")
+list(APPEND QUARTZ_LIBS QUARTZ_Something)
 
 #====================================================================
 # The demo application

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -26,16 +27,6 @@ namespace util {
  * @brief A singleton-esque logger wrapping a spdlog async logger. This exposes a map
  * of loggers, each of which has their own logging level associated with it. To use it
  * be sure to register a logger with the registerLogger function.
- * 
- * @note If you wish to make use of the nice macros at the bottom of this file, be sure
- * to define some LOGGER_NAME string to whatever logger you desire to use. The macros
- * assume that LOGGER_NAME is already defined. If LOGGER_NAME is not defined and you wish
- * to programatically change the logger being used (perhaps in a function taking a logger
- * name parameter) you must use the quartz::util::Logger functions directly
- * 
- * @todo Clamp log levels based on debug vs release mode or something?
- * 
- * @todo ALlow us to set stdout levels vs file levels differently?
  */
 class quartz::util::Logger {
 public: // public classes and enums
@@ -43,21 +34,22 @@ public: // public classes and enums
      * @brief An enum class representing each of the different logging levels
      */
     enum class Level {
-        trace,
-        debug,
-        info,
-        warning,
-        error,
-        critical
+        trace = 0,
+        debug = 1,
+        info = 2,
+        warning = 3,
+        error = 4,
+        critical = 5,
+        off = 6
     };
 
     /**
      * @brief A simple struct used for registering loggers. This pairs a logger's
-     * name with its desired logging level. This is essentially just a pair with
+     * name with its default logging level. This is essentially just a pair with
      * named elements
      */
     struct RegistrationInfo {
-        const std::string loggerName;
+        const char* loggerName;
         const quartz::util::Logger::Level level;
     };
 
@@ -91,7 +83,25 @@ public: // public classes and enums
 
 public: // public static functions
     static void registerLogger(const std::string& loggerName, const quartz::util::Logger::Level level);
-    static void registerLoggers(const std::vector<const quartz::util::Logger::RegistrationInfo>& loggerInfos);
+
+    template<size_t N>
+    static void registerLoggers(const std::array<const quartz::util::Logger::RegistrationInfo, N>& loggerInfos) {
+        for (const quartz::util::Logger::RegistrationInfo& loggerInfo : loggerInfos) {
+            quartz::util::Logger::registerLogger(loggerInfo.loggerName, loggerInfo.level);
+        }
+    }
+
+    static void setLevel(const std::string& loggerName, const quartz::util::Logger::Level desiredLevel);
+    static void setLevels(const std::vector<const quartz::util::Logger::RegistrationInfo>& loggerInfos);
+
+    /**
+     * @brief Functions to actually log messages
+     * 
+     * @tparam Args The variadic arguments to log
+     * @param loggerName The name of the logger we should be using to log
+     * @param format The formatting string
+     * @param args The variadic arguments to apply to the formatting string
+     */
 
     template<typename... Args>
     static void trace(const std::string& loggerName, const std::string& format, Args&&... args) {
@@ -159,6 +169,8 @@ public: // public static functions
             case quartz::util::Logger::Level::critical:
                 quartz::util::Logger::critical(loggerName, format, args...);
                 break;
+            case quartz::util::Logger::Level::off:
+                break;
         }
     }
 
@@ -176,6 +188,7 @@ private: // private static functions
 private: // private static variables
     static bool initialized;
 
+    static std::map<std::string, quartz::util::Logger::Level> loggerNameDefaultLevelMap;
     static std::map<std::string, quartz::util::Logger::Level> loggerNameLevelMap;
 
     static std::shared_ptr<spdlog::details::thread_pool> threadPool;
@@ -184,105 +197,161 @@ private: // private static variables
 };
 
 /**
- * @brief Log something
+ * @brief Dictate which logger you are going to be using
  * 
- * @note To use this LOGGER_NAME must be defined and the first argument of the variadic
- * arguments must be a formatting string
+ * This defines a function to get a reference to the necessary logger registration information in the quartz::logger namespace=
  */
 
-#define LOG_TRACE(...) \
-    quartz::util::Logger::trace(LOGGER_NAME, __VA_ARGS__)
+#define USE_LOGGER(loggerRegistrationInfoName) \
+    const quartz::util::Logger::RegistrationInfo& getLoggerRegistrationInfo() const { return quartz::loggers::loggerRegistrationInfoName; } \
+    REQUIRE_SEMICOLON
 
-#define LOG_DEBUG(...) \
-    quartz::util::Logger::debug(LOGGER_NAME, __VA_ARGS__)
+/**
+ * @brief Log something
+ * 
+ * @note the first argument of the variadic arguments must be a formatting string
+ */
 
-#define LOG_INFO(...) \
-    quartz::util::Logger::info(LOGGER_NAME, __VA_ARGS__)
+#define LOG_TRACE(registrationInfo, ...) \
+    quartz::util::Logger::trace(registrationInfo.loggerName, __VA_ARGS__)
+#define LOG_TRACEthis(...) LOG_TRACE(this->getLoggerRegistrationInfo(), __VA_ARGS__)
 
-#define LOG_WARNING(...) \
-    quartz::util::Logger::warning(LOGGER_NAME, __VA_ARGS__)
+#define LOG_DEBUG(registrationInfo, ...) \
+    quartz::util::Logger::debug(registrationInfo.loggerName, __VA_ARGS__)
+#define LOG_DEBUGthis(...) LOG_DEBUG(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+
+#define LOG_INFO(registrationInfo, ...) \
+    quartz::util::Logger::info(registrationInfo.loggerName, __VA_ARGS__)
+#define LOG_INFOthis(...) LOG_INFO(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+
+#define LOG_WARNING(registrationInfo, ...) \
+    quartz::util::Logger::warning(registrationInfo.loggerName, __VA_ARGS__)
+#define LOG_WARNINGthis(...) LOG_WARNING(this->getLoggerRegistrationInfo(), __VA_ARGS__)
     
-#define LOG_ERROR(...) \
-    quartz::util::Logger::error(LOGGER_NAME, __VA_ARGS__)
+#define LOG_ERROR(registrationInfo, ...) \
+    quartz::util::Logger::error(registrationInfo.loggerName, __VA_ARGS__)
+#define LOG_ERRORthis(...) LOG_ERROR(this->getLoggerRegistrationInfo(), __VA_ARGS__)
 
-#define LOG_CRITICAL(...) \
-    quartz::util::Logger::critical(LOGGER_NAME, __VA_ARGS__)
+#define LOG_CRITICAL(registrationInfo, ...) \
+    quartz::util::Logger::critical(registrationInfo.loggerName, __VA_ARGS__)
+#define LOG_CRITICALthis(...) LOG_CRITICAL(this->getLoggerRegistrationInfo(), __VA_ARGS__)
 
 /**
  * @brief Log a scope change
- * 
- * @note To use this LOGGER_NAME must be defined
  */
 
-#define LOG_SCOPE_CHANGE_TRACE() \
-    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, quartz::util::Logger::Level::trace)
+#define LOG_SCOPE_CHANGE_TRACE(registrationInfo) \
+    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, quartz::util::Logger::Level::trace)
+#define LOG_SCOPE_CHANGE_TRACEthis() LOG_SCOPE_CHANGE_TRACE(this->getLoggerRegistrationInfo())
 
-#define LOG_SCOPE_CHANGE_DEBUG() \
-    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, quartz::util::Logger::Level::debug)
+#define LOG_SCOPE_CHANGE_DEBUG(registrationInfo) \
+    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, quartz::util::Logger::Level::debug)
+#define LOG_SCOPE_CHANGE_DEBUGthis() LOG_SCOPE_CHANGE_DEBUG(this->getLoggerRegistrationInfo())
 
-#define LOG_SCOPE_CHANGE_INFO() \
-    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, quartz::util::Logger::Level::info)
+#define LOG_SCOPE_CHANGE_INFO(registrationInfo) \
+    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, quartz::util::Logger::Level::info)
+#define LOG_SCOPE_CHANGE_INFOthis() LOG_SCOPE_CHANGE_INFO(this->getLoggerRegistrationInfo())
 
-#define LOG_SCOPE_CHANGE_WARNING() \
-    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, quartz::util::Logger::Level::warning)
+#define LOG_SCOPE_CHANGE_WARNING(registrationInfo) \
+    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, quartz::util::Logger::Level::warning)
+#define LOG_SCOPE_CHANGE_WARNINGthis() LOG_SCOPE_CHANGE_WARNING(this->getLoggerRegistrationInfo())
 
-#define LOG_SCOPE_CHANGE_ERROR() \
-    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, quartz::util::Logger::Level::error)
+#define LOG_SCOPE_CHANGE_ERROR(registrationInfo) \
+    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, quartz::util::Logger::Level::error)
+#define LOG_SCOPE_CHANGE_ERRORthis() LOG_SCOPE_CHANGE_ERROR(this->getLoggerRegistrationInfo())
 
-#define LOG_SCOPE_CHANGE_CRITICAL() \
-    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, quartz::util::Logger::Level::critical)
+#define LOG_SCOPE_CHANGE_CRITICAL(registrationInfo) \
+    const quartz::util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, quartz::util::Logger::Level::critical)
+#define LOG_SCOPE_CHANGE_CRITICALthis() LOG_SCOPE_CHANGE_CRITICAL(this->getLoggerRegistrationInfo())
 
 /**
  * @brief log a function call *WITHOUT* scope change
  * 
- * @note To use this LOGGER_NAME must be defined
+ * @details The stuff inside of the __VA_OPT__ macro is only given if __VA_ARGS__ is not empty.
+ * So if we only provide a format string and no additional arguments, the __VA_OPT__(,) will not be supplied.
+ * @details We check if the format string is empty to determine if we need an extra space before our final bracket,
+ * so we can only output 1 space instead of 2 if there is nothing inside of them
  */
 
-#define LOG_FUNCTION_CALL_TRACE(format, ...) \
-    quartz::util::Logger::trace(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
+#define LOG_FUNCTION_CALL_TRACE(registrationInfo, format, ...) \
+    quartz::util::Logger::trace( \
+        registrationInfo.loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
+#define LOG_FUNCTION_CALL_TRACEthis(format, ...) LOG_FUNCTION_CALL_TRACE(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
 
-#define LOG_FUNCTION_CALL_DEBUG(format, ...) \
-    quartz::util::Logger::debug(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
+#define LOG_FUNCTION_CALL_DEBUG(registrationInfo, format, ...) \
+    quartz::util::Logger::debug( \
+        registrationInfo.loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
+#define LOG_FUNCTION_CALL_DEBUGthis(format, ...) LOG_FUNCTION_CALL_DEBUG(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
 
-#define LOG_FUNCTION_CALL_INFO(format, ...) \
-    quartz::util::Logger::info(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
+#define LOG_FUNCTION_CALL_INFO(registrationInfo, format, ...) \
+    quartz::util::Logger::info( \
+        registrationInfo.loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
+#define LOG_FUNCTION_CALL_INFOthis(format, ...) LOG_FUNCTION_CALL_INFO(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
 
-#define LOG_FUNCTION_CALL_WARNING(format, ...) \
-    quartz::util::Logger::warning(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
+#define LOG_FUNCTION_CALL_WARNING(registrationInfo, format, ...) \
+    quartz::util::Logger::warning( \
+        registrationInfo.loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
+#define LOG_FUNCTION_CALL_WARNINGthis(format, ...) LOG_FUNCTION_CALL_WARNING(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
 
-#define LOG_FUNCTION_CALL_ERROR(format, ...) \
-    quartz::util::Logger::error(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
+#define LOG_FUNCTION_CALL_ERROR(registrationInfo, format, ...) \
+    quartz::util::Logger::error( \
+        registrationInfo.loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
+#define LOG_FUNCTION_CALL_ERRORthis(format, ...) LOG_FUNCTION_CALL_ERROR(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
 
-#define LOG_FUNCTION_CALL_CRITICAL(format, ...) \
-    quartz::util::Logger::critical(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
+#define LOG_FUNCTION_CALL_CRITICAL(registrationInfo, format, ...) \
+    quartz::util::Logger::critical( \
+        registrationInfo.loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
+#define LOG_FUNCTION_CALL_CRITICALthis(format, ...) LOG_FUNCTION_CALL_CRITICAL(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
 
 /**
  * @brief log a function call and its scope change
- * 
- * @note To use this LOGGER_NAME must be defined
  */
 
-#define LOG_FUNCTION_SCOPE_TRACE(format, ...) \
-    LOG_FUNCTION_CALL_TRACE(format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_TRACE()
+#define LOG_FUNCTION_SCOPE_TRACE(registrationInfo, format, ...) \
+    LOG_FUNCTION_CALL_TRACE(registrationInfo, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_TRACE(registrationInfo)
+#define LOG_FUNCTION_SCOPE_TRACEthis(format, ...) LOG_FUNCTION_SCOPE_TRACE(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
     
-#define LOG_FUNCTION_SCOPE_DEBUG(format, ...) \
-    LOG_FUNCTION_CALL_DEBUG(format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_DEBUG()
+#define LOG_FUNCTION_SCOPE_DEBUG(registrationInfo, format, ...) \
+    LOG_FUNCTION_CALL_DEBUG(registrationInfo, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_DEBUG(registrationInfo)
+#define LOG_FUNCTION_SCOPE_DEBUGthis(format, ...) LOG_FUNCTION_SCOPE_DEBUG(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
     
-#define LOG_FUNCTION_SCOPE_INFO(format, ...) \
-    LOG_FUNCTION_CALL_INFO(format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_INFO()
+#define LOG_FUNCTION_SCOPE_INFO(registrationInfo, format, ...) \
+    LOG_FUNCTION_CALL_INFO(registrationInfo, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_INFO(registrationInfo)
+#define LOG_FUNCTION_SCOPE_INFOthis(format, ...) LOG_FUNCTION_SCOPE_INFO(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
     
-#define LOG_FUNCTION_SCOPE_WARNING(format, ...) \
-    LOG_FUNCTION_CALL_WARNING(format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_WARNING()
+#define LOG_FUNCTION_SCOPE_WARNING(registrationInfo, format, ...) \
+    LOG_FUNCTION_CALL_WARNING(registrationInfo, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_WARNING(registrationInfo)
+#define LOG_FUNCTION_SCOPE_WARNINGthis(format, ...) LOG_FUNCTION_SCOPE_WARNING(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
     
-#define LOG_FUNCTION_SCOPE_ERROR(format, ...) \
-    LOG_FUNCTION_CALL_ERROR(format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_ERROR()
+#define LOG_FUNCTION_SCOPE_ERROR(registrationInfo, format, ...) \
+    LOG_FUNCTION_CALL_ERROR(registrationInfo, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_ERROR(registrationInfo)
+#define LOG_FUNCTION_SCOPE_ERRORthis(format, ...) LOG_FUNCTION_SCOPE_ERROR(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
     
-#define LOG_FUNCTION_SCOPE_CRITICAL(format, ...) \
-    LOG_FUNCTION_CALL_CRITICAL(format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_CRITICAL()
+#define LOG_FUNCTION_SCOPE_CRITICAL(registrationInfo, format, ...) \
+    LOG_FUNCTION_CALL_CRITICAL(registrationInfo, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_CRITICAL(registrationInfo)
+#define LOG_FUNCTION_SCOPE_CRITICALthis(format, ...) LOG_FUNCTION_SCOPE_CRITICAL(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
     

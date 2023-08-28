@@ -26,7 +26,12 @@
 uint32_t quartz::util::Logger::Scoper::indentationCount = 0;
 
 /**
- * @brief The map that is tracking the corresponding logging levels for each of the loggers
+ * @brief The map that is tracking the corresponding *default* logging levels for each of the loggers
+ */
+std::map<std::string, quartz::util::Logger::Level> quartz::util::Logger::loggerNameDefaultLevelMap;
+
+/**
+ * @brief The map that is tracking the corresponding *current* logging levels for each of the loggers
  */
 std::map<std::string, quartz::util::Logger::Level> quartz::util::Logger::loggerNameLevelMap;
 
@@ -53,7 +58,10 @@ std::map<std::string, std::shared_ptr<quartz::util::spdlog_logger_t>> quartz::ut
 
 /* ------------------------------ public static functions ------------------------------ */
 
-void quartz::util::Logger::registerLogger(const std::string& loggerName, const quartz::util::Logger::Level level) {
+/**
+ * @brief Register the logger of the desired name
+ */
+void quartz::util::Logger::registerLogger(const std::string& loggerName, const quartz::util::Logger::Level defaultLevel) {
     if (!quartz::util::Logger::initialized) {
         quartz::util::Logger::init();
     }
@@ -83,7 +91,7 @@ void quartz::util::Logger::registerLogger(const std::string& loggerName, const q
      */
 
     // Set the logging level
-    switch (level) {
+    switch (defaultLevel) {
         case quartz::util::Logger::Level::trace:
             p_logger->set_level(spdlog::level::trace);
             break;
@@ -102,6 +110,9 @@ void quartz::util::Logger::registerLogger(const std::string& loggerName, const q
         case quartz::util::Logger::Level::critical:
             p_logger->set_level(spdlog::level::critical);
             break;
+        case quartz::util::Logger::Level::off:
+            p_logger->set_level(spdlog::level::off);
+            break;
     }
 
     spdlog::register_logger(p_logger);
@@ -111,18 +122,61 @@ void quartz::util::Logger::registerLogger(const std::string& loggerName, const q
 
     p_logger->info("Logger {} initialized", loggerName);
 
-    quartz::util::Logger::loggerNameLevelMap[loggerName] = level;
+    quartz::util::Logger::loggerNameDefaultLevelMap[loggerName] = defaultLevel;
+    quartz::util::Logger::loggerNameLevelMap[loggerName] = defaultLevel;
     quartz::util::Logger::loggerPtrMap[loggerName] = p_logger;
 }
 
 /**
- * @brief Register a new logger to the logger name and logger level contained in the info struct
- * 
- * @param loggerInfos The information (name and max level) pertaining to the logger
+ * @brief Update the logging level for the desired logger. Only update this level if it is more exclusive than its default logging level.
  */
-void quartz::util::Logger::registerLoggers(const std::vector<const quartz::util::Logger::RegistrationInfo>& loggerInfos) {
+void quartz::util::Logger::setLevel(const std::string& loggerName, const quartz::util::Logger::Level desiredLevel) {
+    std::shared_ptr<quartz::util::spdlog_logger_t> p_logger = quartz::util::Logger::loggerPtrMap[loggerName];
+    const quartz::util::Logger::Level defaultLevel = quartz::util::Logger::loggerNameDefaultLevelMap[loggerName];
+
+    if (desiredLevel <= defaultLevel) {
+        p_logger->critical("Not setting Logger {} to deired level of {} because it is not greater than its default level of {}", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(defaultLevel));
+        return;
+    }
+
+    const quartz::util::Logger::Level previousLevel = quartz::util::Logger::loggerNameLevelMap[loggerName];
+
+    // Actually set the underlying logging level
+    switch (desiredLevel) {
+        case quartz::util::Logger::Level::trace:
+            p_logger->set_level(spdlog::level::trace);
+            break;
+        case quartz::util::Logger::Level::debug:
+            p_logger->set_level(spdlog::level::debug);
+            break;
+        case quartz::util::Logger::Level::info:
+            p_logger->set_level(spdlog::level::info);
+            break;
+        case quartz::util::Logger::Level::warning:
+            p_logger->set_level(spdlog::level::warn);
+            break;
+        case quartz::util::Logger::Level::error:
+            p_logger->set_level(spdlog::level::err);
+            break;
+        case quartz::util::Logger::Level::critical:
+            p_logger->set_level(spdlog::level::critical);
+            break;
+        case quartz::util::Logger::Level::off:
+            p_logger->set_level(spdlog::level::off);
+            break;
+    }
+
+    quartz::util::Logger::loggerNameLevelMap[loggerName] = desiredLevel;
+
+    p_logger->critical("Successfully set Logger {} to desired level of {} (previous level was {}, default level is {})", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(previousLevel), static_cast<uint32_t>(defaultLevel));
+}
+
+/**
+ * @brief Attempt to update the logging levels for all of the desired loggers
+ */
+void quartz::util::Logger::setLevels(const std::vector<const quartz::util::Logger::RegistrationInfo>& loggerInfos) {
     for (const quartz::util::Logger::RegistrationInfo& loggerInfo : loggerInfos) {
-        quartz::util::Logger::registerLogger(loggerInfo.loggerName, loggerInfo.level);
+        quartz::util::Logger::setLevel(loggerInfo.loggerName, loggerInfo.level);
     }
 }
 
@@ -132,6 +186,15 @@ void quartz::util::Logger::registerLoggers(const std::vector<const quartz::util:
  * @brief A function allowing us to initialize the logger so we don't need to do a
  * conditional check for initialization everytime we want to log something
  * time we want to 
+ * 
+ * @details Create stdout sink to receive all logs.
+ * In debug mode this is single threaded.
+ * In test mode this is multi threaded.
+ * In release mode this is not used.
+ * 
+ * @details Create file sink.
+ * In debug mode this receives all logs.
+ * In test and release mode this only receives logs at level warning or higher.
  */
 void quartz::util::Logger::init() {
     const uint32_t threadPoolBackingItems = 8192;

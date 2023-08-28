@@ -33,7 +33,8 @@ target_link_libraries(
     UTIL_Logger
 
     # Quartz
-    # PRIVATE
+    PRIVATE
+    QUARTZ_Something
     # QUARTZ_Application
 )
 
