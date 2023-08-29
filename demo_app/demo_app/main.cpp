@@ -14,17 +14,6 @@ int main() {
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
 
-    /**
-     * @todo This should be done automatically by declaring the loggers in Loggers.hpp files.
-     * The default logging level should automatically be set upon declaration of the loggers so we don't
-     * have to risk accidentally setting the default level incorrectly with the levels we wish to pass to
-     * setLevels
-     * @todo When declaring the loggers via macro, we should define a macro that gives us REGISTER_QUARTZ_LOGGERS()
-     * and REGISTER_DEMO_APP_LOGGERS() so we don't have to risk this.
-     */
-    // REGISTER_QUARTZ_LOGGERS();
-    // REGISTER_DEMO_APP_LOGGERS();
-
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
