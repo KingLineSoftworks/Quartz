@@ -197,6 +197,27 @@ private: // private static variables
 };
 
 /**
+ * @brief Create a logger
+ */
+
+#define DECLARE_LOGGER(name, level) \
+    constexpr quartz::util::Logger::RegistrationInfo name = {#name, quartz::util::Logger::Level::level}
+
+/**
+ * @brief Create a group of loggers and a macro to easily register them
+ */
+
+#define DECLARE_LOGGER_GROUP(groupName, groupSize, ...) \
+    constexpr std::array<const quartz::util::Logger::RegistrationInfo, groupSize> groupName##_LOGGER_INFOS = { __VA_ARGS__ }
+
+/**
+ * @brief A macro to easily register your group of loggers
+ */
+
+#define REGISTER_LOGGER_GROUP(groupName) \
+    quartz::util::Logger::registerLoggers(quartz::loggers::groupName##_LOGGER_INFOS)
+
+/**
  * @brief Dictate which logger you are going to be using
  * 
  * This defines a function to get a reference to the necessary logger registration information in the quartz::logger namespace=
