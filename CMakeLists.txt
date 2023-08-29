@@ -64,17 +64,16 @@ endif ()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(CustomPedanticFlags) # Gives us the CUSTOM_PEDANTIC_WARNING_FLAGS list
+include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
 
-set(CMAKE_CXX_DESIRED_WARNING_FLAGS
+set(QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS
     -Wall
     -Wextra
     -Werror
 )
 
 # Only set the c++ flags for Quartz and not for everything because we want the vendor libraries to be compiled normally
-# set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror)
-set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_DESIRED_WARNING_FLAGS} ${CUSTOM_PEDANTIC_WARNING_FLAGS})
+set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS} ${QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS})
 
 #====================================================================
 # Third party vendor libraries

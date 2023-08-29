@@ -118,13 +118,13 @@ void quartz::util::Logger::registerLogger(const std::string& loggerName, const q
     spdlog::register_logger(p_logger);
 
     // Set the format for the sinks
-    spdlog::set_pattern("[%T:%e] [%=10n] [%^%=10l%$] %v");
-
-    p_logger->info("Logger {} initialized", loggerName);
+    spdlog::set_pattern("[%T:%e] [%-10!n] [%^%-8l%$] %v");
 
     quartz::util::Logger::loggerNameDefaultLevelMap[loggerName] = defaultLevel;
     quartz::util::Logger::loggerNameLevelMap[loggerName] = defaultLevel;
     quartz::util::Logger::loggerPtrMap[loggerName] = p_logger;
+    
+    quartz::util::Logger::log(loggerName, defaultLevel, "Logger {} initialized with default level of {}", loggerName, static_cast<uint32_t>(defaultLevel));
 }
 
 /**
