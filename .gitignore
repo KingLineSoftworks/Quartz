@@ -14,7 +14,15 @@ cmake_install.cmake
 # ========================================
 # IDE stuff
 # ========================================
+
+# VS Code
 .vscode
+
+# CLion
+.idea
+.clion-debug
+.clion-release
+.clion-test
 
 # ========================================
 # Compiled stuff
