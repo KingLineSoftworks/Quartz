@@ -14,24 +14,16 @@ int main() {
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
 
-    /**
-     * @todo This should be done automatically by declaring the loggers in Loggers.hpp files
-     */
-    quartz::util::Logger::registerLoggers(quartz::loggers::QUARTZ_LOGGER_INFOS);
-    quartz::util::Logger::registerLoggers(quartz::loggers::DEMO_APP_LOGGER_INFOS);
-
-    /**
-     * @todo Declare the logging levels for each of the loggers, each of the loggers whose level isn't specified
-     * here is going to use the default logging level
-     */
+    REGISTER_LOGGER_GROUP(QUARTZ);
+    REGISTER_LOGGER_GROUP(DEMO_APP);
 
     quartz::util::Logger::setLevels({
-        {"GENERAL", quartz::util::Logger::Level::off},
-        {"BIGBOY", quartz::util::Logger::Level::warning},
+        {"GENERAL", quartz::util::Logger::Level::trace},
+        {"BIGBOY", quartz::util::Logger::Level::trace},
         {"ALAMANCY", quartz::util::Logger::Level::trace},
-        {"GENERAL2", quartz::util::Logger::Level::critical},
-        {"SOMETHING", quartz::util::Logger::Level::info},
-        {"ANOTHER", quartz::util::Logger::Level::info}
+        {"GENERAL2", quartz::util::Logger::Level::trace},
+        {"SOMETHING", quartz::util::Logger::Level::trace},
+        {"ANOTHER", quartz::util::Logger::Level::trace}
     });
 
     LOG_INFO(quartz::loggers::GENERAL, "Quartz version   : {}.{}.{}", QUARTZ_MAJOR_VERSION, QUARTZ_MINOR_VERSION, QUARTZ_PATCH_VERSION);

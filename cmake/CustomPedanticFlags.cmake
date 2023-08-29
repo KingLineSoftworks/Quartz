@@ -3,7 +3,7 @@
 #====================================================================
 
 set(
-    CUSTOM_PEDANTIC_WARNING_FLAGS
+    QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS
     -Wc++11-extra-semi
     -Wc++11-long-long
     -Wc++14-binary-literal
