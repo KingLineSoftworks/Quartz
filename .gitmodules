@@ -7,6 +7,4 @@
 [submodule "vendor/glfw"]
 	path = vendor/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "vendor/vulkan/vulkan-headers"]
-	path = vendor/vulkan/vulkan-headers
-	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+	
