@@ -81,7 +81,15 @@ set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING
 set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 
 # MoltenVK and Vulkan
-set(VULKAN_ROOT_DIR "${VENDOR_ROOT_DIR}/vulkan")
+add_library(vulkan SHARED IMPORTED)
+set_target_properties(
+        vulkan
+        PROPERTIES
+        IMPORTED_LOCATION
+            "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
+        INTERFACE_INCLUDE_DIRECTORIES
+            "${VENDOR_ROOT_DIR}/vulkan/include"
+)
 
 # GLFW
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

@@ -18,8 +18,12 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
+    constexpr bool shouldLogPreamble = false;
+
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
+
+    quartz::util::Logger::setShouldLogPreamble(shouldLogPreamble);
 
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(DEMO_APP);
@@ -33,29 +37,35 @@ int main() {
         {"ANOTHER", quartz::util::Logger::Level::trace}
     });
 
-    LOG_INFO(quartz::loggers::GENERAL, "Quartz version   : {}.{}.{}", QUARTZ_MAJOR_VERSION, QUARTZ_MINOR_VERSION, QUARTZ_PATCH_VERSION);
-    LOG_INFO(quartz::loggers::GENERAL, "Demo app version : {}.{}.{}", APPLICATION_MAJOR_VERSION, APPLICATION_MINOR_VERSION, APPLICATION_PATCH_VERSION);
+    if (shouldLogPreamble) {
+        LOG_INFO(quartz::loggers::GENERAL, "Quartz version   : {}.{}.{}", QUARTZ_MAJOR_VERSION, QUARTZ_MINOR_VERSION, QUARTZ_PATCH_VERSION);
+        LOG_INFO(quartz::loggers::GENERAL, "Demo app version : {}.{}.{}", APPLICATION_MAJOR_VERSION, APPLICATION_MINOR_VERSION, APPLICATION_PATCH_VERSION);
 
 #ifdef QUARTZ_DEBUG
-    LOG_INFO(quartz::loggers::GENERAL, "Quartz built in debug mode ( QUARTZ_DEBUG )");
+        LOG_INFO(quartz::loggers::GENERAL, "Quartz built in debug mode ( QUARTZ_DEBUG )");
 #endif
 #ifdef QUARTZ_TEST
-    LOG_INFO(quartz::loggers::GENERAL, "Quartz built in test mode ( QUARTZ_TEST )");
+        LOG_INFO(quartz::loggers::GENERAL, "Quartz built in test mode ( QUARTZ_TEST )");
 #endif
 #ifdef QUARTZ_RELEASE
-    LOG_INFO(quartz::loggers::GENERAL, "Quartz built in release mode ( QUARTZ_RELEASE )");
+        LOG_INFO(quartz::loggers::GENERAL, "Quartz built in release mode ( QUARTZ_RELEASE )");
 #endif
 
 #ifdef ON_MAC
-    LOG_INFO(quartz::loggers::GENERAL, "On Mac ( ON_MAC )");
-    LOG_INFO(quartz::loggers::GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
-    LOG_INFO(quartz::loggers::GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
+        LOG_INFO(quartz::loggers::GENERAL, "On Mac ( ON_MAC )");
+        LOG_INFO(quartz::loggers::GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
+        LOG_INFO(quartz::loggers::GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
 #else
-    LOG_INFO(quartz::loggers::GENERAL, "Not on Mac ( ON_MAC )");
+        LOG_INFO(quartz::loggers::GENERAL, "Not on Mac ( ON_MAC )");
 #endif // ON_MAC
+    }
 
 //    quartz::Something something(69, 42.666);
 //    something.doSomething();
+
+    /////////////////////////////////////////////////////////////////
+    // Setup
+    /////////////////////////////////////////////////////////////////
 
     LOG_TRACE(quartz::loggers::GENERAL, "Initializing GLFW");
     glfwInit();
@@ -64,14 +74,43 @@ int main() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     GLFWwindow* p_window = glfwCreateWindow(800, 600, "Demo application window", nullptr, nullptr);
 
+    /////////////////////////////////////////////////////////////////
+    // Get instance extension properties
+    /////////////////////////////////////////////////////////////////
+
     LOG_TRACE(quartz::loggers::GENERAL, "Enumerating extension properties");
-    uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    LOG_TRACE(quartz::loggers::GENERAL, "{} extensions supported", extensionCount);
+    uint32_t instanceExtensionCount = 0;
+    VkExtensionProperties *p_instanceExtensions = nullptr;
+
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, p_instanceExtensions)) {
+        LOG_CRITICAL(quartz::loggers::GENERAL, "Failed to enumerate vulkan instance extension properties");
+        return 1;
+    }
+
+    LOG_TRACE(quartz::loggers::GENERAL, "{} extensions supported. Enumerating information", instanceExtensionCount);
+
+    p_instanceExtensions = (VkExtensionProperties*) realloc(p_instanceExtensions, instanceExtensionCount * sizeof(VkExtensionProperties));
+
+    if (vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, p_instanceExtensions)) {
+        LOG_CRITICAL(quartz::loggers::GENERAL, "Failed to enumerate vulkan instance extension properties");
+        return 1;
+    }
+
+    for (uint32_t i = 0; i < instanceExtensionCount; ++i) {
+        LOG_TRACE(quartz::loggers::GENERAL, "  - {} ( version {} )", p_instanceExtensions[i].extensionName, p_instanceExtensions[i].specVersion);
+    }
+
+    /////////////////////////////////////////////////////////////////
+    // The loop
+    /////////////////////////////////////////////////////////////////
 
     while(!glfwWindowShouldClose(p_window)) {
         glfwPollEvents();
     }
+
+    /////////////////////////////////////////////////////////////////
+    // Cleanup
+    /////////////////////////////////////////////////////////////////
 
     LOG_TRACE(quartz::loggers::GENERAL, "Destroying window");
     glfwDestroyWindow(p_window);

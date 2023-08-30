@@ -14,7 +14,6 @@ target_include_directories(
     ${APPLICATION_NAME}
     PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/.."
-    "${VULKAN_ROOT_DIR}/include"
 )
 
 target_compile_options(
@@ -29,12 +28,9 @@ target_link_libraries(
 
     # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
     PRIVATE
-    "${VULKAN_ROOT_DIR}/lib/libMoltenVK.dylib"
-    "${VULKAN_ROOT_DIR}/lib/libvulkan.1.3.261.dylib"
-    "${VULKAN_ROOT_DIR}/lib/libvulkan.1.dylib"
-    "${VULKAN_ROOT_DIR}/lib/libvulkan.dylib"
     glfw
     glm
+    vulkan
     # some_lib
 
     # Utility

@@ -82,6 +82,8 @@ public: // public classes and enums
     };
 
 public: // public static functions
+    static void setShouldLogPreamble(const bool _shouldLogPreamble) { quartz::util::Logger::shouldLogPreamble = _shouldLogPreamble; }
+
     static void registerLogger(const std::string& loggerName, const quartz::util::Logger::Level level);
 
     template<size_t N>
@@ -187,6 +189,7 @@ private: // private static functions
 
 private: // private static variables
     static bool initialized;
+    static bool shouldLogPreamble;
 
     static std::map<std::string, quartz::util::Logger::Level> loggerNameDefaultLevelMap;
     static std::map<std::string, quartz::util::Logger::Level> loggerNameLevelMap;
@@ -201,14 +204,24 @@ private: // private static variables
  */
 
 #define DECLARE_LOGGER(name, level) \
-    constexpr quartz::util::Logger::RegistrationInfo name = {#name, quartz::util::Logger::Level::level}
+    namespace quartz {              \
+    namespace loggers {             \
+        constexpr quartz::util::Logger::RegistrationInfo name = {#name, quartz::util::Logger::Level::level}; \
+    }                               \
+    }                               \
+    REQUIRE_SEMICOLON
 
 /**
  * @brief Create a group of loggers and a macro to easily register them
  */
 
 #define DECLARE_LOGGER_GROUP(groupName, groupSize, ...) \
-    constexpr std::array<const quartz::util::Logger::RegistrationInfo, groupSize> groupName##_LOGGER_INFOS = { __VA_ARGS__ }
+    namespace quartz {                                  \
+    namespace loggers {                                 \
+        constexpr std::array<const quartz::util::Logger::RegistrationInfo, groupSize> groupName##_LOGGER_INFOS = { __VA_ARGS__ }; \
+    }                                                   \
+    }                                                   \
+    REQUIRE_SEMICOLON
 
 /**
  * @brief A macro to easily register your group of loggers
