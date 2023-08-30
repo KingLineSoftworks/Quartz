@@ -81,14 +81,73 @@ set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING
 set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 
 # MoltenVK and Vulkan
-add_library(vulkan SHARED IMPORTED)
+set(
+    VULKAN_INTERFACE_INCLUDE_DIRECTORIES
+    "${VENDOR_ROOT_DIR}/vulkan/include"
+    "${VENDOR_ROOT_DIR}/vulkan-hpp/include"
+)
+add_library(
+        vulkan
+        SHARED
+        IMPORTED
+        # Vulkan C headers (added to the cmake project to improve CLion linting)
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vk_icd.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vk_layer.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan.cppm"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_android.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_beta.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_directfb.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_format_traits.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_fuchsia.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_ggp.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_hash.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_ios.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_macos.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_metal.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_raii.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_screen.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_static_assertions.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_vi.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_video.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_wayland.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_win32.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_xcb.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_xlib.h"
+        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_xlib_xrandr.h"
+        # Vulkan-hpp C++ headers (added to the cmake project to improve CLion linting)
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan.cppm"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_enums.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_extension_inspection.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_format_traits.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_funcs.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_handles.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_hash.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_raii.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_static_assertions.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_structs.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_to_string.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_video.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc.cppm"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_enums.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_extension_inspection.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_format_traits.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_funcs.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_handles.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_hash.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_raii.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_static_assertions.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_structs.hpp"
+        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_to_string.hpp"
+)
 set_target_properties(
         vulkan
         PROPERTIES
         IMPORTED_LOCATION
             "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
         INTERFACE_INCLUDE_DIRECTORIES
-            "${VENDOR_ROOT_DIR}/vulkan/include"
+            "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
 )
 
 # GLFW

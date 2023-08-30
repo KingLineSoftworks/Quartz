@@ -1,4 +1,5 @@
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_extension_inspection.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -78,6 +79,14 @@ int main() {
     // Get instance extension properties
     /////////////////////////////////////////////////////////////////
 
+#if 1
+    LOG_TRACE(quartz::loggers::GENERAL, "Enumerating extension properties");
+    const std::set<std::string>& instanceExtensions = vk::getInstanceExtensions();
+    LOG_TRACE(quartz::loggers::GENERAL, "{} extensions supported", instanceExtensions.size());
+    for (const std::string& instanceExtension : instanceExtensions) {
+        LOG_TRACE(quartz::loggers::GENERAL, "  - {}", instanceExtension);
+    }
+#else
     LOG_TRACE(quartz::loggers::GENERAL, "Enumerating extension properties");
     uint32_t instanceExtensionCount = 0;
     VkExtensionProperties *p_instanceExtensions = nullptr;
@@ -99,6 +108,7 @@ int main() {
     for (uint32_t i = 0; i < instanceExtensionCount; ++i) {
         LOG_TRACE(quartz::loggers::GENERAL, "  - {} ( version {} )", p_instanceExtensions[i].extensionName, p_instanceExtensions[i].specVersion);
     }
+#endif
 
     /////////////////////////////////////////////////////////////////
     // The loop
