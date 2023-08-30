@@ -80,6 +80,21 @@ set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING
 #====================================================================
 set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 
+# MoltenVK and Vulkan
+set(VULKAN_ROOT_DIR "${VENDOR_ROOT_DIR}/vulkan")
+
+# GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory("${VENDOR_ROOT_DIR}/glfw")
+list(APPEND VENDOR_LIBS glfw)
+
+# GLM
+add_subdirectory("${VENDOR_ROOT_DIR}/glm")
+list(APPEND VENDOR_LIBS glm)
+
+# Spdlog
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 list(APPEND VENDOR_LIBS spdlog)
 
@@ -101,24 +116,18 @@ add_compile_definitions(
 #====================================================================
 # Utility and Quartz libraries
 #====================================================================
-
 set(QUARTZ_ROOT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
-
 include_directories(
     ${QUARTZ_ROOT_SOURCE_DIR}
 )
 
 # Utility
-
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
-
 add_subdirectory("${UTIL_SOURCE_DIR}/logger")
 list(APPEND UTIL_LIBS UTIL_Logger)
 
 # Quartz
-
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
-
 add_subdirectory("${QUARTZ_SOURCE_DIR}/something")
 list(APPEND QUARTZ_LIBS QUARTZ_Something)
 

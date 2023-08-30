@@ -1,4 +1,11 @@
-#include <iostream>
+#include <vulkan/vulkan.h>
+
+#include <GLFW/glfw3.h>
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
@@ -39,29 +46,45 @@ int main() {
     LOG_INFO(quartz::loggers::GENERAL, "Quartz built in release mode ( QUARTZ_RELEASE )");
 #endif
 
-    LOG_TRACE(quartz::loggers::GENERAL, "Attempting log - LOG_TRACE");
-    LOG_DEBUG(quartz::loggers::GENERAL, "Attempting log - LOG_DEBUG");
-    LOG_INFO(quartz::loggers::GENERAL, "Attempting log - LOG_INFO");
-    LOG_WARNING(quartz::loggers::GENERAL, "Attempting log - LOG_WARNING");
-    LOG_ERROR(quartz::loggers::GENERAL, "Attempting log - LOG_ERROR");
-    LOG_CRITICAL(quartz::loggers::GENERAL, "Attempting log - LOG_CRITICAL");
+#ifdef ON_MAC
+    LOG_INFO(quartz::loggers::GENERAL, "On Mac ( ON_MAC )");
+    LOG_INFO(quartz::loggers::GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
+    LOG_INFO(quartz::loggers::GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
+#else
+    LOG_INFO(quartz::loggers::GENERAL, "Not on Mac ( ON_MAC )");
+#endif // ON_MAC
 
-    LOG_TRACE(quartz::loggers::BIGBOY, "Attempting log - LOG_TRACE");
-    LOG_DEBUG(quartz::loggers::BIGBOY, "Attempting log - LOG_DEBUG");
-    LOG_INFO(quartz::loggers::BIGBOY, "Attempting log - LOG_INFO");
-    LOG_WARNING(quartz::loggers::BIGBOY, "Attempting log - LOG_WARNING");
-    LOG_ERROR(quartz::loggers::BIGBOY, "Attempting log - LOG_ERROR");
-    LOG_CRITICAL(quartz::loggers::BIGBOY, "Attempting log - LOG_CRITICAL");
+//    quartz::Something something(69, 42.666);
+//    something.doSomething();
 
-    LOG_TRACE(quartz::loggers::ALAMANCY, "Attempting log - LOG_TRACE");
-    LOG_DEBUG(quartz::loggers::ALAMANCY, "Attempting log - LOG_DEBUG");
-    LOG_INFO(quartz::loggers::ALAMANCY, "Attempting log - LOG_INFO");
-    LOG_WARNING(quartz::loggers::ALAMANCY, "Attempting log - LOG_WARNING");
-    LOG_ERROR(quartz::loggers::ALAMANCY, "Attempting log - LOG_ERROR");
-    LOG_CRITICAL(quartz::loggers::ALAMANCY, "Attempting log - LOG_CRITICAL");
+    LOG_TRACE(quartz::loggers::GENERAL, "Initializing GLFW");
+    glfwInit();
 
-    quartz::Something something(69, 42.666);
-    something.doSomething();
+    LOG_TRACE(quartz::loggers::GENERAL, "Creating GLFW Window");
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    GLFWwindow* p_window = glfwCreateWindow(800, 600, "Demo application window", nullptr, nullptr);
 
+    LOG_TRACE(quartz::loggers::GENERAL, "Enumerating extension properties");
+    uint32_t extensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+    LOG_TRACE(quartz::loggers::GENERAL, "{} extensions supported", extensionCount);
+
+    while(!glfwWindowShouldClose(p_window)) {
+        glfwPollEvents();
+    }
+
+    LOG_TRACE(quartz::loggers::GENERAL, "Destroying window");
+    glfwDestroyWindow(p_window);
+
+    LOG_TRACE(quartz::loggers::GENERAL, "GLFW Terminating");
+    glfwTerminate();
+
+    LOG_TRACE(quartz::loggers::GENERAL, "Testing GLM");
+    glm::mat4 matrix;
+    glm::vec4 vector;
+    glm::vec4 result = matrix * vector;
+    LOG_TRACE(quartz::loggers::GENERAL, "Resulting vector [ {} {} {} {} ]", result.x, result.y, result.z, result.w);
+
+    LOG_TRACE(quartz::loggers::GENERAL, "Terminating");
     return 0;
 }

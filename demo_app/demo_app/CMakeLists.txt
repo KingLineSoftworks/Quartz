@@ -12,12 +12,15 @@ add_executable(
 
 target_include_directories(
     ${APPLICATION_NAME}
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    "${VULKAN_ROOT_DIR}/include"
 )
 
 target_compile_options(
     ${APPLICATION_NAME}
-    PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+    PUBLIC
+    ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 # Link everything to the application
@@ -25,7 +28,13 @@ target_link_libraries(
     ${APPLICATION_NAME}
 
     # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
-    # PRIVATE
+    PRIVATE
+    "${VULKAN_ROOT_DIR}/lib/libMoltenVK.dylib"
+    "${VULKAN_ROOT_DIR}/lib/libvulkan.1.3.261.dylib"
+    "${VULKAN_ROOT_DIR}/lib/libvulkan.1.dylib"
+    "${VULKAN_ROOT_DIR}/lib/libvulkan.dylib"
+    glfw
+    glm
     # some_lib
 
     # Utility
