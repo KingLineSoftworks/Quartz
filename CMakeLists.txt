@@ -23,7 +23,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #====================================================================
 # Build type information
 #====================================================================
-# @todo: we want to have a way to sepcify debug for Quartz and for App seperately, an example
+# @todo: we want to have a way to specify debug for Quartz and for App separately, an example
 #        case is where we want to debug Application while Quartz is in release version. This
 #        will require us to have two different release mode macros (EX: QUARTZ_DEBUG , APP_DEBUG).
 #        This will be made easier when we move the application into it's own project which uses
@@ -83,63 +83,47 @@ set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 # MoltenVK and Vulkan
 set(
     VULKAN_INTERFACE_INCLUDE_DIRECTORIES
-    "${VENDOR_ROOT_DIR}/vulkan/include"
-    "${VENDOR_ROOT_DIR}/vulkan-hpp/include"
+    "${VENDOR_ROOT_DIR}/vulkan/include"                 # MoltenVK headers
+    "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include"  # Vulkan API C & C++ headers
 )
 add_library(
         vulkan
         SHARED
         IMPORTED
-        # Vulkan C headers (added to the cmake project to improve CLion linting)
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vk_icd.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vk_layer.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan.cppm"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_android.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_beta.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_directfb.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_format_traits.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_fuchsia.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_ggp.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_hash.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_ios.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_macos.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_metal.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_raii.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_screen.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_static_assertions.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_vi.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_video.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_wayland.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_win32.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_xcb.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_xlib.h"
-        "${VENDOR_ROOT_DIR}/vulkan/include/vulkan/vulkan_xlib_xrandr.h"
-        # Vulkan-hpp C++ headers (added to the cmake project to improve CLion linting)
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan.cppm"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_enums.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_extension_inspection.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_format_traits.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_funcs.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_handles.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_hash.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_raii.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_static_assertions.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_structs.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_to_string.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkan_video.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc.cppm"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_enums.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_extension_inspection.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_format_traits.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_funcs.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_handles.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_hash.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_raii.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_static_assertions.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_structs.hpp"
-        "${VENDOR_ROOT_DIR}/vulkan-hpp/include/vulkan/vulkansc_to_string.hpp"
+        # Vulkan headers added to cmake project to improve clion linting
+        vendor/vulkan/vulkan-headers/include/vulkan/vk_icd.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vk_layer.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vk_platform.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan.cppm
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_android.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_beta.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_core.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_directfb.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_enums.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_extension_inspection.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_format_traits.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_fuchsia.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_funcs.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_ggp.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_handles.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_hash.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_ios.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_macos.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_metal.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_raii.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_screen.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_static_assertions.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_structs.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_to_string.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_vi.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_video.hpp
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_wayland.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_win32.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xcb.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xlib.h
+        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xlib_xrandr.h
 )
 set_target_properties(
         vulkan

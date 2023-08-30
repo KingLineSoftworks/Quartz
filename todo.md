@@ -1,1 +1,2 @@
 # to do list
+- remove actual tracked files for `vulkan/include` and `vulkan-hpp/include` and instead add [Vulkan Headers](https://github.com/KhronosGroup/Vulkan-Headers.git) as a submodule under `vendor/vulkan` 
