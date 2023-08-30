@@ -12,12 +12,14 @@ add_executable(
 
 target_include_directories(
     ${APPLICATION_NAME}
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
 )
 
 target_compile_options(
     ${APPLICATION_NAME}
-    PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+    PUBLIC
+    ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 # Link everything to the application
@@ -25,7 +27,10 @@ target_link_libraries(
     ${APPLICATION_NAME}
 
     # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
-    # PRIVATE
+    PRIVATE
+    glfw
+    glm
+    vulkan
     # some_lib
 
     # Utility

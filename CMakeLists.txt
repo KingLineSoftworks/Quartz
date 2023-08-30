@@ -23,7 +23,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #====================================================================
 # Build type information
 #====================================================================
-# @todo: we want to have a way to sepcify debug for Quartz and for App seperately, an example
+# @todo: we want to have a way to specify debug for Quartz and for App separately, an example
 #        case is where we want to debug Application while Quartz is in release version. This
 #        will require us to have two different release mode macros (EX: QUARTZ_DEBUG , APP_DEBUG).
 #        This will be made easier when we move the application into it's own project which uses
@@ -80,6 +80,34 @@ set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING
 #====================================================================
 set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 
+# MoltenVK and Vulkan
+set(
+    VULKAN_INTERFACE_INCLUDE_DIRECTORIES
+    "${VENDOR_ROOT_DIR}/vulkan/moltenvk-headers/include"
+    "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include"
+)
+add_library(vulkan SHARED IMPORTED)
+set_target_properties(
+        vulkan
+        PROPERTIES
+        IMPORTED_LOCATION
+            "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
+        INTERFACE_INCLUDE_DIRECTORIES
+            "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
+)
+
+# GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory("${VENDOR_ROOT_DIR}/glfw")
+list(APPEND VENDOR_LIBS glfw)
+
+# GLM
+add_subdirectory("${VENDOR_ROOT_DIR}/glm")
+list(APPEND VENDOR_LIBS glm)
+
+# Spdlog
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 list(APPEND VENDOR_LIBS spdlog)
 
@@ -101,24 +129,18 @@ add_compile_definitions(
 #====================================================================
 # Utility and Quartz libraries
 #====================================================================
-
 set(QUARTZ_ROOT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
-
 include_directories(
     ${QUARTZ_ROOT_SOURCE_DIR}
 )
 
 # Utility
-
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
-
 add_subdirectory("${UTIL_SOURCE_DIR}/logger")
 list(APPEND UTIL_LIBS UTIL_Logger)
 
 # Quartz
-
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
-
 add_subdirectory("${QUARTZ_SOURCE_DIR}/something")
 list(APPEND QUARTZ_LIBS QUARTZ_Something)
 

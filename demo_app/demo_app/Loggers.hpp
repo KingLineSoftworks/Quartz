@@ -4,9 +4,6 @@
 
 #include "util/logger/Logger.hpp"
 
-namespace quartz {
-namespace loggers {
-
 DECLARE_LOGGER(GENERAL, trace);
 DECLARE_LOGGER(BIGBOY, trace);
 DECLARE_LOGGER(ALAMANCY, trace);
@@ -20,6 +17,3 @@ DECLARE_LOGGER_GROUP(
     ALAMANCY,
     GENERAL2
 );
-
-} // namespace loggers
-} // namespace quartz

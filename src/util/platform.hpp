@@ -9,14 +9,17 @@
 /**
  * @brief Mac OS 9
  */
-#if defined macintosh || defined Macintosh
+#if defined __APPLE__ || defined macintosh || defined Macintosh
 
 #ifndef ON_MAC
 #define ON_MAC
 #endif
 
 #ifdef MAC_VERSION
+#define MAC_VERSION_BAD MAC_VERSION
 #undef MAC_VERSION
+#else
+#define MAC_VERSION_BAD -1
 #endif
 #define MAC_VERSION 9
 
@@ -24,7 +27,6 @@
 
 /**
  * @brief 
- * 
  */
 #ifndef PROJECT_ROOT_DIR
 #define PROJECT_ROOT_DIR "<project root directory undefined>"

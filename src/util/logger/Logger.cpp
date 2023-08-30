@@ -41,6 +41,12 @@ std::map<std::string, quartz::util::Logger::Level> quartz::util::Logger::loggerN
 bool quartz::util::Logger::initialized = false;
 
 /**
+ * @brief A flag representing whether or not the preamble should be logged.
+ * This is when we log information about registering loggers and changing their logging level
+ */
+bool quartz::util::Logger::shouldLogPreamble = true;
+
+/**
  * @brief The underlying thread pool that spdlog uses for the asynchronous logging
  */
 std::shared_ptr<spdlog::details::thread_pool> quartz::util::Logger::threadPool = nullptr;
@@ -123,8 +129,10 @@ void quartz::util::Logger::registerLogger(const std::string& loggerName, const q
     quartz::util::Logger::loggerNameDefaultLevelMap[loggerName] = defaultLevel;
     quartz::util::Logger::loggerNameLevelMap[loggerName] = defaultLevel;
     quartz::util::Logger::loggerPtrMap[loggerName] = p_logger;
-    
-    quartz::util::Logger::log(loggerName, defaultLevel, "Logger {} initialized with default level of {}", loggerName, static_cast<uint32_t>(defaultLevel));
+
+    if (quartz::util::Logger::shouldLogPreamble) {
+        quartz::util::Logger::log(loggerName, defaultLevel, "Logger {} initialized with default level of {}", loggerName, static_cast<uint32_t>(defaultLevel));
+    }
 }
 
 /**
@@ -133,9 +141,19 @@ void quartz::util::Logger::registerLogger(const std::string& loggerName, const q
 void quartz::util::Logger::setLevel(const std::string& loggerName, const quartz::util::Logger::Level desiredLevel) {
     std::shared_ptr<quartz::util::spdlog_logger_t> p_logger = quartz::util::Logger::loggerPtrMap[loggerName];
     const quartz::util::Logger::Level defaultLevel = quartz::util::Logger::loggerNameDefaultLevelMap[loggerName];
+    const quartz::util::Logger::Level currentLevel = quartz::util::Logger::loggerNameLevelMap[loggerName];
 
     if (desiredLevel <= defaultLevel) {
-        p_logger->critical("Not setting Logger {} to deired level of {} because it is not greater than its default level of {}", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(defaultLevel));
+        if (quartz::util::Logger::shouldLogPreamble) {
+            quartz::util::Logger::log(loggerName, currentLevel, "Not setting Logger {} to desired level of {} because it is not greater than its default level of {}", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(defaultLevel));
+        }
+        return;
+    }
+
+    if (desiredLevel == currentLevel) {
+        if (quartz::util::Logger::shouldLogPreamble) {
+            quartz::util::Logger::log(loggerName, currentLevel, "Not setting Logger {} to desired level of {} because it is already set to that level", loggerName, static_cast<uint32_t>(desiredLevel));
+        }
         return;
     }
 
@@ -168,7 +186,9 @@ void quartz::util::Logger::setLevel(const std::string& loggerName, const quartz:
 
     quartz::util::Logger::loggerNameLevelMap[loggerName] = desiredLevel;
 
-    p_logger->critical("Successfully set Logger {} to desired level of {} (previous level was {}, default level is {})", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(previousLevel), static_cast<uint32_t>(defaultLevel));
+    if (quartz::util::Logger::shouldLogPreamble) {
+        quartz::util::Logger::log(loggerName, desiredLevel, "Successfully set Logger {} to desired level of {} (previous level was {}, default level is {})", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(previousLevel), static_cast<uint32_t>(defaultLevel));
+    }
 }
 
 /**
