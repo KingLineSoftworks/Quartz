@@ -86,53 +86,7 @@ set(
     "${VENDOR_ROOT_DIR}/vulkan/moltenvk-headers/include"
     "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include"
 )
-add_library(
-        vulkan
-        SHARED
-        IMPORTED
-        # Vulkan headers added to cmake project to improve clion linting
-        vendor/vulkan/vulkan-headers/include/vulkan/vk_icd.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vk_layer.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vk_platform.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan.cppm
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_android.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_beta.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_core.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_directfb.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_enums.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_extension_inspection.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_format_traits.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_fuchsia.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_funcs.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_ggp.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_handles.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_hash.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_ios.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_macos.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_metal.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_raii.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_screen.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_static_assertions.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_structs.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_to_string.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_vi.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_video.hpp
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_wayland.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_win32.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xcb.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xlib.h
-        vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xlib_xrandr.h
-        # MoltenVK headers added to cmake project to improve clion linting
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_config.h
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_datatypes.h
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_deprecated_api.h
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_private_api.h
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_vulkan.h
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/vk_mvk_moltenvk.h
-        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_datatypes.h
-)
+add_library(vulkan SHARED IMPORTED)
 set_target_properties(
         vulkan
         PROPERTIES
