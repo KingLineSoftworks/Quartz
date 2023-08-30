@@ -83,8 +83,8 @@ set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 # MoltenVK and Vulkan
 set(
     VULKAN_INTERFACE_INCLUDE_DIRECTORIES
-    "${VENDOR_ROOT_DIR}/vulkan/include"                 # MoltenVK headers
-    "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include"  # Vulkan API C & C++ headers
+    "${VENDOR_ROOT_DIR}/vulkan/moltenvk-headers/include"
+    "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include"
 )
 add_library(
         vulkan
@@ -124,6 +124,14 @@ add_library(
         vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xcb.h
         vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xlib.h
         vendor/vulkan/vulkan-headers/include/vulkan/vulkan_xlib_xrandr.h
+        # MoltenVK headers added to cmake project to improve clion linting
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_config.h
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_datatypes.h
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_deprecated_api.h
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_private_api.h
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_vulkan.h
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/vk_mvk_moltenvk.h
+        vendor/vulkan/moltenvk-headers/include/MoltenVK/mvk_datatypes.h
 )
 set_target_properties(
         vulkan
