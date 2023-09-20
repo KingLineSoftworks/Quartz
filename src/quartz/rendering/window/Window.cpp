@@ -13,7 +13,7 @@ std::shared_ptr<GLFWwindow> quartz::rendering::Window::initGLFWandCreateGLFWWind
 
     if (!glfwInit()) {
         LOG_CRITICAL(quartz::loggers::WINDOW, "Failed to initialize GLFW");
-        throw;
+        throw std::runtime_error("");
     }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -36,7 +36,7 @@ std::shared_ptr<GLFWwindow> quartz::rendering::Window::initGLFWandCreateGLFWWind
     if (!p_glfwWindow) {
         LOG_CRITICAL(quartz::loggers::WINDOW, "Failed to create GLFW window pointer. Terminating");
         glfwTerminate();
-        throw;
+        throw std::runtime_error("");
     }
 
     return p_glfwWindow;

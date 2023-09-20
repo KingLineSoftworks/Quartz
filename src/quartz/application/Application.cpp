@@ -1,7 +1,8 @@
+#include <algorithm>
+#include <stdexcept>
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_extension_inspection.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -22,37 +23,20 @@ vk::Instance quartz::Application::createVulkanInstance(
         (applicationMajorVersion * 1000000) + (applicationMinorVersion * 1000) + (applicationPatchVersion),
         QUARTZ_NAME,
         (QUARTZ_MAJOR_VERSION * 1000000) + (QUARTZ_MINOR_VERSION * 1000) + (QUARTZ_PATCH_VERSION),
-        VK_API_VERSION_1_3
+        VK_API_VERSION_1_2
     );
 
-    vk::InstanceCreateFlags instanceCreateFlags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+    vk::InstanceCreateFlags instanceCreateFlags;
 
     std::vector<const char*> enabledLayerNames;
-
     std::vector<const char*> enabledExtensionNames;
 
-    bool portabilitySubsetFound = false;
     std::vector<vk::ExtensionProperties> instanceExtensionProperties = vk::enumerateInstanceExtensionProperties();
     LOG_TRACE(quartz::loggers::APPLICATION, "{} extensions available:", instanceExtensionProperties.size());
     for (const vk::ExtensionProperties& instanceExtensionProperty : instanceExtensionProperties) {
         LOG_TRACE(quartz::loggers::APPLICATION, "  - {} {}", instanceExtensionProperty.extensionName, instanceExtensionProperty.specVersion);
-//        enabledExtensionNames.push_back(instanceExtensionProperty.extensionName);
-//        if (instanceExtensionProperty.extensionName == std::string(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)) {
-//            portabilitySubsetFound = true;
-//        }
+        enabledExtensionNames.push_back(instanceExtensionProperty.extensionName);
     }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Enumerating extension properties");
-    const std::set<std::string>& instanceExtensions = vk::getInstanceExtensions();
-    LOG_TRACE(quartz::loggers::APPLICATION, "{} extensions supported", instanceExtensions.size());
-    for (const std::string& instanceExtension : instanceExtensions) {
-        LOG_TRACE(quartz::loggers::APPLICATION, "  - {}", instanceExtension);
-        enabledExtensionNames.push_back(instanceExtension.c_str());
-        if (instanceExtension == std::string(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME)) {
-            portabilitySubsetFound = true;
-        }
-    }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Portability subset found: {}", portabilitySubsetFound);
-//    enabledExtensionNames.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -60,7 +44,17 @@ vk::Instance quartz::Application::createVulkanInstance(
     LOG_TRACE(quartz::loggers::APPLICATION, "{} glfw extensions required", glfwExtensionCount);
     for (uint32_t i = 0; i < glfwExtensionCount; ++i) {
         LOG_TRACE(quartz::loggers::APPLICATION, "  - {}", glfwExtensions[i]);
-        enabledExtensionNames.push_back(glfwExtensions[i]);
+        if (!std::count(enabledExtensionNames.begin(), enabledExtensionNames.end(), std::string(glfwExtensions[i]))) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "    - required extension {} is not in available extensions", glfwExtensions[i]);
+            throw std::runtime_error("");
+        } else {
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - already in enabled extensions, not adding");
+        }
+    }
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "{} extensions enabled", enabledExtensionNames.size());
+    for (uint32_t i = 0; i < enabledExtensionNames.size(); ++i) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - {}", enabledExtensionNames[i]);
     }
 
     vk::InstanceCreateInfo instanceCreateInfo(
@@ -105,4 +99,6 @@ void quartz::Application::run() {
     while(!mp_window->shouldClose()) {
         glfwPollEvents();
     }
+
+    // Destroy the instance
 }
