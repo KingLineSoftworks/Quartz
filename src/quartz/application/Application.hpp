@@ -20,7 +20,8 @@ public: // interface
         const uint32_t applicationMinorVersion,
         const uint32_t applicationPatchVersion,
         const uint32_t windowWidthPixels,
-        const uint32_t windowHeightPixels
+        const uint32_t windowHeightPixels,
+        const bool validationLayersEnabled
     );
     ~Application();
 
@@ -28,12 +29,35 @@ public: // interface
 
     void run();
 
+public: // static functions
+    // The callback the validation layer uses
+    static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* p_callbackData,
+        void* p_userData
+    );
+
 private: // static functions
-    static vk::Instance createVulkanInstance(
+    static std::vector<const char*> getEnabledValidationLayerNames(
+        const bool validationLayersEnabled
+    );
+
+    static std::vector<const char*> getEnabledInstanceExtensionNames(
+        const bool validationLayersEnabled
+    );
+
+    static vk::UniqueInstance createUniqueVulkanInstance(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
         const uint32_t applicationMinorVersion,
-        const uint32_t applicationPatchVersion
+        const uint32_t applicationPatchVersion,
+        const bool validationLayersEnabled
+    );
+
+    static vk::DebugUtilsMessengerEXT createVulkanDebugUtilsMessenger(
+        const vk::UniqueInstance& uniqueInstance,
+        const bool validationLayersEnabled
     );
 
 private: // member variables
@@ -44,5 +68,6 @@ private: // member variables
 
     std::unique_ptr<quartz::rendering::Window> mp_window;
 
-    vk::Instance m_vulkanInstance;
+    vk::UniqueInstance m_uniqueVulkanInstance;
+    vk::DebugUtilsMessengerEXT m_vulkanDebugMessenger; // linking errors when we try to use the Unique version
 };

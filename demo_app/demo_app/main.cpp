@@ -61,19 +61,26 @@ int main() {
 #endif // ON_MAC
     }
 
+#ifdef QUARTZ_RELEASE
+    const bool validationLayersEnabled = false;
+#else
+    const bool validationLayersEnabled = true;
+#endif
+
     quartz::Application application(
         APPLICATION_NAME,
         APPLICATION_MAJOR_VERSION,
         APPLICATION_MINOR_VERSION,
         APPLICATION_PATCH_VERSION,
         800,
-        600
+        600,
+        validationLayersEnabled
     );
 
     try {
         application.run();
     } catch (const std::exception& e) {
-        LOG_ERROR(quartz::loggers::GENERAL, "{}", e.what());
+        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }
 
