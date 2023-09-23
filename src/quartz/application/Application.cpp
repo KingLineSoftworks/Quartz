@@ -203,7 +203,7 @@ vk::UniqueInstance quartz::Application::createUniqueVulkanInstance(
     return uniqueInstance;
 }
 
-vk::DebugUtilsMessengerEXT quartz::Application::createVulkanDebugUtilsMessenger(
+vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> quartz::Application::createUniqueVulkanDebugUtilsMessenger(
     const vk::UniqueInstance& uniqueInstance,
     const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
     const bool validationLayersEnabled
@@ -238,13 +238,20 @@ vk::DebugUtilsMessengerEXT quartz::Application::createVulkanDebugUtilsMessenger(
         nullptr
     );
 
-    vk::DebugUtilsMessengerEXT debugMessenger = uniqueInstance->createDebugUtilsMessengerEXT(
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create the vk::DebugUtilsMessengerEXT");
+    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> uniqueDebugUtilsMessengerExt = uniqueInstance->createDebugUtilsMessengerEXTUnique(
         debugMessengerCreateInfo,
         nullptr,
         dispatchLoaderDynamic
     );
 
-    return debugMessenger;
+    if (!uniqueDebugUtilsMessengerExt) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create the vk::DebugUtilsMessengerEXT");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created the vk::DebugUtilsMessengerEXT");
+
+    return uniqueDebugUtilsMessengerExt;
 }
 
 quartz::Application::Application(
@@ -269,8 +276,7 @@ quartz::Application::Application(
         validationLayersEnabled
     )),
     m_vulkanDispatchLoaderDynamic(*m_uniqueVulkanInstance, vkGetInstanceProcAddr),
-//    m_vulkanDebugMessenger(quartz::Application::createVulkanDebugUtilsMessenger(m_uniqueVulkanInstance, m_vulkanDispatchLoaderDynamic, validationLayersEnabled))
-    m_vulkanDebugMessenger()
+    m_uniqueVulkanDebugMessenger(quartz::Application::createUniqueVulkanDebugUtilsMessenger(m_uniqueVulkanInstance, m_vulkanDispatchLoaderDynamic, validationLayersEnabled))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
 }
@@ -282,41 +288,8 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    const vk::DebugUtilsMessengerCreateFlagsEXT debugMessengerCreateFlags;
-
-    const vk::DebugUtilsMessageSeverityFlagsEXT debugMessengerSeverityFlags(
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-    );
-
-    const vk::DebugUtilsMessageTypeFlagsEXT debugMessengerTypeFlags(
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-    );
-
-    const vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
-        debugMessengerCreateFlags,
-        debugMessengerSeverityFlags,
-        debugMessengerTypeFlags,
-        quartz::Application::vulkanDebugCallback,
-        nullptr
-    );
-
-    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> uniqueDebugUtilsMessengerExt = m_uniqueVulkanInstance->createDebugUtilsMessengerEXTUnique(
-        debugMessengerCreateInfo,
-        nullptr,
-        m_vulkanDispatchLoaderDynamic
-    );
-
     LOG_TRACE(quartz::loggers::APPLICATION, "Beginning main loop");
     while(!mp_window->shouldClose()) {
         glfwPollEvents();
     }
-
-    // Destroy the debug messenger
-    LOG_TRACE(quartz::loggers::APPLICATION, "Destroying debug messenger");
-//    m_uniqueVulkanInstance->destroyDebugUtilsMessengerEXT(m_vulkanDebugMessenger, nullptr, m_vulkanDispatchLoaderDynamic);
 }

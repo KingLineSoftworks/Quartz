@@ -55,7 +55,7 @@ private: // static functions
         const bool validationLayersEnabled
     );
 
-    static vk::DebugUtilsMessengerEXT createVulkanDebugUtilsMessenger(
+    static vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> createUniqueVulkanDebugUtilsMessenger(
         const vk::UniqueInstance& uniqueInstance,
         const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
         const bool validationLayersEnabled
@@ -71,5 +71,5 @@ private: // member variables
 
     vk::UniqueInstance m_uniqueVulkanInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
-    vk::DebugUtilsMessengerEXT m_vulkanDebugMessenger; // linking errors when we try to use the Unique version
+    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_uniqueVulkanDebugMessenger;
 };
