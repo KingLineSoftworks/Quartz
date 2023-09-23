@@ -120,6 +120,7 @@ list(APPEND VENDOR_LIBS spdlog)
 add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_compile_definitions(
+    QUARTZ_NAME="${PROJECT_NAME}"
     QUARTZ_VERSION
     QUARTZ_MAJOR_VERSION=${QUARTZ_MAJOR_VERSION}
     QUARTZ_MINOR_VERSION=${QUARTZ_MINOR_VERSION}
@@ -141,8 +142,12 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/something")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
+list(APPEND QUARTZ_LIBS QUARTZ_Application)
 list(APPEND QUARTZ_LIBS QUARTZ_Something)
+list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Window)
 
 #====================================================================
 # The demo application

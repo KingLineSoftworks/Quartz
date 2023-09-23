@@ -28,9 +28,7 @@ target_link_libraries(
 
     # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
     PRIVATE
-    glfw
     glm
-    vulkan
     # some_lib
 
     # Utility
@@ -39,13 +37,14 @@ target_link_libraries(
 
     # Quartz
     PRIVATE
+    QUARTZ_Application
     QUARTZ_Something
-    # QUARTZ_Application
 )
 
 # pre compile definitions for the target
 target_compile_definitions(
     ${APPLICATION_NAME}
+    PUBLIC APPLICATION_NAME="${APPLICATION_NAME}"
     PUBLIC APPLICATION_VERSION
     PUBLIC APPLICATION_MINOR_VERSION=${APPLICATION_MINOR_VERSION}
     PUBLIC APPLICATION_PATCH_VERSION=${APPLICATION_PATCH_VERSION}

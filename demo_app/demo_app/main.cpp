@@ -1,7 +1,5 @@
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_extension_inspection.hpp>
-
-#include <GLFW/glfw3.h>
+#include <stdexcept>
+#include <cstdlib>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -13,6 +11,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/core.hpp"
+#include "quartz/application/Application.hpp"
 #include "quartz/something/Something.hpp"
 
 #include "demo_app/core.hpp"
@@ -27,6 +26,7 @@ int main() {
     quartz::util::Logger::setShouldLogPreamble(shouldLogPreamble);
 
     REGISTER_LOGGER_GROUP(QUARTZ);
+    REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
     quartz::util::Logger::setLevels({
@@ -61,48 +61,28 @@ int main() {
 #endif // ON_MAC
     }
 
-//    quartz::Something something(69, 42.666);
-//    something.doSomething();
+#ifdef QUARTZ_RELEASE
+    const bool validationLayersEnabled = false;
+#else
+    const bool validationLayersEnabled = true;
+#endif
 
-    /////////////////////////////////////////////////////////////////
-    // Setup
-    /////////////////////////////////////////////////////////////////
+    quartz::Application application(
+        APPLICATION_NAME,
+        APPLICATION_MAJOR_VERSION,
+        APPLICATION_MINOR_VERSION,
+        APPLICATION_PATCH_VERSION,
+        800,
+        600,
+        validationLayersEnabled
+    );
 
-    LOG_TRACE(quartz::loggers::GENERAL, "Initializing GLFW");
-    glfwInit();
-
-    LOG_TRACE(quartz::loggers::GENERAL, "Creating GLFW Window");
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* p_window = glfwCreateWindow(800, 600, "Demo application window", nullptr, nullptr);
-
-    /////////////////////////////////////////////////////////////////
-    // Get instance extension properties
-    /////////////////////////////////////////////////////////////////
-
-    LOG_TRACE(quartz::loggers::GENERAL, "Enumerating extension properties");
-    const std::set<std::string>& instanceExtensions = vk::getInstanceExtensions();
-    LOG_TRACE(quartz::loggers::GENERAL, "{} extensions supported", instanceExtensions.size());
-    for (const std::string& instanceExtension : instanceExtensions) {
-        LOG_TRACE(quartz::loggers::GENERAL, "  - {}", instanceExtension);
+    try {
+        application.run();
+    } catch (const std::exception& e) {
+        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
+        return EXIT_FAILURE;
     }
-
-    /////////////////////////////////////////////////////////////////
-    // The loop
-    /////////////////////////////////////////////////////////////////
-
-    while(!glfwWindowShouldClose(p_window)) {
-        glfwPollEvents();
-    }
-
-    /////////////////////////////////////////////////////////////////
-    // Cleanup
-    /////////////////////////////////////////////////////////////////
-
-    LOG_TRACE(quartz::loggers::GENERAL, "Destroying window");
-    glfwDestroyWindow(p_window);
-
-    LOG_TRACE(quartz::loggers::GENERAL, "GLFW Terminating");
-    glfwTerminate();
 
     LOG_TRACE(quartz::loggers::GENERAL, "Testing GLM");
     glm::mat4 matrix;
@@ -111,5 +91,5 @@ int main() {
     LOG_TRACE(quartz::loggers::GENERAL, "Resulting vector [ {} {} {} {} ]", result.x, result.y, result.z, result.w);
 
     LOG_TRACE(quartz::loggers::GENERAL, "Terminating");
-    return 0;
+    return EXIT_SUCCESS;
 }
