@@ -47,7 +47,7 @@ private: // static functions
         const bool validationLayersEnabled
     );
 
-    static vk::UniqueInstance createUniqueVulkanInstance(
+    static vk::UniqueInstance createVulkanUniqueInstance(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
         const uint32_t applicationMinorVersion,
@@ -55,7 +55,7 @@ private: // static functions
         const bool validationLayersEnabled
     );
 
-    static vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> createUniqueVulkanDebugUtilsMessenger(
+    static vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> createVulkanUniqueDebugUtilsMessenger(
         const vk::UniqueInstance& uniqueInstance,
         const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
         const bool validationLayersEnabled
@@ -69,7 +69,7 @@ private: // member variables
 
     std::unique_ptr<quartz::rendering::Window> mp_window;
 
-    vk::UniqueInstance m_uniqueVulkanInstance;
+    vk::UniqueInstance m_vulkanUniqueInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
-    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_uniqueVulkanDebugMessenger;
+    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_vulkanUniqueDebugMessenger; // we need to use the dynamic loader instead of the static loader (not sure why we can't statically link 😔)
 };

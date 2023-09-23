@@ -155,7 +155,7 @@ std::vector<const char*> quartz::Application::getEnabledInstanceExtensionNames(
     return requiredInstanceExtensionNames;
 }
 
-vk::UniqueInstance quartz::Application::createUniqueVulkanInstance(
+vk::UniqueInstance quartz::Application::createVulkanUniqueInstance(
     const std::string &applicationName,
     const uint32_t applicationMajorVersion,
     const uint32_t applicationMinorVersion,
@@ -203,7 +203,7 @@ vk::UniqueInstance quartz::Application::createUniqueVulkanInstance(
     return uniqueInstance;
 }
 
-vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> quartz::Application::createUniqueVulkanDebugUtilsMessenger(
+vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> quartz::Application::createVulkanUniqueDebugUtilsMessenger(
     const vk::UniqueInstance& uniqueInstance,
     const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
     const bool validationLayersEnabled
@@ -267,16 +267,24 @@ quartz::Application::Application(
     m_majorVersion(applicationMajorVersion),
     m_minorVersion(applicationMinorVersion),
     m_patchVersion(applicationPatchVersion),
-    mp_window(std::make_unique<quartz::rendering::Window>(m_applicationName, windowWidthPixels, windowHeightPixels)),
-    m_uniqueVulkanInstance(quartz::Application::createUniqueVulkanInstance(
+    mp_window(std::make_unique<quartz::rendering::Window>(
+        m_applicationName,
+        windowWidthPixels,
+        windowHeightPixels
+    )),
+    m_vulkanUniqueInstance(quartz::Application::createVulkanUniqueInstance(
         m_applicationName,
         m_majorVersion,
         m_minorVersion,
         m_patchVersion,
         validationLayersEnabled
     )),
-    m_vulkanDispatchLoaderDynamic(*m_uniqueVulkanInstance, vkGetInstanceProcAddr),
-    m_uniqueVulkanDebugMessenger(quartz::Application::createUniqueVulkanDebugUtilsMessenger(m_uniqueVulkanInstance, m_vulkanDispatchLoaderDynamic, validationLayersEnabled))
+    m_vulkanDispatchLoaderDynamic(*m_vulkanUniqueInstance, vkGetInstanceProcAddr),
+    m_vulkanUniqueDebugMessenger(quartz::Application::createVulkanUniqueDebugUtilsMessenger(
+        m_vulkanUniqueInstance,
+        m_vulkanDispatchLoaderDynamic,
+        validationLayersEnabled
+    ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
 }
