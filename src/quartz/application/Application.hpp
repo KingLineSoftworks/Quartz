@@ -57,6 +57,7 @@ private: // static functions
 
     static vk::DebugUtilsMessengerEXT createVulkanDebugUtilsMessenger(
         const vk::UniqueInstance& uniqueInstance,
+        const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
         const bool validationLayersEnabled
     );
 
@@ -69,5 +70,6 @@ private: // member variables
     std::unique_ptr<quartz::rendering::Window> mp_window;
 
     vk::UniqueInstance m_uniqueVulkanInstance;
+    vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
     vk::DebugUtilsMessengerEXT m_vulkanDebugMessenger; // linking errors when we try to use the Unique version
 };

@@ -11,66 +11,6 @@
 
 #include "quartz/application/Application.hpp"
 
-namespace vk {
-
-// Manually load the CreateDebugUtilsMessenger functions via proxy function
-vk::ResultValueType<vk::DebugUtilsMessengerEXT>::type createDebugUtilsMessengerEXT(
-    const vk::Instance& instance,
-    const vk::DebugUtilsMessengerCreateInfoEXT& debugMessengerCreateInfo,
-    vk::Optional<const vk::AllocationCallbacks> allocator
-) {
-    const char* desiredFunctionName = "vkCreateDebugUtilsMessengerEXT";
-
-    PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, desiredFunctionName);
-
-    if (vkCreateDebugUtilsMessengerEXT == nullptr) {
-        LOG_CRITICAL(quartz::loggers::VALIDATION_LAYER, "Could not find extension {}", desiredFunctionName);
-        // return VK_ERROR_EXTENSION_NOT_PRESENT; // if we were returning a VkResult, but we aren't because i'm a fucking god
-        throw std::runtime_error("");
-    }
-
-    vk::DebugUtilsMessengerEXT debugMessenger;
-
-    vk::Result result = static_cast<vk::Result>(
-        vkCreateDebugUtilsMessengerEXT(
-            instance,
-            reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(&debugMessengerCreateInfo),
-            reinterpret_cast<const VkAllocationCallbacks*>(
-                static_cast<const vk::AllocationCallbacks*>(allocator)
-            ),
-            reinterpret_cast<VkDebugUtilsMessengerEXT*>(&debugMessenger)
-        )
-    );
-
-    return vk::createResultValue(result, debugMessenger, "vk::createDebugUtilsMessengerEXT");
-}
-
-// Manually load the DestroyDebugUtilsMessenger functions via proxy function
-void destroyDebugUtilsMessengerEXT(
-    const vk::Instance& instance,
-    vk::DebugUtilsMessengerEXT& debugMessenger,
-    vk::Optional<const vk::AllocationCallbacks> allocator
-) {
-    const char* desiredFunctionName = "vkDestroyDebugUtilsMessengerEXT";
-
-    PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, desiredFunctionName);
-
-    if (vkDestroyDebugUtilsMessengerEXT == nullptr) {
-        LOG_CRITICAL(quartz::loggers::VALIDATION_LAYER, "Could not find extension {}", desiredFunctionName);
-        throw std::runtime_error("");
-    }
-
-    vkDestroyDebugUtilsMessengerEXT(
-        instance,
-        reinterpret_cast<VkDebugUtilsMessengerEXT>(&debugMessenger),
-        reinterpret_cast<const VkAllocationCallbacks*>(
-            static_cast<const vk::AllocationCallbacks*>(allocator)
-        )
-    );
-}
-
-} // namespace vk
-
 VKAPI_ATTR VkBool32 VKAPI_CALL quartz::Application::vulkanDebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -265,6 +205,7 @@ vk::UniqueInstance quartz::Application::createUniqueVulkanInstance(
 
 vk::DebugUtilsMessengerEXT quartz::Application::createVulkanDebugUtilsMessenger(
     const vk::UniqueInstance& uniqueInstance,
+    const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
     const bool validationLayersEnabled
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "enable validation layers = {}", validationLayersEnabled);
@@ -274,16 +215,16 @@ vk::DebugUtilsMessengerEXT quartz::Application::createVulkanDebugUtilsMessenger(
         return {};
     }
 
-    vk::DebugUtilsMessengerCreateFlagsEXT debugMessengerCreateFlags;
+    const vk::DebugUtilsMessengerCreateFlagsEXT debugMessengerCreateFlags;
 
-    vk::DebugUtilsMessageSeverityFlagsEXT debugMessengerSeverityFlags(
+    const vk::DebugUtilsMessageSeverityFlagsEXT debugMessengerSeverityFlags(
             vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
             vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
             vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
             vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
     );
 
-    vk::DebugUtilsMessageTypeFlagsEXT debugMessengerTypeFlags(
+    const vk::DebugUtilsMessageTypeFlagsEXT debugMessengerTypeFlags(
         vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
         vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
         vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
@@ -297,18 +238,11 @@ vk::DebugUtilsMessengerEXT quartz::Application::createVulkanDebugUtilsMessenger(
         nullptr
     );
 
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create the vk::DebugUtilsMessengerEXT");
-    vk::DebugUtilsMessengerEXT debugMessenger = vk::createDebugUtilsMessengerEXT(
-        *uniqueInstance,
+    vk::DebugUtilsMessengerEXT debugMessenger = uniqueInstance->createDebugUtilsMessengerEXT(
         debugMessengerCreateInfo,
-        nullptr
+        nullptr,
+        dispatchLoaderDynamic
     );
-
-    if (!debugMessenger) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create the vk::DebugUtilsMessengerEXT");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created the vk::DebugUtilsMessengerEXT");
 
     return debugMessenger;
 }
@@ -334,7 +268,9 @@ quartz::Application::Application(
         m_patchVersion,
         validationLayersEnabled
     )),
-    m_vulkanDebugMessenger(quartz::Application::createVulkanDebugUtilsMessenger(m_uniqueVulkanInstance, validationLayersEnabled))
+    m_vulkanDispatchLoaderDynamic(*m_uniqueVulkanInstance, vkGetInstanceProcAddr),
+//    m_vulkanDebugMessenger(quartz::Application::createVulkanDebugUtilsMessenger(m_uniqueVulkanInstance, m_vulkanDispatchLoaderDynamic, validationLayersEnabled))
+    m_vulkanDebugMessenger()
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
 }
@@ -346,6 +282,35 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
+    const vk::DebugUtilsMessengerCreateFlagsEXT debugMessengerCreateFlags;
+
+    const vk::DebugUtilsMessageSeverityFlagsEXT debugMessengerSeverityFlags(
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+    );
+
+    const vk::DebugUtilsMessageTypeFlagsEXT debugMessengerTypeFlags(
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+    );
+
+    const vk::DebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo(
+        debugMessengerCreateFlags,
+        debugMessengerSeverityFlags,
+        debugMessengerTypeFlags,
+        quartz::Application::vulkanDebugCallback,
+        nullptr
+    );
+
+    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> uniqueDebugUtilsMessengerExt = m_uniqueVulkanInstance->createDebugUtilsMessengerEXTUnique(
+        debugMessengerCreateInfo,
+        nullptr,
+        m_vulkanDispatchLoaderDynamic
+    );
+
     LOG_TRACE(quartz::loggers::APPLICATION, "Beginning main loop");
     while(!mp_window->shouldClose()) {
         glfwPollEvents();
@@ -353,5 +318,5 @@ void quartz::Application::run() {
 
     // Destroy the debug messenger
     LOG_TRACE(quartz::loggers::APPLICATION, "Destroying debug messenger");
-    vk::destroyDebugUtilsMessengerEXT(*m_uniqueVulkanInstance, m_vulkanDebugMessenger, nullptr);
+//    m_uniqueVulkanInstance->destroyDebugUtilsMessengerEXT(m_vulkanDebugMessenger, nullptr, m_vulkanDispatchLoaderDynamic);
 }
