@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <functional>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -160,7 +160,8 @@ vk::UniqueInstance quartz::Application::createVulkanUniqueInstance(
     const uint32_t applicationMajorVersion,
     const uint32_t applicationMinorVersion,
     const uint32_t applicationPatchVersion,
-    const bool validationLayersEnabled
+    const std::vector<const char*>& enabledValidationLayerNames,
+    const std::vector<const char*>& enabledExtensionNames
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} {}.{}.{}", applicationName, applicationMajorVersion, applicationMinorVersion, applicationPatchVersion);
 
@@ -172,20 +173,10 @@ vk::UniqueInstance quartz::Application::createVulkanUniqueInstance(
         VK_API_VERSION_1_2
     );
 
-    vk::InstanceCreateFlags instanceCreateFlags;
-
-    // ----- validation layers ----- //
-
-    std::vector<const char*> enabledValidationLayerNames = quartz::Application::getEnabledValidationLayerNames(validationLayersEnabled);
-
-    // ----- extensions ----- //
-
-    std::vector<const char*> enabledExtensionNames = quartz::Application::getEnabledInstanceExtensionNames(validationLayersEnabled);
-
     // ----- creating the instance ----- //
 
     vk::InstanceCreateInfo instanceCreateInfo(
-        instanceCreateFlags,
+        {},
         &applicationInfo,
         enabledValidationLayerNames,
         enabledExtensionNames
@@ -272,12 +263,15 @@ quartz::Application::Application(
         windowWidthPixels,
         windowHeightPixels
     )),
+    m_validationLayerNames(quartz::Application::getEnabledValidationLayerNames(validationLayersEnabled)),
+    m_instanceExtensionNames(quartz::Application::getEnabledInstanceExtensionNames(validationLayersEnabled)),
     m_vulkanUniqueInstance(quartz::Application::createVulkanUniqueInstance(
         m_applicationName,
         m_majorVersion,
         m_minorVersion,
         m_patchVersion,
-        validationLayersEnabled
+        m_validationLayerNames,
+        m_instanceExtensionNames
     )),
     m_vulkanDispatchLoaderDynamic(*m_vulkanUniqueInstance, vkGetInstanceProcAddr),
     m_vulkanUniqueDebugMessenger(quartz::Application::createVulkanUniqueDebugUtilsMessenger(
@@ -308,12 +302,11 @@ void quartz::Application::run() {
     // ----- pick the most suitable device based on supported queue families ----- //
 
     vk::PhysicalDevice bestPhysicalDevice;
+    std::optional<uint32_t> queueFamilyIndex;
     for (uint32_t i = 0; i < physicalDevices.size(); ++i) {
         LOG_TRACE(quartz::loggers::APPLICATION, "  - checking suitability of device {}", i);
 
         vk::PhysicalDevice physicalDevice = physicalDevices[i];
-
-        bool suitable = false;
 
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
         LOG_TRACE(quartz::loggers::APPLICATION, "    - {} queue families available", queueFamilyProperties.size());
@@ -326,11 +319,11 @@ void quartz::Application::run() {
             }
 
             LOG_TRACE(quartz::loggers::APPLICATION, "        - queue family {} supports all required queues", j);
-            suitable = true;
+            queueFamilyIndex = j;
             break;
         }
 
-        if (suitable) {
+        if (queueFamilyIndex.has_value()) {
             LOG_TRACE(quartz::loggers::APPLICATION, "    - device is suitable");
             bestPhysicalDevice = physicalDevice;
             break;
@@ -339,10 +332,59 @@ void quartz::Application::run() {
         LOG_TRACE(quartz::loggers::APPLICATION, "    - device not suitable");
     }
 
-    if (bestPhysicalDevice == vk::PhysicalDevice()) {
+    if (!queueFamilyIndex.has_value()) {
         LOG_CRITICAL(quartz::loggers::APPLICATION, "No suitable devices found");
         throw std::runtime_error("");
     }
+
+    // ----- get the physical device extensions ----- //
+
+    std::vector<const char*> requiredPhysicalDeviceExtensionNames;
+    std::vector<vk::ExtensionProperties> availablePhysicalDeviceExtensionProperties = bestPhysicalDevice.enumerateDeviceExtensionProperties();
+    LOG_TRACE(quartz::loggers::APPLICATION, "{} physical device extensions available", availablePhysicalDeviceExtensionProperties.size());
+    for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
+
+        if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - portability subset found");
+            requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
+        }
+    }
+
+    // ----- set up logical device to interface with physical device ----- //
+
+    std::vector<float> deviceQueuePriorities = {1.0f};
+    std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos = {
+        vk::DeviceQueueCreateInfo(
+            {},
+            queueFamilyIndex.value(),
+            deviceQueuePriorities
+        )
+    };
+
+    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
+
+    vk::DeviceCreateInfo logicalDeviceCreateInfo(
+        {},
+        deviceQueueCreateInfos,
+        m_validationLayerNames,
+        requiredPhysicalDeviceExtensionNames,
+        &physicalDeviceFeatures
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create logical device");
+    vk::UniqueDevice uniqueLogicalDevice = bestPhysicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
+
+    if (!uniqueLogicalDevice) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create logical device");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created logical device");
+
+    // ----- get the queue ----- //
+
+    vk::Queue graphicsQueue = uniqueLogicalDevice->getQueue(queueFamilyIndex.value(), 0);
+    UNUSED(graphicsQueue);
 
     // ----- drop that ass at me from an egregarious angle ----- //
 

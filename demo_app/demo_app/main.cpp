@@ -31,11 +31,8 @@ int main() {
 
     quartz::util::Logger::setLevels({
         {"GENERAL", quartz::util::Logger::Level::trace},
-        {"BIGBOY", quartz::util::Logger::Level::trace},
-        {"ALAMANCY", quartz::util::Logger::Level::trace},
-        {"GENERAL2", quartz::util::Logger::Level::trace},
-        {"SOMETHING", quartz::util::Logger::Level::trace},
-        {"ANOTHER", quartz::util::Logger::Level::trace}
+        {"APPLICATION", quartz::util::Logger::Level::trace},
+        {"VULKAN", quartz::util::Logger::Level::info}
     });
 
     if (shouldLogPreamble) {

@@ -52,7 +52,8 @@ private: // static functions
         const uint32_t applicationMajorVersion,
         const uint32_t applicationMinorVersion,
         const uint32_t applicationPatchVersion,
-        const bool validationLayersEnabled
+        const std::vector<const char*>& enabledValidationLayerNames,
+        const std::vector<const char*>& enabledExtensionNames
     );
 
     static vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> createVulkanUniqueDebugUtilsMessenger(
@@ -68,6 +69,9 @@ private: // member variables
     const uint32_t m_patchVersion;
 
     std::unique_ptr<quartz::rendering::Window> mp_window;
+
+    std::vector<const char*> m_validationLayerNames;
+    std::vector<const char*> m_instanceExtensionNames;
 
     vk::UniqueInstance m_vulkanUniqueInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
