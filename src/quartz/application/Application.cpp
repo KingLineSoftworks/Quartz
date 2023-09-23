@@ -37,19 +37,19 @@ VKAPI_ATTR VkBool32 VKAPI_CALL quartz::Application::vulkanDebugCallback(
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            LOG_TRACE(quartz::loggers::VALIDATION_LAYER, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
+            LOG_TRACE(quartz::loggers::VULKAN, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            LOG_INFO(quartz::loggers::VALIDATION_LAYER, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
+            LOG_INFO(quartz::loggers::VULKAN, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            LOG_WARNING(quartz::loggers::VALIDATION_LAYER, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
+            LOG_WARNING(quartz::loggers::VULKAN, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            LOG_ERROR(quartz::loggers::VALIDATION_LAYER, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
+            LOG_ERROR(quartz::loggers::VULKAN, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
             break;
         default:
-            LOG_CRITICAL(quartz::loggers::VALIDATION_LAYER, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
+            LOG_CRITICAL(quartz::loggers::VULKAN, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
             break;
     };
 
@@ -295,6 +295,56 @@ quartz::Application::~Application() {
 
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    // ----- get list of devices ----- //
+
+    std::vector<vk::PhysicalDevice> physicalDevices = m_vulkanUniqueInstance->enumeratePhysicalDevices();
+    LOG_TRACE(quartz::loggers::APPLICATION, "{} physical devices available", physicalDevices.size());
+    if (physicalDevices.size() == 0) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to find GPUs with vulkan support");
+        throw std::runtime_error("");
+    }
+
+    // ----- pick the most suitable device based on supported queue families ----- //
+
+    vk::PhysicalDevice bestPhysicalDevice;
+    for (uint32_t i = 0; i < physicalDevices.size(); ++i) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - checking suitability of device {}", i);
+
+        vk::PhysicalDevice physicalDevice = physicalDevices[i];
+
+        bool suitable = false;
+
+        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - {} queue families available", queueFamilyProperties.size());
+
+        for (uint32_t j = 0; j < queueFamilyProperties.size(); ++j) {
+            const vk::QueueFamilyProperties properties = queueFamilyProperties[j];
+
+            if (!(properties.queueFlags & vk::QueueFlagBits::eGraphics)) {
+                continue;
+            }
+
+            LOG_TRACE(quartz::loggers::APPLICATION, "        - queue family {} supports all required queues", j);
+            suitable = true;
+            break;
+        }
+
+        if (suitable) {
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - device is suitable");
+            bestPhysicalDevice = physicalDevice;
+            break;
+        }
+
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - device not suitable");
+    }
+
+    if (bestPhysicalDevice == vk::PhysicalDevice()) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "No suitable devices found");
+        throw std::runtime_error("");
+    }
+
+    // ----- drop that ass at me from an egregarious angle ----- //
 
     LOG_TRACE(quartz::loggers::APPLICATION, "Beginning main loop");
     while(!mp_window->shouldClose()) {
