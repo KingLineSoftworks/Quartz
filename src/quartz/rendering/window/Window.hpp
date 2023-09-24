@@ -23,6 +23,8 @@ public: // interface
 
     USE_LOGGER(WINDOW);
 
+    const std::shared_ptr<GLFWwindow>& getGLFWwindowPtr() const { return mp_glfwWindow; }
+
     bool shouldClose() const;
 
 private: // static functions
