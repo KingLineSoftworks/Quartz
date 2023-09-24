@@ -7,6 +7,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "util/platform.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/application/Application.hpp"
@@ -245,6 +246,174 @@ vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> quartz::
     return uniqueDebugUtilsMessengerExt;
 }
 
+std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> quartz::Application::getBestPhysicalDeviceAndQueueFamilyIndices(
+    const vk::UniqueInstance& uniqueInstance,
+    const vk::UniqueSurfaceKHR& uniqueSurface
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    // ----- get list of physical devices available to us ----- //
+
+    std::vector<vk::PhysicalDevice> physicalDevices = uniqueInstance->enumeratePhysicalDevices();
+    LOG_TRACE(quartz::loggers::APPLICATION, "{} physical devices available", physicalDevices.size());
+    if (physicalDevices.size() == 0) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to find GPUs with vulkan support");
+        throw std::runtime_error("");
+    }
+
+    // ----- choose the best (first) suitable physical device and get its best queue family index ----- //
+
+    vk::PhysicalDevice bestPhysicalDevice;
+    std::optional<uint32_t> graphicsFamilyIndex;
+    std::optional<uint32_t> presentFamilyIndex;
+    bool foundSuitableDevice = false;
+    for (uint32_t i = 0; i < physicalDevices.size(); ++i) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - checking suitability score of physical device {}", i);
+
+        vk::PhysicalDevice physicalDevice = physicalDevices[i];
+        foundSuitableDevice = false;
+
+        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - {} queue families available", queueFamilyProperties.size());
+
+        for (uint32_t j = 0; j < queueFamilyProperties.size(); ++j) {
+            const vk::QueueFamilyProperties properties = queueFamilyProperties[j];
+
+            if (properties.queueFlags & vk::QueueFlagBits::eGraphics) {
+                LOG_TRACE(quartz::loggers::APPLICATION, "        - queue family {} supports graphics queues", j);
+                graphicsFamilyIndex = j;
+            }
+
+            if (physicalDevice.getSurfaceSupportKHR(j, *uniqueSurface)) {
+                LOG_TRACE(quartz::loggers::APPLICATION, "        - queue family {} supports present queues", j);
+                presentFamilyIndex = j;
+            }
+
+            foundSuitableDevice = graphicsFamilyIndex.has_value() && presentFamilyIndex.has_value();
+            if (foundSuitableDevice) {
+                break;
+            }
+        }
+
+        if (foundSuitableDevice) {
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - device is suitable");
+            bestPhysicalDevice = physicalDevice;
+            break;
+        }
+
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - device not suitable");
+    }
+
+    if (!foundSuitableDevice) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "No suitable devices found");
+        throw std::runtime_error("");
+    }
+
+    return {
+        bestPhysicalDevice,
+        {
+            graphicsFamilyIndex.value(),
+            presentFamilyIndex.value()
+        }
+    };
+}
+
+std::vector<const char*> quartz::Application::getEnabledPhysicalDeviceExtensionNames(
+    const vk::PhysicalDevice& physicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    std::vector<const char*> requiredPhysicalDeviceExtensionNames;
+    std::vector<vk::ExtensionProperties> availablePhysicalDeviceExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
+    LOG_TRACE(quartz::loggers::APPLICATION, "{} physical device extensions available", availablePhysicalDeviceExtensionProperties.size());
+    for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
+
+        if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - portability subset found");
+            requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
+        }
+    }
+
+    return requiredPhysicalDeviceExtensionNames;
+}
+
+vk::UniqueDevice quartz::Application::createVulkanUniqueLogicalDevice(
+    const vk::PhysicalDevice& physicalDevice,
+    const uint32_t queueFamilyIndex,
+    const std::vector<const char*>& validationLayerNames,
+    const std::vector<const char*>& physicalDeviceExtensionNames
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    std::vector<float> deviceQueuePriorities = {1.0f};
+    std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos = {
+        vk::DeviceQueueCreateInfo(
+            {},
+            queueFamilyIndex,
+            deviceQueuePriorities
+        )
+    };
+
+    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
+
+    vk::DeviceCreateInfo logicalDeviceCreateInfo(
+        {},
+        deviceQueueCreateInfos,
+        validationLayerNames,
+        physicalDeviceExtensionNames,
+        &physicalDeviceFeatures
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create logical device");
+    vk::UniqueDevice uniqueLogicalDevice = physicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
+
+    if (!uniqueLogicalDevice) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create logical device");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created logical device");
+
+    return uniqueLogicalDevice;
+}
+
+vk::UniqueSurfaceKHR quartz::Application::createVulkanSurface(
+    const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+    const vk::UniqueInstance& uniqueInstance
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+#ifndef ON_MAC
+    LOG_CRITICAL(quartz::loggers::APPLICATION, "No support for non-mac platforms currently. Inable to create vk::SurfaceKHR");
+    throw std::runtime_error("");
+#endif
+
+    VkSurfaceKHR rawVulkanSurface;
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create VkSurfaceKHR");
+    if (glfwCreateWindowSurface(
+        *uniqueInstance,
+        const_cast<GLFWwindow*>(p_GLFWwindow.get()),
+        nullptr,
+        &rawVulkanSurface
+    ) != VK_SUCCESS) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create VkSurfaceKHR");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created VkSurfaceKHR");
+
+    vk::UniqueSurfaceKHR uniqueSurface(
+        rawVulkanSurface,
+        *uniqueInstance
+    );
+    if (!uniqueSurface) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::SurfaceKHR from VkSurfaceKHR");
+
+    return uniqueSurface;
+}
+
 quartz::Application::Application(
     const std::string& applicationName,
     const uint32_t applicationMajorVersion,
@@ -258,7 +427,7 @@ quartz::Application::Application(
     m_majorVersion(applicationMajorVersion),
     m_minorVersion(applicationMinorVersion),
     m_patchVersion(applicationPatchVersion),
-    mp_window(std::make_unique<quartz::rendering::Window>(
+    mp_window(std::make_shared<quartz::rendering::Window>(
         m_applicationName,
         windowWidthPixels,
         windowHeightPixels
@@ -278,6 +447,21 @@ quartz::Application::Application(
         m_vulkanUniqueInstance,
         m_vulkanDispatchLoaderDynamic,
         validationLayersEnabled
+    )),
+    m_vulkanUniqueSurface(quartz::Application::createVulkanSurface(
+        mp_window->getGLFWwindowPtr(),
+        m_vulkanUniqueInstance
+    )),
+    m_vulkanPhysicalDeviceAndQueueFamilyIndex(quartz::Application::getBestPhysicalDeviceAndQueueFamilyIndices(
+        m_vulkanUniqueInstance,
+        m_vulkanUniqueSurface
+    )),
+    m_physicalDeviceExtensionNames(quartz::Application::getEnabledPhysicalDeviceExtensionNames(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first)),
+    m_vulkanUniqueLogicalDevice(quartz::Application::createVulkanUniqueLogicalDevice(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.graphicsFamilyIndex,
+        m_validationLayerNames,
+        m_physicalDeviceExtensionNames
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
@@ -290,100 +474,9 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    // ----- get list of devices ----- //
-
-    std::vector<vk::PhysicalDevice> physicalDevices = m_vulkanUniqueInstance->enumeratePhysicalDevices();
-    LOG_TRACE(quartz::loggers::APPLICATION, "{} physical devices available", physicalDevices.size());
-    if (physicalDevices.size() == 0) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to find GPUs with vulkan support");
-        throw std::runtime_error("");
-    }
-
-    // ----- pick the most suitable device based on supported queue families ----- //
-
-    vk::PhysicalDevice bestPhysicalDevice;
-    std::optional<uint32_t> queueFamilyIndex;
-    for (uint32_t i = 0; i < physicalDevices.size(); ++i) {
-        LOG_TRACE(quartz::loggers::APPLICATION, "  - checking suitability of device {}", i);
-
-        vk::PhysicalDevice physicalDevice = physicalDevices[i];
-
-        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
-        LOG_TRACE(quartz::loggers::APPLICATION, "    - {} queue families available", queueFamilyProperties.size());
-
-        for (uint32_t j = 0; j < queueFamilyProperties.size(); ++j) {
-            const vk::QueueFamilyProperties properties = queueFamilyProperties[j];
-
-            if (!(properties.queueFlags & vk::QueueFlagBits::eGraphics)) {
-                continue;
-            }
-
-            LOG_TRACE(quartz::loggers::APPLICATION, "        - queue family {} supports all required queues", j);
-            queueFamilyIndex = j;
-            break;
-        }
-
-        if (queueFamilyIndex.has_value()) {
-            LOG_TRACE(quartz::loggers::APPLICATION, "    - device is suitable");
-            bestPhysicalDevice = physicalDevice;
-            break;
-        }
-
-        LOG_TRACE(quartz::loggers::APPLICATION, "    - device not suitable");
-    }
-
-    if (!queueFamilyIndex.has_value()) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "No suitable devices found");
-        throw std::runtime_error("");
-    }
-
-    // ----- get the physical device extensions ----- //
-
-    std::vector<const char*> requiredPhysicalDeviceExtensionNames;
-    std::vector<vk::ExtensionProperties> availablePhysicalDeviceExtensionProperties = bestPhysicalDevice.enumerateDeviceExtensionProperties();
-    LOG_TRACE(quartz::loggers::APPLICATION, "{} physical device extensions available", availablePhysicalDeviceExtensionProperties.size());
-    for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
-        LOG_TRACE(quartz::loggers::APPLICATION, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
-
-        if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
-            LOG_TRACE(quartz::loggers::APPLICATION, "    - portability subset found");
-            requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
-        }
-    }
-
-    // ----- set up logical device to interface with physical device ----- //
-
-    std::vector<float> deviceQueuePriorities = {1.0f};
-    std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos = {
-        vk::DeviceQueueCreateInfo(
-            {},
-            queueFamilyIndex.value(),
-            deviceQueuePriorities
-        )
-    };
-
-    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
-
-    vk::DeviceCreateInfo logicalDeviceCreateInfo(
-        {},
-        deviceQueueCreateInfos,
-        m_validationLayerNames,
-        requiredPhysicalDeviceExtensionNames,
-        &physicalDeviceFeatures
-    );
-
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create logical device");
-    vk::UniqueDevice uniqueLogicalDevice = bestPhysicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
-
-    if (!uniqueLogicalDevice) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create logical device");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created logical device");
-
     // ----- get the queue ----- //
 
-    vk::Queue graphicsQueue = uniqueLogicalDevice->getQueue(queueFamilyIndex.value(), 0);
+    vk::Queue graphicsQueue = m_vulkanUniqueLogicalDevice->getQueue(m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.graphicsFamilyIndex, 0);
     UNUSED(graphicsQueue);
 
     // ----- drop that ass at me from an egregarious angle ----- //

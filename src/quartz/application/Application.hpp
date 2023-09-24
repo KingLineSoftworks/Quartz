@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <vulkan/vulkan.hpp>
 
@@ -13,6 +14,12 @@ namespace quartz {
 }
 
 class quartz::Application {
+public: // classes and enums
+    struct QueueFamilyIndices {
+        uint32_t graphicsFamilyIndex;
+        uint32_t presentFamilyIndex;
+    };
+
 public: // interface
     Application(
         const std::string& applicationName,
@@ -62,18 +69,43 @@ private: // static functions
         const bool validationLayersEnabled
     );
 
+    static std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> getBestPhysicalDeviceAndQueueFamilyIndices(
+        const vk::UniqueInstance& uniqueInstance,
+        const vk::UniqueSurfaceKHR& uniqueSurface
+    );
+
+    static std::vector<const char*> getEnabledPhysicalDeviceExtensionNames(
+        const vk::PhysicalDevice& physicalDevice
+    );
+
+    static vk::UniqueDevice createVulkanUniqueLogicalDevice(
+        const vk::PhysicalDevice& physicalDevice,
+        const uint32_t queueFamilyIndex,
+        const std::vector<const char*>& validationLayerNames,
+        const std::vector<const char*>& physicalDeviceExtensionNames
+    );
+
+    static vk::UniqueSurfaceKHR createVulkanSurface(
+        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+        const vk::UniqueInstance& uniqueInstance
+    );
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
     const uint32_t m_minorVersion;
     const uint32_t m_patchVersion;
 
-    std::unique_ptr<quartz::rendering::Window> mp_window;
+    // ----- Context tings (tings lishted in the oahdah of which dey ahh creah'id mang) ---- //
 
+    std::shared_ptr<quartz::rendering::Window> mp_window;
     std::vector<const char*> m_validationLayerNames;
     std::vector<const char*> m_instanceExtensionNames;
-
     vk::UniqueInstance m_vulkanUniqueInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
     vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_vulkanUniqueDebugMessenger; // we need to use the dynamic loader instead of the static loader (not sure why we can't statically link 😔)
+    vk::UniqueSurfaceKHR m_vulkanUniqueSurface;
+    std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> m_vulkanPhysicalDeviceAndQueueFamilyIndex; // Because these are both (physical device && queue family indices) determined at the "same" time and truly are coupled
+    std::vector<const char*> m_physicalDeviceExtensionNames;
+    vk::UniqueDevice  m_vulkanUniqueLogicalDevice;
 };
