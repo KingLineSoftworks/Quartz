@@ -1,5 +1,6 @@
 #include <functional>
 #include <optional>
+#include <set>
 #include <stdexcept>
 #include <vector>
 
@@ -340,20 +341,27 @@ std::vector<const char*> quartz::Application::getEnabledPhysicalDeviceExtensionN
 
 vk::UniqueDevice quartz::Application::createVulkanUniqueLogicalDevice(
     const vk::PhysicalDevice& physicalDevice,
-    const uint32_t queueFamilyIndex,
+    const quartz::Application::QueueFamilyIndices queueFamilyIndices,
     const std::vector<const char*>& validationLayerNames,
     const std::vector<const char*>& physicalDeviceExtensionNames
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "graphics queue family index = {} , present queue family index = {}", queueFamilyIndices.graphicsFamilyIndex, queueFamilyIndices.presentFamilyIndex);
 
-    std::vector<float> deviceQueuePriorities = {1.0f};
-    std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos = {
-        vk::DeviceQueueCreateInfo(
-            {},
-            queueFamilyIndex,
-            deviceQueuePriorities
-        )
-    };
+    std::set<uint32_t> uniqueQueueFamilyIndices = {queueFamilyIndices.graphicsFamilyIndex, queueFamilyIndices.presentFamilyIndex};
+    std::vector<float> deviceQueuePriorities(uniqueQueueFamilyIndices.size(), 1.0f);
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::DeviceQueueCreateInfo for each of the unique queue family indices");
+    std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos;
+    for (const uint32_t queueFamilyIndex : uniqueQueueFamilyIndices) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - Unique index {}", queueFamilyIndex);
+        deviceQueueCreateInfos.push_back(
+            vk::DeviceQueueCreateInfo(
+                {},
+                queueFamilyIndex,
+                deviceQueuePriorities
+            )
+        );
+    }
 
     vk::PhysicalDeviceFeatures physicalDeviceFeatures;
 
@@ -459,9 +467,17 @@ quartz::Application::Application(
     m_physicalDeviceExtensionNames(quartz::Application::getEnabledPhysicalDeviceExtensionNames(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first)),
     m_vulkanUniqueLogicalDevice(quartz::Application::createVulkanUniqueLogicalDevice(
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
-        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.graphicsFamilyIndex,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
         m_validationLayerNames,
         m_physicalDeviceExtensionNames
+    )),
+    m_vulkanGraphicsQueue(m_vulkanUniqueLogicalDevice->getQueue(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.graphicsFamilyIndex,
+        0
+    )),
+    m_vulkanPresentQueue(m_vulkanUniqueLogicalDevice->getQueue(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.presentFamilyIndex,
+        0
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
@@ -473,11 +489,6 @@ quartz::Application::~Application() {
 
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-
-    // ----- get the queue ----- //
-
-    vk::Queue graphicsQueue = m_vulkanUniqueLogicalDevice->getQueue(m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.graphicsFamilyIndex, 0);
-    UNUSED(graphicsQueue);
 
     // ----- drop that ass at me from an egregarious angle ----- //
 

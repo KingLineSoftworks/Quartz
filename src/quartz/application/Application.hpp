@@ -80,7 +80,7 @@ private: // static functions
 
     static vk::UniqueDevice createVulkanUniqueLogicalDevice(
         const vk::PhysicalDevice& physicalDevice,
-        const uint32_t queueFamilyIndex,
+        const quartz::Application::QueueFamilyIndices queueFamilyIndex,
         const std::vector<const char*>& validationLayerNames,
         const std::vector<const char*>& physicalDeviceExtensionNames
     );
@@ -108,4 +108,6 @@ private: // member variables
     std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> m_vulkanPhysicalDeviceAndQueueFamilyIndex; // Because these are both (physical device && queue family indices) determined at the "same" time and truly are coupled
     std::vector<const char*> m_physicalDeviceExtensionNames;
     vk::UniqueDevice  m_vulkanUniqueLogicalDevice;
+    vk::Queue m_vulkanGraphicsQueue;
+    vk::Queue m_vulkanPresentQueue;
 };
