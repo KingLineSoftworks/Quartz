@@ -20,6 +20,12 @@ public: // classes and enums
         uint32_t presentFamilyIndex;
     };
 
+    struct SwapchainSupportDetails {
+        vk::SurfaceCapabilitiesKHR surfaceCapabilities;
+        std::vector<vk::SurfaceFormatKHR> surfaceFormats;
+        std::vector<vk::PresentModeKHR> presentModes;
+    };
+
 public: // interface
     Application(
         const std::string& applicationName,
@@ -69,6 +75,11 @@ private: // static functions
         const bool validationLayersEnabled
     );
 
+    static vk::UniqueSurfaceKHR createVulkanSurface(
+        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+        const vk::UniqueInstance& uniqueInstance
+    );
+
     static std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> getBestPhysicalDeviceAndQueueFamilyIndices(
         const vk::UniqueInstance& uniqueInstance,
         const vk::UniqueSurfaceKHR& uniqueSurface
@@ -80,14 +91,40 @@ private: // static functions
 
     static vk::UniqueDevice createVulkanUniqueLogicalDevice(
         const vk::PhysicalDevice& physicalDevice,
-        const quartz::Application::QueueFamilyIndices queueFamilyIndex,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
         const std::vector<const char*>& validationLayerNames,
         const std::vector<const char*>& physicalDeviceExtensionNames
     );
 
-    static vk::UniqueSurfaceKHR createVulkanSurface(
+    static vk::Extent2D getBestSwapExtent(
         const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
-        const vk::UniqueInstance& uniqueInstance
+        const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
+    );
+
+    static vk::SurfaceFormatKHR getBestSurfaceFormat(
+        const vk::UniqueSurfaceKHR& uniqueSurface,
+        const vk::PhysicalDevice& physicalDevice
+    );
+
+    static vk::PresentModeKHR getBestPresentMode(
+        const vk::UniqueSurfaceKHR& uniqueSurface,
+        const vk::PhysicalDevice& physicalDevice
+    );
+
+    static vk::UniqueSwapchainKHR createVulkanUniqueSwapchain(
+        const vk::UniqueSurfaceKHR& uniqueSurface,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
+        const vk::Extent2D& swapExtent,
+        const vk::SurfaceFormatKHR& surfaceFormat,
+        const vk::PresentModeKHR& presentMode
+    );
+
+    static std::vector<vk::UniqueImageView> createVulkanUniqueImageViews(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::SurfaceFormatKHR& surfaceFormat,
+        const std::vector<vk::Image>& swapchainImages
     );
 
 private: // member variables
@@ -98,16 +135,27 @@ private: // member variables
 
     // ----- Context tings (tings lishted in the oahdah of which dey ahh creah'id mang) ---- //
 
-    std::shared_ptr<quartz::rendering::Window> mp_window;
+    // instance
     std::vector<const char*> m_validationLayerNames;
     std::vector<const char*> m_instanceExtensionNames;
     vk::UniqueInstance m_vulkanUniqueInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
     vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_vulkanUniqueDebugMessenger; // we need to use the dynamic loader instead of the static loader (not sure why we can't statically link 😔)
+    // window
+    std::shared_ptr<quartz::rendering::Window> mp_window;
     vk::UniqueSurfaceKHR m_vulkanUniqueSurface;
+    // device (and its queues)
     std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> m_vulkanPhysicalDeviceAndQueueFamilyIndex; // Because these are both (physical device && queue family indices) determined at the "same" time and truly are coupled
     std::vector<const char*> m_physicalDeviceExtensionNames;
     vk::UniqueDevice  m_vulkanUniqueLogicalDevice;
     vk::Queue m_vulkanGraphicsQueue;
     vk::Queue m_vulkanPresentQueue;
+    // swapchain
+    vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities; // should maybe go with the window stuff? seems directly related to the surface
+    vk::Extent2D m_vulkanSwapExtent; // should maybe go with the window stuff? seems directly related to the surface
+    vk::SurfaceFormatKHR m_vulkanSurfaceFormat; // should maybe go with the window stuff? seems directly related to the surface
+    vk::PresentModeKHR m_vulkanPresentMode; // should maybe go with the window stuff? seems directly related to the surface
+    vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
+    std::vector<vk::Image> m_vulkanSwapchainImages;
+    std::vector<vk::UniqueImageView> m_vulkanUniqueImageViews;
 };

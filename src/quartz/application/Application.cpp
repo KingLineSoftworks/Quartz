@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <set>
 #include <stdexcept>
@@ -247,6 +249,44 @@ vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> quartz::
     return uniqueDebugUtilsMessengerExt;
 }
 
+vk::UniqueSurfaceKHR quartz::Application::createVulkanSurface(
+    const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+    const vk::UniqueInstance& uniqueInstance
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+#ifndef ON_MAC
+    LOG_CRITICAL(quartz::loggers::APPLICATION, "No support for non-mac platforms currently. Inable to create vk::SurfaceKHR");
+    throw std::runtime_error("");
+#endif
+
+    VkSurfaceKHR rawVulkanSurface;
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create VkSurfaceKHR");
+    VkResult createResult = glfwCreateWindowSurface(
+        *uniqueInstance,
+        const_cast<GLFWwindow*>(p_GLFWwindow.get()),
+        nullptr,
+        &rawVulkanSurface
+    );
+    if (createResult != VK_SUCCESS) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create VkSurfaceKHR ( {} )", static_cast<int64_t>(createResult));
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created VkSurfaceKHR");
+
+    vk::UniqueSurfaceKHR uniqueSurface(
+        rawVulkanSurface,
+        *uniqueInstance
+    );
+    if (!uniqueSurface) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::SurfaceKHR from VkSurfaceKHR");
+
+    return uniqueSurface;
+}
+
 std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> quartz::Application::getBestPhysicalDeviceAndQueueFamilyIndices(
     const vk::UniqueInstance& uniqueInstance,
     const vk::UniqueSurfaceKHR& uniqueSurface
@@ -324,16 +364,30 @@ std::vector<const char*> quartz::Application::getEnabledPhysicalDeviceExtensionN
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
 
-    std::vector<const char*> requiredPhysicalDeviceExtensionNames;
+    std::vector<const char*> requiredPhysicalDeviceExtensionNames = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
+    bool swapchainExtensionFound = false;
+
     std::vector<vk::ExtensionProperties> availablePhysicalDeviceExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
     LOG_TRACE(quartz::loggers::APPLICATION, "{} physical device extensions available", availablePhysicalDeviceExtensionProperties.size());
     for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
         LOG_TRACE(quartz::loggers::APPLICATION, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
 
         if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
-            LOG_TRACE(quartz::loggers::APPLICATION, "    - portability subset found");
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - portability subset extension found");
             requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
         }
+
+        if (extensionProperties.extensionName == std::string(VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
+            LOG_TRACE(quartz::loggers::APPLICATION, "    - swapchain extension found");
+            swapchainExtensionFound = true;
+        }
+    }
+
+    if (!swapchainExtensionFound) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "{} extension not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        throw std::runtime_error("");
     }
 
     return requiredPhysicalDeviceExtensionNames;
@@ -341,7 +395,7 @@ std::vector<const char*> quartz::Application::getEnabledPhysicalDeviceExtensionN
 
 vk::UniqueDevice quartz::Application::createVulkanUniqueLogicalDevice(
     const vk::PhysicalDevice& physicalDevice,
-    const quartz::Application::QueueFamilyIndices queueFamilyIndices,
+    const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
     const std::vector<const char*>& validationLayerNames,
     const std::vector<const char*>& physicalDeviceExtensionNames
 ) {
@@ -385,41 +439,206 @@ vk::UniqueDevice quartz::Application::createVulkanUniqueLogicalDevice(
     return uniqueLogicalDevice;
 }
 
-vk::UniqueSurfaceKHR quartz::Application::createVulkanSurface(
+vk::Extent2D quartz::Application::getBestSwapExtent(
     const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
-    const vk::UniqueInstance& uniqueInstance
+    const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
 
-#ifndef ON_MAC
-    LOG_CRITICAL(quartz::loggers::APPLICATION, "No support for non-mac platforms currently. Inable to create vk::SurfaceKHR");
-    throw std::runtime_error("");
-#endif
+    LOG_TRACE(quartz::loggers::APPLICATION, "Choosing best swap extent");
+    if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "Using capabilities's current swap extent");
+        return surfaceCapabilities.currentExtent;
+    }
 
-    VkSurfaceKHR rawVulkanSurface;
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create VkSurfaceKHR");
-    if (glfwCreateWindowSurface(
-        *uniqueInstance,
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating our own swap extent (capabilities's current extent has width of uint32_t max value, so we must handle manually)");
+    int32_t widthPixels;
+    int32_t heightPixels;
+    glfwGetFramebufferSize(
         const_cast<GLFWwindow*>(p_GLFWwindow.get()),
-        nullptr,
-        &rawVulkanSurface
-    ) != VK_SUCCESS) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create VkSurfaceKHR");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created VkSurfaceKHR");
-
-    vk::UniqueSurfaceKHR uniqueSurface(
-        rawVulkanSurface,
-        *uniqueInstance
+        &widthPixels,
+        &heightPixels
     );
-    if (!uniqueSurface) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
+    LOG_TRACE(quartz::loggers::APPLICATION, "Got GLFW framebuffer size of W {} pix x H {} pix", widthPixels, heightPixels);
+
+    uint32_t adjustedWidthPixels = std::clamp(
+        static_cast<uint32_t>(widthPixels),
+        surfaceCapabilities.minImageExtent.width,
+        surfaceCapabilities.maxImageExtent.width
+    );
+    LOG_TRACE(quartz::loggers::APPLICATION, "Adjusted width of {} pixels (after clamping between {} and {})", adjustedWidthPixels, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+
+    uint32_t adjustedHeightPixels = std::clamp(
+        static_cast<uint32_t>(heightPixels),
+        surfaceCapabilities.minImageExtent.height,
+        surfaceCapabilities.maxImageExtent.height
+    );
+    LOG_TRACE(quartz::loggers::APPLICATION, "Adjusted height of {} pixels (after clamping between {} and {})", adjustedHeightPixels, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating custom extent of W {} pix x H {} pix", adjustedWidthPixels, adjustedHeightPixels);
+    vk::Extent2D customExtent(
+        static_cast<uint32_t>(adjustedWidthPixels),
+        static_cast<uint32_t>(adjustedHeightPixels)
+    );
+
+    return customExtent;
+}
+
+vk::SurfaceFormatKHR quartz::Application::getBestSurfaceFormat(
+    const vk::UniqueSurfaceKHR& uniqueSurface,
+    const vk::PhysicalDevice& physicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Getting surface formats from physical device");
+    std::vector<vk::SurfaceFormatKHR> surfaceFormats = physicalDevice.getSurfaceFormatsKHR(*uniqueSurface);
+    if (surfaceFormats.empty()) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "No surface formats available for chosen physical device");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::SurfaceKHR from VkSurfaceKHR");
 
-    return uniqueSurface;
+    LOG_TRACE(quartz::loggers::APPLICATION, "Choosing suitable surface format");
+    for (const vk::SurfaceFormatKHR& surfaceFormat : surfaceFormats) {
+        if (
+            surfaceFormat.format == vk::Format::eB8G8R8A8Srgb &&
+            surfaceFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear
+        ) {
+            LOG_TRACE(quartz::loggers::APPLICATION, "  - found suitable surface format");
+            return surfaceFormat;
+        }
+    }
+
+    LOG_CRITICAL(quartz::loggers::APPLICATION, "No suitable surface formats found");
+    throw std::runtime_error("");
+}
+
+vk::PresentModeKHR quartz::Application::getBestPresentMode(
+    const vk::UniqueSurfaceKHR& uniqueSurface,
+    const vk::PhysicalDevice& physicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Getting present modes from physical device");
+    std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(*uniqueSurface);
+    if (presentModes.empty()) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "No present modes available for chosen physical device");
+        throw std::runtime_error("");
+    }
+
+    vk::PresentModeKHR bestPresentMode = vk::PresentModeKHR::eFifo;
+    LOG_TRACE(quartz::loggers::APPLICATION, "Choosing best present mode");
+    for (const vk::PresentModeKHR& presentMode : presentModes) {
+        if (presentMode == vk::PresentModeKHR::eMailbox) {
+            bestPresentMode = presentMode;
+            break;
+        }
+    }
+
+    if (bestPresentMode == vk::PresentModeKHR::eMailbox) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "Using mailbox present mode");
+    } else {
+        LOG_TRACE(quartz::loggers::APPLICATION, "Using fifo present mode");
+    }
+
+    return bestPresentMode;
+}
+
+vk::UniqueSwapchainKHR quartz::Application::createVulkanUniqueSwapchain(
+    const vk::UniqueSurfaceKHR& uniqueSurface,
+    const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
+    const vk::Extent2D& swapExtent,
+    const vk::SurfaceFormatKHR& surfaceFormat,
+    const vk::PresentModeKHR& presentMode
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    uint32_t imageCount = (surfaceCapabilities.maxImageCount != 0) ?
+        surfaceCapabilities.maxImageCount :
+        surfaceCapabilities.minImageCount + 1
+    ;
+
+    std::set uniqueQueueFamilyIndicesSet = {queueFamilyIndices.graphicsFamilyIndex, queueFamilyIndices.presentFamilyIndex};
+    std::vector uniqueQueueFamilyIndicesVector(uniqueQueueFamilyIndicesSet.begin(), uniqueQueueFamilyIndicesSet.end());
+
+    vk::SwapchainCreateInfoKHR swapchainCreateInfo(
+        {},
+        *uniqueSurface,
+        imageCount,
+        surfaceFormat.format,
+        surfaceFormat.colorSpace,
+        swapExtent,
+        1,
+        vk::ImageUsageFlagBits::eColorAttachment,
+        (uniqueQueueFamilyIndicesSet.size() > 1) ? vk::SharingMode::eConcurrent : vk::SharingMode::eExclusive,
+        uniqueQueueFamilyIndicesVector,
+        surfaceCapabilities.currentTransform,
+        vk::CompositeAlphaFlagBitsKHR::eOpaque,
+        presentMode,
+        true
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create the vk::SwapchainKHR");
+    vk::UniqueSwapchainKHR uniqueSwapchain = uniqueLogicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
+
+    if (!uniqueSwapchain) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create the vk::SwapchainKHR");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created the vk::SwapchainKHR");
+
+    return uniqueSwapchain;
+}
+
+std::vector<vk::UniqueImageView> quartz::Application::createVulkanUniqueImageViews(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::SurfaceFormatKHR& surfaceFormat,
+    const std::vector<vk::Image>& swapchainImages
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    std::vector<vk::UniqueImageView> uniqueImageViews;
+    uniqueImageViews.reserve(swapchainImages.size());
+
+    vk::ComponentMapping components(
+        vk::ComponentSwizzle::eIdentity,
+        vk::ComponentSwizzle::eIdentity,
+        vk::ComponentSwizzle::eIdentity,
+        vk::ComponentSwizzle::eIdentity
+    );
+
+    vk::ImageSubresourceRange imageSubresourceRange(
+        vk::ImageAspectFlagBits::eColor,
+        0,
+        1,
+        0,
+        1
+    );
+
+    for (uint32_t i = 0; i < swapchainImages.size(); ++i) {
+        vk::ImageViewCreateInfo imageViewCreateInfo(
+            {},
+            swapchainImages[i],
+            vk::ImageViewType::e2D,
+            surfaceFormat.format,
+            components,
+            imageSubresourceRange
+        );
+
+        vk::UniqueImageView uniqueImageView = uniqueLogicalDevice->createImageViewUnique(imageViewCreateInfo);
+
+        if (!uniqueImageView) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::ImageView {}", i);
+            throw std::runtime_error("");
+        }
+
+        LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::ImageView {}", i);
+        uniqueImageViews.push_back(std::move(uniqueImageView));
+    }
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created all {} vk::ImageViews(s)", swapchainImages.size());
+    return uniqueImageViews;
 }
 
 quartz::Application::Application(
@@ -435,11 +654,6 @@ quartz::Application::Application(
     m_majorVersion(applicationMajorVersion),
     m_minorVersion(applicationMinorVersion),
     m_patchVersion(applicationPatchVersion),
-    mp_window(std::make_shared<quartz::rendering::Window>(
-        m_applicationName,
-        windowWidthPixels,
-        windowHeightPixels
-    )),
     m_validationLayerNames(quartz::Application::getEnabledValidationLayerNames(validationLayersEnabled)),
     m_instanceExtensionNames(quartz::Application::getEnabledInstanceExtensionNames(validationLayersEnabled)),
     m_vulkanUniqueInstance(quartz::Application::createVulkanUniqueInstance(
@@ -455,6 +669,11 @@ quartz::Application::Application(
         m_vulkanUniqueInstance,
         m_vulkanDispatchLoaderDynamic,
         validationLayersEnabled
+    )),
+    mp_window(std::make_shared<quartz::rendering::Window>(
+        m_applicationName,
+        windowWidthPixels,
+        windowHeightPixels
     )),
     m_vulkanUniqueSurface(quartz::Application::createVulkanSurface(
         mp_window->getGLFWwindowPtr(),
@@ -478,6 +697,34 @@ quartz::Application::Application(
     m_vulkanPresentQueue(m_vulkanUniqueLogicalDevice->getQueue(
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.presentFamilyIndex,
         0
+    )),
+    m_vulkanSurfaceCapabilities(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first.getSurfaceCapabilitiesKHR(*m_vulkanUniqueSurface)),
+    m_vulkanSwapExtent(quartz::Application::getBestSwapExtent(
+        mp_window->getGLFWwindowPtr(),
+        m_vulkanSurfaceCapabilities
+    )),
+    m_vulkanSurfaceFormat(quartz::Application::getBestSurfaceFormat(
+        m_vulkanUniqueSurface,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first
+    )),
+    m_vulkanPresentMode(quartz::Application::getBestPresentMode(
+        m_vulkanUniqueSurface,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first
+    )),
+    m_vulkanUniqueSwapchain(quartz::Application::createVulkanUniqueSwapchain(
+        m_vulkanUniqueSurface,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceCapabilities,
+        m_vulkanSwapExtent,
+        m_vulkanSurfaceFormat,
+        m_vulkanPresentMode
+    )),
+    m_vulkanSwapchainImages(m_vulkanUniqueLogicalDevice->getSwapchainImagesKHR(*m_vulkanUniqueSwapchain)),
+    m_vulkanUniqueImageViews(quartz::Application::createVulkanUniqueImageViews(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceFormat,
+        m_vulkanSwapchainImages
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
