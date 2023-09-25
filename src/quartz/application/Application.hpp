@@ -121,6 +121,12 @@ private: // static functions
         const vk::PresentModeKHR& presentMode
     );
 
+    static std::vector<vk::UniqueImageView> createVulkanUniqueImageViews(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::SurfaceFormatKHR& surfaceFormat,
+        const std::vector<vk::Image>& swapchainImages
+    );
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
@@ -151,4 +157,5 @@ private: // member variables
     vk::PresentModeKHR m_vulkanPresentMode; // should maybe go with the window stuff? seems directly related to the surface
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
     std::vector<vk::Image> m_vulkanSwapchainImages;
+    std::vector<vk::UniqueImageView> m_vulkanUniqueImageViews;
 };

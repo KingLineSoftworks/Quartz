@@ -591,6 +591,56 @@ vk::UniqueSwapchainKHR quartz::Application::createVulkanUniqueSwapchain(
     return uniqueSwapchain;
 }
 
+std::vector<vk::UniqueImageView> quartz::Application::createVulkanUniqueImageViews(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::SurfaceFormatKHR& surfaceFormat,
+    const std::vector<vk::Image>& swapchainImages
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    std::vector<vk::UniqueImageView> uniqueImageViews;
+    uniqueImageViews.reserve(swapchainImages.size());
+
+    vk::ComponentMapping components(
+        vk::ComponentSwizzle::eIdentity,
+        vk::ComponentSwizzle::eIdentity,
+        vk::ComponentSwizzle::eIdentity,
+        vk::ComponentSwizzle::eIdentity
+    );
+
+    vk::ImageSubresourceRange imageSubresourceRange(
+        vk::ImageAspectFlagBits::eColor,
+        0,
+        1,
+        0,
+        1
+    );
+
+    for (uint32_t i = 0; i < swapchainImages.size(); ++i) {
+        vk::ImageViewCreateInfo imageViewCreateInfo(
+            {},
+            swapchainImages[i],
+            vk::ImageViewType::e2D,
+            surfaceFormat.format,
+            components,
+            imageSubresourceRange
+        );
+
+        vk::UniqueImageView uniqueImageView = uniqueLogicalDevice->createImageViewUnique(imageViewCreateInfo);
+
+        if (!uniqueImageView) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::ImageView {}", i);
+            throw std::runtime_error("");
+        }
+
+        LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::ImageView {}", i);
+        uniqueImageViews.push_back(std::move(uniqueImageView));
+    }
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created all {} vk::ImageViews(s)", swapchainImages.size());
+    return uniqueImageViews;
+}
+
 quartz::Application::Application(
     const std::string& applicationName,
     const uint32_t applicationMajorVersion,
@@ -670,7 +720,12 @@ quartz::Application::Application(
         m_vulkanSurfaceFormat,
         m_vulkanPresentMode
     )),
-    m_vulkanSwapchainImages(m_vulkanUniqueLogicalDevice->getSwapchainImagesKHR(*m_vulkanUniqueSwapchain))
+    m_vulkanSwapchainImages(m_vulkanUniqueLogicalDevice->getSwapchainImagesKHR(*m_vulkanUniqueSwapchain)),
+    m_vulkanUniqueImageViews(quartz::Application::createVulkanUniqueImageViews(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceFormat,
+        m_vulkanSwapchainImages
+    ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
 }
