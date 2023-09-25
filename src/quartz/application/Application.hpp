@@ -20,6 +20,12 @@ public: // classes and enums
         uint32_t presentFamilyIndex;
     };
 
+    struct SwapchainSupportDetails {
+        vk::SurfaceCapabilitiesKHR surfaceCapabilities;
+        std::vector<vk::SurfaceFormatKHR> surfaceFormats;
+        std::vector<vk::PresentModeKHR> presentModes;
+    };
+
 public: // interface
     Application(
         const std::string& applicationName,
@@ -80,7 +86,7 @@ private: // static functions
 
     static vk::UniqueDevice createVulkanUniqueLogicalDevice(
         const vk::PhysicalDevice& physicalDevice,
-        const quartz::Application::QueueFamilyIndices queueFamilyIndex,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
         const std::vector<const char*>& validationLayerNames,
         const std::vector<const char*>& physicalDeviceExtensionNames
     );
@@ -88,6 +94,14 @@ private: // static functions
     static vk::UniqueSurfaceKHR createVulkanSurface(
         const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
         const vk::UniqueInstance& uniqueInstance
+    );
+
+    static vk::UniqueSwapchainKHR createVulkanUniqueSwapchain(
+        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+        const vk::UniqueSurfaceKHR& uniqueSurface,
+        const vk::PhysicalDevice& physicalDevice,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+        const vk::UniqueDevice& uniqueLogicalDevice
     );
 
 private: // member variables
@@ -98,16 +112,21 @@ private: // member variables
 
     // ----- Context tings (tings lishted in the oahdah of which dey ahh creah'id mang) ---- //
 
-    std::shared_ptr<quartz::rendering::Window> mp_window;
+    // instance
     std::vector<const char*> m_validationLayerNames;
     std::vector<const char*> m_instanceExtensionNames;
     vk::UniqueInstance m_vulkanUniqueInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
     vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_vulkanUniqueDebugMessenger; // we need to use the dynamic loader instead of the static loader (not sure why we can't statically link 😔)
+    // window
+    std::shared_ptr<quartz::rendering::Window> mp_window;
     vk::UniqueSurfaceKHR m_vulkanUniqueSurface;
+    // device (and its queues)
     std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> m_vulkanPhysicalDeviceAndQueueFamilyIndex; // Because these are both (physical device && queue family indices) determined at the "same" time and truly are coupled
     std::vector<const char*> m_physicalDeviceExtensionNames;
     vk::UniqueDevice  m_vulkanUniqueLogicalDevice;
     vk::Queue m_vulkanGraphicsQueue;
     vk::Queue m_vulkanPresentQueue;
+    // swapchain
+    vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
 };

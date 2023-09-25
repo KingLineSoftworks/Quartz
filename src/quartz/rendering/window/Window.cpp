@@ -4,17 +4,12 @@
 
 #include "quartz/rendering/window/Window.hpp"
 
-std::shared_ptr<GLFWwindow> quartz::rendering::Window::initGLFWandCreateGLFWWindow(
+std::shared_ptr<GLFWwindow> quartz::rendering::Window::createGLFWwindowPtr(
     const std::string &name,
     const uint32_t widthPixels,
     const uint32_t heightPixels
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::WINDOW, "{} ({}x{})", name, widthPixels, heightPixels);
-
-    if (!glfwInit()) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "Failed to initialize GLFW");
-        throw std::runtime_error("");
-    }
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -50,7 +45,7 @@ quartz::rendering::Window::Window(
     m_name(name),
     m_widthPixels(windowWidthPixels),
     m_heightPixels(windowHeightPixels),
-    mp_glfwWindow(quartz::rendering::Window::initGLFWandCreateGLFWWindow(name, windowWidthPixels, windowHeightPixels))
+    mp_glfwWindow(quartz::rendering::Window::createGLFWwindowPtr(name, windowWidthPixels, windowHeightPixels))
 {
     LOG_FUNCTION_CALL_TRACEthis("{}", m_name, m_widthPixels, m_heightPixels);
 }

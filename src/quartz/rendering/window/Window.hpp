@@ -28,7 +28,7 @@ public: // interface
     bool shouldClose() const;
 
 private: // static functions
-    static std::shared_ptr<GLFWwindow> initGLFWandCreateGLFWWindow(
+    static std::shared_ptr<GLFWwindow> createGLFWwindowPtr(
         const std::string& name,
         const uint32_t widthPixels,
         const uint32_t heightPixels

@@ -32,6 +32,7 @@ int main() {
     quartz::util::Logger::setLevels({
         {"GENERAL", quartz::util::Logger::Level::trace},
         {"APPLICATION", quartz::util::Logger::Level::trace},
+        {"WINDOW", quartz::util::Logger::Level::trace},
         {"VULKAN", quartz::util::Logger::Level::info}
     });
 
@@ -63,6 +64,12 @@ int main() {
 #else
     const bool validationLayersEnabled = true;
 #endif
+
+    if (!glfwInit()) {
+        LOG_CRITICAL(quartz::loggers::GENERAL, "Failed to initialize GLFW");
+        return EXIT_FAILURE;
+    }
+    LOG_INFO(quartz::loggers::GENERAL, "GLFW initialized");
 
     quartz::Application application(
         APPLICATION_NAME,
