@@ -75,6 +75,11 @@ private: // static functions
         const bool validationLayersEnabled
     );
 
+    static vk::UniqueSurfaceKHR createVulkanSurface(
+        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+        const vk::UniqueInstance& uniqueInstance
+    );
+
     static std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> getBestPhysicalDeviceAndQueueFamilyIndices(
         const vk::UniqueInstance& uniqueInstance,
         const vk::UniqueSurfaceKHR& uniqueSurface
@@ -91,17 +96,29 @@ private: // static functions
         const std::vector<const char*>& physicalDeviceExtensionNames
     );
 
-    static vk::UniqueSurfaceKHR createVulkanSurface(
+    static vk::Extent2D getBestSwapExtent(
         const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
-        const vk::UniqueInstance& uniqueInstance
+        const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
+    );
+
+    static vk::SurfaceFormatKHR getBestSurfaceFormat(
+        const vk::UniqueSurfaceKHR& uniqueSurface,
+        const vk::PhysicalDevice& physicalDevice
+    );
+
+    static vk::PresentModeKHR getBestPresentMode(
+        const vk::UniqueSurfaceKHR& uniqueSurface,
+        const vk::PhysicalDevice& physicalDevice
     );
 
     static vk::UniqueSwapchainKHR createVulkanUniqueSwapchain(
-        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
         const vk::UniqueSurfaceKHR& uniqueSurface,
-        const vk::PhysicalDevice& physicalDevice,
         const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
-        const vk::UniqueDevice& uniqueLogicalDevice
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
+        const vk::Extent2D& swapExtent,
+        const vk::SurfaceFormatKHR& surfaceFormat,
+        const vk::PresentModeKHR& presentMode
     );
 
 private: // member variables
@@ -128,5 +145,10 @@ private: // member variables
     vk::Queue m_vulkanGraphicsQueue;
     vk::Queue m_vulkanPresentQueue;
     // swapchain
+    vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities; // should maybe go with the window stuff? seems directly related to the surface
+    vk::Extent2D m_vulkanSwapExtent; // should maybe go with the window stuff? seems directly related to the surface
+    vk::SurfaceFormatKHR m_vulkanSurfaceFormat; // should maybe go with the window stuff? seems directly related to the surface
+    vk::PresentModeKHR m_vulkanPresentMode; // should maybe go with the window stuff? seems directly related to the surface
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
+    std::vector<vk::Image> m_vulkanSwapchainImages;
 };
