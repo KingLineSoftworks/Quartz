@@ -127,6 +127,11 @@ private: // static functions
         const std::vector<vk::Image>& swapchainImages
     );
 
+    static vk::UniqueShaderModule createVulkanUniqueShaderModule(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const std::string& filepath
+    );
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
@@ -158,4 +163,8 @@ private: // member variables
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
     std::vector<vk::Image> m_vulkanSwapchainImages;
     std::vector<vk::UniqueImageView> m_vulkanUniqueImageViews;
+    // graphics pipeline
+    vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
+    vk::UniqueShaderModule m_vulkanUniqueFragmentShaderModule;
+    vk::UniqueRenderPass m_vulkanUniqueRenderPass;
 };

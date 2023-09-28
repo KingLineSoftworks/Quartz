@@ -1,28 +1,19 @@
 #====================================================================
-# The Application library
+# The file system library
 #====================================================================
 add_library(
-    QUARTZ_Application
+    UTIL_FileSystem
     SHARED
-    Application.cpp
+    FileSystem.cpp
 )
 
 target_compile_options(
-    QUARTZ_Application
+    UTIL_FileSystem
     PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-    QUARTZ_Application
-
-    PUBLIC
-    glfw
-    vulkan
-
-    PUBLIC
     UTIL_FileSystem
-    UTIL_Logger
-
     PUBLIC
-    QUARTZ_RENDERING_Window
+    UTIL_Logger
 )

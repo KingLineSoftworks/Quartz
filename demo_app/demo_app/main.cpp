@@ -8,6 +8,7 @@
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
+#include "util/Loggers.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/core.hpp"
@@ -25,12 +26,14 @@ int main() {
 
     quartz::util::Logger::setShouldLogPreamble(shouldLogPreamble);
 
+    REGISTER_LOGGER_GROUP(UTIL);
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
     quartz::util::Logger::setLevels({
         {"GENERAL", quartz::util::Logger::Level::trace},
+        {"FILESYSTEM", quartz::util::Logger::Level::trace},
         {"APPLICATION", quartz::util::Logger::Level::trace},
         {"WINDOW", quartz::util::Logger::Level::trace},
         {"VULKAN", quartz::util::Logger::Level::info}
