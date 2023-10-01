@@ -668,6 +668,299 @@ vk::UniqueShaderModule quartz::Application::createVulkanUniqueShaderModule(
     return uniqueShaderModule;
 }
 
+quartz::Application::PipelineInformation quartz::Application::getPipelineInformation(
+    const vk::Extent2D& swapExtent,
+    const vk::UniqueShaderModule& uniqueVertexShaderModule,
+    const vk::UniqueShaderModule& uniqueFragmentShaderModule
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    quartz::Application::PipelineInformation pipelineInformation;
+
+    // ----- shader stage tings ----- //
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineShaderStageCreateInfo(s)");
+    pipelineInformation.pipelineShaderStageCreateInfos = {
+        vk::PipelineShaderStageCreateInfo(
+            {},
+            vk::ShaderStageFlagBits::eVertex,
+            *uniqueVertexShaderModule,
+            "main"
+        ),
+        vk::PipelineShaderStageCreateInfo(
+            {},
+            vk::ShaderStageFlagBits::eFragment,
+            *uniqueFragmentShaderModule,
+            "main"
+        )
+    };
+
+    // ----- vertex input tings ----- //
+
+    pipelineInformation.vertexInputBindingDescriptions = {};
+    pipelineInformation.vertexInputAttributeDescriptions = {};
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineVertexInputStateCreateInfo");
+    pipelineInformation.pipelineVertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo(
+        {},
+        pipelineInformation.vertexInputBindingDescriptions,
+        pipelineInformation.vertexInputAttributeDescriptions
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineInputAssemblyStateCreateInfo");
+    pipelineInformation.pipelineInputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo(
+        {},
+        vk::PrimitiveTopology::eTriangleList,
+        false
+    );
+
+    // ----- tessellation tings ----- //
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineTessellationStateCreateInfo");
+    pipelineInformation.pipelineTessellationStateCreateInfo = vk::PipelineTessellationStateCreateInfo();
+
+    // ----- viewport and scissor tings ----- //
+
+    pipelineInformation.viewports = {
+        vk::Viewport(
+            0.0f,
+            0.0f,
+            static_cast<float>(swapExtent.width),
+            static_cast<float>(swapExtent.height),
+            0.0f,
+            1.0f
+        )
+    };
+
+    pipelineInformation.scissorRectangles = {
+        vk::Rect2D(
+            vk::Offset2D(0.0f, 0.0f),
+            swapExtent
+        )
+    };
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineViewportStateCreateInfo");
+    LOG_TRACE(quartz::loggers::APPLICATION, "  - using {} viewports", pipelineInformation.viewports.size());
+    for (const vk::Viewport& viewport : pipelineInformation.viewports) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - {} x {}", viewport.width, viewport.height);
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "  - using {} scissor rectangles", pipelineInformation.scissorRectangles.size());
+    for (const vk::Rect2D& scissorRectangle : pipelineInformation.scissorRectangles) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - {} , {}", scissorRectangle.offset.x, scissorRectangle.offset.y);
+    }
+    pipelineInformation.pipelineViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo(
+        {},
+        pipelineInformation.viewports,
+        pipelineInformation.scissorRectangles
+    );
+
+    // ----- rasterizer tings ----- //
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineRasterizationStateCreateInfo");
+    pipelineInformation.pipelineRasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo(
+        {},
+        false,
+        false,
+        vk::PolygonMode::eFill,
+        vk::CullModeFlagBits::eBack,
+        vk::FrontFace::eClockwise,
+        false,
+        0.0f,
+        0.0f,
+        0.0f,
+        1.0f
+    );
+
+    // ----- multisample tings ----- //
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineMultisampleStateCreateInfo");
+    pipelineInformation.pipelineMultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo(
+        {},
+        vk::SampleCountFlagBits::e1,
+        false,
+        1.0f,
+        nullptr,
+        false,
+        false
+    );
+
+    // ----- depth stencil tings ----- //
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineDepthStencilStateCreateInfo");
+    pipelineInformation.pipelineDepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo();
+
+    // ----- color blend tings ----- //
+
+    vk::ColorComponentFlags colorComponentFlags(
+        vk::ColorComponentFlagBits::eR |
+        vk::ColorComponentFlagBits::eG |
+        vk::ColorComponentFlagBits::eB |
+        vk::ColorComponentFlagBits::eA
+    );
+
+    pipelineInformation.colorBlendAttachmentStates = {
+        vk::PipelineColorBlendAttachmentState(
+            true,
+            vk::BlendFactor::eSrcAlpha,
+            vk::BlendFactor::eOneMinusSrcAlpha,
+            vk::BlendOp::eAdd,
+            vk::BlendFactor::eOne,
+            vk::BlendFactor::eZero,
+            vk::BlendOp::eAdd,
+            colorComponentFlags
+        )
+    };
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineColorBlendStateCreateInfo");
+    pipelineInformation.pipelineColorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo(
+        {},
+        false,
+        vk::LogicOp::eCopy,
+        pipelineInformation.colorBlendAttachmentStates,
+        { 0.0f, 0.0f, 0.0f, 0.0f}
+    );
+
+    // ----- dynamic state tings ----- //
+
+    pipelineInformation.dynamicStates = {
+        vk::DynamicState::eViewport,
+        vk::DynamicState::eScissor
+    };
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Creating vk::PipelineDynamicStateCreateInfo", pipelineInformation.dynamicStates.size());
+    LOG_TRACE(quartz::loggers::APPLICATION, "  - using {} dynamic states", pipelineInformation.dynamicStates.size());
+    for (const vk::DynamicState& dynamicState : pipelineInformation.dynamicStates) {
+        LOG_TRACE(quartz::loggers::APPLICATION, "    - {}", static_cast<uint32_t>(dynamicState));
+    }
+    pipelineInformation.pipelineDynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo(
+        {},
+        pipelineInformation.dynamicStates
+    );
+
+    // ----- returning ----- //
+
+    return pipelineInformation;
+}
+
+vk::UniquePipelineLayout quartz::Application::createVulkanUniquePipelineLayout(
+    const vk::UniqueDevice& uniqueLogicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
+        {},
+        0,
+        nullptr,
+        0,
+        nullptr
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::PipelineLayout");
+    vk::UniquePipelineLayout uniquePipelineLayout = uniqueLogicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
+
+    if (!uniquePipelineLayout) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::PipelineLayout");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::PipelineLayout");
+
+    return uniquePipelineLayout;
+}
+
+vk::UniqueRenderPass quartz::Application::createVulkanUniqueRenderPass(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::Format& surfaceFormatFormat
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    vk::AttachmentDescription colorAttachment(
+        {},
+        surfaceFormatFormat,
+        vk::SampleCountFlagBits::e1,
+        vk::AttachmentLoadOp::eClear,
+        vk::AttachmentStoreOp::eStore,
+        vk::AttachmentLoadOp::eDontCare,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::ImageLayout::eUndefined,
+        vk::ImageLayout::ePresentSrcKHR
+    );
+
+    vk::AttachmentReference colorAttachmentRef(
+        0,
+        vk::ImageLayout::eColorAttachmentOptimal
+    );
+
+    vk::SubpassDescription subpassDescription(
+        {},
+        vk::PipelineBindPoint::eGraphics,
+        {},
+        colorAttachmentRef,
+        {},
+        {},
+        {}
+    );
+
+    vk::RenderPassCreateInfo renderPassCreateInfo(
+        {},
+        colorAttachment,
+        subpassDescription,
+        {}
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::RenderPass");
+    vk::UniqueRenderPass uniqueRenderPass = uniqueLogicalDevice->createRenderPassUnique(renderPassCreateInfo);
+
+    if (!uniqueRenderPass) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::RenderPass");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::RenderPass");
+
+    return uniqueRenderPass;
+}
+
+vk::UniquePipeline quartz::Application::createVulkanUniqueGraphicsPipeline(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const quartz::Application::PipelineInformation& pipelineInformation,
+    const vk::UniquePipelineLayout& uniquePipelineLayout,
+    const vk::UniqueRenderPass& uniqueRenderPass
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
+        {},
+        pipelineInformation.pipelineShaderStageCreateInfos,
+        &pipelineInformation.pipelineVertexInputStateCreateInfo,
+        &pipelineInformation.pipelineInputAssemblyStateCreateInfo,
+        &pipelineInformation.pipelineTessellationStateCreateInfo,
+        &pipelineInformation.pipelineViewportStateCreateInfo,
+        &pipelineInformation.pipelineRasterizationStateCreateInfo,
+        &pipelineInformation.pipelineMultisampleStateCreateInfo,
+        &pipelineInformation.pipelineDepthStencilStateCreateInfo,
+        &pipelineInformation.pipelineColorBlendStateCreateInfo,
+        &pipelineInformation.pipelineDynamicStateCreateInfo,
+        *uniquePipelineLayout,
+        *uniqueRenderPass,
+        0,
+        VK_NULL_HANDLE,
+        -1
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::Pipeline");
+    vk::ResultValue<vk::UniquePipeline> uniqueGraphicsPipelineResult = uniqueLogicalDevice->createGraphicsPipelineUnique(
+        VK_NULL_HANDLE,
+        graphicsPipelineCreateInfo
+    );
+
+    if (uniqueGraphicsPipelineResult.result != vk::Result::eSuccess) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::Pipeline");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::Pipeline");
+
+    return std::move(uniqueGraphicsPipelineResult.value);
+}
+
 quartz::Application::Application(
     const std::string& applicationName,
     const uint32_t applicationMajorVersion,
@@ -760,6 +1053,24 @@ quartz::Application::Application(
     m_vulkanUniqueFragmentShaderModule(quartz::Application::createVulkanUniqueShaderModule(
         m_vulkanUniqueLogicalDevice,
         quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
+    )),
+    m_pipelineInformation(quartz::Application::getPipelineInformation(
+        m_vulkanSwapExtent,
+        m_vulkanUniqueVertexShaderModule,
+        m_vulkanUniqueFragmentShaderModule
+    )),
+    m_vulkanUniquePipelineLayout(quartz::Application::createVulkanUniquePipelineLayout(
+        m_vulkanUniqueLogicalDevice
+    )),
+    m_vulkanUniqueRenderPass(quartz::Application::createVulkanUniqueRenderPass(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceFormat.format
+    )),
+    m_vulkanUniqueGraphicsPipeline(quartz::Application::createVulkanUniqueGraphicsPipeline(
+        m_vulkanUniqueLogicalDevice,
+        m_pipelineInformation,
+        m_vulkanUniquePipelineLayout,
+        m_vulkanUniqueRenderPass
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
@@ -771,188 +1082,6 @@ quartz::Application::~Application() {
 
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-
-    // ----- create the shader pipeline information ----- //
-
-    UNUSED std::array<vk::PipelineShaderStageCreateInfo, 2> pipelineShaderStageCreateInfos = {
-        vk::PipelineShaderStageCreateInfo(
-            {},
-            vk::ShaderStageFlagBits::eVertex,
-            *m_vulkanUniqueVertexShaderModule,
-            "main"
-        ),
-        vk::PipelineShaderStageCreateInfo(
-            {},
-            vk::ShaderStageFlagBits::eFragment,
-            *m_vulkanUniqueFragmentShaderModule,
-            "main"
-        )
-    };
-
-    // ----- render pass tings ----- //
-
-    vk::AttachmentDescription colorAttachment(
-            {},
-            m_vulkanSurfaceFormat.format,
-            vk::SampleCountFlagBits::e1,
-            vk::AttachmentLoadOp::eClear,
-            vk::AttachmentStoreOp::eStore,
-            vk::AttachmentLoadOp::eDontCare,
-            vk::AttachmentStoreOp::eDontCare,
-            vk::ImageLayout::eUndefined,
-            vk::ImageLayout::ePresentSrcKHR
-        );
-
-    vk::AttachmentReference colorAttachmentRef(
-        0,
-        vk::ImageLayout::eColorAttachmentOptimal
-    );
-
-    vk::SubpassDescription subpassDescription(
-        {},
-        vk::PipelineBindPoint::eGraphics,
-        {},
-        colorAttachmentRef,
-        {},
-        {},
-        {}
-    );
-
-    vk::RenderPassCreateInfo renderPassCreateInfo(
-        {},
-        colorAttachment,
-        subpassDescription,
-        {}
-    );
-
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::RenderPass");
-    vk::UniqueRenderPass uniqueRenderPass = m_vulkanUniqueLogicalDevice->createRenderPassUnique(renderPassCreateInfo);
-
-    if (!uniqueRenderPass) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::RenderPass");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::RenderPass");
-
-    // ----- rendering pipeline stuff ----- //
-
-    std::vector<vk::DynamicState> dynamicStates = {
-        vk::DynamicState::eViewport,
-        vk::DynamicState::eScissor
-    };
-
-    UNUSED vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(
-        {},
-        dynamicStates
-    );
-
-    std::vector<vk::VertexInputBindingDescription> vertexInputBindingDescriptions;
-    std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
-
-    UNUSED vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo(
-        {},
-        vertexInputBindingDescriptions,
-        vertexInputAttributeDescriptions
-    );
-
-    UNUSED vk::PipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo(
-        {},
-        vk::PrimitiveTopology::eTriangleList,
-        false
-    );
-
-    std::vector<vk::Viewport> viewports = {
-        vk::Viewport(
-            0.0f,
-            0.0f,
-            static_cast<float>(m_vulkanSwapExtent.width),
-            static_cast<float>(m_vulkanSwapExtent.height),
-            0.0f,
-            1.0f
-        )
-    };
-
-    std::vector<vk::Rect2D> scissorRectangles = {
-        vk::Rect2D(
-            vk::Offset2D(0.0f, 0.0f),
-            m_vulkanSwapExtent
-        )
-    };
-
-    UNUSED vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo(
-        {},
-        viewports,
-        scissorRectangles
-    );
-
-    UNUSED vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo(
-        {},
-        false,
-        false,
-        vk::PolygonMode::eFill,
-        vk::CullModeFlagBits::eBack,
-        vk::FrontFace::eClockwise,
-        false,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f
-    );
-
-    UNUSED vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo(
-        {},
-        vk::SampleCountFlagBits::e1,
-        false,
-        1.0f,
-        nullptr,
-        false,
-        false
-    );
-
-    vk::ColorComponentFlags colorComponentFlags(
-        vk::ColorComponentFlagBits::eR |
-        vk::ColorComponentFlagBits::eG |
-        vk::ColorComponentFlagBits::eB |
-        vk::ColorComponentFlagBits::eA
-    );
-
-    std::vector<vk::PipelineColorBlendAttachmentState> pipelineColorBlendAttachmentStates = {
-        vk::PipelineColorBlendAttachmentState(
-            true,
-            vk::BlendFactor::eSrcAlpha,
-            vk::BlendFactor::eOneMinusSrcAlpha,
-            vk::BlendOp::eAdd,
-            vk::BlendFactor::eOne,
-            vk::BlendFactor::eZero,
-            vk::BlendOp::eAdd,
-            colorComponentFlags
-        )
-    };
-
-    UNUSED vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
-        {},
-        false,
-        vk::LogicOp::eCopy,
-        pipelineColorBlendAttachmentStates,
-        { 0.0f, 0.0f, 0.0f, 0.0f}
-    );
-
-    vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
-        {},
-        0,
-        nullptr,
-        0,
-        nullptr
-    );
-
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::PipelineLayout");
-    vk::UniquePipelineLayout uniquePipelineLayout = m_vulkanUniqueLogicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
-
-    if (!uniquePipelineLayout) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::PipelineLayout");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::PipelineLayout");
 
     // ----- drop that ass at me from an egregarious angle ----- //
 

@@ -15,11 +15,16 @@ cmake_install.cmake
 # IDE stuff
 # ========================================
 
-# VS Code
+# ----- VS Code ----- #
+
 .vscode
 
-# CLion
+# ----- CLion tings ----- #
+
+# jetbrains project config (?)
 .idea
+
+# build directories
 .clion-debug
 .clion-release
 .clion-test
@@ -27,8 +32,15 @@ cmake_install.cmake
 # ========================================
 # Compiled stuff
 # ========================================
+
+# ----- manual cmake tings ----- #
+
 build/
 .build/
 .debug/
 .test/
-.release
+.release/
+
+# ----- SPIR-V shader bytecode ----- #
+
+*.spv
