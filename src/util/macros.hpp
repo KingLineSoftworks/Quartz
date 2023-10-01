@@ -82,11 +82,10 @@
 
 /**
  * @brief A macro to use to get rid of the unused variable/parameter warnings and
- * errors when prototyping a function
- * 
- * @example UNUSED(argv);
+ * errors when prototyping a function. Use this shit when you're declaring a variable
+ * or a parameter or a member.
  */
-#define UNUSED(x) (void)(x); REQUIRE_SEMICOLON
+#define UNUSED [[maybe_unused]]
 
 /**
  * @brief A macro to generate a unique variable name given the base name for that

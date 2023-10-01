@@ -26,6 +26,28 @@ public: // classes and enums
         std::vector<vk::PresentModeKHR> presentModes;
     };
 
+    struct PipelineInformation {
+        // The things the create infos store as references
+        std::vector<vk::VertexInputBindingDescription> vertexInputBindingDescriptions;
+        std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
+        std::vector<vk::Viewport> viewports;
+        std::vector<vk::Rect2D> scissorRectangles;
+        std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates;
+        std::vector<vk::DynamicState> dynamicStates;
+
+        // The create infos
+        std::vector<vk::PipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
+        vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
+        vk::PipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo;
+        vk::PipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo;
+        vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
+        vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
+        vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
+        vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo;
+        vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
+        vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
+    };
+
 public: // interface
     Application(
         const std::string& applicationName,
@@ -127,6 +149,33 @@ private: // static functions
         const std::vector<vk::Image>& swapchainImages
     );
 
+    static vk::UniqueShaderModule createVulkanUniqueShaderModule(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const std::string& filepath
+    );
+
+    static quartz::Application::PipelineInformation getPipelineInformation(
+        const vk::Extent2D& swapExtent,
+        const vk::UniqueShaderModule& uniqueVertexShaderModule,
+        const vk::UniqueShaderModule& uniqueFragmentShaderModule
+    );
+
+    static vk::UniqueRenderPass createVulkanUniqueRenderPass(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::Format& surfaceFormatFormat
+    );
+
+    static vk::UniquePipelineLayout createVulkanUniquePipelineLayout(
+        const vk::UniqueDevice& uniqueLogicalDevice
+    );
+
+    static vk::UniquePipeline createVulkanUniqueGraphicsPipeline(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const quartz::Application::PipelineInformation& pipelineInformation,
+        const vk::UniquePipelineLayout& uniquePipelineLayout,
+        const vk::UniqueRenderPass& uniqueRenderPass
+    );
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
@@ -141,15 +190,18 @@ private: // member variables
     vk::UniqueInstance m_vulkanUniqueInstance;
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
     vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_vulkanUniqueDebugMessenger; // we need to use the dynamic loader instead of the static loader (not sure why we can't statically link 😔)
+
     // window
     std::shared_ptr<quartz::rendering::Window> mp_window;
     vk::UniqueSurfaceKHR m_vulkanUniqueSurface;
+
     // device (and its queues)
     std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> m_vulkanPhysicalDeviceAndQueueFamilyIndex; // Because these are both (physical device && queue family indices) determined at the "same" time and truly are coupled
     std::vector<const char*> m_physicalDeviceExtensionNames;
     vk::UniqueDevice  m_vulkanUniqueLogicalDevice;
     vk::Queue m_vulkanGraphicsQueue;
     vk::Queue m_vulkanPresentQueue;
+
     // swapchain
     vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities; // should maybe go with the window stuff? seems directly related to the surface
     vk::Extent2D m_vulkanSwapExtent; // should maybe go with the window stuff? seems directly related to the surface
@@ -158,4 +210,12 @@ private: // member variables
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
     std::vector<vk::Image> m_vulkanSwapchainImages;
     std::vector<vk::UniqueImageView> m_vulkanUniqueImageViews;
+
+    // graphics pipeline
+    vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
+    vk::UniqueShaderModule m_vulkanUniqueFragmentShaderModule;
+    quartz::Application::PipelineInformation m_pipelineInformation;
+    vk::UniquePipelineLayout m_vulkanUniquePipelineLayout;
+    vk::UniqueRenderPass m_vulkanUniqueRenderPass;
+    vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
 };
