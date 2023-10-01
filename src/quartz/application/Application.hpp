@@ -143,7 +143,7 @@ private: // static functions
         const vk::PresentModeKHR& presentMode
     );
 
-    static std::vector<vk::UniqueImageView> createVulkanUniqueImageViews(
+    static std::vector<vk::UniqueImageView> createVulkanUniqueSwapchainImageViews(
         const vk::UniqueDevice& uniqueLogicalDevice,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const std::vector<vk::Image>& swapchainImages
@@ -176,6 +176,13 @@ private: // static functions
         const vk::UniqueRenderPass& uniqueRenderPass
     );
 
+    static std::vector<vk::UniqueFramebuffer> createVulkanUniqueFramebuffers(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::Extent2D& swapchainExtent,
+        const std::vector<vk::UniqueImageView>& uniqueSwapchainImageViews,
+        const vk::UniqueRenderPass& uniqueRenderPass
+    );
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
@@ -204,12 +211,12 @@ private: // member variables
 
     // swapchain
     vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities; // should maybe go with the window stuff? seems directly related to the surface
-    vk::Extent2D m_vulkanSwapExtent; // should maybe go with the window stuff? seems directly related to the surface
+    vk::Extent2D m_vulkanSwapchainExtent; // should maybe go with the window stuff? seems directly related to the surface
     vk::SurfaceFormatKHR m_vulkanSurfaceFormat; // should maybe go with the window stuff? seems directly related to the surface
     vk::PresentModeKHR m_vulkanPresentMode; // should maybe go with the window stuff? seems directly related to the surface
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
     std::vector<vk::Image> m_vulkanSwapchainImages;
-    std::vector<vk::UniqueImageView> m_vulkanUniqueImageViews;
+    std::vector<vk::UniqueImageView> m_vulkanUniqueSwapchainImageViews;
 
     // graphics pipeline
     vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
@@ -218,4 +225,7 @@ private: // member variables
     vk::UniquePipelineLayout m_vulkanUniquePipelineLayout;
     vk::UniqueRenderPass m_vulkanUniqueRenderPass;
     vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
+
+    // framebuffer
+    std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
 };

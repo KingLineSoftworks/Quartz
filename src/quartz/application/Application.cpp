@@ -592,7 +592,7 @@ vk::UniqueSwapchainKHR quartz::Application::createVulkanUniqueSwapchain(
     return uniqueSwapchain;
 }
 
-std::vector<vk::UniqueImageView> quartz::Application::createVulkanUniqueImageViews(
+std::vector<vk::UniqueImageView> quartz::Application::createVulkanUniqueSwapchainImageViews(
     const vk::UniqueDevice& uniqueLogicalDevice,
     const vk::SurfaceFormatKHR& surfaceFormat,
     const std::vector<vk::Image>& swapchainImages
@@ -961,6 +961,39 @@ vk::UniquePipeline quartz::Application::createVulkanUniqueGraphicsPipeline(
     return std::move(uniqueGraphicsPipelineResult.value);
 }
 
+std::vector<vk::UniqueFramebuffer> quartz::Application::createVulkanUniqueFramebuffers(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::Extent2D& swapchainExtent,
+    const std::vector<vk::UniqueImageView>& uniqueSwapchainImageViews,
+    const vk::UniqueRenderPass& uniqueRenderPass
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} swapchain image views", uniqueSwapchainImageViews.size());
+
+    std::vector<vk::UniqueFramebuffer> uniqueFramebuffers(uniqueSwapchainImageViews.size());
+
+    for (uint32_t i = 0; i < uniqueSwapchainImageViews.size(); ++i) {
+        vk::FramebufferCreateInfo framebufferCreateInfo(
+            {},
+            *uniqueRenderPass,
+            *uniqueSwapchainImageViews[i],
+            swapchainExtent.width,
+            swapchainExtent.height,
+            1
+        );
+
+        uniqueFramebuffers[i] = uniqueLogicalDevice->createFramebufferUnique(framebufferCreateInfo);
+
+        if (!uniqueFramebuffers[i]) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::Framebuffer {}", i);
+            throw std::runtime_error("");
+        }
+        LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::Framebuffer {}", i);
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created {} vk::Framebuffer(s)", uniqueFramebuffers.size());
+
+    return uniqueFramebuffers;
+}
+
 quartz::Application::Application(
     const std::string& applicationName,
     const uint32_t applicationMajorVersion,
@@ -1019,7 +1052,7 @@ quartz::Application::Application(
         0
     )),
     m_vulkanSurfaceCapabilities(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first.getSurfaceCapabilitiesKHR(*m_vulkanUniqueSurface)),
-    m_vulkanSwapExtent(quartz::Application::getBestSwapExtent(
+    m_vulkanSwapchainExtent(quartz::Application::getBestSwapExtent(
         mp_window->getGLFWwindowPtr(),
         m_vulkanSurfaceCapabilities
     )),
@@ -1036,12 +1069,12 @@ quartz::Application::Application(
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
         m_vulkanUniqueLogicalDevice,
         m_vulkanSurfaceCapabilities,
-        m_vulkanSwapExtent,
+        m_vulkanSwapchainExtent,
         m_vulkanSurfaceFormat,
         m_vulkanPresentMode
     )),
     m_vulkanSwapchainImages(m_vulkanUniqueLogicalDevice->getSwapchainImagesKHR(*m_vulkanUniqueSwapchain)),
-    m_vulkanUniqueImageViews(quartz::Application::createVulkanUniqueImageViews(
+    m_vulkanUniqueSwapchainImageViews(quartz::Application::createVulkanUniqueSwapchainImageViews(
         m_vulkanUniqueLogicalDevice,
         m_vulkanSurfaceFormat,
         m_vulkanSwapchainImages
@@ -1055,7 +1088,7 @@ quartz::Application::Application(
         quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
     )),
     m_pipelineInformation(quartz::Application::getPipelineInformation(
-        m_vulkanSwapExtent,
+        m_vulkanSwapchainExtent,
         m_vulkanUniqueVertexShaderModule,
         m_vulkanUniqueFragmentShaderModule
     )),
@@ -1070,6 +1103,12 @@ quartz::Application::Application(
         m_vulkanUniqueLogicalDevice,
         m_pipelineInformation,
         m_vulkanUniquePipelineLayout,
+        m_vulkanUniqueRenderPass
+    )),
+    m_vulkanUniqueFramebuffers(quartz::Application::createVulkanUniqueFramebuffers(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSwapchainExtent,
+        m_vulkanUniqueSwapchainImageViews,
         m_vulkanUniqueRenderPass
     ))
 {
