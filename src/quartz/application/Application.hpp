@@ -74,6 +74,9 @@ public: // static functions
     );
 
 private: // static functions
+
+    // ----- construction functions ----- //
+
     static std::vector<const char*> getEnabledValidationLayerNames(
         const bool validationLayersEnabled
     );
@@ -138,7 +141,7 @@ private: // static functions
         const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
         const vk::UniqueDevice& uniqueLogicalDevice,
         const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
-        const vk::Extent2D& swapExtent,
+        const vk::Extent2D& swapchainExtent,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const vk::PresentModeKHR& presentMode
     );
@@ -155,7 +158,7 @@ private: // static functions
     );
 
     static quartz::Application::PipelineInformation getPipelineInformation(
-        const vk::Extent2D& swapExtent,
+        const vk::Extent2D& swapchainExtent,
         const vk::UniqueShaderModule& uniqueVertexShaderModule,
         const vk::UniqueShaderModule& uniqueFragmentShaderModule
     );
@@ -181,6 +184,21 @@ private: // static functions
         const vk::Extent2D& swapchainExtent,
         const std::vector<vk::UniqueImageView>& uniqueSwapchainImageViews,
         const vk::UniqueRenderPass& uniqueRenderPass
+    );
+
+    static vk::UniqueCommandPool createVulkanUniqueCommandPool(
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+        const vk::UniqueDevice& uniqueLogicalDevice
+    );
+
+    static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueCommandBuffers(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::Extent2D& swapchainExtent,
+        const std::vector<vk::Image>& swapchainImages,
+        const vk::UniqueRenderPass& uniqueRenderPass,
+        const vk::UniquePipeline& uniqueGraphicsPipeline,
+        const std::vector<vk::UniqueFramebuffer>& uniqueFramebuffers,
+        const vk::UniqueCommandPool& uniqueCommandPool
     );
 
 private: // member variables
@@ -228,4 +246,8 @@ private: // member variables
 
     // framebuffer
     std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
+
+    // command pools and buffers
+    vk::UniqueCommandPool m_vulkanUniqueCommandPool;
+    std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueCommandBuffers;
 };

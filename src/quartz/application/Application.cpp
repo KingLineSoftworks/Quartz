@@ -549,7 +549,7 @@ vk::UniqueSwapchainKHR quartz::Application::createVulkanUniqueSwapchain(
     const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
     const vk::UniqueDevice& uniqueLogicalDevice,
     const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
-    const vk::Extent2D& swapExtent,
+    const vk::Extent2D& swapchainExtent,
     const vk::SurfaceFormatKHR& surfaceFormat,
     const vk::PresentModeKHR& presentMode
 ) {
@@ -569,7 +569,7 @@ vk::UniqueSwapchainKHR quartz::Application::createVulkanUniqueSwapchain(
         imageCount,
         surfaceFormat.format,
         surfaceFormat.colorSpace,
-        swapExtent,
+        swapchainExtent,
         1,
         vk::ImageUsageFlagBits::eColorAttachment,
         (uniqueQueueFamilyIndicesSet.size() > 1) ? vk::SharingMode::eConcurrent : vk::SharingMode::eExclusive,
@@ -669,7 +669,7 @@ vk::UniqueShaderModule quartz::Application::createVulkanUniqueShaderModule(
 }
 
 quartz::Application::PipelineInformation quartz::Application::getPipelineInformation(
-    const vk::Extent2D& swapExtent,
+    const vk::Extent2D& swapchainExtent,
     const vk::UniqueShaderModule& uniqueVertexShaderModule,
     const vk::UniqueShaderModule& uniqueFragmentShaderModule
 ) {
@@ -725,8 +725,8 @@ quartz::Application::PipelineInformation quartz::Application::getPipelineInforma
         vk::Viewport(
             0.0f,
             0.0f,
-            static_cast<float>(swapExtent.width),
-            static_cast<float>(swapExtent.height),
+            static_cast<float>(swapchainExtent.width),
+            static_cast<float>(swapchainExtent.height),
             0.0f,
             1.0f
         )
@@ -735,7 +735,7 @@ quartz::Application::PipelineInformation quartz::Application::getPipelineInforma
     pipelineInformation.scissorRectangles = {
         vk::Rect2D(
             vk::Offset2D(0.0f, 0.0f),
-            swapExtent
+            swapchainExtent
         )
     };
 
@@ -994,6 +994,138 @@ std::vector<vk::UniqueFramebuffer> quartz::Application::createVulkanUniqueFrameb
     return uniqueFramebuffers;
 }
 
+vk::UniqueCommandPool quartz::Application::createVulkanUniqueCommandPool(
+    const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+    const vk::UniqueDevice& uniqueLogicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+
+    vk::CommandPoolCreateInfo commandPoolCreateInfo(
+        vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+        queueFamilyIndices.graphicsFamilyIndex
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::CommandPool");
+    vk::UniqueCommandPool uniqueCommandPool = uniqueLogicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
+
+    if (!uniqueCommandPool) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::CommandPool");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::CommandPool");
+
+    return uniqueCommandPool;
+};
+
+std::vector<vk::UniqueCommandBuffer> quartz::Application::createVulkanUniqueCommandBuffers(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::Extent2D& swapchainExtent,
+    const std::vector<vk::Image>& swapchainImages,
+    const vk::UniqueRenderPass& uniqueRenderPass,
+    const vk::UniquePipeline& uniqueGraphicsPipeline,
+    const std::vector<vk::UniqueFramebuffer>& uniqueFramebuffers,
+    const vk::UniqueCommandPool& uniqueCommandPool
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} swapchain images", swapchainImages.size());
+
+    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
+        *uniqueCommandPool,
+        vk::CommandBufferLevel::ePrimary,
+        swapchainImages.size()
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to allocate {} vk::CommandBuffer(s)", swapchainImages.size());
+    std::vector<vk::UniqueCommandBuffer> uniqueCommandBuffers = uniqueLogicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
+
+    if (uniqueCommandBuffers.size() != swapchainImages.size()) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Allocated {} vk::CommandBuffer(s) instead of {}", uniqueCommandBuffers.size(), swapchainImages.size());
+        throw std::runtime_error("");
+    }
+
+    for (uint32_t i = 0; i < uniqueCommandBuffers.size(); ++i) {
+        if (!uniqueCommandBuffers[i]) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to allocate vk::CommandBuffer {}", i);
+            throw std::runtime_error("");
+        }
+        LOG_TRACE(quartz::loggers::APPLICATION, "Successfully allocated vk::CommandBuffer {}", i);
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - Recording commands");
+
+        // ----- record things into a command buffer ? ----- //
+
+        vk::CommandBufferBeginInfo commandBufferBeginInfo(
+            {},
+            {}
+        );
+
+        uniqueCommandBuffers[i]->begin(commandBufferBeginInfo);
+
+        // ----- start a render pass ----- //
+
+        vk::ClearValue clearScreenColor(
+            vk::ClearColorValue(
+                std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f }
+            )
+        );
+
+        vk::Rect2D renderPassRenderArea(
+            vk::Offset2D(0.0f, 0.0f),
+            swapchainExtent
+        );
+
+        vk::RenderPassBeginInfo renderPassBeginInfo(
+            *uniqueRenderPass,
+            *(uniqueFramebuffers[i]),
+            renderPassRenderArea,
+            clearScreenColor
+        );
+
+        uniqueCommandBuffers[i]->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+
+        // ----- draw (but first bind graphics pipeline and set up viewport and scissor) ----- //
+
+        uniqueCommandBuffers[i]->bindPipeline(vk::PipelineBindPoint::eGraphics, *uniqueGraphicsPipeline);
+
+        vk::Viewport viewport(
+            0.0f,
+            0.0f,
+            static_cast<float>(swapchainExtent.width),
+            static_cast<float>(swapchainExtent.height),
+            0.0f,
+            1.0f
+        );
+        uniqueCommandBuffers[i]->setViewport(
+            0,
+            viewport
+        );
+
+        vk::Rect2D scissor(
+            vk::Offset2D(0.0f, 0.0f),
+            swapchainExtent
+        );
+        uniqueCommandBuffers[i]->setScissor(
+            0,
+            scissor
+        );
+
+        uniqueCommandBuffers[i]->draw(
+            3,
+            1,
+            0,
+            0
+        );
+
+        // ----- finish up ----- //
+
+        uniqueCommandBuffers[i]->endRenderPass();
+
+        uniqueCommandBuffers[i]->end();
+
+        LOG_TRACE(quartz::loggers::APPLICATION, "  - Commands recorded successfully");
+    }
+
+    return uniqueCommandBuffers;
+}
+
 quartz::Application::Application(
     const std::string& applicationName,
     const uint32_t applicationMajorVersion,
@@ -1110,6 +1242,19 @@ quartz::Application::Application(
         m_vulkanSwapchainExtent,
         m_vulkanUniqueSwapchainImageViews,
         m_vulkanUniqueRenderPass
+    )),
+    m_vulkanUniqueCommandPool(quartz::Application::createVulkanUniqueCommandPool(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice
+    )),
+    m_vulkanUniqueCommandBuffers(quartz::Application::createVulkanUniqueCommandBuffers(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSwapchainExtent,
+        m_vulkanSwapchainImages,
+        m_vulkanUniqueRenderPass,
+        m_vulkanUniqueGraphicsPipeline,
+        m_vulkanUniqueFramebuffers,
+        m_vulkanUniqueCommandPool
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
@@ -1121,6 +1266,7 @@ quartz::Application::~Application() {
 
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
+
 
     // ----- drop that ass at me from an egregarious angle ----- //
 
