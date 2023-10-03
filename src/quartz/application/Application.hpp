@@ -48,7 +48,7 @@ public: // classes and enums
         vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
     };
 
-public: // interface
+public: // member functions
     Application(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
@@ -64,6 +64,10 @@ public: // interface
 
     void run();
 
+private: // member functions
+
+    void drawFrameToWindow();
+
 public: // static functions
     // The callback the validation layer uses
     static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(
@@ -74,8 +78,6 @@ public: // static functions
     );
 
 private: // static functions
-
-    // ----- construction functions ----- //
 
     static std::vector<const char*> getEnabledValidationLayerNames(
         const bool validationLayersEnabled
@@ -201,6 +203,14 @@ private: // static functions
         const vk::UniqueCommandPool& uniqueCommandPool
     );
 
+    static vk::UniqueSemaphore createVulkanUniqueSemaphore(
+        const vk::UniqueDevice& uniqueLogicalDevice
+    );
+
+    static vk::UniqueFence createVulkanUniqueFence(
+        const vk::UniqueDevice& uniqueLogicalDevice
+    );
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
@@ -247,7 +257,10 @@ private: // member variables
     // framebuffer
     std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
 
-    // command pools and buffers
+    // command pools and buffers and synchronization objects
     vk::UniqueCommandPool m_vulkanUniqueCommandPool;
     std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueCommandBuffers;
+    vk::UniqueSemaphore m_vulkanUniqueImageAvailableSemaphore;
+    vk::UniqueSemaphore m_vulkanUniqueRenderFinishedSemaphore;
+    vk::UniqueFence m_vulkanUniqueInFlightFence;
 };
