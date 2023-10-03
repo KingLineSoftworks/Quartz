@@ -66,7 +66,7 @@ public: // member functions
 
 private: // member functions
 
-    void drawFrameToWindow();
+    void drawFrameToWindow(const uint32_t currentInFlightFrameIndex);
 
 public: // static functions
     // The callback the validation layer uses
@@ -203,12 +203,14 @@ private: // static functions
         const vk::UniqueCommandPool& uniqueCommandPool
     );
 
-    static vk::UniqueSemaphore createVulkanUniqueSemaphore(
-        const vk::UniqueDevice& uniqueLogicalDevice
+    static std::vector<vk::UniqueSemaphore> createVulkanUniqueSemaphores(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t maxNumFramesInFlight
     );
 
-    static vk::UniqueFence createVulkanUniqueFence(
-        const vk::UniqueDevice& uniqueLogicalDevice
+    static std::vector<vk::UniqueFence> createVulkanUniqueFences(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t maxNumFramesInFlight
     );
 
 private: // member variables
@@ -259,8 +261,9 @@ private: // member variables
 
     // command pools and buffers and synchronization objects
     vk::UniqueCommandPool m_vulkanUniqueCommandPool;
+    const uint32_t m_maxNumFramesInFlight;
     std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueCommandBuffers;
-    vk::UniqueSemaphore m_vulkanUniqueImageAvailableSemaphore;
-    vk::UniqueSemaphore m_vulkanUniqueRenderFinishedSemaphore;
-    vk::UniqueFence m_vulkanUniqueInFlightFence;
+    std::vector<vk::UniqueSemaphore> m_vulkanUniqueImageAvailableSemaphores;
+    std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
+    std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
 };

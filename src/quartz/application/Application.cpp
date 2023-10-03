@@ -1036,19 +1036,20 @@ std::vector<vk::UniqueCommandBuffer> quartz::Application::createVulkanUniqueComm
     const std::vector<vk::UniqueFramebuffer>& uniqueFramebuffers,
     const vk::UniqueCommandPool& uniqueCommandPool
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} swapchain images", swapchainImages.size());
+    const uint32_t desiredCommandBufferCount = swapchainImages.size();
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} max frames in flight", desiredCommandBufferCount);
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *uniqueCommandPool,
         vk::CommandBufferLevel::ePrimary,
-        swapchainImages.size()
+        desiredCommandBufferCount
     );
 
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to allocate {} vk::CommandBuffer(s)", swapchainImages.size());
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to allocate {} vk::CommandBuffer(s)", desiredCommandBufferCount);
     std::vector<vk::UniqueCommandBuffer> uniqueCommandBuffers = uniqueLogicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
 
-    if (uniqueCommandBuffers.size() != swapchainImages.size()) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Allocated {} vk::CommandBuffer(s) instead of {}", uniqueCommandBuffers.size(), swapchainImages.size());
+    if (uniqueCommandBuffers.size() != desiredCommandBufferCount) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION, "Allocated {} vk::CommandBuffer(s) instead of {}", uniqueCommandBuffers.size(), desiredCommandBufferCount);
         throw std::runtime_error("");
     }
 
@@ -1136,44 +1137,54 @@ std::vector<vk::UniqueCommandBuffer> quartz::Application::createVulkanUniqueComm
     return uniqueCommandBuffers;
 }
 
-vk::UniqueSemaphore quartz::Application::createVulkanUniqueSemaphore(
-    const vk::UniqueDevice& uniqueLogicalDevice
+std::vector<vk::UniqueSemaphore> quartz::Application::createVulkanUniqueSemaphores(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const uint32_t maxNumFramesInFlight
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} max frames in flight", maxNumFramesInFlight);
 
-    vk::SemaphoreCreateInfo semaphoreCreateInfo;
+    std::vector<vk::UniqueSemaphore> uniqueSemaphores(maxNumFramesInFlight);
 
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::Semaphore");
-    vk::UniqueSemaphore uniqueSemaphore = uniqueLogicalDevice->createSemaphoreUnique(semaphoreCreateInfo);
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create {} vk::Semaphore(s)", maxNumFramesInFlight);
+    for (uint32_t i = 0; i < maxNumFramesInFlight; ++i) {
+        vk::SemaphoreCreateInfo semaphoreCreateInfo;
 
-    if (!uniqueSemaphore) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::Semaphore");
-        throw std::runtime_error("");
+        uniqueSemaphores[i] = uniqueLogicalDevice->createSemaphoreUnique(semaphoreCreateInfo);
+
+        if (!uniqueSemaphores[i]) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::Semaphore {}", i);
+            throw std::runtime_error("");
+        }
+        LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::Semaphore {}", i);
     }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::Semaphore");
 
-    return uniqueSemaphore;
+    return uniqueSemaphores;
 }
 
-vk::UniqueFence quartz::Application::createVulkanUniqueFence(
-    const vk::UniqueDevice& uniqueLogicalDevice
+std::vector<vk::UniqueFence> quartz::Application::createVulkanUniqueFences(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const uint32_t maxNumFramesInFlight
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "");
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "{} max frames in flight", maxNumFramesInFlight);
 
-    vk::FenceCreateInfo fenceCreateInfo(
-        vk::FenceCreateFlagBits::eSignaled
-    );
+    std::vector<vk::UniqueFence> uniqueFences(maxNumFramesInFlight);
 
-    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create vk::Fence");
-    vk::UniqueFence uniqueFence = uniqueLogicalDevice->createFenceUnique(fenceCreateInfo);
+    LOG_TRACE(quartz::loggers::APPLICATION, "Attempting to create {} vk::Fence(s)", maxNumFramesInFlight);
+    for (uint32_t i = 0; i < maxNumFramesInFlight; ++i) {
+        vk::FenceCreateInfo fenceCreateInfo(
+            vk::FenceCreateFlagBits::eSignaled
+        );
 
-    if (!uniqueFence) {
-        LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::Fence");
-        throw std::runtime_error("");
+        uniqueFences[i] = uniqueLogicalDevice->createFenceUnique(fenceCreateInfo);
+
+        if (!uniqueFences[i]) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION, "Failed to create vk::Fence {}", i);
+            throw std::runtime_error("");
+        }
+        LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::Fence {}", i);
     }
-    LOG_TRACE(quartz::loggers::APPLICATION, "Successfully created vk::Fence");
 
-    return uniqueFence;
+    return uniqueFences;
 }
 
 quartz::Application::Application(
@@ -1297,6 +1308,7 @@ quartz::Application::Application(
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
         m_vulkanUniqueLogicalDevice
     )),
+    m_maxNumFramesInFlight(2),
     m_vulkanUniqueCommandBuffers(quartz::Application::createVulkanUniqueCommandBuffers(
         m_vulkanUniqueLogicalDevice,
         m_vulkanSwapchainExtent,
@@ -1306,9 +1318,18 @@ quartz::Application::Application(
         m_vulkanUniqueFramebuffers,
         m_vulkanUniqueCommandPool
     )),
-    m_vulkanUniqueImageAvailableSemaphore(quartz::Application::createVulkanUniqueSemaphore(m_vulkanUniqueLogicalDevice)),
-    m_vulkanUniqueRenderFinishedSemaphore(quartz::Application::createVulkanUniqueSemaphore(m_vulkanUniqueLogicalDevice)),
-    m_vulkanUniqueInFlightFence(quartz::Application::createVulkanUniqueFence(m_vulkanUniqueLogicalDevice))
+    m_vulkanUniqueImageAvailableSemaphores(quartz::Application::createVulkanUniqueSemaphores(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight
+    )),
+    m_vulkanUniqueRenderFinishedSemaphores(quartz::Application::createVulkanUniqueSemaphores(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight
+    )),
+    m_vulkanUniqueInFlightFences(quartz::Application::createVulkanUniqueFences(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight
+    ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
 }
@@ -1322,20 +1343,22 @@ void quartz::Application::run() {
 
     // ----- drop that ass at me from an egregarious angle ----- //
 
+    uint32_t currentInFlightFrameIndex = 0;
     LOG_TRACE(quartz::loggers::APPLICATION, "Beginning main loop");
     while(!mp_window->shouldClose()) {
         glfwPollEvents();
-        this->drawFrameToWindow();
+        this->drawFrameToWindow(currentInFlightFrameIndex);
+        currentInFlightFrameIndex = (currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight;
     }
 
     m_vulkanUniqueLogicalDevice->waitIdle();
 }
 
-void quartz::Application::drawFrameToWindow() {
+void quartz::Application::drawFrameToWindow(const uint32_t currentInFlightFrameIndex) {
     // ----- 1. wait for previous frame to finish ----- //
 
     vk::Result waitForInFlightFenceResult = m_vulkanUniqueLogicalDevice->waitForFences(
-        *m_vulkanUniqueInFlightFence,
+        *(m_vulkanUniqueInFlightFences[currentInFlightFrameIndex]),
         true,
         std::numeric_limits<uint64_t>::max()
     );
@@ -1344,7 +1367,7 @@ void quartz::Application::drawFrameToWindow() {
         LOG_ERRORthis("Failed to wait for previous frame to finish: {}", static_cast<uint32_t>(waitForInFlightFenceResult));
     }
 
-    m_vulkanUniqueLogicalDevice->resetFences(*m_vulkanUniqueInFlightFence);
+    m_vulkanUniqueLogicalDevice->resetFences(*(m_vulkanUniqueInFlightFences[currentInFlightFrameIndex]));
 
     // ----- 2. acquire an image from the swapchain ----- //
 
@@ -1352,7 +1375,7 @@ void quartz::Application::drawFrameToWindow() {
     vk::Result acquireAvailableImageIndexResult = m_vulkanUniqueLogicalDevice->acquireNextImageKHR(
         *m_vulkanUniqueSwapchain,
         std::numeric_limits<uint64_t>::max(),
-        *m_vulkanUniqueImageAvailableSemaphore,
+        *(m_vulkanUniqueImageAvailableSemaphores[currentInFlightFrameIndex]),
         {},
         &availableImageIndex
     );
@@ -1370,21 +1393,21 @@ void quartz::Application::drawFrameToWindow() {
     vk::PipelineStageFlags waitStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 
     vk::SubmitInfo commandBufferSubmitInfo(
-        *m_vulkanUniqueImageAvailableSemaphore,
+        *(m_vulkanUniqueImageAvailableSemaphores[currentInFlightFrameIndex]),
         waitStageMask,
         *(m_vulkanUniqueCommandBuffers[availableImageIndex]),
-        *m_vulkanUniqueRenderFinishedSemaphore
+        *(m_vulkanUniqueRenderFinishedSemaphores[currentInFlightFrameIndex])
     );
 
     m_vulkanGraphicsQueue.submit(
         commandBufferSubmitInfo,
-        *m_vulkanUniqueInFlightFence
+        *(m_vulkanUniqueInFlightFences[currentInFlightFrameIndex])
     );
 
     // ----- 5. present the swapchain image ----- //
 
     vk::PresentInfoKHR presentInfo(
-        *m_vulkanUniqueRenderFinishedSemaphore,
+        *(m_vulkanUniqueRenderFinishedSemaphores[currentInFlightFrameIndex]),
         *m_vulkanUniqueSwapchain,
         availableImageIndex,
         {}
