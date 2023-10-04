@@ -66,6 +66,7 @@ public: // member functions
 
 private: // member functions
 
+    void recreateSwapchain();
     void drawFrameToWindow(const uint32_t currentInFlightFrameIndex);
 
 public: // static functions
