@@ -55,7 +55,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL quartz::Application::vulkanDebugCallback(
         default:
             LOG_CRITICAL(quartz::loggers::VULKAN, "( {} ) {}", messageTypeString, p_callbackData->pMessage);
             break;
-    };
+    }
 
     return VK_FALSE;
 }
@@ -297,7 +297,7 @@ std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> quartz::A
 
     std::vector<vk::PhysicalDevice> physicalDevices = uniqueInstance->enumeratePhysicalDevices();
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} physical devices available", physicalDevices.size());
-    if (physicalDevices.size() == 0) {
+    if (physicalDevices.empty()) {
         LOG_CRITICAL(quartz::loggers::APPLICATION_INITIALIZATION, "Failed to find GPUs with vulkan support");
         throw std::runtime_error("");
     }
@@ -1024,7 +1024,7 @@ vk::UniqueCommandPool quartz::Application::createVulkanUniqueCommandPool(
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully created vk::CommandPool");
 
     return uniqueCommandPool;
-};
+}
 
 std::vector<vk::UniqueCommandBuffer> quartz::Application::createVulkanUniqueCommandBuffers(
     const vk::UniqueDevice& uniqueLogicalDevice,
