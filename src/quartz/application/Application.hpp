@@ -48,7 +48,7 @@ public: // classes and enums
         vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
     };
 
-public: // interface
+public: // member functions
     Application(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
@@ -64,6 +64,11 @@ public: // interface
 
     void run();
 
+private: // member functions
+
+    void recreateSwapchain();
+    void drawFrameToWindow(const uint32_t currentInFlightFrameIndex);
+
 public: // static functions
     // The callback the validation layer uses
     static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(
@@ -74,6 +79,7 @@ public: // static functions
     );
 
 private: // static functions
+
     static std::vector<const char*> getEnabledValidationLayerNames(
         const bool validationLayersEnabled
     );
@@ -138,12 +144,12 @@ private: // static functions
         const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
         const vk::UniqueDevice& uniqueLogicalDevice,
         const vk::SurfaceCapabilitiesKHR& surfaceCapabilities,
-        const vk::Extent2D& swapExtent,
+        const vk::Extent2D& swapchainExtent,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const vk::PresentModeKHR& presentMode
     );
 
-    static std::vector<vk::UniqueImageView> createVulkanUniqueImageViews(
+    static std::vector<vk::UniqueImageView> createVulkanUniqueSwapchainImageViews(
         const vk::UniqueDevice& uniqueLogicalDevice,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const std::vector<vk::Image>& swapchainImages
@@ -155,7 +161,7 @@ private: // static functions
     );
 
     static quartz::Application::PipelineInformation getPipelineInformation(
-        const vk::Extent2D& swapExtent,
+        const vk::Extent2D& swapchainExtent,
         const vk::UniqueShaderModule& uniqueVertexShaderModule,
         const vk::UniqueShaderModule& uniqueFragmentShaderModule
     );
@@ -174,6 +180,38 @@ private: // static functions
         const quartz::Application::PipelineInformation& pipelineInformation,
         const vk::UniquePipelineLayout& uniquePipelineLayout,
         const vk::UniqueRenderPass& uniqueRenderPass
+    );
+
+    static std::vector<vk::UniqueFramebuffer> createVulkanUniqueFramebuffers(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::Extent2D& swapchainExtent,
+        const std::vector<vk::UniqueImageView>& uniqueSwapchainImageViews,
+        const vk::UniqueRenderPass& uniqueRenderPass
+    );
+
+    static vk::UniqueCommandPool createVulkanUniqueCommandPool(
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+        const vk::UniqueDevice& uniqueLogicalDevice
+    );
+
+    static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueCommandBuffers(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::Extent2D& swapchainExtent,
+        const std::vector<vk::Image>& swapchainImages,
+        const vk::UniqueRenderPass& uniqueRenderPass,
+        const vk::UniquePipeline& uniqueGraphicsPipeline,
+        const std::vector<vk::UniqueFramebuffer>& uniqueFramebuffers,
+        const vk::UniqueCommandPool& uniqueCommandPool
+    );
+
+    static std::vector<vk::UniqueSemaphore> createVulkanUniqueSemaphores(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t maxNumFramesInFlight
+    );
+
+    static std::vector<vk::UniqueFence> createVulkanUniqueFences(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t maxNumFramesInFlight
     );
 
 private: // member variables
@@ -204,12 +242,12 @@ private: // member variables
 
     // swapchain
     vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities; // should maybe go with the window stuff? seems directly related to the surface
-    vk::Extent2D m_vulkanSwapExtent; // should maybe go with the window stuff? seems directly related to the surface
+    vk::Extent2D m_vulkanSwapchainExtent; // should maybe go with the window stuff? seems directly related to the surface
     vk::SurfaceFormatKHR m_vulkanSurfaceFormat; // should maybe go with the window stuff? seems directly related to the surface
     vk::PresentModeKHR m_vulkanPresentMode; // should maybe go with the window stuff? seems directly related to the surface
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
     std::vector<vk::Image> m_vulkanSwapchainImages;
-    std::vector<vk::UniqueImageView> m_vulkanUniqueImageViews;
+    std::vector<vk::UniqueImageView> m_vulkanUniqueSwapchainImageViews;
 
     // graphics pipeline
     vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
@@ -218,4 +256,15 @@ private: // member variables
     vk::UniquePipelineLayout m_vulkanUniquePipelineLayout;
     vk::UniqueRenderPass m_vulkanUniqueRenderPass;
     vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
+
+    // framebuffer
+    std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
+
+    // command pools and buffers and synchronization objects
+    vk::UniqueCommandPool m_vulkanUniqueCommandPool;
+    const uint32_t m_maxNumFramesInFlight;
+    std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueCommandBuffers;
+    std::vector<vk::UniqueSemaphore> m_vulkanUniqueImageAvailableSemaphores;
+    std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
+    std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
 };

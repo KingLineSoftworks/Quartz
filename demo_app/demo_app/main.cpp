@@ -13,7 +13,6 @@
 
 #include "quartz/core.hpp"
 #include "quartz/application/Application.hpp"
-#include "quartz/something/Something.hpp"
 
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
@@ -35,6 +34,7 @@ int main() {
         {"GENERAL", quartz::util::Logger::Level::trace},
         {"FILESYSTEM", quartz::util::Logger::Level::trace},
         {"APPLICATION", quartz::util::Logger::Level::trace},
+        {"APPLICATION_INITIALIZATION", quartz::util::Logger::Level::info},
         {"WINDOW", quartz::util::Logger::Level::trace},
         {"VULKAN", quartz::util::Logger::Level::info}
     });
