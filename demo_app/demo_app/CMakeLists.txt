@@ -28,7 +28,6 @@ target_link_libraries(
 
     # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
     PRIVATE
-    glm
     # some_lib
 
     # Utility
