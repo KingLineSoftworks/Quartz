@@ -90,7 +90,7 @@ public: // member functions
 private: // member functions
 
     void recreateSwapchain();
-    void resetAndRecordCommandBuffer(const uint32_t imageIndex);
+    void resetAndRecordDrawingCommandBuffer(const uint32_t imageIndex);
     void drawFrameToWindow(const uint32_t currentInFlightFrameIndex);
 
 public: // static functions
@@ -215,10 +215,11 @@ private: // static functions
 
     static vk::UniqueCommandPool createVulkanUniqueCommandPool(
         const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
-        const vk::UniqueDevice& uniqueLogicalDevice
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::CommandPoolCreateFlags commandPoolCreateFlags
     );
 
-    static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueCommandBuffers(
+    static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueDrawingCommandBuffers(
         const vk::UniqueDevice& uniqueLogicalDevice,
         const std::vector<vk::Image>& swapchainImages,
         const vk::UniqueCommandPool& uniqueCommandPool
@@ -236,16 +237,22 @@ private: // static functions
 
     static std::vector<quartz::Vertex> loadSceneVertices();
 
-    static vk::UniqueBuffer createVulkanUniqueVertexBuffer(
+    static vk::UniqueBuffer createVulkanUniqueBuffer(
         const vk::UniqueDevice& uniqueLogicalDevice,
-        const std::vector<quartz::Vertex>& vertices
+        const uint32_t bufferSizeBytes,
+        const vk::BufferUsageFlags bufferUsageFlags
     );
 
-    static vk::UniqueDeviceMemory allocateVulkanUniqueVertexBufferMemory(
+    static vk::UniqueDeviceMemory allocateVulkanUniqueBufferMemory(
         const vk::PhysicalDevice& physicalDevice,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
         const vk::UniqueDevice& uniqueLogicalDevice,
-        const std::vector<quartz::Vertex>& vertices,
-        const vk::UniqueBuffer& uniqueVertexBuffer
+        const uint32_t bufferSizeBytes,
+        const void* p_bufferData,
+        const vk::UniqueBuffer& uniqueBuffer,
+        const vk::MemoryPropertyFlags requiredMemoryProperties,
+        const vk::UniqueBuffer* p_sourceBuffer,
+        const vk::Queue& graphicsQueue
     );
 
 private: // member variables
@@ -295,15 +302,17 @@ private: // member variables
     std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
 
     // command pools and buffers and synchronization objects
-    vk::UniqueCommandPool m_vulkanUniqueCommandPool;
+    vk::UniqueCommandPool m_vulkanUniqueDrawingCommandPool;
     const uint32_t m_maxNumFramesInFlight;
-    std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueCommandBuffers;
+    std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueDrawingCommandBuffers;
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueImageAvailableSemaphores;
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
     std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
 
     // Scene information
     std::vector<quartz::Vertex> m_vertices;
+    vk::UniqueBuffer m_vulkanUniqueStagingBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueStagingBufferMemory;
     vk::UniqueBuffer m_vulkanUniqueVertexBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexBufferMemory;
 };
