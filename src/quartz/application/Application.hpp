@@ -237,6 +237,8 @@ private: // static functions
 
     static std::vector<quartz::Vertex> loadSceneVertices();
 
+    static std::vector<uint32_t> loadSceneIndices();
+
     static vk::UniqueBuffer createVulkanUniqueBuffer(
         const vk::UniqueDevice& uniqueLogicalDevice,
         const uint32_t bufferSizeBytes,
@@ -249,9 +251,9 @@ private: // static functions
         const vk::UniqueDevice& uniqueLogicalDevice,
         const uint32_t bufferSizeBytes,
         const void* p_bufferData,
-        const vk::UniqueBuffer& uniqueBuffer,
+        const vk::UniqueBuffer& uniqueDestinationBuffer,
         const vk::MemoryPropertyFlags requiredMemoryProperties,
-        const vk::UniqueBuffer* p_sourceBuffer,
+        const vk::UniqueBuffer* p_uniqueSourceBuffer,
         const vk::Queue& graphicsQueue
     );
 
@@ -311,8 +313,13 @@ private: // member variables
 
     // Scene information
     std::vector<quartz::Vertex> m_vertices;
-    vk::UniqueBuffer m_vulkanUniqueStagingBuffer;
-    vk::UniqueDeviceMemory m_vulkanUniqueStagingBufferMemory;
+    std::vector<uint32_t> m_indices;
+    vk::UniqueBuffer m_vulkanUniqueVertexStagingBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueVertexStagingBufferMemory;
     vk::UniqueBuffer m_vulkanUniqueVertexBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexBufferMemory;
+    vk::UniqueBuffer m_vulkanUniqueIndexStagingBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueIndexStagingBufferMemory;
+    vk::UniqueBuffer m_vulkanUniqueIndexBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueIndexBufferMemory;
 };

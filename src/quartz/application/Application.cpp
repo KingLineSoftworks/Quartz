@@ -1155,9 +1155,10 @@ std::vector<quartz::Vertex> quartz::Application::loadSceneVertices() {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "");
 
     std::vector<quartz::Vertex> vertices = {
-        quartz::Vertex({ 0.0f, -0.5f,  0.0f}, {1.0f, 1.0f, 1.0f}),
-        quartz::Vertex({ 0.5f,  0.5f,  0.0f}, {0.0f, 1.0f, 0.0f}),
-        quartz::Vertex({-0.5f,  0.5f,  0.0f}, {0.0f, 0.0f, 1.0f})
+        quartz::Vertex({-0.5f, -0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}),
+        quartz::Vertex({ 0.5f, -0.5f,  0.0f}, {0.0f, 1.0f, 0.0f}),
+        quartz::Vertex({ 0.5f, 0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}),
+        quartz::Vertex({-0.5f,  0.5f,  0.0f}, {1.0f, 1.0f, 1.0f})
     };
 
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Got {} vertices", vertices.size());
@@ -1168,6 +1169,17 @@ std::vector<quartz::Vertex> quartz::Application::loadSceneVertices() {
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Total size of vertices is {} bytes ( {} vertices x {} bytes per vertex )", sizeof(quartz::Vertex) * vertices.size(), vertices.size(), sizeof(quartz::Vertex));
 
     return vertices;
+}
+
+std::vector<uint32_t> quartz::Application::loadSceneIndices() {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "");
+
+    std::vector<uint32_t> indices = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    return indices;
 }
 
 vk::UniqueBuffer quartz::Application::createVulkanUniqueBuffer(
@@ -1202,14 +1214,14 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
     const vk::UniqueDevice& uniqueLogicalDevice,
     const uint32_t bufferSizeBytes,
     const void* p_bufferData,
-    const vk::UniqueBuffer& uniqueBuffer,
+    const vk::UniqueBuffer& uniqueDestinationBuffer,
     const vk::MemoryPropertyFlags requiredMemoryProperties,
-    const vk::UniqueBuffer* p_sourceBuffer,
+    const vk::UniqueBuffer* p_uniqueSourceBuffer,
     const vk::Queue& graphicsQueue
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} bytes", bufferSizeBytes);
 
-    vk::MemoryRequirements memoryRequirements = uniqueLogicalDevice->getBufferMemoryRequirements(*uniqueBuffer);
+    vk::MemoryRequirements memoryRequirements = uniqueLogicalDevice->getBufferMemoryRequirements(*uniqueDestinationBuffer);
 
     vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties = physicalDevice.getMemoryProperties();
     std::optional<uint32_t> chosenMemoryTypeIndex;
@@ -1233,27 +1245,27 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
     );
 
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Attempting to allocate vk::DeviceMemory");
-    vk::UniqueDeviceMemory uniqueBufferMemory = uniqueLogicalDevice->allocateMemoryUnique(memoryAllocateInfo);
+    vk::UniqueDeviceMemory uniqueDestinationBufferMemory = uniqueLogicalDevice->allocateMemoryUnique(memoryAllocateInfo);
 
-    if (!uniqueBufferMemory) {
+    if (!uniqueDestinationBufferMemory) {
         LOG_CRITICAL(quartz::loggers::APPLICATION_INITIALIZATION, "Failed to create vk::DeviceMemory");
         throw std::runtime_error("");
     }
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully created vk::DeviceMemory");
 
     uniqueLogicalDevice->bindBufferMemory(
-        *uniqueBuffer,
-        *uniqueBufferMemory,
+        *uniqueDestinationBuffer,
+        *uniqueDestinationBufferMemory,
         0
     );
 
     // ----- copy the vertex data into this if we need to ----- //
 
-    if (!p_sourceBuffer) {
+    if (!p_uniqueSourceBuffer) {
         LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Memory *IS* allocated for a source buffer. Populating with data");
 
         void* mappedVertexBufferMemory = uniqueLogicalDevice->mapMemory(
-            *uniqueBufferMemory,
+            *uniqueDestinationBufferMemory,
             0,
             bufferSizeBytes
         );
@@ -1262,10 +1274,10 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
             p_bufferData,
             bufferSizeBytes
         );
-        uniqueLogicalDevice->unmapMemory(*uniqueBufferMemory);
+        uniqueLogicalDevice->unmapMemory(*uniqueDestinationBufferMemory);
 
         LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully copied data to device memory");
-        return uniqueBufferMemory;
+        return uniqueDestinationBufferMemory;
     }
 
     // ----- copy from a staging buffer into this if we need to ----- //
@@ -1305,8 +1317,8 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
     );
 
     uniqueCopyDataCommandBuffer[0]->copyBuffer(
-        *(*p_sourceBuffer),
-        *uniqueBuffer,
+        *(*p_uniqueSourceBuffer),
+        *uniqueDestinationBuffer,
         bufferCopyRegion
     );
 
@@ -1327,7 +1339,7 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
     graphicsQueue.waitIdle();
 
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully copied data from source buffer to this buffer's memory");
-    return uniqueBufferMemory;
+    return uniqueDestinationBufferMemory;
 }
 
 quartz::Application::Application(
@@ -1471,18 +1483,19 @@ quartz::Application::Application(
         m_maxNumFramesInFlight
     )),
     m_vertices(quartz::Application::loadSceneVertices()),
-    m_vulkanUniqueStagingBuffer(quartz::Application::createVulkanUniqueBuffer(
+    m_indices(quartz::Application::loadSceneIndices()),
+    m_vulkanUniqueVertexStagingBuffer(quartz::Application::createVulkanUniqueBuffer(
         m_vulkanUniqueLogicalDevice,
         sizeof(quartz::Vertex) * m_vertices.size(),
         vk::BufferUsageFlagBits::eTransferSrc
     )),
-    m_vulkanUniqueStagingBufferMemory(quartz::Application::allocateVulkanUniqueBufferMemory(
+    m_vulkanUniqueVertexStagingBufferMemory(quartz::Application::allocateVulkanUniqueBufferMemory(
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
         m_vulkanUniqueLogicalDevice,
         sizeof(quartz::Vertex) * m_vertices.size(),
         m_vertices.data(),
-        m_vulkanUniqueStagingBuffer,
+        m_vulkanUniqueVertexStagingBuffer,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         nullptr,
         m_vulkanGraphicsQueue
@@ -1499,8 +1512,40 @@ quartz::Application::Application(
         sizeof(quartz::Vertex) * m_vertices.size(),
         m_vertices.data(),
         m_vulkanUniqueVertexBuffer,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        &m_vulkanUniqueVertexStagingBuffer,
+        m_vulkanGraphicsQueue
+    )),
+    m_vulkanUniqueIndexStagingBuffer(quartz::Application::createVulkanUniqueBuffer(
+        m_vulkanUniqueLogicalDevice,
+        sizeof(uint32_t) * m_indices.size(),
+        vk::BufferUsageFlagBits::eTransferSrc
+    )),
+    m_vulkanUniqueIndexStagingBufferMemory(quartz::Application::allocateVulkanUniqueBufferMemory(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice,
+        sizeof(uint32_t) * m_indices.size(),
+        m_indices.data(),
+        m_vulkanUniqueIndexStagingBuffer,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        &m_vulkanUniqueStagingBuffer,
+        nullptr,
+        m_vulkanGraphicsQueue
+    )),
+    m_vulkanUniqueIndexBuffer(quartz::Application::createVulkanUniqueBuffer(
+        m_vulkanUniqueLogicalDevice,
+        sizeof(uint32_t) * m_indices.size(),
+        vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer
+    )),
+    m_vulkanUniqueIndexBufferMemory(quartz::Application::allocateVulkanUniqueBufferMemory(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice,
+        sizeof(uint32_t) * m_indices.size(),
+        m_indices.data(),
+        m_vulkanUniqueIndexBuffer,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        &m_vulkanUniqueIndexStagingBuffer,
         m_vulkanGraphicsQueue
     ))
 {
@@ -1698,9 +1743,16 @@ void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imag
         offset
     );
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->draw(
-        3,
+    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->bindIndexBuffer(
+        *m_vulkanUniqueIndexBuffer,
+        0,
+        vk::IndexType::eUint32
+    );
+
+    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->drawIndexed(
+        m_indices.size(),
         1,
+        0,
         0,
         0
     );
