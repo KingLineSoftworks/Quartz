@@ -1,8 +1,14 @@
 #pragma once
 
+#include <array>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/vec3.hpp>
 
 #include <vulkan/vulkan.hpp>
 
@@ -11,7 +17,24 @@
 
 namespace quartz {
     class Application;
+    struct Vertex;
 }
+
+struct quartz::Vertex {
+public: // member functions
+    Vertex(
+        const glm::vec3& _worldPosition,
+        const glm::vec3& _color
+    );
+
+public: // static functions
+    static vk::VertexInputBindingDescription getVulkanVertexInputBindingDescription();
+    static std::array<vk::VertexInputAttributeDescription, 2> getVulkanVertexInputAttributeDescriptions();
+
+public: // member variables
+    glm::vec3 worldPosition;
+    glm::vec3 color;
+};
 
 class quartz::Application {
 public: // classes and enums
@@ -28,8 +51,8 @@ public: // classes and enums
 
     struct PipelineInformation {
         // The things the create infos store as references
-        std::vector<vk::VertexInputBindingDescription> vertexInputBindingDescriptions;
-        std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
+        vk::VertexInputBindingDescription vertexInputBindingDescriptions;
+        std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions;
         std::vector<vk::Viewport> viewports;
         std::vector<vk::Rect2D> scissorRectangles;
         std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates;
@@ -67,6 +90,7 @@ public: // member functions
 private: // member functions
 
     void recreateSwapchain();
+    void resetAndRecordDrawingCommandBuffer(const uint32_t imageIndex);
     void drawFrameToWindow(const uint32_t currentInFlightFrameIndex);
 
 public: // static functions
@@ -191,16 +215,13 @@ private: // static functions
 
     static vk::UniqueCommandPool createVulkanUniqueCommandPool(
         const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
-        const vk::UniqueDevice& uniqueLogicalDevice
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::CommandPoolCreateFlags commandPoolCreateFlags
     );
 
-    static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueCommandBuffers(
+    static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueDrawingCommandBuffers(
         const vk::UniqueDevice& uniqueLogicalDevice,
-        const vk::Extent2D& swapchainExtent,
         const std::vector<vk::Image>& swapchainImages,
-        const vk::UniqueRenderPass& uniqueRenderPass,
-        const vk::UniquePipeline& uniqueGraphicsPipeline,
-        const std::vector<vk::UniqueFramebuffer>& uniqueFramebuffers,
         const vk::UniqueCommandPool& uniqueCommandPool
     );
 
@@ -212,6 +233,28 @@ private: // static functions
     static std::vector<vk::UniqueFence> createVulkanUniqueFences(
         const vk::UniqueDevice& uniqueLogicalDevice,
         const uint32_t maxNumFramesInFlight
+    );
+
+    static std::vector<quartz::Vertex> loadSceneVertices();
+
+    static std::vector<uint32_t> loadSceneIndices();
+
+    static vk::UniqueBuffer createVulkanUniqueBuffer(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t bufferSizeBytes,
+        const vk::BufferUsageFlags bufferUsageFlags
+    );
+
+    static vk::UniqueDeviceMemory allocateVulkanUniqueBufferMemory(
+        const vk::PhysicalDevice& physicalDevice,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t bufferSizeBytes,
+        const void* p_bufferData,
+        const vk::UniqueBuffer& uniqueDestinationBuffer,
+        const vk::MemoryPropertyFlags requiredMemoryProperties,
+        const vk::UniqueBuffer* p_uniqueSourceBuffer,
+        const vk::Queue& graphicsQueue
     );
 
 private: // member variables
@@ -257,14 +300,26 @@ private: // member variables
     vk::UniqueRenderPass m_vulkanUniqueRenderPass;
     vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
 
-    // framebuffer
+    // Framebuffer tings
     std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
 
     // command pools and buffers and synchronization objects
-    vk::UniqueCommandPool m_vulkanUniqueCommandPool;
+    vk::UniqueCommandPool m_vulkanUniqueDrawingCommandPool;
     const uint32_t m_maxNumFramesInFlight;
-    std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueCommandBuffers;
+    std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueDrawingCommandBuffers;
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueImageAvailableSemaphores;
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
     std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
+
+    // Scene information
+    std::vector<quartz::Vertex> m_vertices;
+    std::vector<uint32_t> m_indices;
+    vk::UniqueBuffer m_vulkanUniqueVertexStagingBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueVertexStagingBufferMemory;
+    vk::UniqueBuffer m_vulkanUniqueVertexBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueVertexBufferMemory;
+    vk::UniqueBuffer m_vulkanUniqueIndexStagingBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueIndexStagingBufferMemory;
+    vk::UniqueBuffer m_vulkanUniqueIndexBuffer;
+    vk::UniqueDeviceMemory m_vulkanUniqueIndexBufferMemory;
 };

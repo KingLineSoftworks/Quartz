@@ -1,11 +1,6 @@
 #include <stdexcept>
 #include <cstdlib>
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/Loggers.hpp"
@@ -34,7 +29,7 @@ int main() {
         {"GENERAL", quartz::util::Logger::Level::trace},
         {"FILESYSTEM", quartz::util::Logger::Level::trace},
         {"APPLICATION", quartz::util::Logger::Level::trace},
-        {"APPLICATION_INITIALIZATION", quartz::util::Logger::Level::info},
+        {"APPLICATION_INITIALIZATION", quartz::util::Logger::Level::trace},
         {"WINDOW", quartz::util::Logger::Level::trace},
         {"VULKAN", quartz::util::Logger::Level::info}
     });
@@ -90,12 +85,6 @@ int main() {
         LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }
-
-    LOG_TRACE(quartz::loggers::GENERAL, "Testing GLM");
-    glm::mat4 matrix;
-    glm::vec4 vector;
-    glm::vec4 result = matrix * vector;
-    LOG_TRACE(quartz::loggers::GENERAL, "Resulting vector [ {} {} {} {} ]", result.x, result.y, result.z, result.w);
 
     LOG_TRACE(quartz::loggers::GENERAL, "Terminating");
     return EXIT_SUCCESS;

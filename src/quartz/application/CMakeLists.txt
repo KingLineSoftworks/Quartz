@@ -17,6 +17,7 @@ target_link_libraries(
 
     PUBLIC
     glfw
+    glm
     vulkan
 
     PUBLIC
