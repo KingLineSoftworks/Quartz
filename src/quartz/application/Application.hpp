@@ -6,8 +6,9 @@
 #include <utility>
 #include <vector>
 
-#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_RADIANS
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
@@ -33,9 +34,9 @@ public: // member functions
     );
 
 public: // member variables
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 projection;
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 projection;
 };
 
 struct quartz::Vertex {
