@@ -6,9 +6,11 @@
 #include <utility>
 #include <vector>
 
-#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_RADIANS
 #include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 
 #include <vulkan/vulkan.hpp>
 
@@ -16,15 +18,32 @@
 #include "quartz/rendering/window/Window.hpp"
 
 namespace quartz {
-    class Application;
+    struct UniformBufferObject;
     struct Vertex;
+    class Application;
 }
+
+struct quartz::UniformBufferObject {
+public: // member functions
+    UniformBufferObject() = default;
+
+    UniformBufferObject(
+        glm::mat4 model_,
+        glm::mat4 view_,
+        glm::mat4 projection_
+    );
+
+public: // member variables
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 projection;
+};
 
 struct quartz::Vertex {
 public: // member functions
     Vertex(
-        const glm::vec3& _worldPosition,
-        const glm::vec3& _color
+        const glm::vec3& worldPosition_,
+        const glm::vec3& color_
     );
 
 public: // static functions
@@ -90,7 +109,8 @@ public: // member functions
 private: // member functions
 
     void recreateSwapchain();
-    void resetAndRecordDrawingCommandBuffer(const uint32_t imageIndex);
+    void updateUniformBuffer(const uint32_t currentInFlightFrameIndex);
+    void resetAndRecordDrawingCommandBuffer(const uint32_t currentInFlightFrameIndex, const uint32_t swapchainImageIndex);
     void drawFrameToWindow(const uint32_t currentInFlightFrameIndex);
 
 public: // static functions
@@ -195,8 +215,13 @@ private: // static functions
         const vk::Format& surfaceFormatFormat
     );
 
-    static vk::UniquePipelineLayout createVulkanUniquePipelineLayout(
+    static vk::UniqueDescriptorSetLayout createVulkanUniqueDescriptorSetLayout(
         const vk::UniqueDevice& uniqueLogicalDevice
+    );
+
+    static vk::UniquePipelineLayout createVulkanUniquePipelineLayout(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::UniqueDescriptorSetLayout& uniqueDescriptorSetLayout
     );
 
     static vk::UniquePipeline createVulkanUniqueGraphicsPipeline(
@@ -221,8 +246,8 @@ private: // static functions
 
     static std::vector<vk::UniqueCommandBuffer> createVulkanUniqueDrawingCommandBuffers(
         const vk::UniqueDevice& uniqueLogicalDevice,
-        const std::vector<vk::Image>& swapchainImages,
-        const vk::UniqueCommandPool& uniqueCommandPool
+        const vk::UniqueCommandPool& uniqueCommandPool,
+        const uint32_t desiredCommandBufferCount
     );
 
     static std::vector<vk::UniqueSemaphore> createVulkanUniqueSemaphores(
@@ -254,7 +279,46 @@ private: // static functions
         const vk::UniqueBuffer& uniqueDestinationBuffer,
         const vk::MemoryPropertyFlags requiredMemoryProperties,
         const vk::UniqueBuffer* p_uniqueSourceBuffer,
+        const vk::Queue& graphicsQueue,
+        const bool dontMap
+    );
+
+    static std::vector<vk::UniqueBuffer> createVulkanUniqueBuffers(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t maxNumFramesInFlight,
+        const uint32_t bufferSizeBytes,
+        const vk::BufferUsageFlags bufferUsageFlags
+    );
+
+    static std::vector<vk::UniqueDeviceMemory> allocateVulkanUniqueBufferMemories(
+        const vk::PhysicalDevice& physicalDevice,
+        const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t bufferSizeBytes,
+        const std::vector<void*> bufferDataPtrs,
+        const std::vector<vk::UniqueBuffer>& uniqueDestinationBuffers,
+        const vk::MemoryPropertyFlags requiredMemoryProperties,
+        const std::vector<vk::UniqueBuffer*> uniqueSourceBufferPtrs,
         const vk::Queue& graphicsQueue
+    );
+
+    static std::vector<void*> mapVulkanUniqueBufferMemories(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t bufferSizeBytes,
+        const std::vector<vk::UniqueDeviceMemory>& uniqueDeviceMemories
+    );
+
+    static vk::UniqueDescriptorPool createVulkanUniqueDescriptorPool(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const uint32_t maxNumFramesInFlight
+    );
+
+    static std::vector<vk::DescriptorSet> allocateVulkanUniqueDescriptorSets(
+        const vk::UniqueDevice& uniqueLogicalDevice,
+        const vk::UniqueDescriptorSetLayout& uniqueDescriptorSetLayout,
+        const uint32_t maxNumFramesInFlight,
+        const std::vector<vk::UniqueBuffer>& uniqueUniformBuffers,
+        const vk::UniqueDescriptorPool& uniqueDescriptorPool
     );
 
 private: // member variables
@@ -296,6 +360,7 @@ private: // member variables
     vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
     vk::UniqueShaderModule m_vulkanUniqueFragmentShaderModule;
     quartz::Application::PipelineInformation m_pipelineInformation;
+    vk::UniqueDescriptorSetLayout m_vulkanUniqueDescriptorSetLayout;
     vk::UniquePipelineLayout m_vulkanUniquePipelineLayout;
     vk::UniqueRenderPass m_vulkanUniqueRenderPass;
     vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
@@ -311,15 +376,20 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
     std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
 
-    // Scene information
+    // Scene drawing information
     std::vector<quartz::Vertex> m_vertices;
-    std::vector<uint32_t> m_indices;
     vk::UniqueBuffer m_vulkanUniqueVertexStagingBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexStagingBufferMemory;
     vk::UniqueBuffer m_vulkanUniqueVertexBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexBufferMemory;
+    std::vector<uint32_t> m_indices;
     vk::UniqueBuffer m_vulkanUniqueIndexStagingBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueIndexStagingBufferMemory;
     vk::UniqueBuffer m_vulkanUniqueIndexBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueIndexBufferMemory;
+    std::vector<vk::UniqueBuffer> m_vulkanUniqueUniformBuffers;
+    std::vector<vk::UniqueDeviceMemory> m_vulkanUniqueUniformBufferMemories;
+    std::vector<void*> m_mappedUniformBufferMemories;
+    vk::UniqueDescriptorPool m_vulkanUniqueDescriptorPool;
+    std::vector<vk::DescriptorSet> m_vulkanUniqueDescriptorSets;
 };

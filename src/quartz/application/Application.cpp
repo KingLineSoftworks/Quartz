@@ -1,10 +1,15 @@
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <limits>
 #include <optional>
 #include <set>
 #include <stdexcept>
 #include <vector>
+
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <vulkan/vulkan.hpp>
 
@@ -17,14 +22,26 @@
 
 #include "quartz/application/Application.hpp"
 
+// ----- uniform buffer object ----- //
+
+quartz::UniformBufferObject::UniformBufferObject(
+    glm::mat4 model_,
+    glm::mat4 view_,
+    glm::mat4 projection_
+) :
+    model(model_),
+    view(view_),
+    projection(projection_)
+{}
+
 // ----- vertex ----- //
 
 quartz::Vertex::Vertex(
-    const glm::vec3& _worldPosition,
-    const glm::vec3& _color
+    const glm::vec3& worldPosition_,
+    const glm::vec3& color_
 ) :
-    worldPosition(_worldPosition),
-    color(_color)
+    worldPosition(worldPosition_),
+    color(color_)
 {}
 
 vk::VertexInputBindingDescription quartz::Vertex::getVulkanVertexInputBindingDescription() {
@@ -803,7 +820,7 @@ quartz::Application::PipelineInformation quartz::Application::getPipelineInforma
         false,
         vk::PolygonMode::eFill,
         vk::CullModeFlagBits::eBack,
-        vk::FrontFace::eClockwise,
+        vk::FrontFace::eCounterClockwise,
         false,
         0.0f,
         0.0f,
@@ -882,15 +899,45 @@ quartz::Application::PipelineInformation quartz::Application::getPipelineInforma
     return pipelineInformation;
 }
 
-vk::UniquePipelineLayout quartz::Application::createVulkanUniquePipelineLayout(
+vk::UniqueDescriptorSetLayout quartz::Application::createVulkanUniqueDescriptorSetLayout(
     const vk::UniqueDevice& uniqueLogicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "");
+
+    vk::DescriptorSetLayoutBinding layoutBinding(
+        0,
+        vk::DescriptorType::eUniformBuffer,
+        1,vk::ShaderStageFlagBits::eVertex,
+        {}
+    );
+
+    vk::DescriptorSetLayoutCreateInfo layoutCreateInfo(
+        {},
+        layoutBinding
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Attempting to create vk::DescriptorSetLayout");
+    vk::UniqueDescriptorSetLayout uniqueDescriptorSetLayout = uniqueLogicalDevice->createDescriptorSetLayoutUnique(layoutCreateInfo);
+
+    if (!uniqueDescriptorSetLayout) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION_INITIALIZATION, "Failed to create vk::DescriptorSetLayout");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully created vk::DescriptorSetLayout");
+
+    return uniqueDescriptorSetLayout;
+}
+
+vk::UniquePipelineLayout quartz::Application::createVulkanUniquePipelineLayout(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::UniqueDescriptorSetLayout& uniqueDescriptorSetLayout
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "");
 
     vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
         {},
-        0,
-        nullptr,
+        1,
+        &(*uniqueDescriptorSetLayout),
         0,
         nullptr
     );
@@ -1070,10 +1117,9 @@ vk::UniqueCommandPool quartz::Application::createVulkanUniqueCommandPool(
 
 std::vector<vk::UniqueCommandBuffer> quartz::Application::createVulkanUniqueDrawingCommandBuffers(
     const vk::UniqueDevice& uniqueLogicalDevice,
-    const std::vector<vk::Image>& swapchainImages,
-    const vk::UniqueCommandPool& uniqueCommandPool
+    const vk::UniqueCommandPool& uniqueCommandPool,
+    const uint32_t desiredCommandBufferCount
 ) {
-    const uint32_t desiredCommandBufferCount = swapchainImages.size();
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} max frames in flight", desiredCommandBufferCount);
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
@@ -1217,7 +1263,8 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
     const vk::UniqueBuffer& uniqueDestinationBuffer,
     const vk::MemoryPropertyFlags requiredMemoryProperties,
     const vk::UniqueBuffer* p_uniqueSourceBuffer,
-    const vk::Queue& graphicsQueue
+    const vk::Queue& graphicsQueue,
+    const bool dontMap
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} bytes", bufferSizeBytes);
 
@@ -1261,28 +1308,38 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
 
     // ----- copy the vertex data into this if we need to ----- //
 
-    if (!p_uniqueSourceBuffer) {
-        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Memory *IS* allocated for a source buffer. Populating with data");
+    if (dontMap) {
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Not mapping any of this memory to any local buffer");
+        return uniqueDestinationBufferMemory;
+    }
 
-        void* mappedVertexBufferMemory = uniqueLogicalDevice->mapMemory(
+    if (!p_uniqueSourceBuffer) {
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Memory *IS* allocated for a source buffer. Populating device's buffer memory with input raw data");
+
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "  - Creating mapping for allocated device memory of size {}", bufferSizeBytes);
+        void* p_mappedDestinationDeviceMemory = uniqueLogicalDevice->mapMemory(
             *uniqueDestinationBufferMemory,
             0,
             bufferSizeBytes
         );
+
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "  - Copying {} bytes to mapped device memory at {} from buffer at {}", bufferSizeBytes, p_mappedDestinationDeviceMemory, p_bufferData);
         memcpy(
-            mappedVertexBufferMemory,
+            p_mappedDestinationDeviceMemory,
             p_bufferData,
             bufferSizeBytes
         );
+
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "  - Unmapping device memory");
         uniqueLogicalDevice->unmapMemory(*uniqueDestinationBufferMemory);
 
-        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully copied data to device memory");
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully copied input data to device's buffer memory");
         return uniqueDestinationBufferMemory;
     }
 
     // ----- copy from a staging buffer into this if we need to ----- //
 
-    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Memory is *NOT* allocated for a source buffer. Not populating with data");
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Memory is *NOT* allocated for a source buffer. Populating with input source buffer instead");
 
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Creating unique command pool for copying data from source to destination buffer");
     vk::UniqueCommandPool uniqueCopyDataCommandPool = quartz::Application::createVulkanUniqueCommandPool(
@@ -1324,7 +1381,7 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
 
     uniqueCopyDataCommandBuffer[0]->end();
 
-    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Submitting command buffer and waiting idly for it to complete");
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Submitting command buffer and waiting idly for it to complete the transfer of data into this buffer");
 
     vk::SubmitInfo submitInfo(
         0,
@@ -1340,6 +1397,181 @@ vk::UniqueDeviceMemory quartz::Application::allocateVulkanUniqueBufferMemory(
 
     LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully copied data from source buffer to this buffer's memory");
     return uniqueDestinationBufferMemory;
+}
+
+std::vector<vk::UniqueBuffer> quartz::Application::createVulkanUniqueBuffers(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const uint32_t maxNumFramesInFlight,
+    const uint32_t bufferSizeBytes,
+    const vk::BufferUsageFlags bufferUsageFlags
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} frames in flight", maxNumFramesInFlight);
+
+    std::vector<vk::UniqueBuffer> uniqueBuffers;
+    uniqueBuffers.reserve(maxNumFramesInFlight);
+
+    for (uint32_t i = 0; i < maxNumFramesInFlight; ++i) {
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Creating vk::Buffer {}", i);
+        uniqueBuffers.emplace_back(quartz::Application::createVulkanUniqueBuffer(
+            uniqueLogicalDevice,
+            bufferSizeBytes,
+            bufferUsageFlags
+        ));
+    }
+
+    return uniqueBuffers;
+}
+
+std::vector<vk::UniqueDeviceMemory> quartz::Application::allocateVulkanUniqueBufferMemories(
+    const vk::PhysicalDevice& physicalDevice,
+    const quartz::Application::QueueFamilyIndices& queueFamilyIndices,
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const uint32_t bufferSizeBytes,
+    const std::vector<void*> bufferDataPtrs,
+    const std::vector<vk::UniqueBuffer>& uniqueDestinationBuffers,
+    const vk::MemoryPropertyFlags requiredMemoryProperties,
+    const std::vector<vk::UniqueBuffer*> uniqueSourceBufferPtrs,
+    const vk::Queue& graphicsQueue
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} buffers", uniqueDestinationBuffers.size());
+
+    std::vector<vk::UniqueDeviceMemory> uniqueDeviceMemories;
+    uniqueDeviceMemories.reserve(uniqueDestinationBuffers.size());
+
+    for (uint32_t i = 0; i < uniqueDestinationBuffers.size(); ++i)  {
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Allocating vk::DeviceMemory {}", i);
+        uniqueDeviceMemories.emplace_back(quartz::Application::allocateVulkanUniqueBufferMemory(
+            physicalDevice,
+            queueFamilyIndices,
+            uniqueLogicalDevice,
+            bufferSizeBytes,
+            bufferDataPtrs[i],
+            uniqueDestinationBuffers[i],
+            requiredMemoryProperties,
+            uniqueSourceBufferPtrs[i],
+            graphicsQueue,
+            true
+        ));
+    }
+
+    return uniqueDeviceMemories;
+}
+
+std::vector<void*> quartz::Application::mapVulkanUniqueBufferMemories(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const uint32_t bufferSizeBytes,
+    const std::vector<vk::UniqueDeviceMemory>& uniqueDeviceMemories
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} buffer memories", uniqueDeviceMemories.size());
+
+    std::vector<void*> mappedDeviceMemories;
+    mappedDeviceMemories.reserve(uniqueDeviceMemories.size());
+
+    for (uint32_t i = 0; i < uniqueDeviceMemories.size(); ++i) {
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Mapping vk::DeviceMemory {} to void*", i);
+
+        mappedDeviceMemories.emplace_back(uniqueLogicalDevice->mapMemory(
+            *(uniqueDeviceMemories[i]),
+            0,
+            bufferSizeBytes
+        ));
+
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "  - mapped to {}", mappedDeviceMemories[i]);
+    }
+
+    return mappedDeviceMemories;
+}
+
+vk::UniqueDescriptorPool quartz::Application::createVulkanUniqueDescriptorPool(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const uint32_t maxNumFramesInFlight
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} frames in flight", maxNumFramesInFlight);
+
+    vk::DescriptorPoolSize poolSize(
+        vk::DescriptorType::eUniformBuffer,
+        maxNumFramesInFlight
+    );
+
+    vk::DescriptorPoolCreateInfo poolCreateInfo(
+        {},
+        maxNumFramesInFlight,
+        poolSize
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Attempting to create vk::DescriptorPool");
+    vk::UniqueDescriptorPool uniqueDescriptorPool = uniqueLogicalDevice->createDescriptorPoolUnique(poolCreateInfo);
+
+    if (!uniqueDescriptorPool) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION_INITIALIZATION, "Failed to create vk::DescriptorPool");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully created vk::DescriptorPool");
+
+    return uniqueDescriptorPool;
+}
+
+std::vector<vk::DescriptorSet> quartz::Application::allocateVulkanUniqueDescriptorSets(
+    const vk::UniqueDevice& uniqueLogicalDevice,
+    const vk::UniqueDescriptorSetLayout& uniqueDescriptorSetLayout,
+    const uint32_t maxNumFramesInFlight,
+    const std::vector<vk::UniqueBuffer>& uniqueUniformBuffers,
+    const vk::UniqueDescriptorPool& uniqueDescriptorPool
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{} frames in flight", maxNumFramesInFlight);
+
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Creating vector of {} vk::DescriptorSetLayout(s) from vk::UniqueDescriptorSetLayout with instance at {}", maxNumFramesInFlight, reinterpret_cast<const void*>(&(*uniqueDescriptorSetLayout)));
+    std::vector<const vk::DescriptorSetLayout> descriptorSetLayoutPtrs(maxNumFramesInFlight, *uniqueDescriptorSetLayout);
+
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Creating vk::DescriptorSetAllocateInfo using vk::UniqueDescriptorPool with instance at {}", reinterpret_cast<const void*>(&(*uniqueDescriptorPool)));
+    vk::DescriptorSetAllocateInfo allocateInfo(
+        *uniqueDescriptorPool,
+        maxNumFramesInFlight,
+        descriptorSetLayoutPtrs.data()
+    );
+
+    LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Attempting to allocate {} vk::DescriptorSet(s)", descriptorSetLayoutPtrs.size());
+    std::vector<vk::DescriptorSet> uniqueDescriptorSets = uniqueLogicalDevice->allocateDescriptorSets(allocateInfo);
+
+    if (uniqueDescriptorSets.size() != descriptorSetLayoutPtrs.size()) {
+        LOG_CRITICAL(quartz::loggers::APPLICATION_INITIALIZATION, "Created {} vk::DescriptorSet(s) instead of {}", uniqueDescriptorSets.size(), descriptorSetLayoutPtrs.size());
+        throw std::runtime_error("");
+    }
+
+    for (uint32_t i = 0; i < uniqueDescriptorSets.size(); ++i) {
+        if (!uniqueDescriptorSets[i]) {
+            LOG_CRITICAL(quartz::loggers::APPLICATION_INITIALIZATION, "Failed to allocate vk::DescriptorSet {}", i);
+            throw std::runtime_error("");
+        }
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "Successfully allocated vk::DescriptorSet {} with instance at {}", i, reinterpret_cast<void*>(&(uniqueDescriptorSets[i])));
+
+        vk::DescriptorBufferInfo bufferInfo(
+            *(uniqueUniformBuffers[i]),
+            0,
+            sizeof(quartz::UniformBufferObject)
+        );
+
+        vk::WriteDescriptorSet descriptorSetWrite(
+            uniqueDescriptorSets[i],
+            0,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &bufferInfo,
+            {}
+        );
+
+        LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "  - updating");
+        uniqueLogicalDevice->updateDescriptorSets(
+            1,
+            &descriptorSetWrite,
+            0,
+            nullptr
+        );
+    }
+
+    return uniqueDescriptorSets;
 }
 
 quartz::Application::Application(
@@ -1440,8 +1672,12 @@ quartz::Application::Application(
         m_vulkanUniqueVertexShaderModule,
         m_vulkanUniqueFragmentShaderModule
     )),
-    m_vulkanUniquePipelineLayout(quartz::Application::createVulkanUniquePipelineLayout(
+    m_vulkanUniqueDescriptorSetLayout(quartz::Application::createVulkanUniqueDescriptorSetLayout(
         m_vulkanUniqueLogicalDevice
+    )),
+    m_vulkanUniquePipelineLayout(quartz::Application::createVulkanUniquePipelineLayout(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanUniqueDescriptorSetLayout
     )),
     m_vulkanUniqueRenderPass(quartz::Application::createVulkanUniqueRenderPass(
         m_vulkanUniqueLogicalDevice,
@@ -1467,8 +1703,8 @@ quartz::Application::Application(
     m_maxNumFramesInFlight(2),
     m_vulkanUniqueDrawingCommandBuffers(quartz::Application::createVulkanUniqueDrawingCommandBuffers(
         m_vulkanUniqueLogicalDevice,
-        m_vulkanSwapchainImages,
-        m_vulkanUniqueDrawingCommandPool
+        m_vulkanUniqueDrawingCommandPool,
+        m_maxNumFramesInFlight
     )),
     m_vulkanUniqueImageAvailableSemaphores(quartz::Application::createVulkanUniqueSemaphores(
         m_vulkanUniqueLogicalDevice,
@@ -1483,7 +1719,6 @@ quartz::Application::Application(
         m_maxNumFramesInFlight
     )),
     m_vertices(quartz::Application::loadSceneVertices()),
-    m_indices(quartz::Application::loadSceneIndices()),
     m_vulkanUniqueVertexStagingBuffer(quartz::Application::createVulkanUniqueBuffer(
         m_vulkanUniqueLogicalDevice,
         sizeof(quartz::Vertex) * m_vertices.size(),
@@ -1498,7 +1733,8 @@ quartz::Application::Application(
         m_vulkanUniqueVertexStagingBuffer,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         nullptr,
-        m_vulkanGraphicsQueue
+        m_vulkanGraphicsQueue,
+        false
     )),
     m_vulkanUniqueVertexBuffer(quartz::Application::createVulkanUniqueBuffer(
         m_vulkanUniqueLogicalDevice,
@@ -1514,8 +1750,10 @@ quartz::Application::Application(
         m_vulkanUniqueVertexBuffer,
         vk::MemoryPropertyFlagBits::eDeviceLocal,
         &m_vulkanUniqueVertexStagingBuffer,
-        m_vulkanGraphicsQueue
+        m_vulkanGraphicsQueue,
+        false
     )),
+    m_indices(quartz::Application::loadSceneIndices()),
     m_vulkanUniqueIndexStagingBuffer(quartz::Application::createVulkanUniqueBuffer(
         m_vulkanUniqueLogicalDevice,
         sizeof(uint32_t) * m_indices.size(),
@@ -1530,7 +1768,8 @@ quartz::Application::Application(
         m_vulkanUniqueIndexStagingBuffer,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         nullptr,
-        m_vulkanGraphicsQueue
+        m_vulkanGraphicsQueue,
+        false
     )),
     m_vulkanUniqueIndexBuffer(quartz::Application::createVulkanUniqueBuffer(
         m_vulkanUniqueLogicalDevice,
@@ -1546,7 +1785,41 @@ quartz::Application::Application(
         m_vulkanUniqueIndexBuffer,
         vk::MemoryPropertyFlagBits::eDeviceLocal,
         &m_vulkanUniqueIndexStagingBuffer,
+        m_vulkanGraphicsQueue,
+        false
+    )),
+    m_vulkanUniqueUniformBuffers(quartz::Application::createVulkanUniqueBuffers(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight,
+        sizeof(quartz::UniformBufferObject),
+        vk::BufferUsageFlagBits::eUniformBuffer
+    )),
+    m_vulkanUniqueUniformBufferMemories(quartz::Application::allocateVulkanUniqueBufferMemories(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice,
+        sizeof(quartz::UniformBufferObject),
+        std::vector<void*>(m_vulkanUniqueUniformBuffers.size(), nullptr),
+        m_vulkanUniqueUniformBuffers,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        std::vector<vk::UniqueBuffer*>(m_vulkanUniqueUniformBuffers.size(), nullptr),
         m_vulkanGraphicsQueue
+    )),
+    m_mappedUniformBufferMemories(quartz::Application::mapVulkanUniqueBufferMemories(
+        m_vulkanUniqueLogicalDevice,
+        sizeof(quartz::UniformBufferObject),
+        m_vulkanUniqueUniformBufferMemories
+    )),
+    m_vulkanUniqueDescriptorPool(quartz::Application::createVulkanUniqueDescriptorPool(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight
+    )),
+    m_vulkanUniqueDescriptorSets(quartz::Application::allocateVulkanUniqueDescriptorSets(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanUniqueDescriptorSetLayout,
+        m_maxNumFramesInFlight,
+        m_vulkanUniqueUniformBuffers,
+        m_vulkanUniqueDescriptorPool
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);
@@ -1558,6 +1831,20 @@ quartz::Application::~Application() {
 
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    // ----- information about the vectors of things we created ----- //
+
+    LOG_TRACEthis("Using {} swapchain images", m_vulkanSwapchainImages.size());
+    LOG_TRACEthis("Using {} swapchain image views", m_vulkanUniqueSwapchainImageViews.size());
+    LOG_TRACEthis("Using {} framebuffers", m_vulkanUniqueFramebuffers.size());
+    LOG_TRACEthis("Using {} command buffers", m_vulkanUniqueDrawingCommandBuffers.size());
+    LOG_TRACEthis("Using {} image available semaphores", m_vulkanUniqueImageAvailableSemaphores.size());
+    LOG_TRACEthis("Using {} render finished semaphores", m_vulkanUniqueRenderFinishedSemaphores.size());
+    LOG_TRACEthis("Using {} image in flight fences", m_vulkanUniqueInFlightFences.size());
+    LOG_TRACEthis("Using {} uniform buffers", m_vulkanUniqueUniformBuffers.size());
+    LOG_TRACEthis("Using {} uniform buffer device memories", m_vulkanUniqueUniformBufferMemories.size());
+    LOG_TRACEthis("Using {} uniform mapped memories", m_mappedUniformBufferMemories.size());
+    LOG_TRACEthis("Using {} uniform descriptor sets", m_vulkanUniqueDescriptorSets.size());
 
     // ----- drop that ass at me from an egregarious angle ----- //
 
@@ -1632,7 +1919,8 @@ void quartz::Application::recreateSwapchain() {
         m_vulkanUniqueFragmentShaderModule
     );
     m_vulkanUniquePipelineLayout = quartz::Application::createVulkanUniquePipelineLayout(
-        m_vulkanUniqueLogicalDevice
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanUniqueDescriptorSetLayout
     );
     m_vulkanUniqueRenderPass = quartz::Application::createVulkanUniqueRenderPass(
         m_vulkanUniqueLogicalDevice,
@@ -1657,8 +1945,8 @@ void quartz::Application::recreateSwapchain() {
     );
     m_vulkanUniqueDrawingCommandBuffers = quartz::Application::createVulkanUniqueDrawingCommandBuffers(
         m_vulkanUniqueLogicalDevice,
-        m_vulkanSwapchainImages,
-        m_vulkanUniqueDrawingCommandPool
+        m_vulkanUniqueDrawingCommandPool,
+        m_maxNumFramesInFlight
     );
      m_vulkanUniqueImageAvailableSemaphores = quartz::Application::createVulkanUniqueSemaphores(
         m_vulkanUniqueLogicalDevice,
@@ -1674,10 +1962,44 @@ void quartz::Application::recreateSwapchain() {
     );
 }
 
-void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imageIndex) {
+void quartz::Application::updateUniformBuffer(const uint32_t currentInFlightFrameIndex) {
+    static std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
+    float executionDurationTimeCount = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    quartz::UniformBufferObject ubo;
+    ubo.model = glm::rotate(
+        glm::mat4(1.0f),
+        executionDurationTimeCount * glm::radians(90.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
+    ubo.view = glm::lookAt(
+        glm::vec3(2.0f, 2.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
+    ubo.projection = glm::perspective(
+        glm::radians(45.0f),
+        static_cast<float>(m_vulkanSwapchainExtent.width) / static_cast<float>(m_vulkanSwapchainExtent.height),
+        0.1f,
+        10.0f
+    );
+    ubo.projection[1][1] *= -1; // Because glm is meant for OpenGL where Y clip coordinate is inverted
+
+    memcpy(
+        m_mappedUniformBufferMemories[currentInFlightFrameIndex],
+        &ubo,
+        sizeof(quartz::UniformBufferObject)
+    );
+}
+
+void quartz::Application::resetAndRecordDrawingCommandBuffer(
+    const uint32_t currentInFlightFrameIndex,
+    const uint32_t swapchainImageIndex
+) {
     // ----- reset ----- //
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->reset();
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->reset();
 
     // ----- record things into a command buffer ? ----- //
 
@@ -1686,7 +2008,7 @@ void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imag
         {}
     );
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->begin(commandBufferBeginInfo);
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->begin(commandBufferBeginInfo);
 
     // ----- start a render pass ----- //
 
@@ -1703,16 +2025,16 @@ void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imag
 
     vk::RenderPassBeginInfo renderPassBeginInfo(
         *m_vulkanUniqueRenderPass,
-        *(m_vulkanUniqueFramebuffers[imageIndex]),
+        *(m_vulkanUniqueFramebuffers[swapchainImageIndex]),
         renderPassRenderArea,
         clearScreenColor
     );
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
     // ----- draw (but first bind graphics pipeline and set up viewport and scissor) ----- //
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_vulkanUniqueGraphicsPipeline);
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_vulkanUniqueGraphicsPipeline);
 
     vk::Viewport viewport(
         0.0f,
@@ -1722,7 +2044,7 @@ void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imag
         0.0f,
         1.0f
     );
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->setViewport(
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->setViewport(
         0,
         viewport
     );
@@ -1731,25 +2053,35 @@ void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imag
         vk::Offset2D(0.0f, 0.0f),
         m_vulkanSwapchainExtent
     );
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->setScissor(
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->setScissor(
         0,
         scissor
     );
 
     uint32_t offset = 0;
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->bindVertexBuffers(
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->bindVertexBuffers(
         0,
         *m_vulkanUniqueVertexBuffer,
         offset
     );
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->bindIndexBuffer(
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->bindIndexBuffer(
         *m_vulkanUniqueIndexBuffer,
         0,
         vk::IndexType::eUint32
     );
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->drawIndexed(
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *m_vulkanUniquePipelineLayout,
+        0,
+        1,
+        &(m_vulkanUniqueDescriptorSets[currentInFlightFrameIndex]),
+        0,
+        nullptr
+    );
+
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->drawIndexed(
         m_indices.size(),
         1,
         0,
@@ -1759,9 +2091,9 @@ void quartz::Application::resetAndRecordDrawingCommandBuffer(const uint32_t imag
 
     // ----- finish up ----- //
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->endRenderPass();
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->endRenderPass();
 
-    m_vulkanUniqueDrawingCommandBuffers[imageIndex]->end();
+    m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]->end();
 }
 
 void quartz::Application::drawFrameToWindow(const uint32_t currentInFlightFrameIndex) {
@@ -1777,7 +2109,7 @@ void quartz::Application::drawFrameToWindow(const uint32_t currentInFlightFrameI
         LOG_ERRORthis("Failed to wait for previous frame to finish: {}", static_cast<uint32_t>(waitForInFlightFenceResult));
     }
 
-    // ----- 2. acquire an image from the swapchain ----- //
+    // ----- 2. acquire an image from the swapchain and reset our uniform buffer ----- //
 
     uint32_t availableImageIndex;
     vk::Result acquireAvailableImageIndexResult = m_vulkanUniqueLogicalDevice->acquireNextImageKHR(
@@ -1800,11 +2132,13 @@ void quartz::Application::drawFrameToWindow(const uint32_t currentInFlightFrameI
         LOG_ERRORthis("Failed to retrieve available image index: {}", static_cast<uint32_t>(acquireAvailableImageIndexResult));
     }
 
+    updateUniformBuffer(currentInFlightFrameIndex);
+
     m_vulkanUniqueLogicalDevice->resetFences(*(m_vulkanUniqueInFlightFences[currentInFlightFrameIndex]));
 
     // ----- 3. record a command buffer which draws the scene onto the acquired image ----- //
 
-    this->resetAndRecordDrawingCommandBuffer(availableImageIndex);
+    this->resetAndRecordDrawingCommandBuffer(currentInFlightFrameIndex, availableImageIndex);
 
     // ----- 4. submit the recorded command buffer ----- //
 
@@ -1813,7 +2147,7 @@ void quartz::Application::drawFrameToWindow(const uint32_t currentInFlightFrameI
     vk::SubmitInfo commandBufferSubmitInfo(
         *(m_vulkanUniqueImageAvailableSemaphores[currentInFlightFrameIndex]),
         waitStageMask,
-        *(m_vulkanUniqueDrawingCommandBuffers[availableImageIndex]),
+        *(m_vulkanUniqueDrawingCommandBuffers[currentInFlightFrameIndex]),
         *(m_vulkanUniqueRenderFinishedSemaphores[currentInFlightFrameIndex])
     );
 
