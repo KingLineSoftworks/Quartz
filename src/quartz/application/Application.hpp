@@ -153,8 +153,7 @@ private: // static functions
     );
 
     static std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> getBestPhysicalDeviceAndQueueFamilyIndices(
-        const vk::UniqueInstance& uniqueInstance,
-        const vk::UniqueSurfaceKHR& uniqueSurface
+        const vk::UniqueInstance& uniqueInstance
     );
 
     static std::vector<const char*> getEnabledPhysicalDeviceExtensionNames(
@@ -336,10 +335,6 @@ private: // member variables
     vk::DispatchLoaderDynamic m_vulkanDispatchLoaderDynamic;
     vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_vulkanUniqueDebugMessenger; // we need to use the dynamic loader instead of the static loader (not sure why we can't statically link 😔)
 
-    // window
-    std::shared_ptr<quartz::rendering::Window> mp_window;
-    vk::UniqueSurfaceKHR m_vulkanUniqueSurface;
-
     // device (and its queues)
     std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> m_vulkanPhysicalDeviceAndQueueFamilyIndex; // Because these are both (physical device && queue family indices) determined at the "same" time and truly are coupled
     std::vector<const char*> m_physicalDeviceExtensionNames;
@@ -347,11 +342,15 @@ private: // member variables
     vk::Queue m_vulkanGraphicsQueue;
     vk::Queue m_vulkanPresentQueue;
 
+    // window
+    std::shared_ptr<quartz::rendering::Window> mp_window;
+    vk::UniqueSurfaceKHR m_vulkanUniqueSurface;
+    vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities;
+    vk::SurfaceFormatKHR m_vulkanSurfaceFormat;
+    vk::PresentModeKHR m_vulkanPresentMode;
+    vk::Extent2D m_vulkanSwapchainExtent;
+
     // swapchain
-    vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities; // should maybe go with the window stuff? seems directly related to the surface
-    vk::Extent2D m_vulkanSwapchainExtent; // should maybe go with the window stuff? seems directly related to the surface
-    vk::SurfaceFormatKHR m_vulkanSurfaceFormat; // should maybe go with the window stuff? seems directly related to the surface
-    vk::PresentModeKHR m_vulkanPresentMode; // should maybe go with the window stuff? seems directly related to the surface
     vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
     std::vector<vk::Image> m_vulkanSwapchainImages;
     std::vector<vk::UniqueImageView> m_vulkanUniqueSwapchainImageViews;

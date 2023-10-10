@@ -8,6 +8,7 @@
 
 #include "quartz/core.hpp"
 #include "quartz/application/Application.hpp"
+#include "quartz/application2/Application2.hpp"
 
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
@@ -69,7 +70,36 @@ int main() {
     }
     LOG_INFO(quartz::loggers::GENERAL, "GLFW initialized");
 
-    quartz::Application application(
+//    quartz::Application application(
+//        APPLICATION_NAME,
+//        APPLICATION_MAJOR_VERSION,
+//        APPLICATION_MINOR_VERSION,
+//        APPLICATION_PATCH_VERSION,
+//        800,
+//        600,
+//        validationLayersEnabled
+//    );
+//
+//    try {
+//        application.run();
+//    } catch (const std::exception& e) {
+//        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
+//        return EXIT_FAILURE;
+//    }
+//
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+//    LOG_TRACE(quartz::loggers::GENERAL, "");
+
+    quartz::Application2 application2(
         APPLICATION_NAME,
         APPLICATION_MAJOR_VERSION,
         APPLICATION_MINOR_VERSION,
@@ -80,7 +110,7 @@ int main() {
     );
 
     try {
-        application.run();
+        application2.run();
     } catch (const std::exception& e) {
         LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
         return EXIT_FAILURE;

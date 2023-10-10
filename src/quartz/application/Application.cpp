@@ -22,6 +22,8 @@
 
 #include "quartz/application/Application.hpp"
 
+#include "quartz/rendering/Loggers.hpp"
+
 // ----- uniform buffer object ----- //
 
 quartz::UniformBufferObject::UniformBufferObject(
@@ -346,8 +348,7 @@ vk::UniqueSurfaceKHR quartz::Application::createVulkanSurface(
 }
 
 std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> quartz::Application::getBestPhysicalDeviceAndQueueFamilyIndices(
-    const vk::UniqueInstance& uniqueInstance,
-    const vk::UniqueSurfaceKHR& uniqueSurface
+    const vk::UniqueInstance& uniqueInstance
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "");
 
@@ -380,11 +381,8 @@ std::pair<vk::PhysicalDevice, quartz::Application::QueueFamilyIndices> quartz::A
 
             if (properties.queueFlags & vk::QueueFlagBits::eGraphics) {
                 LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "        - queue family {} supports graphics queues", j);
+                LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "          - assuming implied support for present queues as well");
                 graphicsFamilyIndex = j;
-            }
-
-            if (physicalDevice.getSurfaceSupportKHR(j, *uniqueSurface)) {
-                LOG_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "        - queue family {} supports present queues", j);
                 presentFamilyIndex = j;
             }
 
@@ -1603,18 +1601,8 @@ quartz::Application::Application(
         m_vulkanDispatchLoaderDynamic,
         validationLayersEnabled
     )),
-    mp_window(std::make_shared<quartz::rendering::Window>(
-        m_applicationName,
-        windowWidthPixels,
-        windowHeightPixels
-    )),
-    m_vulkanUniqueSurface(quartz::Application::createVulkanSurface(
-        mp_window->getGLFWwindowPtr(),
-        m_vulkanUniqueInstance
-    )),
     m_vulkanPhysicalDeviceAndQueueFamilyIndex(quartz::Application::getBestPhysicalDeviceAndQueueFamilyIndices(
-        m_vulkanUniqueInstance,
-        m_vulkanUniqueSurface
+        m_vulkanUniqueInstance
     )),
     m_physicalDeviceExtensionNames(quartz::Application::getEnabledPhysicalDeviceExtensionNames(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first)),
     m_vulkanUniqueLogicalDevice(quartz::Application::createVulkanUniqueLogicalDevice(
@@ -1631,11 +1619,16 @@ quartz::Application::Application(
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.second.presentFamilyIndex,
         0
     )),
-    m_vulkanSurfaceCapabilities(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first.getSurfaceCapabilitiesKHR(*m_vulkanUniqueSurface)),
-    m_vulkanSwapchainExtent(quartz::Application::getBestSwapExtent(
-        mp_window->getGLFWwindowPtr(),
-        m_vulkanSurfaceCapabilities
+    mp_window(std::make_shared<quartz::rendering::Window>(
+        m_applicationName,
+        windowWidthPixels,
+        windowHeightPixels
     )),
+    m_vulkanUniqueSurface(quartz::Application::createVulkanSurface(
+        mp_window->getGLFWwindowPtr(),
+        m_vulkanUniqueInstance
+    )),
+    m_vulkanSurfaceCapabilities(m_vulkanPhysicalDeviceAndQueueFamilyIndex.first.getSurfaceCapabilitiesKHR(*m_vulkanUniqueSurface)),
     m_vulkanSurfaceFormat(quartz::Application::getBestSurfaceFormat(
         m_vulkanUniqueSurface,
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.first
@@ -1643,6 +1636,10 @@ quartz::Application::Application(
     m_vulkanPresentMode(quartz::Application::getBestPresentMode(
         m_vulkanUniqueSurface,
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.first
+    )),
+    m_vulkanSwapchainExtent(quartz::Application::getBestSwapExtent(
+        mp_window->getGLFWwindowPtr(),
+        m_vulkanSurfaceCapabilities
     )),
     m_vulkanUniqueSwapchain(quartz::Application::createVulkanUniqueSwapchain(
         m_vulkanUniqueSurface,
@@ -1886,10 +1883,6 @@ void quartz::Application::recreateSwapchain() {
         m_vulkanUniqueInstance
     );
     m_vulkanSurfaceCapabilities = m_vulkanPhysicalDeviceAndQueueFamilyIndex.first.getSurfaceCapabilitiesKHR(*m_vulkanUniqueSurface);
-    m_vulkanSwapchainExtent = quartz::Application::getBestSwapExtent(
-        mp_window->getGLFWwindowPtr(),
-        m_vulkanSurfaceCapabilities
-    );
     m_vulkanSurfaceFormat = quartz::Application::getBestSurfaceFormat(
         m_vulkanUniqueSurface,
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.first
@@ -1897,6 +1890,10 @@ void quartz::Application::recreateSwapchain() {
     m_vulkanPresentMode = quartz::Application::getBestPresentMode(
         m_vulkanUniqueSurface,
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.first
+    );
+    m_vulkanSwapchainExtent = quartz::Application::getBestSwapExtent(
+        mp_window->getGLFWwindowPtr(),
+        m_vulkanSurfaceCapabilities
     );
     m_vulkanUniqueSwapchain = quartz::Application::createVulkanUniqueSwapchain(
         m_vulkanUniqueSurface,
