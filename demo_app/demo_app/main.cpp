@@ -31,8 +31,12 @@ int main() {
         {"FILESYSTEM", quartz::util::Logger::Level::trace},
         {"APPLICATION", quartz::util::Logger::Level::trace},
         {"APPLICATION_INITIALIZATION", quartz::util::Logger::Level::trace},
+        {"VULKAN", quartz::util::Logger::Level::info},
+        {"INSTANCE", quartz::util::Logger::Level::trace},
+        {"DEVICE", quartz::util::Logger::Level::trace},
         {"WINDOW", quartz::util::Logger::Level::trace},
-        {"VULKAN", quartz::util::Logger::Level::info}
+        {"PIPELINE", quartz::util::Logger::Level::trace},
+        {"SWAPCHAIN", quartz::util::Logger::Level::trace},
     });
 
     if (shouldLogPreamble) {
@@ -70,35 +74,24 @@ int main() {
     }
     LOG_INFO(quartz::loggers::GENERAL, "GLFW initialized");
 
-//    quartz::Application application(
-//        APPLICATION_NAME,
-//        APPLICATION_MAJOR_VERSION,
-//        APPLICATION_MINOR_VERSION,
-//        APPLICATION_PATCH_VERSION,
-//        800,
-//        600,
-//        validationLayersEnabled
-//    );
-//
-//    try {
-//        application.run();
-//    } catch (const std::exception& e) {
-//        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
-//        return EXIT_FAILURE;
-//    }
-//
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
-//    LOG_TRACE(quartz::loggers::GENERAL, "");
+#if false
+    quartz::Application application(
+        APPLICATION_NAME,
+        APPLICATION_MAJOR_VERSION,
+        APPLICATION_MINOR_VERSION,
+        APPLICATION_PATCH_VERSION,
+        800,
+        600,
+        validationLayersEnabled
+    );
 
+    try {
+        application.run();
+    } catch (const std::exception& e) {
+        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
+        return EXIT_FAILURE;
+    }
+#else
     quartz::Application2 application2(
         APPLICATION_NAME,
         APPLICATION_MAJOR_VERSION,
@@ -115,6 +108,7 @@ int main() {
         LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }
+#endif
 
     LOG_TRACE(quartz::loggers::GENERAL, "Terminating");
     return EXIT_SUCCESS;

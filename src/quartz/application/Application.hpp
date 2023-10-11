@@ -350,11 +350,6 @@ private: // member variables
     vk::PresentModeKHR m_vulkanPresentMode;
     vk::Extent2D m_vulkanSwapchainExtent;
 
-    // swapchain
-    vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
-    std::vector<vk::Image> m_vulkanSwapchainImages;
-    std::vector<vk::UniqueImageView> m_vulkanUniqueSwapchainImageViews;
-
     // graphics pipeline
     vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
     vk::UniqueShaderModule m_vulkanUniqueFragmentShaderModule;
@@ -364,9 +359,12 @@ private: // member variables
     vk::UniqueRenderPass m_vulkanUniqueRenderPass;
     vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
 
+    // swapchain
+    vk::UniqueSwapchainKHR m_vulkanUniqueSwapchain;
+    std::vector<vk::Image> m_vulkanSwapchainImages;
+    std::vector<vk::UniqueImageView> m_vulkanUniqueSwapchainImageViews;
     // Framebuffer tings
     std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
-
     // command pools and buffers and synchronization objects
     vk::UniqueCommandPool m_vulkanUniqueDrawingCommandPool;
     const uint32_t m_maxNumFramesInFlight;
@@ -375,7 +373,7 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
     std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
 
-    // Scene drawing information
+    // Scene drawing information (should go with graphics pipeline?)
     std::vector<quartz::Vertex> m_vertices;
     vk::UniqueBuffer m_vulkanUniqueVertexStagingBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexStagingBufferMemory;

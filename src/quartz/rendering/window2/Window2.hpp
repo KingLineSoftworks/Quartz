@@ -30,6 +30,11 @@ public: // interface
     USE_LOGGER(WINDOW);
 
     const std::shared_ptr<GLFWwindow>& getGLFWwindowPtr() const { return mp_glfwWindow; }
+    const vk::UniqueSurfaceKHR& getVulkanSurfacePtr() const { return mp_vulkanSurface; }
+    const vk::SurfaceCapabilitiesKHR& getVulkanSurfaceCapabilities() const { return m_vulkanSurfaceCapabilities; }
+    const vk::SurfaceFormatKHR& getVulkanSurfaceFormat() const { return m_vulkanSurfaceFormat; }
+    const vk::PresentModeKHR& getVulkanPresentMode() const { return m_vulkanPresentMode; }
+    const vk::Extent2D& getVulkanExtent() const { return m_vulkanExtent; }
 
     bool shouldClose() const;
 
@@ -75,12 +80,12 @@ private: // member variables
     uint32_t m_heightPixels;
     bool m_wasResized;
 
-    UNUSED std::shared_ptr<GLFWwindow> mp_glfwWindow;
-    UNUSED vk::UniqueSurfaceKHR mp_vulkanSurface;
-    UNUSED vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities;
-    UNUSED vk::SurfaceFormatKHR m_vulkanSurfaceFormat;
-    UNUSED vk::PresentModeKHR m_vulkanPresentMode;
-    UNUSED vk::Extent2D m_vulkanExtent;
+    std::shared_ptr<GLFWwindow> mp_glfwWindow;
+    vk::UniqueSurfaceKHR mp_vulkanSurface;
+    vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities;
+    vk::SurfaceFormatKHR m_vulkanSurfaceFormat;
+    vk::PresentModeKHR m_vulkanPresentMode;
+    vk::Extent2D m_vulkanExtent;
 
 private: // friends
     friend void quartz::rendering::Window2::glfwFramebufferSizeCallback(

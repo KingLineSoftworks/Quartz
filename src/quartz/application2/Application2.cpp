@@ -5,8 +5,8 @@ quartz::Application2::Application2(
     const uint32_t applicationMajorVersion,
     const uint32_t applicationMinorVersion,
     const uint32_t applicationPatchVersion,
-    UNUSED const uint32_t windowWidthPixels,
-    UNUSED const uint32_t windowHeightPixels,
+    const uint32_t windowWidthPixels,
+    const uint32_t windowHeightPixels,
     const bool validationLayersEnabled
 ) :
     m_applicationName(applicationName),
@@ -27,6 +27,14 @@ quartz::Application2::Application2(
         windowHeightPixels,
         m_renderingInstance,
         m_renderingDevice
+    ),
+    m_renderingPipeline(
+        m_renderingDevice,
+        m_renderingWindow
+    ),
+    m_renderingSwapchain(
+        m_renderingDevice,
+        m_renderingWindow
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -38,4 +46,9 @@ quartz::Application2::~Application2() {
 
 void quartz::Application2::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
+
+    LOG_TRACEthis("Beginning main loop");
+    while(!m_renderingWindow.shouldClose()) {
+        glfwPollEvents();
+    }
 }

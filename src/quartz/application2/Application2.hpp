@@ -6,6 +6,8 @@
 
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/instance/Instance.hpp"
+#include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/window2/Window2.hpp"
 
 namespace quartz {
@@ -38,4 +40,6 @@ private: // member variables
     quartz::rendering::Instance m_renderingInstance;
     quartz::rendering::Device m_renderingDevice;
     quartz::rendering::Window2 m_renderingWindow;
+    quartz::rendering::Pipeline m_renderingPipeline;
+    quartz::rendering::Swapchain m_renderingSwapchain;
 };

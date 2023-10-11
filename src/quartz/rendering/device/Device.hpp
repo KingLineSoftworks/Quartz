@@ -20,6 +20,8 @@ public: // member functions
     USE_LOGGER(DEVICE);
 
     const vk::PhysicalDevice& getVulkanPhysicalDevice() const { return m_vulkanPhysicalDevice; }
+    uint32_t getGraphicsQueueFamilyIndex() const { return m_graphicsQueueFamilyIndex; }
+    const vk::UniqueDevice& getVulkanLogicalDevicePtr() const { return mp_vulkanLogicalDevice; }
 
 private: // static functions
 

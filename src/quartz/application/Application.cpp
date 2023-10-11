@@ -1641,21 +1641,6 @@ quartz::Application::Application(
         mp_window->getGLFWwindowPtr(),
         m_vulkanSurfaceCapabilities
     )),
-    m_vulkanUniqueSwapchain(quartz::Application::createVulkanUniqueSwapchain(
-        m_vulkanUniqueSurface,
-        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
-        m_vulkanUniqueLogicalDevice,
-        m_vulkanSurfaceCapabilities,
-        m_vulkanSwapchainExtent,
-        m_vulkanSurfaceFormat,
-        m_vulkanPresentMode
-    )),
-    m_vulkanSwapchainImages(m_vulkanUniqueLogicalDevice->getSwapchainImagesKHR(*m_vulkanUniqueSwapchain)),
-    m_vulkanUniqueSwapchainImageViews(quartz::Application::createVulkanUniqueSwapchainImageViews(
-        m_vulkanUniqueLogicalDevice,
-        m_vulkanSurfaceFormat,
-        m_vulkanSwapchainImages
-    )),
     m_vulkanUniqueVertexShaderModule(quartz::Application::createVulkanUniqueShaderModule(
         m_vulkanUniqueLogicalDevice,
         quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.vert.spv")
@@ -1685,6 +1670,21 @@ quartz::Application::Application(
         m_pipelineInformation,
         m_vulkanUniquePipelineLayout,
         m_vulkanUniqueRenderPass
+    )),
+    m_vulkanUniqueSwapchain(quartz::Application::createVulkanUniqueSwapchain(
+        m_vulkanUniqueSurface,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceCapabilities,
+        m_vulkanSwapchainExtent,
+        m_vulkanSurfaceFormat,
+        m_vulkanPresentMode
+    )),
+    m_vulkanSwapchainImages(m_vulkanUniqueLogicalDevice->getSwapchainImagesKHR(*m_vulkanUniqueSwapchain)),
+    m_vulkanUniqueSwapchainImageViews(quartz::Application::createVulkanUniqueSwapchainImageViews(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceFormat,
+        m_vulkanSwapchainImages
     )),
     m_vulkanUniqueFramebuffers(quartz::Application::createVulkanUniqueFramebuffers(
         m_vulkanUniqueLogicalDevice,

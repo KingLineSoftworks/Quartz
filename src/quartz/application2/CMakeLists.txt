@@ -21,11 +21,12 @@ target_link_libraries(
 #        vulkan
 
         PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
-        QUARTZ_RENDERING_Instance
         QUARTZ_RENDERING_Device
+        QUARTZ_RENDERING_Instance
+        QUARTZ_RENDERING_Pipeline
+        QUARTZ_RENDERING_Swapchain
         QUARTZ_RENDERING_Window2
 )
