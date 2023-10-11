@@ -19,6 +19,8 @@ public: // member functions
 
     USE_LOGGER(DEVICE);
 
+    const vk::PhysicalDevice& getVulkanPhysicalDevice() const { return m_vulkanPhysicalDevice; }
+
 private: // static functions
 
     static vk::PhysicalDevice getBestPhysicalDevice(const vk::UniqueInstance& p_instance);

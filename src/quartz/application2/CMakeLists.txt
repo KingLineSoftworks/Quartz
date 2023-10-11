@@ -27,5 +27,5 @@ target_link_libraries(
         PUBLIC
         QUARTZ_RENDERING_Instance
         QUARTZ_RENDERING_Device
-#        QUARTZ_RENDERING_Window2
+        QUARTZ_RENDERING_Window2
 )

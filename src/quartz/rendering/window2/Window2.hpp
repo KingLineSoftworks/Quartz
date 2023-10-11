@@ -2,9 +2,13 @@
 
 #include <string>
 
+#include <vulkan/vulkan.hpp>
+
 #include <GLFW/glfw3.h>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/instance/Instance.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -17,7 +21,9 @@ public: // interface
     Window2(
         const std::string& name,
         const uint32_t widthPixels,
-        const uint32_t heightPixels
+        const uint32_t heightPixels,
+        const quartz::rendering::Instance& renderingInstance,
+        const quartz::rendering::Device& renderingDevice
     );
     ~Window2();
 
@@ -45,6 +51,22 @@ private: // static functions
         const uint32_t heightPixels,
         const void* p_windowUser
     );
+    static vk::UniqueSurfaceKHR createVulkanSurfaceUniquePtr(
+        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+        const vk::UniqueInstance& p_instance
+    );
+    static vk::SurfaceFormatKHR getBestSurfaceFormat(
+        const vk::UniqueSurfaceKHR& p_surface,
+        const vk::PhysicalDevice& physicalDevice
+    );
+    static vk::PresentModeKHR getBestPresentMode(
+        const vk::UniqueSurfaceKHR& p_surface,
+        const vk::PhysicalDevice& physicalDevice
+    );
+    static vk::Extent2D getBestVulkanExtent(
+        const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
+        const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
+    );
 
 private: // member variables
     const std::string m_name;
@@ -53,7 +75,12 @@ private: // member variables
     uint32_t m_heightPixels;
     bool m_wasResized;
 
-    std::shared_ptr<GLFWwindow> mp_glfwWindow;
+    UNUSED std::shared_ptr<GLFWwindow> mp_glfwWindow;
+    UNUSED vk::UniqueSurfaceKHR mp_vulkanSurface;
+    UNUSED vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities;
+    UNUSED vk::SurfaceFormatKHR m_vulkanSurfaceFormat;
+    UNUSED vk::PresentModeKHR m_vulkanPresentMode;
+    UNUSED vk::Extent2D m_vulkanExtent;
 
 private: // friends
     friend void quartz::rendering::Window2::glfwFramebufferSizeCallback(

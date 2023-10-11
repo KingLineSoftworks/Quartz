@@ -17,6 +17,7 @@ target_link_libraries(
 
         PUBLIC
         glfw
+        vulkan
 
         PUBLIC
         UTIL_Logger

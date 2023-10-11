@@ -6,6 +6,7 @@
 
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/instance/Instance.hpp"
+#include "quartz/rendering/window2/Window2.hpp"
 
 namespace quartz {
     class Application2;
@@ -36,4 +37,5 @@ private: // member variables
 
     quartz::rendering::Instance m_renderingInstance;
     quartz::rendering::Device m_renderingDevice;
+    quartz::rendering::Window2 m_renderingWindow;
 };

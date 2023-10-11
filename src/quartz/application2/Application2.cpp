@@ -20,7 +20,14 @@ quartz::Application2::Application2(
         m_patchVersion,
         validationLayersEnabled
     ),
-    m_renderingDevice(m_renderingInstance)
+    m_renderingDevice(m_renderingInstance),
+    m_renderingWindow(
+        m_applicationName,
+        windowWidthPixels,
+        windowHeightPixels,
+        m_renderingInstance,
+        m_renderingDevice
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
