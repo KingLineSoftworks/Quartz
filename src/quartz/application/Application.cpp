@@ -703,7 +703,7 @@ vk::UniqueShaderModule quartz::Application::createVulkanUniqueShaderModule(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION_INITIALIZATION, "{}", filepath);
 
-    const std::vector<char> shaderBytes = quartz::util::FileSystem::readBytesFromFile(filepath);
+    const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(filepath);
 
     vk::ShaderModuleCreateInfo shaderModuleCreateInfo(
         {},
@@ -1644,11 +1644,11 @@ quartz::Application::Application(
     m_maxNumFramesInFlight(2),
     m_vulkanUniqueVertexShaderModule(quartz::Application::createVulkanUniqueShaderModule(
         m_vulkanUniqueLogicalDevice,
-        quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.vert.spv")
+        util::FileSystem::getAbsoluteFilepathInProject("shader.vert.spv")
     )),
     m_vulkanUniqueFragmentShaderModule(quartz::Application::createVulkanUniqueShaderModule(
         m_vulkanUniqueLogicalDevice,
-        quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
+        util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
     )),
     m_vulkanUniqueUniformBuffers(quartz::Application::createVulkanUniqueBuffers(
         m_vulkanUniqueLogicalDevice,

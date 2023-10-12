@@ -3,13 +3,11 @@
 #include <vector>
 #include <string>
 
-namespace quartz {
 namespace util {
     class FileSystem;
 }
-}
 
-class quartz::util::FileSystem {
+class util::FileSystem {
 public:
     static std::string getAbsoluteFilepathInProject(const std::string& filepathInProject);
     static std::vector<char> readBytesFromFile(const std::string& filepath);
