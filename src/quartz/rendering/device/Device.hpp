@@ -13,7 +13,6 @@ namespace rendering {
 
 class quartz::rendering::Device {
 public: // member functions
-
     Device(const quartz::rendering::Instance& renderingInstance);
     ~Device();
 
@@ -24,10 +23,15 @@ public: // member functions
     const vk::UniqueDevice& getVulkanLogicalDevicePtr() const { return mp_vulkanLogicalDevice; }
 
 private: // static functions
-
-    static vk::PhysicalDevice getBestPhysicalDevice(const vk::UniqueInstance& p_instance);
-    static uint32_t getGraphicsQueueFamilyIndex(const vk::PhysicalDevice& physicalDevice);
-    static std::vector<const char*> getEnabledPhysicalDeviceExtensionNames(const vk::PhysicalDevice& physicalDevice);
+    static vk::PhysicalDevice getBestPhysicalDevice(
+        const vk::UniqueInstance& p_instance
+    );
+    static uint32_t getGraphicsQueueFamilyIndex(
+        const vk::PhysicalDevice& physicalDevice
+    );
+    static std::vector<const char*> getEnabledPhysicalDeviceExtensionNames(
+        const vk::PhysicalDevice& physicalDevice
+    );
     static vk::UniqueDevice createVulkanLogicalDeviceUniquePtr(
         const vk::PhysicalDevice& physicalDevice,
         const uint32_t graphicsQueueFamilyIndex,
@@ -36,7 +40,6 @@ private: // static functions
     );
 
 private: // member variables
-
     vk::PhysicalDevice m_vulkanPhysicalDevice;
     const uint32_t m_graphicsQueueFamilyIndex;
     const std::vector<const char*> m_physicalDeviceExtensionNames;

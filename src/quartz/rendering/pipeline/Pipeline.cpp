@@ -322,8 +322,10 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
 quartz::rendering::Pipeline::Pipeline(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Window2& renderingWindow
+    const quartz::rendering::Window2& renderingWindow,
+    const uint32_t maxNumFramesInFlight
 ) :
+    m_maxNumFramesInFlight(maxNumFramesInFlight),
     m_vulkanVertexInputBindingDescriptions(quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()),
     m_vulkanVertexInputAttributeDescriptions(quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions()),
     m_vulkanViewports({
@@ -371,16 +373,21 @@ quartz::rendering::Pipeline::Pipeline(
         renderingDevice.getVulkanLogicalDevicePtr(),
         quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
     )),
+    m_vulkanUniformBufferPtrs(),
+    m_vulkanUniformBufferMemoryPtrs(),
+    m_mappedUniformBufferMemoryPtrs(),
     mp_vulkanDescriptorSetLayout(quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr()
+    )),
+    m_vulkanDescriptorPoolPtr(),
+    m_vulkanDescriptorSets(),
+    mp_vulkanRenderPass(quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanSurfaceFormat()
     )),
     mp_vulkanPipelineLayout(quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         mp_vulkanDescriptorSetLayout
-    )),
-    mp_vulkanRenderPass(quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfaceFormat()
     )),
     mp_vulkanUniqueGraphicsPipeline(quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr(),

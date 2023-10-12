@@ -1641,6 +1641,7 @@ quartz::Application::Application(
         mp_window->getGLFWwindowPtr(),
         m_vulkanSurfaceCapabilities
     )),
+    m_maxNumFramesInFlight(2),
     m_vulkanUniqueVertexShaderModule(quartz::Application::createVulkanUniqueShaderModule(
         m_vulkanUniqueLogicalDevice,
         quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.vert.spv")
@@ -1649,21 +1650,54 @@ quartz::Application::Application(
         m_vulkanUniqueLogicalDevice,
         quartz::util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
     )),
-    m_pipelineInformation(quartz::Application::getPipelineInformation(
-        m_vulkanSwapchainExtent,
-        m_vulkanUniqueVertexShaderModule,
-        m_vulkanUniqueFragmentShaderModule
+    m_vulkanUniqueUniformBuffers(quartz::Application::createVulkanUniqueBuffers(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight,
+        sizeof(quartz::UniformBufferObject),
+        vk::BufferUsageFlagBits::eUniformBuffer
+    )),
+    m_vulkanUniqueUniformBufferMemories(quartz::Application::allocateVulkanUniqueBufferMemories(
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
+        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
+        m_vulkanUniqueLogicalDevice,
+        sizeof(quartz::UniformBufferObject),
+        std::vector<void*>(m_vulkanUniqueUniformBuffers.size(), nullptr),
+        m_vulkanUniqueUniformBuffers,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        std::vector<vk::UniqueBuffer*>(m_vulkanUniqueUniformBuffers.size(), nullptr),
+        m_vulkanGraphicsQueue
+    )),
+    m_mappedUniformBufferMemories(quartz::Application::mapVulkanUniqueBufferMemories(
+        m_vulkanUniqueLogicalDevice,
+        sizeof(quartz::UniformBufferObject),
+        m_vulkanUniqueUniformBufferMemories
     )),
     m_vulkanUniqueDescriptorSetLayout(quartz::Application::createVulkanUniqueDescriptorSetLayout(
         m_vulkanUniqueLogicalDevice
+    )),
+    m_vulkanUniqueDescriptorPool(quartz::Application::createVulkanUniqueDescriptorPool(
+        m_vulkanUniqueLogicalDevice,
+        m_maxNumFramesInFlight
+    )),
+    m_vulkanUniqueDescriptorSets(quartz::Application::allocateVulkanUniqueDescriptorSets(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanUniqueDescriptorSetLayout,
+        m_maxNumFramesInFlight,
+        m_vulkanUniqueUniformBuffers,
+        m_vulkanUniqueDescriptorPool
+    )),
+    m_vulkanUniqueRenderPass(quartz::Application::createVulkanUniqueRenderPass(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceFormat.format
     )),
     m_vulkanUniquePipelineLayout(quartz::Application::createVulkanUniquePipelineLayout(
         m_vulkanUniqueLogicalDevice,
         m_vulkanUniqueDescriptorSetLayout
     )),
-    m_vulkanUniqueRenderPass(quartz::Application::createVulkanUniqueRenderPass(
-        m_vulkanUniqueLogicalDevice,
-        m_vulkanSurfaceFormat.format
+    m_pipelineInformation(quartz::Application::getPipelineInformation(
+        m_vulkanSwapchainExtent,
+        m_vulkanUniqueVertexShaderModule,
+        m_vulkanUniqueFragmentShaderModule
     )),
     m_vulkanUniqueGraphicsPipeline(quartz::Application::createVulkanUniqueGraphicsPipeline(
         m_vulkanUniqueLogicalDevice,
@@ -1697,7 +1731,6 @@ quartz::Application::Application(
         m_vulkanUniqueLogicalDevice,
         vk::CommandPoolCreateFlagBits::eResetCommandBuffer
     )),
-    m_maxNumFramesInFlight(2),
     m_vulkanUniqueDrawingCommandBuffers(quartz::Application::createVulkanUniqueDrawingCommandBuffers(
         m_vulkanUniqueLogicalDevice,
         m_vulkanUniqueDrawingCommandPool,
@@ -1784,39 +1817,6 @@ quartz::Application::Application(
         &m_vulkanUniqueIndexStagingBuffer,
         m_vulkanGraphicsQueue,
         false
-    )),
-    m_vulkanUniqueUniformBuffers(quartz::Application::createVulkanUniqueBuffers(
-        m_vulkanUniqueLogicalDevice,
-        m_maxNumFramesInFlight,
-        sizeof(quartz::UniformBufferObject),
-        vk::BufferUsageFlagBits::eUniformBuffer
-    )),
-    m_vulkanUniqueUniformBufferMemories(quartz::Application::allocateVulkanUniqueBufferMemories(
-        m_vulkanPhysicalDeviceAndQueueFamilyIndex.first,
-        m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
-        m_vulkanUniqueLogicalDevice,
-        sizeof(quartz::UniformBufferObject),
-        std::vector<void*>(m_vulkanUniqueUniformBuffers.size(), nullptr),
-        m_vulkanUniqueUniformBuffers,
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        std::vector<vk::UniqueBuffer*>(m_vulkanUniqueUniformBuffers.size(), nullptr),
-        m_vulkanGraphicsQueue
-    )),
-    m_mappedUniformBufferMemories(quartz::Application::mapVulkanUniqueBufferMemories(
-        m_vulkanUniqueLogicalDevice,
-        sizeof(quartz::UniformBufferObject),
-        m_vulkanUniqueUniformBufferMemories
-    )),
-    m_vulkanUniqueDescriptorPool(quartz::Application::createVulkanUniqueDescriptorPool(
-        m_vulkanUniqueLogicalDevice,
-        m_maxNumFramesInFlight
-    )),
-    m_vulkanUniqueDescriptorSets(quartz::Application::allocateVulkanUniqueDescriptorSets(
-        m_vulkanUniqueLogicalDevice,
-        m_vulkanUniqueDescriptorSetLayout,
-        m_maxNumFramesInFlight,
-        m_vulkanUniqueUniformBuffers,
-        m_vulkanUniqueDescriptorPool
     ))
 {
     LOG_FUNCTION_CALL_TRACEthis("{} version {}.{}.{}", m_applicationName, m_majorVersion, m_minorVersion, m_patchVersion);

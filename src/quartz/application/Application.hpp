@@ -351,12 +351,23 @@ private: // member variables
     vk::Extent2D m_vulkanSwapchainExtent;
 
     // graphics pipeline
+    const uint32_t m_maxNumFramesInFlight;
+    // shaders
     vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
     vk::UniqueShaderModule m_vulkanUniqueFragmentShaderModule;
-    quartz::Application::PipelineInformation m_pipelineInformation;
+    // uniform buffers for shader uniforms
+    std::vector<vk::UniqueBuffer> m_vulkanUniqueUniformBuffers;
+    std::vector<vk::UniqueDeviceMemory> m_vulkanUniqueUniformBufferMemories;
+    std::vector<void*> m_mappedUniformBufferMemories;
+    // descriptor sets
     vk::UniqueDescriptorSetLayout m_vulkanUniqueDescriptorSetLayout;
-    vk::UniquePipelineLayout m_vulkanUniquePipelineLayout;
+    vk::UniqueDescriptorPool m_vulkanUniqueDescriptorPool;
+    std::vector<vk::DescriptorSet> m_vulkanUniqueDescriptorSets;
+    // render pass
     vk::UniqueRenderPass m_vulkanUniqueRenderPass;
+    // graphics pipeline
+    vk::UniquePipelineLayout m_vulkanUniquePipelineLayout;
+    quartz::Application::PipelineInformation m_pipelineInformation;
     vk::UniquePipeline m_vulkanUniqueGraphicsPipeline;
 
     // swapchain
@@ -365,9 +376,8 @@ private: // member variables
     std::vector<vk::UniqueImageView> m_vulkanUniqueSwapchainImageViews;
     // Framebuffer tings
     std::vector<vk::UniqueFramebuffer> m_vulkanUniqueFramebuffers;
-    // command pools and buffers and synchronization objects
+    // command pools/buffers and synchronization objects
     vk::UniqueCommandPool m_vulkanUniqueDrawingCommandPool;
-    const uint32_t m_maxNumFramesInFlight;
     std::vector<vk::UniqueCommandBuffer> m_vulkanUniqueDrawingCommandBuffers;
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueImageAvailableSemaphores;
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
@@ -384,9 +394,4 @@ private: // member variables
     vk::UniqueDeviceMemory m_vulkanUniqueIndexStagingBufferMemory;
     vk::UniqueBuffer m_vulkanUniqueIndexBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueIndexBufferMemory;
-    std::vector<vk::UniqueBuffer> m_vulkanUniqueUniformBuffers;
-    std::vector<vk::UniqueDeviceMemory> m_vulkanUniqueUniformBufferMemories;
-    std::vector<void*> m_mappedUniformBufferMemories;
-    vk::UniqueDescriptorPool m_vulkanUniqueDescriptorPool;
-    std::vector<vk::DescriptorSet> m_vulkanUniqueDescriptorSets;
 };

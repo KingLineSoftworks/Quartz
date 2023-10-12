@@ -81,6 +81,7 @@ private: // member variables
     bool m_wasResized;
 
     std::shared_ptr<GLFWwindow> mp_glfwWindow;
+
     vk::UniqueSurfaceKHR mp_vulkanSurface;
     vk::SurfaceCapabilitiesKHR m_vulkanSurfaceCapabilities;
     vk::SurfaceFormatKHR m_vulkanSurfaceFormat;

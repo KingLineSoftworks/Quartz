@@ -74,7 +74,7 @@ int main() {
     }
     LOG_INFO(quartz::loggers::GENERAL, "GLFW initialized");
 
-#if false
+#if true
     quartz::Application application(
         APPLICATION_NAME,
         APPLICATION_MAJOR_VERSION,

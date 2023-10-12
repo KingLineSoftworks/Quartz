@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
@@ -16,9 +18,13 @@ class quartz::rendering::Pipeline {
 public: // member functions
     Pipeline(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window2& renderingWindow
+        const quartz::rendering::Window2& renderingWindow,
+        const uint32_t maxNumFramesInFlight
     );
     ~Pipeline();
+
+    uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
+    const vk::UniqueRenderPass& getVulkanRenderPassPtr() const { return mp_vulkanRenderPass; }
 
     USE_LOGGER(PIPELINE);
 
@@ -53,6 +59,7 @@ private: // static functions
     );
 
 private: // member variables
+    const uint32_t m_maxNumFramesInFlight;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
     std::array<vk::VertexInputAttributeDescription, 2> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
@@ -62,8 +69,17 @@ private: // member variables
 
     vk::UniqueShaderModule mp_vulkanVertexShaderModule;
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
+
+    std::vector<vk::UniqueBuffer> m_vulkanUniformBufferPtrs;
+    std::vector<vk::UniqueDeviceMemory> m_vulkanUniformBufferMemoryPtrs;
+    std::vector<void*> m_mappedUniformBufferMemoryPtrs;
+
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
-    vk::UniquePipelineLayout mp_vulkanPipelineLayout;
+    vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
+    std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;
+
     vk::UniqueRenderPass mp_vulkanRenderPass;
+
+    vk::UniquePipelineLayout mp_vulkanPipelineLayout;
     vk::UniquePipeline mp_vulkanUniqueGraphicsPipeline;
 };

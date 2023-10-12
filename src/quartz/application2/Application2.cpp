@@ -30,11 +30,13 @@ quartz::Application2::Application2(
     ),
     m_renderingPipeline(
         m_renderingDevice,
-        m_renderingWindow
+        m_renderingWindow,
+        2
     ),
     m_renderingSwapchain(
         m_renderingDevice,
-        m_renderingWindow
+        m_renderingWindow,
+        m_renderingPipeline
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
