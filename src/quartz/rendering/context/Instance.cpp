@@ -1,8 +1,8 @@
 #include <vulkan/vulkan.hpp>
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
-#include "quartz/rendering/instance/Instance.hpp"
+#include "Instance.hpp"
 
 VKAPI_ATTR VkBool32 VKAPI_CALL quartz::rendering::Instance::vulkanDebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

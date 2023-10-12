@@ -4,11 +4,11 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/instance/Instance.hpp"
+#include "quartz/rendering/context/Device.hpp"
+#include "quartz/rendering/context/Instance.hpp"
 
 namespace quartz {
 namespace rendering {

@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/instance/Instance.hpp"
+#include "Instance.hpp"
 
 namespace quartz {
 namespace rendering {

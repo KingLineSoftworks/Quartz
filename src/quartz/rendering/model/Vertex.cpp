@@ -1,4 +1,4 @@
-#include "quartz/rendering/vertex/Vertex.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
 #include <glm/vec3.hpp>
 
 #include <vulkan/vulkan.hpp>

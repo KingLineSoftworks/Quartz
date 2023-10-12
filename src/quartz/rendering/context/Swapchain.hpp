@@ -5,9 +5,9 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/pipeline/Pipeline.hpp"
-#include "quartz/rendering/window2/Window2.hpp"
+#include "quartz/rendering/context/Device.hpp"
+#include "quartz/rendering/context/Pipeline.hpp"
+#include "Window2.hpp"
 
 namespace quartz {
 namespace rendering {

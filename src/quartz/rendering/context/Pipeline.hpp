@@ -5,8 +5,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/window2/Window2.hpp"
+#include "quartz/rendering/context/Device.hpp"
+#include "Window2.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -36,13 +36,13 @@ private: // static functions
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutUniquePtr(
         const vk::UniqueDevice& p_logicalDevice
     );
-    static vk::UniquePipelineLayout createVulkanPipelineLayoutUniquePtr(
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
-    );
     static vk::UniqueRenderPass createVulkanRenderPassUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::SurfaceFormatKHR& surfaceFormat
+    );
+    static vk::UniquePipelineLayout createVulkanPipelineLayoutUniquePtr(
+        const vk::UniqueDevice& p_logicalDevice,
+        const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
     );
     static vk::UniquePipeline createVulkanGraphicsPipelineUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,
@@ -73,7 +73,6 @@ private: // member variables
     std::vector<vk::UniqueBuffer> m_vulkanUniformBufferPtrs;
     std::vector<vk::UniqueDeviceMemory> m_vulkanUniformBufferMemoryPtrs;
     std::vector<void*> m_mappedUniformBufferMemoryPtrs;
-
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
     vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
     std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;

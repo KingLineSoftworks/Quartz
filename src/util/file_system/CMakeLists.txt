@@ -1,5 +1,5 @@
 #====================================================================
-# The file system library
+# The file system utility library
 #====================================================================
 add_library(
     UTIL_FileSystem
@@ -14,6 +14,7 @@ target_compile_options(
 
 target_link_libraries(
     UTIL_FileSystem
+
     PUBLIC
     UTIL_Logger
 )

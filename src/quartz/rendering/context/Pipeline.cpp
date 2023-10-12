@@ -4,10 +4,10 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/pipeline/Pipeline.hpp"
-#include "quartz/rendering/vertex/Vertex.hpp"
-#include "quartz/rendering/window2/Window2.hpp"
+#include "quartz/rendering/context/Device.hpp"
+#include "Pipeline.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
+#include "Window2.hpp"
 
 vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -64,32 +64,6 @@ vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescripto
     LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::DescriptorSetLayout");
 
     return p_descriptorSetLayout;
-}
-
-vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
-) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
-
-    vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
-        {},
-        1,
-        &(*p_descriptorSetLayout),
-        0,
-        nullptr
-    );
-
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::PipelineLayout");
-    vk::UniquePipelineLayout p_pipelineLayout = p_logicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
-
-    if (!p_pipelineLayout) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::PipelineLayout");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::PipelineLayout");
-
-    return p_pipelineLayout;
 }
 
 vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
@@ -154,18 +128,44 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
     return p_renderPass;
 }
 
+vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
+
+    vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
+        {},
+        1,
+        &(*p_descriptorSetLayout),
+        0,
+        nullptr
+    );
+
+    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::PipelineLayout");
+    vk::UniquePipelineLayout p_pipelineLayout = p_logicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
+
+    if (!p_pipelineLayout) {
+        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::PipelineLayout");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::PipelineLayout");
+
+    return p_pipelineLayout;
+}
+
 vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
-    UNUSED const vk::UniqueDevice& p_logicalDevice,
-    UNUSED const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-    UNUSED const std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions,
-    UNUSED const std::vector<vk::Viewport> viewports,
-    UNUSED const std::vector<vk::Rect2D> scissorRectangles,
-    UNUSED const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
-    UNUSED const std::vector<vk::DynamicState> dynamicStates,
-    UNUSED const vk::UniqueShaderModule& p_vertexShaderModule,
-    UNUSED const vk::UniqueShaderModule& p_fragmentShaderModule,
-    UNUSED const vk::UniquePipelineLayout& p_pipelineLayout,
-    UNUSED const vk::UniqueRenderPass& p_renderPass
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
+    const std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions,
+    const std::vector<vk::Viewport> viewports,
+    const std::vector<vk::Rect2D> scissorRectangles,
+    const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
+    const std::vector<vk::DynamicState> dynamicStates,
+    const vk::UniqueShaderModule& p_vertexShaderModule,
+    const vk::UniqueShaderModule& p_fragmentShaderModule,
+    const vk::UniquePipelineLayout& p_pipelineLayout,
+    const vk::UniqueRenderPass& p_renderPass
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
 

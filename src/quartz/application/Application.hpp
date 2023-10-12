@@ -355,11 +355,10 @@ private: // member variables
     // shaders
     vk::UniqueShaderModule m_vulkanUniqueVertexShaderModule;
     vk::UniqueShaderModule m_vulkanUniqueFragmentShaderModule;
-    // uniform buffers for shader uniforms
+    // uniform buffers for shader uniforms and their descriptor sets
     std::vector<vk::UniqueBuffer> m_vulkanUniqueUniformBuffers;
     std::vector<vk::UniqueDeviceMemory> m_vulkanUniqueUniformBufferMemories;
     std::vector<void*> m_mappedUniformBufferMemories;
-    // descriptor sets
     vk::UniqueDescriptorSetLayout m_vulkanUniqueDescriptorSetLayout;
     vk::UniqueDescriptorPool m_vulkanUniqueDescriptorPool;
     std::vector<vk::DescriptorSet> m_vulkanUniqueDescriptorSets;

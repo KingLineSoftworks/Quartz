@@ -3,8 +3,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/instance/Instance.hpp"
+#include "Device.hpp"
+#include "Instance.hpp"
 
 vk::PhysicalDevice quartz::rendering::Device::getBestPhysicalDevice(
     const vk::UniqueInstance& p_instance
