@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <glm/mat4x4.hpp>
+
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
@@ -11,9 +13,26 @@
 
 namespace quartz {
 namespace rendering {
+    struct UniformBufferObject;
     class Pipeline;
 }
 }
+
+struct quartz::rendering::UniformBufferObject {
+public: // member functions
+    UniformBufferObject() = default;
+
+    UniformBufferObject(
+        glm::mat4 model_,
+        glm::mat4 view_,
+        glm::mat4 projection_
+    );
+
+public: // member variables
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 projection;
+};
 
 class quartz::rendering::Pipeline {
 public: // member functions
@@ -36,11 +55,21 @@ private: // static functions
     );
     static std::vector<quartz::rendering::Buffer> createUniformBuffers(
         const quartz::rendering::Device& renderingDevice,
-        const uint32_t numBuffers,
-        const uint32_t bufferSizeBytes
+        const uint32_t numBuffers
     );
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutUniquePtr(
         const vk::UniqueDevice& p_logicalDevice
+    );
+    static vk::UniqueDescriptorPool createVulkanDescriptorPoolUniquePtr(
+        const vk::UniqueDevice& p_logicalDevice,
+        const uint32_t numDescriptorSets
+    );
+    static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const uint32_t maxNumFramesInFlight,
+        const std::vector<quartz::rendering::Buffer>& uniformBuffers,
+        const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
+        const vk::UniqueDescriptorPool& uniqueDescriptorPool
     );
     static vk::UniqueRenderPass createVulkanRenderPassUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,

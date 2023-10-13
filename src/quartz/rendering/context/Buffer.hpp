@@ -28,6 +28,8 @@ public: // member functions
 
     USE_LOGGER(BUFFER);
 
+    const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }
+
 public: // static functions
     static std::string getUsageFlagsString(const vk::BufferUsageFlags bufferUsageFlags);
 
