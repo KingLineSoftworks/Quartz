@@ -49,8 +49,13 @@ quartz::Application2::~Application2() {
 void quartz::Application2::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
+    LOG_TRACEthis("Loading scene");
+    // Load the scene and its objects
+
     LOG_TRACEthis("Beginning main loop");
     while(!m_renderingWindow.shouldClose()) {
         glfwPollEvents();
+
+        // Draw the scene and its objects
     }
 }

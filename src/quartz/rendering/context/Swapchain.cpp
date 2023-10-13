@@ -4,8 +4,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/context/Device.hpp"
-#include "Swapchain.hpp"
-#include "Window2.hpp"
+#include "quartz/rendering/context/Swapchain.hpp"
+#include "quartz/rendering/context/Window2.hpp"
 
 vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
     const uint32_t graphicsQueueFamilyIndex,

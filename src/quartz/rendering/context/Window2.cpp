@@ -8,7 +8,7 @@
 
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Instance.hpp"
-#include "Window2.hpp"
+#include "quartz/rendering/context/Window2.hpp"
 
 void quartz::rendering::Window2::glfwFramebufferSizeCallback(
     GLFWwindow* p_glfwWindow,

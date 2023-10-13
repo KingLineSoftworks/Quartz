@@ -7,7 +7,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
-#include "Window2.hpp"
+#include "quartz/rendering/context/Window2.hpp"
 
 namespace quartz {
 namespace rendering {

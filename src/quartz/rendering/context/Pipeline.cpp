@@ -4,10 +4,11 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
-#include "Pipeline.hpp"
+#include "quartz/rendering/context/Pipeline.hpp"
+#include "quartz/rendering/context/Window2.hpp"
 #include "quartz/rendering/model/Vertex.hpp"
-#include "Window2.hpp"
 
 vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -33,6 +34,28 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
     LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::ShaderModule");
 
     return p_shaderModule;
+}
+
+std::vector<quartz::rendering::Buffer> quartz::rendering::Pipeline::createUniformBuffers(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t numBuffers,
+    const uint32_t bufferSizeBytes
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "{} buffers", numBuffers);
+
+    std::vector<quartz::rendering::Buffer> buffers;
+
+    for (uint32_t i = 0; i < numBuffers; ++i) {
+        LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "Creating uniform buffer {}", i);
+        buffers.emplace_back(
+            renderingDevice,
+            bufferSizeBytes,
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+        );
+    }
+
+    return buffers;
 }
 
 vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
@@ -373,9 +396,11 @@ quartz::rendering::Pipeline::Pipeline(
         renderingDevice.getVulkanLogicalDevicePtr(),
         util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
     )),
-    m_vulkanUniformBufferPtrs(),
-    m_vulkanUniformBufferMemoryPtrs(),
-    m_mappedUniformBufferMemoryPtrs(),
+    m_uniformBuffers(quartz::rendering::Pipeline::createUniformBuffers(
+        renderingDevice,
+        m_maxNumFramesInFlight,
+        4
+    )),
     mp_vulkanDescriptorSetLayout(quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr()
     )),

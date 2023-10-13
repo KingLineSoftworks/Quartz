@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "Instance.hpp"
+#include "quartz/rendering/context/Instance.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -21,6 +21,8 @@ public: // member functions
     const vk::PhysicalDevice& getVulkanPhysicalDevice() const { return m_vulkanPhysicalDevice; }
     uint32_t getGraphicsQueueFamilyIndex() const { return m_graphicsQueueFamilyIndex; }
     const vk::UniqueDevice& getVulkanLogicalDevicePtr() const { return mp_vulkanLogicalDevice; }
+    const vk::Queue& getVulkanGraphicsQueue() const { return m_vulkanGraphicsQueue; }
+    const vk::Queue& getVulkanPresentQueue() const { return m_vulkanPresentQueue; }
 
 private: // static functions
     static vk::PhysicalDevice getBestPhysicalDevice(
