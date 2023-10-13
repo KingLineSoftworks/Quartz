@@ -40,28 +40,6 @@ std::string quartz::rendering::Buffer::getUsageFlagsString(const vk::BufferUsage
     return usageFlagsString;
 }
 
-void quartz::rendering::Buffer::customMappedLocalMemoryDeleter(
-    UNUSED void* p_mappedLocalMemory,
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::UniqueDeviceMemory& p_physicalDeviceMemory
-) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "local memory at {}", p_mappedLocalMemory);
-
-    LOG_TRACE(quartz::loggers::BUFFER, "Local memory pointer at {}", p_mappedLocalMemory);
-
-    if (!p_logicalDevice) {
-        LOG_ERROR(quartz::loggers::BUFFER, "Logical device instance is invalid");
-    }
-    LOG_TRACE(quartz::loggers::BUFFER, "Logical device instance at {}", static_cast<const void*>(&(*p_logicalDevice)));
-
-    if (!p_physicalDeviceMemory) {
-        LOG_ERROR(quartz::loggers::BUFFER, "Physical device memory instance is invalid");
-    }
-    LOG_TRACE(quartz::loggers::BUFFER, "Physical device memory instance at {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
-
-    p_logicalDevice->unmapMemory(*p_physicalDeviceMemory);
-}
-
 vk::UniqueBuffer quartz::rendering::Buffer::createVulkanBufferUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
@@ -145,20 +123,6 @@ void* quartz::rendering::Buffer::mapVulkanPhysicalDeviceMemoryToLocalMemory(
     const vk::UniqueDeviceMemory& p_physicalDeviceMemory
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
-
-//    std::function<void(void*)> customDeleter = [&p_logicalDevice, &p_physicalDeviceMemory] (void* p) {
-//        quartz::rendering::Buffer::customMappedLocalMemoryDeleter(p, p_logicalDevice, p_physicalDeviceMemory);
-//    };
-//
-//    LOG_TRACE(quartz::loggers::BUFFER, "Mapping memory from physical device memory to local memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
-//    std::unique_ptr<void, std::function<void(void*)>> p_mappedLocalMemory(
-//        p_logicalDevice->mapMemory(
-//            *(p_physicalDeviceMemory),
-//            0,
-//            sizeBytes
-//        ),
-//        customDeleter
-//    );
 
     LOG_TRACE(quartz::loggers::BUFFER, "Mapping memory from physical device memory to local memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
     void* p_mappedLocalMemory = p_logicalDevice->mapMemory(

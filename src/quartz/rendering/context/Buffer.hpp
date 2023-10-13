@@ -30,11 +30,6 @@ public: // member functions
 
 public: // static functions
     static std::string getUsageFlagsString(const vk::BufferUsageFlags bufferUsageFlags);
-    static void customMappedLocalMemoryDeleter(
-        void* p_mappedLocalMemory,
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::UniqueDeviceMemory& p_physicalDeviceMemory
-    );
 
 private: // static functions
     static vk::UniqueBuffer createVulkanBufferUniquePtr(
