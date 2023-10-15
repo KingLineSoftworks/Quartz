@@ -7,8 +7,10 @@ add_library(
         Buffer.cpp
         Device.cpp
         Instance.cpp
+        Mesh.cpp
         Pipeline.cpp
         Swapchain.cpp
+        Vertex.cpp
         Window2.cpp
 )
 
@@ -30,5 +32,5 @@ target_link_libraries(
         UTIL_Logger
 
         PUBLIC
-        QUARTZ_RENDERING_Model
+        # QUARTZ_Something
 )

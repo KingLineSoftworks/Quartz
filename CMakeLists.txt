@@ -148,12 +148,10 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/application2")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/context")
-add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/model")
 list(APPEND QUARTZ_LIBS QUARTZ_Application)
 list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Window)
 list(APPEND QUARTZ_LIBS QUARTZ_Application2)
 list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Context)
-list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Model)
 
 #====================================================================
 # The demo application

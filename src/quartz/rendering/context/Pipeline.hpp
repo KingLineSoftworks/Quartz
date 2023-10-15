@@ -43,17 +43,17 @@ public: // member functions
     );
     ~Pipeline();
 
+    USE_LOGGER(PIPELINE);
+
     uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
     const vk::UniqueRenderPass& getVulkanRenderPassPtr() const { return mp_vulkanRenderPass; }
-
-    USE_LOGGER(PIPELINE);
 
 private: // static functions
     static vk::UniqueShaderModule createVulkanShaderModuleUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
-    static std::vector<quartz::rendering::Buffer> createUniformBuffers(
+    static std::vector<quartz::rendering::LocallyMappedBuffer> createUniformBuffers(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t numBuffers
     );
@@ -67,7 +67,7 @@ private: // static functions
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t maxNumFramesInFlight,
-        const std::vector<quartz::rendering::Buffer>& uniformBuffers,
+        const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
         const vk::UniqueDescriptorPool& uniqueDescriptorPool
     );
@@ -105,7 +105,7 @@ private: // member variables
     vk::UniqueShaderModule mp_vulkanVertexShaderModule;
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
 
-    std::vector<quartz::rendering::Buffer> m_uniformBuffers;
+    std::vector<quartz::rendering::LocallyMappedBuffer> m_uniformBuffers;
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
     vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
     std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;

@@ -382,12 +382,14 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanUniqueRenderFinishedSemaphores;
     std::vector<vk::UniqueFence> m_vulkanUniqueInFlightFences;
 
-    // Scene drawing information (should go with graphics pipeline?)
+    // Scene info
+    // vertices
     std::vector<quartz::Vertex> m_vertices;
     vk::UniqueBuffer m_vulkanUniqueVertexStagingBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexStagingBufferMemory;
     vk::UniqueBuffer m_vulkanUniqueVertexBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueVertexBufferMemory;
+    // indices
     std::vector<uint32_t> m_indices;
     vk::UniqueBuffer m_vulkanUniqueIndexStagingBuffer;
     vk::UniqueDeviceMemory m_vulkanUniqueIndexStagingBufferMemory;

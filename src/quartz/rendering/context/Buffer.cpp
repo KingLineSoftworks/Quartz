@@ -5,7 +5,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Buffer.hpp"
 
-std::string quartz::rendering::Buffer::getUsageFlagsString(const vk::BufferUsageFlags bufferUsageFlags) {
+std::string quartz::rendering::BufferHelper::getUsageFlagsString(const vk::BufferUsageFlags bufferUsageFlags) {
     std::string usageFlagsString = "[ ";
 
     if (bufferUsageFlags & vk::BufferUsageFlagBits::eUniformBuffer) {
@@ -40,7 +40,7 @@ std::string quartz::rendering::Buffer::getUsageFlagsString(const vk::BufferUsage
     return usageFlagsString;
 }
 
-vk::UniqueBuffer quartz::rendering::Buffer::createVulkanBufferUniquePtr(
+vk::UniqueBuffer quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
     const vk::BufferUsageFlags bufferUsageFlags
@@ -54,7 +54,7 @@ vk::UniqueBuffer quartz::rendering::Buffer::createVulkanBufferUniquePtr(
         vk::SharingMode::eExclusive
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::Buffer ({} buffer)", quartz::rendering::Buffer::getUsageFlagsString(bufferUsageFlags));
+    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::Buffer ({} buffer)", quartz::rendering::BufferHelper::getUsageFlagsString(bufferUsageFlags));
     vk::UniqueBuffer p_buffer = p_logicalDevice->createBufferUnique(bufferCreateInfo);
 
     if (!p_buffer) {
@@ -66,7 +66,7 @@ vk::UniqueBuffer quartz::rendering::Buffer::createVulkanBufferUniquePtr(
     return p_buffer;
 }
 
-vk::UniqueDeviceMemory quartz::rendering::Buffer::allocateVulkanPhysicalDeviceMemory(
+vk::UniqueDeviceMemory quartz::rendering::LocallyMappedBuffer::allocateVulkanPhysicalDeviceMemoryUniquePtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
@@ -117,7 +117,7 @@ vk::UniqueDeviceMemory quartz::rendering::Buffer::allocateVulkanPhysicalDeviceMe
     return p_logicalBufferMemory;
 }
 
-void* quartz::rendering::Buffer::mapVulkanPhysicalDeviceMemoryToLocalMemory(
+void* quartz::rendering::LocallyMappedBuffer::mapVulkanPhysicalDeviceMemoryToLocalMemory(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
     const vk::UniqueDeviceMemory& p_physicalDeviceMemory
@@ -135,7 +135,7 @@ void* quartz::rendering::Buffer::mapVulkanPhysicalDeviceMemoryToLocalMemory(
     return p_mappedLocalMemory;
 }
 
-quartz::rendering::Buffer::Buffer(
+quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t sizeBytes,
     const vk::BufferUsageFlags usageFlags,
@@ -144,19 +144,19 @@ quartz::rendering::Buffer::Buffer(
     m_sizeBytes(sizeBytes),
     m_usageFlags(usageFlags),
     m_memoryPropertyFlags(memoryPropertyFlags),
-    mp_vulkanLogicalBuffer(quartz::rendering::Buffer::createVulkanBufferUniquePtr(
+    mp_vulkanLogicalBuffer(quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_sizeBytes,
         m_usageFlags
     )),
-    mp_vulkanPhysicalDeviceMemory(quartz::rendering::Buffer::allocateVulkanPhysicalDeviceMemory(
+    mp_vulkanPhysicalDeviceMemory(quartz::rendering::LocallyMappedBuffer::allocateVulkanPhysicalDeviceMemoryUniquePtr(
         renderingDevice.getVulkanPhysicalDevice(),
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_sizeBytes,
         mp_vulkanLogicalBuffer,
         memoryPropertyFlags
     )),
-    mp_mappedLocalMemory(quartz::rendering::Buffer::mapVulkanPhysicalDeviceMemoryToLocalMemory(
+    mp_mappedLocalMemory(quartz::rendering::LocallyMappedBuffer::mapVulkanPhysicalDeviceMemoryToLocalMemory(
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_sizeBytes,
         mp_vulkanPhysicalDeviceMemory
@@ -165,7 +165,7 @@ quartz::rendering::Buffer::Buffer(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::Buffer::Buffer(quartz::rendering::Buffer&& other) :
+quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(quartz::rendering::LocallyMappedBuffer&& other) :
     m_sizeBytes(other.m_sizeBytes),
     m_usageFlags(other.m_usageFlags),
     m_memoryPropertyFlags(other.m_memoryPropertyFlags),
@@ -176,6 +176,251 @@ quartz::rendering::Buffer::Buffer(quartz::rendering::Buffer&& other) :
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::Buffer::~Buffer() {
+quartz::rendering::LocallyMappedBuffer::~LocallyMappedBuffer() {
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+    const vk::PhysicalDevice& physicalDevice,
+    const vk::UniqueDevice& p_logicalDevice,
+    const uint32_t sizeBytes,
+    const void* p_bufferData,
+    const vk::UniqueBuffer& p_logicalBuffer,
+    const vk::MemoryPropertyFlags memoryPropertyFlags
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "{} bytes", sizeBytes);
+
+    vk::MemoryRequirements memoryRequirements = p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
+
+    vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties = physicalDevice.getMemoryProperties();
+    std::optional<uint32_t> chosenMemoryTypeIndex;
+    for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i) {
+        if (
+            (memoryRequirements.memoryTypeBits & (1 << i)) && // if it has our desired memory type bit set
+            (physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & memoryPropertyFlags)
+            ) {
+            chosenMemoryTypeIndex = i;
+            break;
+        }
+    }
+    if (!chosenMemoryTypeIndex.has_value()) {
+        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to find a suitable memory type");
+        throw std::runtime_error("");
+    }
+
+    vk::MemoryAllocateInfo memoryAllocateInfo(
+        memoryRequirements.size,
+        chosenMemoryTypeIndex.value()
+    );
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::DeviceMemory");
+    vk::UniqueDeviceMemory p_bufferMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
+
+    if (!p_bufferMemory) {
+        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::DeviceMemory");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::DeviceMemory");
+
+    p_logicalDevice->bindBufferMemory(
+        *p_logicalBuffer,
+        *p_bufferMemory,
+        0
+    );
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Memory *IS* allocated for a source buffer. Populating device's buffer memory with input raw data");
+
+    LOG_TRACE(quartz::loggers::BUFFER, "  - Creating mapping for allocated device memory of size {}", sizeBytes);
+    void* p_mappedDestinationDeviceMemory = p_logicalDevice->mapMemory(
+        *p_bufferMemory,
+        0,
+        sizeBytes
+    );
+
+    LOG_TRACE(quartz::loggers::BUFFER, "  - Copying {} bytes to mapped device memory at {} from buffer at {}", sizeBytes, p_mappedDestinationDeviceMemory, p_bufferData);
+    memcpy(
+        p_mappedDestinationDeviceMemory,
+        p_bufferData,
+        sizeBytes
+    );
+
+    LOG_TRACE(quartz::loggers::BUFFER, "  - Unmapping device memory");
+    p_logicalDevice->unmapMemory(*p_bufferMemory);
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Successfully copied input data to device's buffer memory");
+    return p_bufferMemory;
+}
+
+vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUniquePtr(
+    const vk::PhysicalDevice& physicalDevice,
+    const uint32_t graphicsQueueFamilyIndex,
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::Queue& graphicsQueue,
+    const uint32_t sizeBytes,
+    const vk::UniqueBuffer& p_logicalBuffer,
+    const vk::MemoryPropertyFlags memoryPropertyFlags,
+    const vk::UniqueBuffer& p_logicalStagingBuffer
+) {
+    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "{} bytes", sizeBytes);
+
+    vk::MemoryRequirements memoryRequirements = p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
+
+    vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties = physicalDevice.getMemoryProperties();
+    std::optional<uint32_t> chosenMemoryTypeIndex;
+    for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i) {
+        if (
+            (memoryRequirements.memoryTypeBits & (1 << i)) && // if it has our desired memory type bit set
+            (physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & memoryPropertyFlags)
+            ) {
+            chosenMemoryTypeIndex = i;
+            break;
+        }
+    }
+    if (!chosenMemoryTypeIndex.has_value()) {
+        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to find a suitable memory type");
+        throw std::runtime_error("");
+    }
+
+    vk::MemoryAllocateInfo memoryAllocateInfo(
+        memoryRequirements.size,
+        chosenMemoryTypeIndex.value()
+    );
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::DeviceMemory");
+    vk::UniqueDeviceMemory uniqueDestinationBufferMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
+
+    if (!uniqueDestinationBufferMemory) {
+        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::DeviceMemory");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::DeviceMemory");
+
+    p_logicalDevice->bindBufferMemory(
+        *p_logicalBuffer,
+        *uniqueDestinationBufferMemory,
+        0
+    );
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Memory is *NOT* allocated for a source buffer. Populating with input source buffer instead");
+
+    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to create vk::CommandPool");
+
+    vk::CommandPoolCreateInfo commandPoolCreateInfo(
+        vk::CommandPoolCreateFlagBits::eTransient,
+        graphicsQueueFamilyIndex
+    );
+
+    vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
+
+    if (!p_commandPool) {
+        LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::CommandPool");
+        throw std::runtime_error("");
+    }
+    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::CommandPool");
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
+
+    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
+        *p_commandPool,
+        vk::CommandBufferLevel::ePrimary,
+        1
+    );
+
+    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
+
+    if (!(commandBufferPtrs[0])) {
+        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to allocate vk::CommandBuffer for copying data");
+        throw std::runtime_error("");
+    }
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Recording commands to newly created command buffer");
+
+    vk::CommandBufferBeginInfo commandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+    commandBufferPtrs[0]->begin(commandBufferBeginInfo);
+
+    vk::BufferCopy bufferCopyRegion(
+        0,
+        0,
+        sizeBytes
+    );
+
+    commandBufferPtrs[0]->copyBuffer(
+        *p_logicalStagingBuffer,
+        *p_logicalBuffer,
+        bufferCopyRegion
+    );
+
+    commandBufferPtrs[0]->end();
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Submitting command buffer and waiting idly for it to complete the transfer of data into this buffer");
+
+    vk::SubmitInfo submitInfo(
+        0,
+        nullptr,
+        nullptr,
+        1,
+        &(*(commandBufferPtrs[0])),
+        0,
+        nullptr
+    );
+    graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
+    graphicsQueue.waitIdle();
+
+    LOG_TRACE(quartz::loggers::BUFFER, "Successfully copied data from source buffer to this buffer's memory");
+    return uniqueDestinationBufferMemory;
+}
+
+quartz::rendering::StagedBuffer::StagedBuffer(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t sizeBytes,
+    const vk::BufferUsageFlags usageFlags,
+    const void* p_bufferData
+) :
+    m_sizeBytes(sizeBytes),
+    m_usageFlags(usageFlags),
+    mp_vulkanLogicalStagingBuffer(quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        m_sizeBytes,
+        vk::BufferUsageFlagBits::eTransferSrc
+    )),
+    mp_vulkanPhysicalDeviceStagingMemory(quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+        renderingDevice.getVulkanPhysicalDevice(),
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        m_sizeBytes,
+        p_bufferData,
+        mp_vulkanLogicalStagingBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+    )),
+    mp_vulkanLogicalBuffer(quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        m_sizeBytes,
+        vk::BufferUsageFlagBits::eTransferDst | m_usageFlags
+    )),
+    mp_vulkanPhysicalDeviceMemory(quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUniquePtr(
+        renderingDevice.getVulkanPhysicalDevice(),
+        renderingDevice.getGraphicsQueueFamilyIndex(),
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingDevice.getVulkanGraphicsQueue(),
+        m_sizeBytes,
+        mp_vulkanLogicalBuffer,
+        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        mp_vulkanLogicalStagingBuffer
+    ))
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::rendering::StagedBuffer::StagedBuffer(quartz::rendering::StagedBuffer&& other) :
+    m_sizeBytes(other.m_sizeBytes),
+    m_usageFlags(other.m_usageFlags),
+    mp_vulkanLogicalStagingBuffer(std::move(other.mp_vulkanLogicalStagingBuffer)),
+    mp_vulkanPhysicalDeviceStagingMemory(std::move(other.mp_vulkanPhysicalDeviceStagingMemory)),
+    mp_vulkanLogicalBuffer(std::move(other.mp_vulkanLogicalBuffer)),
+    mp_vulkanPhysicalDeviceMemory(std::move(other.mp_vulkanPhysicalDeviceMemory))
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::rendering::StagedBuffer::~StagedBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

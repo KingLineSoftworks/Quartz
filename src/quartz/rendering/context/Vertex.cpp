@@ -1,5 +1,5 @@
-#include "quartz/rendering/model/Vertex.hpp"
-#include <glm/vec3.hpp>
+#include "quartz/rendering/context/Vertex.hpp"
+#include "glm/vec3.hpp"
 
 #include <vulkan/vulkan.hpp>
 

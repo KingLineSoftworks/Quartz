@@ -1,11 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "quartz/Loggers.hpp"
 
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Instance.hpp"
+#include "quartz/rendering/context/Mesh.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Swapchain.hpp"
 #include "quartz/rendering/context/Window2.hpp"
@@ -31,6 +33,9 @@ public: // member functions
 
     void run();
 
+private: // static functions
+    static std::vector<quartz::rendering::Mesh> loadMeshes(const quartz::rendering::Device& renderingDevice);
+
 private: // member variables
     const std::string m_applicationName;
     const uint32_t m_majorVersion;
@@ -42,4 +47,5 @@ private: // member variables
     quartz::rendering::Window2 m_renderingWindow;
     quartz::rendering::Pipeline m_renderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
+    std::vector<quartz::rendering::Mesh> m_meshes;
 };

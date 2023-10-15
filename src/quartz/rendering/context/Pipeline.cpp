@@ -8,7 +8,7 @@
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Window2.hpp"
-#include "quartz/rendering/model/Vertex.hpp"
+#include "quartz/rendering/context/Vertex.hpp"
 
 quartz::rendering::UniformBufferObject::UniformBufferObject(
     glm::mat4 model_,
@@ -46,13 +46,13 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
     return p_shaderModule;
 }
 
-std::vector<quartz::rendering::Buffer> quartz::rendering::Pipeline::createUniformBuffers(
+std::vector<quartz::rendering::LocallyMappedBuffer> quartz::rendering::Pipeline::createUniformBuffers(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t numBuffers
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "{} buffers", numBuffers);
 
-    std::vector<quartz::rendering::Buffer> buffers;
+    std::vector<quartz::rendering::LocallyMappedBuffer> buffers;
 
     for (uint32_t i = 0; i < numBuffers; ++i) {
         LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "Creating uniform buffer {}", i);
@@ -130,7 +130,7 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
 std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t maxNumFramesInFlight,
-    const std::vector<quartz::rendering::Buffer>& uniformBuffers,
+    const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool
 ) {
