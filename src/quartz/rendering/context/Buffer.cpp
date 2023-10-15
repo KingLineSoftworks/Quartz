@@ -303,7 +303,7 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
 
     LOG_TRACE(quartz::loggers::BUFFER, "Memory is *NOT* allocated for a source buffer. Populating with input source buffer instead");
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to create vk::CommandPool");
+    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::CommandPool");
 
     vk::CommandPoolCreateInfo commandPoolCreateInfo(
         vk::CommandPoolCreateFlagBits::eTransient,
@@ -313,10 +313,10 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
     vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::CommandPool");
+        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::CommandPool");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::CommandPool");
+    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::CommandPool");
 
     LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
 
