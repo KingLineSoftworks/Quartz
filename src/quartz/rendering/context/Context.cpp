@@ -53,38 +53,18 @@ quartz::rendering::Context::~Context() {
 }
 
 void quartz::rendering::Context::draw(const std::vector<quartz::rendering::Mesh>& meshes) {
-    // wait for fences (Swapchain::waitForFences)
-    //   m_renderingDevice    (logical device)
-    //   m_renderingPipeline  (current in flight frame index)
-    //   m_renderingSwapchain (fences)
     m_renderingSwapchain.waitForInFlightFence(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
 
-    // get image from swapchain (Swapchain::getAvailableImageIndex)
-    //   m_renderingDevice    (logical device)
-    //   m_renderingSwapchain (swapchain, semaphores)
     const uint32_t availableSwapchainImageIndex = m_renderingSwapchain.getAvailableImageIndex(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
-    // recreate swapchain if need to
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        //   m_renderingWindow    (check resize, surface, surface capabilites, present mode, extent)
-        //   m_renderingPipeline  (render pass, pipeline layout, pipeline)
-        //   m_renderingSwapchain (swapchain, images, image views, framebuffers, command pool, command buffers, fences, semaphores)
+        recreateSwapchain();
+        return;
     }
 
-    // update uniform buffer (Pipeline::updateUniformBuffer)
-    //   m_renderingWindow    (extent)
-    //   m_renderingPipeline  (uniform buffer)
     m_renderingPipeline.updateUniformBuffer(m_renderingWindow);
 
-    // reset fences (Swapchain::resetFences)
-    //   m_renderingDevice    (logical device)
-    //   m_renderingSwapchain (fences)
     m_renderingSwapchain.resetInFlightFence(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
 
-    // record command buffer for drawing onto the acquired image (Swapchain::resetAndRecordDrawingCommandBuffer)
-    //   m_renderingWindow    (extent)
-    //   m_renderingPipeline  (render pass, pipeline layout, pipeline)
-    //   m_renderingSwapchain (framebuffers)
-    //   meshes               (indices, vertex buffer, index buffer)
     m_renderingSwapchain.resetAndRecordDrawingCommandBuffer(
         m_renderingWindow,
         m_renderingPipeline,
@@ -93,23 +73,38 @@ void quartz::rendering::Context::draw(const std::vector<quartz::rendering::Mesh>
         availableSwapchainImageIndex
     );
 
-    // submit the command buffer (Swapchain::submitDrawingCommandBuffer)
-    //   m_renderingDevice    (graphics queue)
-    //   m_renderingSwapchain (semaphores, command buffers)
     m_renderingSwapchain.submitDrawingCommandBuffer(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
 
-    // present the acquired image
-    //   m_renderingDevice    (graphics queue)
-    //   m_renderingSwapchain (swapchain, semaphores)
-    // recreate swapchain if need to
     m_renderingSwapchain.presentImage(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex(), availableSwapchainImageIndex);
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        //   m_renderingWindow    (check resize, surface, surface capabilites, present mode, extent)
-        //   m_renderingPipeline  (render pass, pipeline layout, pipeline)
-        //   m_renderingSwapchain (swapchain, images, image views, framebuffers, command pool, command buffers, fences, semaphores)
+        recreateSwapchain();
+        return;
     }
 
     m_renderingPipeline.incrementCurrentInFlightFrameIndex();
+}
+
+void quartz::rendering::Context::recreateSwapchain() {
+    LOG_FUNCTION_SCOPE_INFOthis("");
+    m_renderingDevice.waitIdle();
+
+    m_renderingSwapchain.reset();
+    m_renderingPipeline.reset();
+    m_renderingWindow.reset();
+
+    m_renderingWindow.recreate(
+        m_renderingInstance,
+        m_renderingDevice
+    );
+    m_renderingPipeline.recreate(
+        m_renderingDevice,
+        m_renderingWindow
+    );
+    m_renderingSwapchain.recreate(
+        m_renderingDevice,
+        m_renderingWindow,
+        m_renderingPipeline
+    );
 }
 
 void quartz::rendering::Context::finish() {

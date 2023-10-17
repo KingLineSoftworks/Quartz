@@ -300,6 +300,73 @@ quartz::rendering::Swapchain::~Swapchain() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
+void quartz::rendering::Swapchain::reset() {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    for (vk::UniqueFence& uniqueInFlightFence : m_vulkanInFlightFencePtrs) { uniqueInFlightFence.reset(); }
+    for (vk::UniqueSemaphore& uniqueRenderFinishedSemaphore : m_vulkanRenderFinishedSemaphorePtrs) { uniqueRenderFinishedSemaphore.reset(); }
+    for (vk::UniqueSemaphore& uniqueImageAvailableSemaphore : m_vulkanImageAvailableSemaphorePtrs) { uniqueImageAvailableSemaphore.reset(); }
+    for (vk::UniqueCommandBuffer& uniqueCommandBuffer : m_vulkanDrawingCommandBufferPtrs) { uniqueCommandBuffer.reset(); }
+    mp_vulkanDrawingCommandPool.reset();
+    for (vk::UniqueFramebuffer& uniqueFramebuffer : m_vulkanFramebufferPtrs) { uniqueFramebuffer.reset(); }
+    for (vk::UniqueImageView& uniqueImageView : m_vulkanImageViewPtrs) { uniqueImageView.reset(); }
+    mp_vulkanSwapchain.reset();
+}
+
+void quartz::rendering::Swapchain::recreate(
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Window2& renderingWindow,
+    const quartz::rendering::Pipeline& renderingPipeline
+) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    mp_vulkanSwapchain = quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
+        renderingDevice.getGraphicsQueueFamilyIndex(),
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanSurfacePtr(),
+        renderingWindow.getVulkanSurfaceCapabilities(),
+        renderingWindow.getVulkanSurfaceFormat(),
+        renderingWindow.getVulkanPresentMode(),
+        renderingWindow.getVulkanExtent()
+    );
+    m_vulkanImages = renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(*mp_vulkanSwapchain);
+    m_vulkanImageViewPtrs = quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanSurfaceFormat(),
+        m_vulkanImages
+    );
+    m_vulkanFramebufferPtrs = quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanExtent(),
+        m_vulkanImageViewPtrs,
+        renderingPipeline.getVulkanRenderPassPtr()
+    );
+    mp_vulkanDrawingCommandPool = quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
+        renderingDevice.getGraphicsQueueFamilyIndex(),
+        renderingDevice.getVulkanLogicalDevicePtr()
+    );
+    m_vulkanDrawingCommandBufferPtrs = quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        mp_vulkanDrawingCommandPool,
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+    m_vulkanImageAvailableSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+    m_vulkanRenderFinishedSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+    m_vulkanInFlightFencePtrs = quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+
+    LOG_TRACEthis("Clearing the \"should recreate\" flag");
+    m_shouldRecreate = false;
+}
+
 void quartz::rendering::Swapchain::waitForInFlightFence(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
@@ -479,7 +546,6 @@ void quartz::rendering::Swapchain::presentImage(
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
 ) {
-
     vk::PresentInfoKHR presentInfo(
         *(m_vulkanRenderFinishedSemaphorePtrs[inFlightFrameIndex]),
         *mp_vulkanSwapchain,

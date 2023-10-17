@@ -1863,17 +1863,19 @@ void quartz::Application::recreateSwapchain() {
 
     // ----- clean up ----- //
 
-    for (vk::UniqueSemaphore& uniqueImageAvailableSemaphore : m_vulkanUniqueImageAvailableSemaphores) { uniqueImageAvailableSemaphore.reset(); }
-    for (vk::UniqueSemaphore& uniqueRenderFinishedSemaphore : m_vulkanUniqueRenderFinishedSemaphores) { uniqueRenderFinishedSemaphore.reset(); }
     for (vk::UniqueFence& uniqueInFlightFence : m_vulkanUniqueInFlightFences) { uniqueInFlightFence.reset(); }
+    for (vk::UniqueSemaphore& uniqueRenderFinishedSemaphore : m_vulkanUniqueRenderFinishedSemaphores) { uniqueRenderFinishedSemaphore.reset(); }
+    for (vk::UniqueSemaphore& uniqueImageAvailableSemaphore : m_vulkanUniqueImageAvailableSemaphores) { uniqueImageAvailableSemaphore.reset(); }
     for (vk::UniqueCommandBuffer& uniqueCommandBuffer : m_vulkanUniqueDrawingCommandBuffers) { uniqueCommandBuffer.reset(); }
     m_vulkanUniqueDrawingCommandPool.reset();
     for (vk::UniqueFramebuffer& uniqueFramebuffer : m_vulkanUniqueFramebuffers) { uniqueFramebuffer.reset(); }
     for (vk::UniqueImageView& uniqueImageView : m_vulkanUniqueSwapchainImageViews) { uniqueImageView.reset(); }
-    m_vulkanUniqueGraphicsPipeline.reset();
-    m_vulkanUniqueRenderPass.reset();
-    m_vulkanUniquePipelineLayout.reset();
     m_vulkanUniqueSwapchain.reset();
+
+    m_vulkanUniqueGraphicsPipeline.reset();
+    m_vulkanUniquePipelineLayout.reset();
+    m_vulkanUniqueRenderPass.reset();
+
     m_vulkanUniqueSurface.reset();
 
     // ----- recreate things ----- //
@@ -1895,6 +1897,31 @@ void quartz::Application::recreateSwapchain() {
         mp_window->getGLFWwindowPtr(),
         m_vulkanSurfaceCapabilities
     );
+
+
+
+    m_vulkanUniqueRenderPass = quartz::Application::createVulkanUniqueRenderPass(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanSurfaceFormat.format
+    );
+    m_pipelineInformation = quartz::Application::getPipelineInformation(
+        m_vulkanSwapchainExtent,
+        m_vulkanUniqueVertexShaderModule,
+        m_vulkanUniqueFragmentShaderModule
+    );
+    m_vulkanUniquePipelineLayout = quartz::Application::createVulkanUniquePipelineLayout(
+        m_vulkanUniqueLogicalDevice,
+        m_vulkanUniqueDescriptorSetLayout
+    );
+    m_vulkanUniqueGraphicsPipeline = quartz::Application::createVulkanUniqueGraphicsPipeline(
+        m_vulkanUniqueLogicalDevice,
+        m_pipelineInformation,
+        m_vulkanUniquePipelineLayout,
+        m_vulkanUniqueRenderPass
+    );
+
+
+
     m_vulkanUniqueSwapchain = quartz::Application::createVulkanUniqueSwapchain(
         m_vulkanUniqueSurface,
         m_vulkanPhysicalDeviceAndQueueFamilyIndex.second,
@@ -1909,25 +1936,6 @@ void quartz::Application::recreateSwapchain() {
         m_vulkanUniqueLogicalDevice,
         m_vulkanSurfaceFormat,
         m_vulkanSwapchainImages
-    );
-    m_pipelineInformation = quartz::Application::getPipelineInformation(
-        m_vulkanSwapchainExtent,
-        m_vulkanUniqueVertexShaderModule,
-        m_vulkanUniqueFragmentShaderModule
-    );
-    m_vulkanUniquePipelineLayout = quartz::Application::createVulkanUniquePipelineLayout(
-        m_vulkanUniqueLogicalDevice,
-        m_vulkanUniqueDescriptorSetLayout
-    );
-    m_vulkanUniqueRenderPass = quartz::Application::createVulkanUniqueRenderPass(
-        m_vulkanUniqueLogicalDevice,
-        m_vulkanSurfaceFormat.format
-    );
-    m_vulkanUniqueGraphicsPipeline = quartz::Application::createVulkanUniqueGraphicsPipeline(
-        m_vulkanUniqueLogicalDevice,
-        m_pipelineInformation,
-        m_vulkanUniquePipelineLayout,
-        m_vulkanUniqueRenderPass
     );
     m_vulkanUniqueFramebuffers = quartz::Application::createVulkanUniqueFramebuffers(
         m_vulkanUniqueLogicalDevice,
@@ -1945,7 +1953,7 @@ void quartz::Application::recreateSwapchain() {
         m_vulkanUniqueDrawingCommandPool,
         m_maxNumFramesInFlight
     );
-     m_vulkanUniqueImageAvailableSemaphores = quartz::Application::createVulkanUniqueSemaphores(
+    m_vulkanUniqueImageAvailableSemaphores = quartz::Application::createVulkanUniqueSemaphores(
         m_vulkanUniqueLogicalDevice,
         m_maxNumFramesInFlight
     );

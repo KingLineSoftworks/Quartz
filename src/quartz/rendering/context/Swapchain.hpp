@@ -25,6 +25,13 @@ public: // member functions
     );
     ~Swapchain();
 
+    void reset();
+    void recreate(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window2& renderingWindow,
+        const quartz::rendering::Pipeline& renderingPipeline
+    );
+
     USE_LOGGER(SWAPCHAIN);
 
     bool getShouldRecreate() const { return m_shouldRecreate; }

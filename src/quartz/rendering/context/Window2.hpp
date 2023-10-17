@@ -27,6 +27,12 @@ public: // interface
     );
     ~Window2();
 
+    void reset();
+    void recreate(
+        const quartz::rendering::Instance& renderingInstance,
+        const quartz::rendering::Device& renderingDevice
+    );
+
     USE_LOGGER(WINDOW);
 
     const std::shared_ptr<GLFWwindow>& getGLFWwindowPtr() const { return mp_glfwWindow; }
@@ -39,7 +45,6 @@ public: // interface
     bool shouldClose() const;
 
     bool getWasResized() const { return m_wasResized; }
-    void clearWasResized() { m_wasResized = false; }
 
 public: // static functions
     // The callback we give to glfw to use when it resizes the window

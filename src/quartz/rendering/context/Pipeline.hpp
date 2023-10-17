@@ -43,6 +43,12 @@ public: // member functions
     );
     ~Pipeline();
 
+    void reset();
+    void recreate(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window2& renderingWindow
+    );
+
     USE_LOGGER(PIPELINE);
 
     uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
@@ -50,7 +56,7 @@ public: // member functions
     const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
     const vk::UniqueRenderPass& getVulkanRenderPassPtr() const { return mp_vulkanRenderPass; }
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
-    const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanUniqueGraphicsPipeline; }
+    const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
     void updateUniformBuffer(const quartz::rendering::Window2& renderingWindow);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
@@ -121,5 +127,5 @@ private: // member variables
     vk::UniqueRenderPass mp_vulkanRenderPass;
 
     vk::UniquePipelineLayout mp_vulkanPipelineLayout;
-    vk::UniquePipeline mp_vulkanUniqueGraphicsPipeline;
+    vk::UniquePipeline mp_vulkanGraphicsPipeline;
 };

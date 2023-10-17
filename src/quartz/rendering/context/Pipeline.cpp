@@ -527,7 +527,7 @@ quartz::rendering::Pipeline::Pipeline(
         renderingDevice.getVulkanLogicalDevicePtr(),
         mp_vulkanDescriptorSetLayout
     )),
-    mp_vulkanUniqueGraphicsPipeline(quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+    mp_vulkanGraphicsPipeline(quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_vulkanVertexInputBindingDescriptions,
         m_vulkanVertexInputAttributeDescriptions,
@@ -546,6 +546,43 @@ quartz::rendering::Pipeline::Pipeline(
 
 quartz::rendering::Pipeline::~Pipeline() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+void quartz::rendering::Pipeline::reset() {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    mp_vulkanGraphicsPipeline.reset();
+    mp_vulkanPipelineLayout.reset();
+    mp_vulkanRenderPass.reset();
+}
+
+void quartz::rendering::Pipeline::recreate(
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Window2& renderingWindow
+) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    mp_vulkanRenderPass = quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanSurfaceFormat()
+    );
+    mp_vulkanPipelineLayout = quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        mp_vulkanDescriptorSetLayout
+    );
+    mp_vulkanGraphicsPipeline = quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        m_vulkanVertexInputBindingDescriptions,
+        m_vulkanVertexInputAttributeDescriptions,
+        m_vulkanViewports,
+        m_vulkanScissorRectangles,
+        m_vulkanColorBlendAttachmentStates,
+        m_vulkanDynamicStates,
+        mp_vulkanVertexShaderModule,
+        mp_vulkanFragmentShaderModule,
+        mp_vulkanPipelineLayout,
+        mp_vulkanRenderPass
+    );
 }
 
 void quartz::rendering::Pipeline::updateUniformBuffer(const quartz::rendering::Window2& renderingWindow) {
