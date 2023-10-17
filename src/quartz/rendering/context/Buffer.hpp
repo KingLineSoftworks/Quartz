@@ -50,6 +50,7 @@ public: // member functions
     USE_LOGGER(BUFFER);
 
     const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }
+    void* getMappedLocalMemoryPtr() { return mp_mappedLocalMemory; }
 
 private: // static functions
     static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceMemoryUniquePtr(
@@ -87,6 +88,8 @@ public: // member functions
     ~StagedBuffer();
 
     USE_LOGGER(BUFFER);
+
+    const vk::UniqueBuffer& getLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }
 
 private: // static functions
     static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(

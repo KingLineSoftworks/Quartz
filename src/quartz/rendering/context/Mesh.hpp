@@ -23,6 +23,10 @@ public: // member functions
 
     USE_LOGGER(MESH);
 
+    const std::vector<uint32_t>& getIndices() const { return m_indices; }
+    const quartz::rendering::StagedBuffer& getStagedVertexBuffer() const { return m_stagedVertexBuffer; }
+    const quartz::rendering::StagedBuffer& getStagedIndexBuffer() const { return m_stagedIndexBuffer; }
+
 private: // static functions
     static std::vector<quartz::rendering::Vertex> loadVertices();
     static std::vector<uint32_t> loadIndices();

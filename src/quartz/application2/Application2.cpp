@@ -35,30 +35,14 @@ quartz::Application2::Application2(
     m_majorVersion(applicationMajorVersion),
     m_minorVersion(applicationMinorVersion),
     m_patchVersion(applicationPatchVersion),
-    m_renderingInstance(
+    m_renderingContext(
         m_applicationName,
         m_majorVersion,
         m_minorVersion,
         m_patchVersion,
-        validationLayersEnabled
-    ),
-    m_renderingDevice(m_renderingInstance),
-    m_renderingWindow(
-        m_applicationName,
         windowWidthPixels,
         windowHeightPixels,
-        m_renderingInstance,
-        m_renderingDevice
-    ),
-    m_renderingPipeline(
-        m_renderingDevice,
-        m_renderingWindow,
-        2
-    ),
-    m_renderingSwapchain(
-        m_renderingDevice,
-        m_renderingWindow,
-        m_renderingPipeline
+        validationLayersEnabled
     ),
     m_meshes()
 {
@@ -73,12 +57,19 @@ void quartz::Application2::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     LOG_TRACEthis("Loading scene");
-    m_meshes = quartz::Application2::loadMeshes(m_renderingDevice);
+    m_meshes = quartz::Application2::loadMeshes(m_renderingContext.getRenderingDevice());
 
     LOG_TRACEthis("Beginning main loop");
-    while(!m_renderingWindow.shouldClose()) {
+    while(!m_renderingContext.getRenderingWindow().shouldClose()) {
+        // Capture input
         glfwPollEvents();
 
-        // Draw the scene and its objects
+        // Simulate the game world
+
+        // Draw the game world
+        m_renderingContext.draw(m_meshes);
     }
+
+    LOG_TRACEthis("Finishing");
+    m_renderingContext.finish();
 }

@@ -31,13 +31,14 @@ int main() {
         {"FILESYSTEM", util::Logger::Level::trace},
         {"APPLICATION", util::Logger::Level::trace},
         {"APPLICATION_INITIALIZATION", util::Logger::Level::trace},
-        {"VULKAN", util::Logger::Level::trace},
         {"BUFFER", util::Logger::Level::trace},
+        {"CONTEXT", util::Logger::Level::trace},
         {"DEVICE", util::Logger::Level::trace},
         {"INSTANCE", util::Logger::Level::trace},
         {"MESH", util::Logger::Level::trace},
         {"PIPELINE", util::Logger::Level::trace},
         {"SWAPCHAIN", util::Logger::Level::trace},
+        {"VULKAN", util::Logger::Level::trace},
         {"WINDOW", util::Logger::Level::trace},
     });
 

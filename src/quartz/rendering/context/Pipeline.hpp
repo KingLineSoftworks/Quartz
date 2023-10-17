@@ -46,7 +46,14 @@ public: // member functions
     USE_LOGGER(PIPELINE);
 
     uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
+    uint32_t getCurrentInFlightFrameIndex() const { return m_currentInFlightFrameIndex; }
+    const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
     const vk::UniqueRenderPass& getVulkanRenderPassPtr() const { return mp_vulkanRenderPass; }
+    const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
+    const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanUniqueGraphicsPipeline; }
+
+    void updateUniformBuffer(const quartz::rendering::Window2& renderingWindow);
+    void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions
     static vk::UniqueShaderModule createVulkanShaderModuleUniquePtr(
@@ -95,6 +102,7 @@ private: // static functions
 
 private: // member variables
     const uint32_t m_maxNumFramesInFlight;
+    uint32_t m_currentInFlightFrameIndex;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
     std::array<vk::VertexInputAttributeDescription, 2> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;

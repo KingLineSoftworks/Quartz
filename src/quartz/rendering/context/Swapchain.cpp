@@ -249,6 +249,7 @@ quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Window2& renderingWindow,
     const quartz::rendering::Pipeline& renderingPipeline
 ):
+    m_shouldRecreate(false),
     mp_vulkanSwapchain(quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
         renderingDevice.getGraphicsQueueFamilyIndex(),
         renderingDevice.getVulkanLogicalDevicePtr(),
@@ -274,20 +275,20 @@ quartz::rendering::Swapchain::Swapchain(
         renderingDevice.getGraphicsQueueFamilyIndex(),
         renderingDevice.getVulkanLogicalDevicePtr()
     )),
-    mp_vulkanDrawingCommandBuffers(quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
+    m_vulkanDrawingCommandBufferPtrs(quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
         mp_vulkanDrawingCommandPool,
         renderingPipeline.getMaxNumFramesInFlight()
     )),
-    m_vulkanImageAvailableSemaphoresPtrs(quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+    m_vulkanImageAvailableSemaphorePtrs(quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
         renderingPipeline.getMaxNumFramesInFlight()
     )),
-    m_vulkanRenderFinishedSemaphoresPtrs(quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+    m_vulkanRenderFinishedSemaphorePtrs(quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
         renderingPipeline.getMaxNumFramesInFlight()
     )),
-    m_vulkanInFlightFencesPtrs(quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
+    m_vulkanInFlightFencePtrs(quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
         renderingPipeline.getMaxNumFramesInFlight()
     ))
@@ -297,4 +298,205 @@ quartz::rendering::Swapchain::Swapchain(
 
 quartz::rendering::Swapchain::~Swapchain() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+void quartz::rendering::Swapchain::waitForInFlightFence(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t inFlightFrameIndex
+) {
+    vk::Result result = renderingDevice.getVulkanLogicalDevicePtr()->waitForFences(
+        *(m_vulkanInFlightFencePtrs[inFlightFrameIndex]),
+        true,
+        std::numeric_limits<uint64_t>::max()
+    );
+
+    if (result != vk::Result::eSuccess) {
+        LOG_ERRORthis("Failed to wait for previous frame to finish: {}", static_cast<uint32_t>(result));
+    }
+}
+
+uint32_t quartz::rendering::Swapchain::getAvailableImageIndex(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t inFlightFrameIndex
+) {
+    uint32_t availableImageIndex;
+    vk::Result acquireAvailableImageIndexResult = renderingDevice.getVulkanLogicalDevicePtr()->acquireNextImageKHR(
+        *mp_vulkanSwapchain,
+        std::numeric_limits<uint64_t>::max(),
+        *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
+        {},
+        &availableImageIndex
+    );
+
+    if (acquireAvailableImageIndexResult == vk::Result::eErrorOutOfDateKHR) {
+        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
+        m_shouldRecreate = true;
+    } else if (acquireAvailableImageIndexResult == vk::Result::eSuboptimalKHR) {
+        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
+        m_shouldRecreate = true;
+    } else if (acquireAvailableImageIndexResult != vk::Result::eSuccess) {
+        LOG_ERRORthis("Failed to retrieve available image index ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
+    }
+
+    return availableImageIndex;
+}
+
+void quartz::rendering::Swapchain::resetInFlightFence(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t inFlightFrameIndex
+) {
+    renderingDevice.getVulkanLogicalDevicePtr()->resetFences(*(m_vulkanInFlightFencePtrs[inFlightFrameIndex]));
+}
+
+void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
+    const quartz::rendering::Window2& renderingWindow,
+    const quartz::rendering::Pipeline& renderingPipeline,
+    const std::vector<quartz::rendering::Mesh>& meshes,
+    const uint32_t inFlightFrameIndex,
+    const uint32_t availableSwapchainImageIndex
+) {
+
+    // ----- reset ----- //
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->reset();
+
+    // ----- record things into a command buffer ? ----- //
+
+    vk::CommandBufferBeginInfo commandBufferBeginInfo(
+        {},
+        {}
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->begin(commandBufferBeginInfo);
+
+    // ----- start a render pass ----- //
+
+    vk::ClearValue clearScreenColor(
+        vk::ClearColorValue(
+            std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f }
+        )
+    );
+
+    vk::Rect2D renderPassRenderArea(
+        vk::Offset2D(0.0f, 0.0f),
+        renderingWindow.getVulkanExtent()
+    );
+
+    vk::RenderPassBeginInfo renderPassBeginInfo(
+        *renderingPipeline.getVulkanRenderPassPtr(),
+        *(m_vulkanFramebufferPtrs[availableSwapchainImageIndex]),
+        renderPassRenderArea,
+        clearScreenColor
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+
+    // ----- draw (but first bind graphics pipeline and set up viewport and scissor) ----- //
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindPipeline(vk::PipelineBindPoint::eGraphics, *renderingPipeline.getVulkanGraphicsPipelinePtr());
+
+    vk::Viewport viewport(
+        0.0f,
+        0.0f,
+        static_cast<float>(renderingWindow.getVulkanExtent().width),
+        static_cast<float>(renderingWindow.getVulkanExtent().height),
+        0.0f,
+        1.0f
+    );
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->setViewport(
+        0,
+        viewport
+    );
+
+    vk::Rect2D scissor(
+        vk::Offset2D(0.0f, 0.0f),
+        renderingWindow.getVulkanExtent()
+    );
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->setScissor(
+        0,
+        scissor
+    );
+
+    uint32_t offset = 0;
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+        0,
+        *(meshes[0].getStagedVertexBuffer().getLogicalBufferPtr()),
+        offset
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+        *(meshes[0].getStagedIndexBuffer().getLogicalBufferPtr()),
+        0,
+        vk::IndexType::eUint32
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *renderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        nullptr
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+        meshes[0].getIndices().size(),
+        1,
+        0,
+        0,
+        0
+    );
+
+    // ----- finish up ----- //
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->endRenderPass();
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->end();
+}
+
+void quartz::rendering::Swapchain::submitDrawingCommandBuffer(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t inFlightFrameIndex
+) {
+    vk::PipelineStageFlags waitStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+
+    vk::SubmitInfo commandBufferSubmitInfo(
+        *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
+        waitStageMask,
+        *(m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]),
+        *(m_vulkanRenderFinishedSemaphorePtrs[inFlightFrameIndex])
+    );
+
+    renderingDevice.getVulkanGraphicsQueue().submit(
+        commandBufferSubmitInfo,
+        *(m_vulkanInFlightFencePtrs[inFlightFrameIndex])
+    );
+}
+
+void quartz::rendering::Swapchain::presentImage(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t inFlightFrameIndex,
+    const uint32_t availableSwapchainImageIndex
+) {
+
+    vk::PresentInfoKHR presentInfo(
+        *(m_vulkanRenderFinishedSemaphorePtrs[inFlightFrameIndex]),
+        *mp_vulkanSwapchain,
+        availableSwapchainImageIndex,
+        {}
+    );
+
+    vk::Result presentResult = renderingDevice.getVulkanPresentQueue().presentKHR(presentInfo);
+
+
+    if (presentResult == vk::Result::eErrorOutOfDateKHR) {
+        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )", static_cast<uint32_t>(presentResult));
+        m_shouldRecreate = true;
+    } else if (presentResult == vk::Result::eSuboptimalKHR) {
+        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )", static_cast<uint32_t>(presentResult));
+        m_shouldRecreate = true;
+    } else if (presentResult != vk::Result::eSuccess) {
+        LOG_ERRORthis("Failed to retrieve available image index ( {} )", static_cast<uint32_t>(presentResult));
+    }
 }

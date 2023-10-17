@@ -5,6 +5,7 @@ add_library(
         QUARTZ_RENDERING_Context
         SHARED
         Buffer.cpp
+        Context.cpp
         Device.cpp
         Instance.cpp
         Mesh.cpp

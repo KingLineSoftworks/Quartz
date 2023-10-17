@@ -24,6 +24,8 @@ public: // member functions
     const vk::Queue& getVulkanGraphicsQueue() const { return m_vulkanGraphicsQueue; }
     const vk::Queue& getVulkanPresentQueue() const { return m_vulkanPresentQueue; }
 
+    void waitIdle() const { mp_vulkanLogicalDevice->waitIdle(); }
+
 private: // static functions
     static vk::PhysicalDevice getBestPhysicalDevice(
         const vk::UniqueInstance& p_instance

@@ -6,6 +6,7 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Device.hpp"
+#include "quartz/rendering/context/Mesh.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Window2.hpp"
 
@@ -25,6 +26,37 @@ public: // member functions
     ~Swapchain();
 
     USE_LOGGER(SWAPCHAIN);
+
+    bool getShouldRecreate() const { return m_shouldRecreate; }
+
+    void waitForInFlightFence(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t inFlightFrameIndex
+    );
+    uint32_t getAvailableImageIndex(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t inFlightFrameIndex
+    );
+    void resetInFlightFence(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t inFlightFrameIndex
+    );
+    void resetAndRecordDrawingCommandBuffer(
+        const quartz::rendering::Window2& renderingWindow,
+        const quartz::rendering::Pipeline& renderingPipeline,
+        const std::vector<quartz::rendering::Mesh>& meshes,
+        const uint32_t inFlightFrameIndex,
+        const uint32_t availableSwapchainImageIndex
+    );
+    void submitDrawingCommandBuffer(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t inFlightFrameIndex
+    );
+    void presentImage(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t inFlightFrameIndex,
+        const uint32_t availableSwapchainImageIndex
+    );
 
 private: // static functions
     static vk::UniqueSwapchainKHR createVulkanSwapchainUniquePtr(
@@ -66,6 +98,8 @@ private: // static functions
     );
 
 private: // member variables
+    bool m_shouldRecreate;
+
     vk::UniqueSwapchainKHR mp_vulkanSwapchain;
     std::vector<vk::Image> m_vulkanImages;
     std::vector<vk::UniqueImageView> m_vulkanImageViewPtrs;
@@ -73,8 +107,8 @@ private: // member variables
     std::vector<vk::UniqueFramebuffer> m_vulkanFramebufferPtrs;
 
     vk::UniqueCommandPool mp_vulkanDrawingCommandPool;
-    std::vector<vk::UniqueCommandBuffer> mp_vulkanDrawingCommandBuffers;
-    std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphoresPtrs;
-    std::vector<vk::UniqueSemaphore> m_vulkanRenderFinishedSemaphoresPtrs;
-    std::vector<vk::UniqueFence> m_vulkanInFlightFencesPtrs;
+    std::vector<vk::UniqueCommandBuffer> m_vulkanDrawingCommandBufferPtrs;
+    std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphorePtrs;
+    std::vector<vk::UniqueSemaphore> m_vulkanRenderFinishedSemaphorePtrs;
+    std::vector<vk::UniqueFence> m_vulkanInFlightFencePtrs;
 };

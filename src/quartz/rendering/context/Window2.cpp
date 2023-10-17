@@ -24,6 +24,7 @@ void quartz::rendering::Window2::glfwFramebufferSizeCallback(
         LOG_CRITICAL(quartz::loggers::WINDOW, "Retrieved invalid window pointer from glfw window user pointer");
     }
 
+    LOG_INFO(quartz::loggers::WINDOW, "Window resized to {} x {}", updatedWindowWidthPixels, updatedWindowHeightPixels);
     p_quartzWindow->m_widthPixels = updatedWindowWidthPixels;
     p_quartzWindow->m_heightPixels = updatedWindowHeightPixels;
     p_quartzWindow->m_wasResized = true;
