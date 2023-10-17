@@ -12,20 +12,20 @@
 
 namespace quartz {
 namespace rendering {
-    class Window2;
+    class Window;
 }
 }
 
-class quartz::rendering::Window2 {
+class quartz::rendering::Window {
 public: // interface
-    Window2(
+    Window(
         const std::string& name,
         const uint32_t widthPixels,
         const uint32_t heightPixels,
         const quartz::rendering::Instance& renderingInstance,
         const quartz::rendering::Device& renderingDevice
     );
-    ~Window2();
+    ~Window();
 
     void reset();
     void recreate(
@@ -94,7 +94,7 @@ private: // member variables
     vk::Extent2D m_vulkanExtent;
 
 private: // friends
-    friend void quartz::rendering::Window2::glfwFramebufferSizeCallback(
+    friend void quartz::rendering::Window::glfwFramebufferSizeCallback(
         GLFWwindow* p_glfwWindow,
         int updatedWindowWidthPixels,
         int updatedWindowHeightPixels

@@ -145,12 +145,8 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
-add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
-add_subdirectory("${QUARTZ_SOURCE_DIR}/application2")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/context")
 list(APPEND QUARTZ_LIBS QUARTZ_Application)
-list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Window)
-list(APPEND QUARTZ_LIBS QUARTZ_Application2)
 list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Context)
 
 #====================================================================

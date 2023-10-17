@@ -12,7 +12,7 @@ add_library(
         Pipeline.cpp
         Swapchain.cpp
         Vertex.cpp
-        Window2.cpp
+        Window.cpp
 )
 
 target_compile_options(

@@ -9,7 +9,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -38,7 +38,7 @@ class quartz::rendering::Pipeline {
 public: // member functions
     Pipeline(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window2& renderingWindow,
+        const quartz::rendering::Window& renderingWindow,
         const uint32_t maxNumFramesInFlight
     );
     ~Pipeline();
@@ -46,7 +46,7 @@ public: // member functions
     void reset();
     void recreate(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window2& renderingWindow
+        const quartz::rendering::Window& renderingWindow
     );
 
     USE_LOGGER(PIPELINE);
@@ -58,7 +58,7 @@ public: // member functions
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateUniformBuffer(const quartz::rendering::Window2& renderingWindow);
+    void updateUniformBuffer(const quartz::rendering::Window& renderingWindow);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions

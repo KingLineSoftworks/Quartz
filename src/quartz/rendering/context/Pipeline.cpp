@@ -10,7 +10,7 @@
 #include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 #include "quartz/rendering/context/Vertex.hpp"
 
 quartz::rendering::UniformBufferObject::UniformBufferObject(
@@ -449,7 +449,7 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
 quartz::rendering::Pipeline::Pipeline(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Window2& renderingWindow,
+    const quartz::rendering::Window& renderingWindow,
     const uint32_t maxNumFramesInFlight
 ) :
     m_maxNumFramesInFlight(maxNumFramesInFlight),
@@ -558,7 +558,7 @@ void quartz::rendering::Pipeline::reset() {
 
 void quartz::rendering::Pipeline::recreate(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Window2& renderingWindow
+    const quartz::rendering::Window& renderingWindow
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -585,7 +585,7 @@ void quartz::rendering::Pipeline::recreate(
     );
 }
 
-void quartz::rendering::Pipeline::updateUniformBuffer(const quartz::rendering::Window2& renderingWindow) {
+void quartz::rendering::Pipeline::updateUniformBuffer(const quartz::rendering::Window& renderingWindow) {
     static std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
     std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
     float executionDurationTimeCount = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();

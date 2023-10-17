@@ -8,15 +8,15 @@
 
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Instance.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 
-void quartz::rendering::Window2::glfwFramebufferSizeCallback(
+void quartz::rendering::Window::glfwFramebufferSizeCallback(
     GLFWwindow* p_glfwWindow,
     int updatedWindowWidthPixels,
     int updatedWindowHeightPixels
 ) {
-    // Get a pointer to the quartz::rendering::Window2 form the GLFWwindow* so we may update its values
-    quartz::rendering::Window2* p_quartzWindow = reinterpret_cast<quartz::rendering::Window2*>(
+    // Get a pointer to the quartz::rendering::Window form the GLFWwindow* so we may update its values
+    quartz::rendering::Window* p_quartzWindow = reinterpret_cast<quartz::rendering::Window*>(
         glfwGetWindowUserPointer(p_glfwWindow)
     );
 
@@ -29,7 +29,7 @@ void quartz::rendering::Window2::glfwFramebufferSizeCallback(
     p_quartzWindow->m_wasResized = true;
 }
 
-std::shared_ptr<GLFWwindow> quartz::rendering::Window2::createGLFWwindowPtr(
+std::shared_ptr<GLFWwindow> quartz::rendering::Window::createGLFWwindowPtr(
     const std::string &name,
     const uint32_t widthPixels,
     const uint32_t heightPixels,
@@ -64,12 +64,12 @@ std::shared_ptr<GLFWwindow> quartz::rendering::Window2::createGLFWwindowPtr(
     glfwSetWindowUserPointer(p_glfwWindow.get(), const_cast<void*>(p_windowUser));
 
     LOG_TRACE(quartz::loggers::WINDOW, "Setting GLFW framebuffer size callback");
-    glfwSetFramebufferSizeCallback(p_glfwWindow.get(), quartz::rendering::Window2::glfwFramebufferSizeCallback);
+    glfwSetFramebufferSizeCallback(p_glfwWindow.get(), quartz::rendering::Window::glfwFramebufferSizeCallback);
 
     return p_glfwWindow;
 }
 
-vk::UniqueSurfaceKHR quartz::rendering::Window2::createVulkanSurfaceUniquePtr(
+vk::UniqueSurfaceKHR quartz::rendering::Window::createVulkanSurfaceUniquePtr(
     const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
     const vk::UniqueInstance& uniqueInstance
 ) {
@@ -107,7 +107,7 @@ vk::UniqueSurfaceKHR quartz::rendering::Window2::createVulkanSurfaceUniquePtr(
     return p_surface;
 }
 
-vk::SurfaceFormatKHR quartz::rendering::Window2::getBestSurfaceFormat(
+vk::SurfaceFormatKHR quartz::rendering::Window::getBestSurfaceFormat(
     const vk::UniqueSurfaceKHR& p_surface,
     const vk::PhysicalDevice& physicalDevice
 ) {
@@ -135,7 +135,7 @@ vk::SurfaceFormatKHR quartz::rendering::Window2::getBestSurfaceFormat(
     throw std::runtime_error("");
 }
 
-vk::PresentModeKHR quartz::rendering::Window2::getBestPresentMode(
+vk::PresentModeKHR quartz::rendering::Window::getBestPresentMode(
     const vk::UniqueSurfaceKHR& p_surface,
     const vk::PhysicalDevice& physicalDevice
 ) {
@@ -166,7 +166,7 @@ vk::PresentModeKHR quartz::rendering::Window2::getBestPresentMode(
     return bestPresentMode;
 }
 
-vk::Extent2D quartz::rendering::Window2::getBestVulkanExtent(
+vk::Extent2D quartz::rendering::Window::getBestVulkanExtent(
     const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
     const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
 ) {
@@ -211,7 +211,7 @@ vk::Extent2D quartz::rendering::Window2::getBestVulkanExtent(
     return customExtent;
 }
 
-quartz::rendering::Window2::Window2(
+quartz::rendering::Window::Window(
     const std::string& name,
     const uint32_t windowWidthPixels,
     const uint32_t windowHeightPixels,
@@ -222,26 +222,26 @@ quartz::rendering::Window2::Window2(
     m_widthPixels(windowWidthPixels),
     m_heightPixels(windowHeightPixels),
     m_wasResized(false),
-    mp_glfwWindow(quartz::rendering::Window2::createGLFWwindowPtr(
+    mp_glfwWindow(quartz::rendering::Window::createGLFWwindowPtr(
         name,
         windowWidthPixels,
         windowHeightPixels,
         this
     )),
-    mp_vulkanSurface(quartz::rendering::Window2::createVulkanSurfaceUniquePtr(
+    mp_vulkanSurface(quartz::rendering::Window::createVulkanSurfaceUniquePtr(
         mp_glfwWindow,
         renderingInstance.getVulkanInstanceUniquePtr()
     )),
     m_vulkanSurfaceCapabilities(renderingDevice.getVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(*mp_vulkanSurface)),
-    m_vulkanSurfaceFormat(quartz::rendering::Window2::getBestSurfaceFormat(
+    m_vulkanSurfaceFormat(quartz::rendering::Window::getBestSurfaceFormat(
         mp_vulkanSurface,
         renderingDevice.getVulkanPhysicalDevice()
     )),
-    m_vulkanPresentMode(quartz::rendering::Window2::getBestPresentMode(
+    m_vulkanPresentMode(quartz::rendering::Window::getBestPresentMode(
         mp_vulkanSurface,
         renderingDevice.getVulkanPhysicalDevice()
     )),
-    m_vulkanExtent(quartz::rendering::Window2::getBestVulkanExtent(
+    m_vulkanExtent(quartz::rendering::Window::getBestVulkanExtent(
         mp_glfwWindow,
         m_vulkanSurfaceCapabilities
     ))
@@ -249,7 +249,7 @@ quartz::rendering::Window2::Window2(
     LOG_FUNCTION_CALL_TRACEthis("{} ( {} x {} )", m_name, m_widthPixels, m_heightPixels);
 }
 
-quartz::rendering::Window2::~Window2() {
+quartz::rendering::Window::~Window() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     LOG_TRACEthis("Destroying GLFW window at {}", static_cast<void*>(mp_glfwWindow.get()));
@@ -259,36 +259,36 @@ quartz::rendering::Window2::~Window2() {
     glfwTerminate();
 }
 
-void quartz::rendering::Window2::reset() {
+void quartz::rendering::Window::reset() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     mp_vulkanSurface.reset();
 }
 
-void quartz::rendering::Window2::recreate(
+void quartz::rendering::Window::recreate(
     const quartz::rendering::Instance& renderingInstance,
     const quartz::rendering::Device& renderingDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    mp_vulkanSurface = quartz::rendering::Window2::createVulkanSurfaceUniquePtr(
+    mp_vulkanSurface = quartz::rendering::Window::createVulkanSurfaceUniquePtr(
         mp_glfwWindow,
         renderingInstance.getVulkanInstanceUniquePtr()
     );
 
     m_vulkanSurfaceCapabilities = renderingDevice.getVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(*mp_vulkanSurface);
 
-    m_vulkanSurfaceFormat = quartz::rendering::Window2::getBestSurfaceFormat(
+    m_vulkanSurfaceFormat = quartz::rendering::Window::getBestSurfaceFormat(
         mp_vulkanSurface,
         renderingDevice.getVulkanPhysicalDevice()
     );
 
-    m_vulkanPresentMode = quartz::rendering::Window2::getBestPresentMode(
+    m_vulkanPresentMode = quartz::rendering::Window::getBestPresentMode(
         mp_vulkanSurface,
         renderingDevice.getVulkanPhysicalDevice()
     );
 
-    m_vulkanExtent = quartz::rendering::Window2::getBestVulkanExtent(
+    m_vulkanExtent = quartz::rendering::Window::getBestVulkanExtent(
         mp_glfwWindow,
         m_vulkanSurfaceCapabilities
     );
@@ -297,7 +297,7 @@ void quartz::rendering::Window2::recreate(
     m_wasResized = false;
 }
 
-bool quartz::rendering::Window2::shouldClose() const {
+bool quartz::rendering::Window::shouldClose() const {
     return static_cast<bool>(
         glfwWindowShouldClose(mp_glfwWindow.get())
     );

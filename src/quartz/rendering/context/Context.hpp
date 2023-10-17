@@ -9,7 +9,7 @@
 #include "quartz/rendering/context/Mesh.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Swapchain.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -33,7 +33,7 @@ public: // member functions
     USE_LOGGER(CONTEXT);
 
     const quartz::rendering::Device& getRenderingDevice() const { return m_renderingDevice; }
-    const quartz::rendering::Window2& getRenderingWindow() const { return m_renderingWindow; }
+    const quartz::rendering::Window& getRenderingWindow() const { return m_renderingWindow; }
 
     void draw(const std::vector<quartz::rendering::Mesh>& meshes);
     void recreateSwapchain();
@@ -42,7 +42,7 @@ public: // member functions
 private: // member variables
     quartz::rendering::Instance m_renderingInstance;
     quartz::rendering::Device m_renderingDevice;
-    quartz::rendering::Window2 m_renderingWindow;
+    quartz::rendering::Window m_renderingWindow;
     quartz::rendering::Pipeline m_renderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };

@@ -37,7 +37,6 @@ target_link_libraries(
     # Quartz
     PRIVATE
     QUARTZ_Application
-    QUARTZ_Application2
 )
 
 # pre compile definitions for the target

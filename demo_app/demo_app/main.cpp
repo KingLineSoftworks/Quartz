@@ -8,7 +8,6 @@
 
 #include "quartz/core.hpp"
 #include "quartz/application/Application.hpp"
-#include "quartz/application2/Application2.hpp"
 
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
@@ -30,7 +29,6 @@ int main() {
         {"GENERAL", util::Logger::Level::trace},
         {"FILESYSTEM", util::Logger::Level::trace},
         {"APPLICATION", util::Logger::Level::trace},
-        {"APPLICATION_INITIALIZATION", util::Logger::Level::trace},
         {"BUFFER", util::Logger::Level::trace},
         {"CONTEXT", util::Logger::Level::trace},
         {"DEVICE", util::Logger::Level::trace},
@@ -77,7 +75,6 @@ int main() {
     }
     LOG_INFO(quartz::loggers::GENERAL, "GLFW initialized");
 
-#if false
     quartz::Application application(
         APPLICATION_NAME,
         APPLICATION_MAJOR_VERSION,
@@ -94,24 +91,6 @@ int main() {
         LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }
-#else
-    quartz::Application2 application2(
-        APPLICATION_NAME,
-        APPLICATION_MAJOR_VERSION,
-        APPLICATION_MINOR_VERSION,
-        APPLICATION_PATCH_VERSION,
-        800,
-        600,
-        validationLayersEnabled
-    );
-
-    try {
-        application2.run();
-    } catch (const std::exception& e) {
-        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
-        return EXIT_FAILURE;
-    }
-#endif
 
     LOG_TRACE(quartz::loggers::GENERAL, "Terminating");
     return EXIT_SUCCESS;

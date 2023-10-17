@@ -8,7 +8,7 @@
 #include "quartz/rendering/context/Mesh.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Swapchain.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 
 quartz::rendering::Context::Context(
     const std::string& applicationName,

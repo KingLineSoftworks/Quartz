@@ -8,7 +8,7 @@
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Mesh.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -20,7 +20,7 @@ class quartz::rendering::Swapchain {
 public: // member functions
     Swapchain(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window2& renderingWindow,
+        const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::Pipeline& renderingPipeline
     );
     ~Swapchain();
@@ -28,7 +28,7 @@ public: // member functions
     void reset();
     void recreate(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window2& renderingWindow,
+        const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::Pipeline& renderingPipeline
     );
 
@@ -49,7 +49,7 @@ public: // member functions
         const uint32_t inFlightFrameIndex
     );
     void resetAndRecordDrawingCommandBuffer(
-        const quartz::rendering::Window2& renderingWindow,
+        const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::Pipeline& renderingPipeline,
         const std::vector<quartz::rendering::Mesh>& meshes,
         const uint32_t inFlightFrameIndex,

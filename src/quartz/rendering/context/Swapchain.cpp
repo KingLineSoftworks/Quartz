@@ -5,7 +5,7 @@
 
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Swapchain.hpp"
-#include "quartz/rendering/context/Window2.hpp"
+#include "quartz/rendering/context/Window.hpp"
 
 vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
     const uint32_t graphicsQueueFamilyIndex,
@@ -246,7 +246,7 @@ std::vector<vk::UniqueFence> quartz::rendering::Swapchain::createVulkanFenceUniq
 
 quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Window2& renderingWindow,
+    const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::Pipeline& renderingPipeline
 ):
     m_shouldRecreate(false),
@@ -315,7 +315,7 @@ void quartz::rendering::Swapchain::reset() {
 
 void quartz::rendering::Swapchain::recreate(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Window2& renderingWindow,
+    const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::Pipeline& renderingPipeline
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
@@ -416,7 +416,7 @@ void quartz::rendering::Swapchain::resetInFlightFence(
 }
 
 void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
-    const quartz::rendering::Window2& renderingWindow,
+    const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::Pipeline& renderingPipeline,
     const std::vector<quartz::rendering::Mesh>& meshes,
     const uint32_t inFlightFrameIndex,
