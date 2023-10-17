@@ -6,11 +6,11 @@
 
 #include "util/file_system/FileSystem.hpp"
 
-std::string quartz::util::FileSystem::getAbsoluteFilepathInProject(const std::string& filepathInProject) {
+std::string util::FileSystem::getAbsoluteFilepathInProject(const std::string& filepathInProject) {
     return std::string(PROJECT_ROOT_DIR) + std::string("/") + filepathInProject;
 }
 
-std::vector<char> quartz::util::FileSystem::readBytesFromFile(const std::string& filepath) {
+std::vector<char> util::FileSystem::readBytesFromFile(const std::string& filepath) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::FILESYSTEM, "{}", filepath);
     std::ifstream infile(filepath, std::ios::ate | std::ios::binary);
 

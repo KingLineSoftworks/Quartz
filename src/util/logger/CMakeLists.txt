@@ -1,5 +1,5 @@
 #====================================================================
-# The logger library
+# The logger utility library
 #====================================================================
 add_library(
     UTIL_Logger
@@ -14,6 +14,7 @@ target_compile_options(
 
 target_link_libraries(
     UTIL_Logger
+
     PUBLIC
     spdlog
 )
