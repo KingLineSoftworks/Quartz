@@ -10,3 +10,6 @@
 [submodule "vendor/vulkan"]
 	path = vendor/vulkan
 	url = https://github.com/KingLineSoftworks/vulkan.git
+[submodule "vendor/stb"]
+	path = vendor/stb
+	url = https://github.com/nothings/stb.git
