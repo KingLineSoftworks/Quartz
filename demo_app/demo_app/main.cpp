@@ -26,18 +26,19 @@ int main() {
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
     util::Logger::setLevels({
-        {"GENERAL", util::Logger::Level::trace},
-        {"FILESYSTEM", util::Logger::Level::trace},
+        {"GENERAL", util::Logger::Level::info},
+        {"FILESYSTEM", util::Logger::Level::info},
         {"APPLICATION", util::Logger::Level::trace},
         {"BUFFER", util::Logger::Level::trace},
-        {"CONTEXT", util::Logger::Level::trace},
-        {"DEVICE", util::Logger::Level::trace},
-        {"INSTANCE", util::Logger::Level::trace},
-        {"MESH", util::Logger::Level::trace},
-        {"PIPELINE", util::Logger::Level::trace},
-        {"SWAPCHAIN", util::Logger::Level::trace},
+        {"CONTEXT", util::Logger::Level::info},
+        {"DEVICE", util::Logger::Level::info},
+        {"INSTANCE", util::Logger::Level::info},
+        {"MESH", util::Logger::Level::info},
+        {"PIPELINE", util::Logger::Level::info},
+        {"SWAPCHAIN", util::Logger::Level::info},
+        {"TEXTURE", util::Logger::Level::trace},
         {"VULKAN", util::Logger::Level::trace},
-        {"WINDOW", util::Logger::Level::trace},
+        {"WINDOW", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {

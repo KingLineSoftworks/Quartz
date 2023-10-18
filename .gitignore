@@ -44,3 +44,7 @@ build/
 # ----- SPIR-V shader bytecode ----- #
 
 *.spv
+
+# ----- images ----- #
+
+*.jpg

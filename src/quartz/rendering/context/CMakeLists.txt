@@ -11,6 +11,7 @@ add_library(
         Mesh.cpp
         Pipeline.cpp
         Swapchain.cpp
+        Texture.cpp
         Vertex.cpp
         Window.cpp
 )

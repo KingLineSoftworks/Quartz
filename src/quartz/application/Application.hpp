@@ -6,7 +6,8 @@
 #include "quartz/Loggers.hpp"
 
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/context/Device.hpp"
+#include "quartz/rendering/context/Mesh.hpp"
+#include "quartz/rendering/context/Texture.hpp"
 
 namespace quartz {
     class Application;
@@ -40,4 +41,6 @@ private: // member variables
 
     quartz::rendering::Context m_renderingContext;
     std::vector<quartz::rendering::Mesh> m_meshes;
+    quartz::rendering::Texture m_texture;
+
 };

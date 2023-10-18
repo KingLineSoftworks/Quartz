@@ -44,7 +44,8 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    m_meshes()
+    m_meshes(),
+    m_texture(m_renderingContext.getRenderingDevice())
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
