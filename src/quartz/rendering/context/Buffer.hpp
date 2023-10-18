@@ -132,6 +132,8 @@ public: // member functions
         const uint32_t imageHeight,
         const uint32_t sizeBytes,
         const vk::ImageUsageFlags usageFlags,
+        const vk::Format format,
+        const vk::ImageTiling tiling,
         const void* p_bufferData
     );
     ImageBuffer(ImageBuffer&& other);
@@ -144,9 +146,11 @@ public: // member functions
 private: // static functions
     static vk::UniqueImage createVulkanImagePtr(
         const vk::UniqueDevice& p_logicalDevice,
-        const vk::ImageUsageFlags usageFlags,
         const uint32_t imageWidth,
-        const uint32_t imageHeight
+        const uint32_t imageHeight,
+        const vk::ImageUsageFlags usageFlags,
+        const vk::Format format,
+        const vk::ImageTiling tiling
     );
     static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceImageMemory(
         const vk::PhysicalDevice& physicalDevice,
@@ -160,6 +164,8 @@ private: // member variables
     uint32_t m_imageHeight;
     uint32_t m_sizeBytes;
     vk::ImageUsageFlags m_usageFlags;
+    vk::Format m_format;
+    vk::ImageTiling m_tiling;
 
     vk::UniqueBuffer mp_vulkanLogicalStagingBuffer;
     vk::UniqueDeviceMemory mp_vulkanPhysicalDeviceStagingMemory;

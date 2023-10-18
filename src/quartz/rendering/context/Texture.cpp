@@ -44,6 +44,8 @@ quartz::rendering::Texture::Texture(
         static_cast<uint32_t>(textureHeight),
         imageSizeBytes,
         vk::ImageUsageFlagBits::eSampled,
+        vk::Format::eR8G8B8A8Srgb,
+        vk::ImageTiling::eOptimal,
         p_texturePixels
     );
 

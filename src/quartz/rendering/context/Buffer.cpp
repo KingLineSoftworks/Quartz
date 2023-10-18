@@ -427,16 +427,18 @@ quartz::rendering::StagedBuffer::~StagedBuffer() {
 
 vk::UniqueImage quartz::rendering::ImageBuffer::createVulkanImagePtr(
     const vk::UniqueDevice& p_logicalDevice,
-    const vk::ImageUsageFlags usageFlags,
     const uint32_t imageWidth,
-    const uint32_t imageHeight
+    const uint32_t imageHeight,
+    const vk::ImageUsageFlags usageFlags,
+    const vk::Format format,
+    const vk::ImageTiling tiling
 ) {
     LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
 
     vk::ImageCreateInfo imageCreateInfo(
         {},
         vk::ImageType::e2D,
-        vk::Format::eR8G8B8A8Srgb,
+        format,
         {
             static_cast<uint32_t>(imageWidth),
             static_cast<uint32_t>(imageHeight),
@@ -445,7 +447,7 @@ vk::UniqueImage quartz::rendering::ImageBuffer::createVulkanImagePtr(
         1,
         1,
         vk::SampleCountFlagBits::e1,
-        vk::ImageTiling::eOptimal,
+        tiling,
         usageFlags,
         vk::SharingMode::eExclusive
     );
@@ -516,12 +518,16 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     const uint32_t imageHeight,
     const uint32_t sizeBytes,
     const vk::ImageUsageFlags usageFlags,
+    const vk::Format format,
+    const vk::ImageTiling tiling,
     const void* p_bufferData
 ) :
     m_imageWidth(imageWidth),
     m_imageHeight(imageHeight),
     m_sizeBytes(sizeBytes),
     m_usageFlags(usageFlags),
+    m_format(format),
+    m_tiling(tiling),
     mp_vulkanLogicalStagingBuffer(quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_sizeBytes,
@@ -537,9 +543,11 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     )),
     mp_vulkanImage(quartz::rendering::ImageBuffer::createVulkanImagePtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        vk::ImageUsageFlagBits::eTransferDst | m_usageFlags, // vk::ImageUsageFlagBits::eSampled
         m_imageWidth,
-        m_imageHeight
+        m_imageHeight,
+        vk::ImageUsageFlagBits::eTransferDst | m_usageFlags,
+        m_format,
+        m_tiling
     )),
     mp_vulkanPhysicalDeviceMemory(quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
         renderingDevice.getVulkanPhysicalDevice(),
