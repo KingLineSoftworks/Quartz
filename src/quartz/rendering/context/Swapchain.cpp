@@ -487,12 +487,12 @@ void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
     uint32_t offset = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
-        *(meshes[0].getStagedVertexBuffer().getLogicalBufferPtr()),
+        *(meshes[0].getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
         offset
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(meshes[0].getStagedIndexBuffer().getLogicalBufferPtr()),
+        *(meshes[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );
