@@ -12,7 +12,9 @@
 #include "quartz/rendering/context/Swapchain.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
-std::vector<quartz::rendering::Mesh> quartz::Application::loadMeshes(const quartz::rendering::Device& renderingDevice) {
+std::vector<quartz::rendering::Mesh> quartz::Application::loadMeshes(
+    const quartz::rendering::Device& renderingDevice
+) {
     LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "Loading meshes");
 
     std::vector<quartz::rendering::Mesh> meshes;
@@ -58,7 +60,9 @@ void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     LOG_TRACEthis("Loading scene");
-    m_meshes = quartz::Application::loadMeshes(m_renderingContext.getRenderingDevice());
+    m_meshes = quartz::Application::loadMeshes(
+        m_renderingContext.getRenderingDevice()
+    );
 
     LOG_TRACEthis("Beginning main loop");
     while(!m_renderingContext.getRenderingWindow().shouldClose()) {

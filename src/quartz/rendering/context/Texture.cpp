@@ -36,14 +36,13 @@ quartz::rendering::Texture::Texture(
 
     // x4 for rgba (32 bits = 4 bytes)
     uint32_t imageSizeBytes = textureWidth * textureHeight * 4;
-    LOG_TRACEthis(
-        "Successfully loaded {}x{} texture with {} channels ( {} bytes ) from {}",
-        textureWidth,
-        textureHeight,
-        textureChannelCount,
-        imageSizeBytes,
-        filepath
-    );
+    LOG_TRACEthis("Successfully loaded {}x{} texture with {} channels "
+                  "( {} bytes ) from {}",
+                  textureWidth,
+                  textureHeight,
+                  textureChannelCount,
+                  imageSizeBytes,
+                  filepath);
 
     quartz::rendering::ImageBuffer imageBuffer(
         renderingDevice,

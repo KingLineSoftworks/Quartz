@@ -31,7 +31,9 @@ public: // member functions
     void run();
 
 private: // static functions
-    static std::vector<quartz::rendering::Mesh> loadMeshes(const quartz::rendering::Device& renderingDevice);
+    static std::vector<quartz::rendering::Mesh> loadMeshes(
+        const quartz::rendering::Device& renderingDevice
+    );
 
 private: // member variables
     const std::string m_applicationName;

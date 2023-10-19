@@ -29,7 +29,8 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{}", filepath);
 
-    const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(filepath);
+    const std::vector<char> shaderBytes =
+        util::FileSystem::readBytesFromFile(filepath);
 
     vk::ShaderModuleCreateInfo shaderModuleCreateInfo(
         {},
@@ -38,7 +39,7 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::ShaderModule");
-    vk::UniqueShaderModule p_shaderModule = p_logicalDevice->createShaderModuleUnique(shaderModuleCreateInfo);
+    vk::UniqueShaderModule p_shaderModule =p_logicalDevice->createShaderModuleUnique(shaderModuleCreateInfo);
 
     if (!p_shaderModule) {
         LOG_CRITICAL(PIPELINE, "Failed to create vk::ShaderModule");
@@ -63,7 +64,10 @@ std::vector<quartz::rendering::LocallyMappedBuffer> quartz::rendering::Pipeline:
             renderingDevice,
             sizeof(quartz::rendering::UniformBufferObject),
             vk::BufferUsageFlagBits::eUniformBuffer,
-            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
         );
     }
 
@@ -88,9 +92,10 @@ vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescripto
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::DescriptorSetLayout");
-    vk::UniqueDescriptorSetLayout p_descriptorSetLayout = p_logicalDevice->createDescriptorSetLayoutUnique(
-        layoutCreateInfo
-    );
+    vk::UniqueDescriptorSetLayout p_descriptorSetLayout =
+        p_logicalDevice->createDescriptorSetLayoutUnique(
+            layoutCreateInfo
+        );
 
     if (!p_descriptorSetLayout) {
         LOG_CRITICAL(PIPELINE, "Failed to create vk::DescriptorSetLayout");
@@ -105,7 +110,8 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t numDescriptorSets
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", numDescriptorSets);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight",
+                             numDescriptorSets);
 
     vk::DescriptorPoolSize poolSize(
         vk::DescriptorType::eUniformBuffer,
@@ -119,7 +125,8 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::DescriptorPool");
-    vk::UniqueDescriptorPool uniqueDescriptorPool = p_logicalDevice->createDescriptorPoolUnique(poolCreateInfo);
+    vk::UniqueDescriptorPool uniqueDescriptorPool =
+        p_logicalDevice->createDescriptorPoolUnique(poolCreateInfo);
 
     if (!uniqueDescriptorPool) {
         LOG_CRITICAL(PIPELINE, "Failed to create vk::DescriptorPool");
@@ -137,23 +144,35 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight",
+                             maxNumFramesInFlight);
 
-    LOG_TRACE(PIPELINE, "Creating vector of {} vk::DescriptorSetLayout(s) from vk::UniqueDescriptorSetLayout with instance at {}", maxNumFramesInFlight, reinterpret_cast<const void*>(&(*p_descriptorSetLayout)));
-    std::vector<const vk::DescriptorSetLayout> descriptorSetLayouts(maxNumFramesInFlight,  *p_descriptorSetLayout);
+    LOG_TRACE(PIPELINE, "Creating vector of {} vk::DescriptorSetLayout(s) from "
+                        "vk::UniqueDescriptorSetLayout with instance at {}",
+                        maxNumFramesInFlight,
+                        reinterpret_cast<const void*>(&(*p_descriptorSetLayout)));
+    std::vector<const vk::DescriptorSetLayout> descriptorSetLayouts(
+        maxNumFramesInFlight,
+        *p_descriptorSetLayout
+    );
 
-    LOG_TRACE(PIPELINE, "Creating vk::DescriptorSetAllocateInfo using vk::UniqueDescriptorPool with instance at {}", reinterpret_cast<const void*>(&(*p_descriptorPool)));
+    LOG_TRACE(PIPELINE, "Creating vk::DescriptorSetAllocateInfo using "
+                        "vk::UniqueDescriptorPool with instance at {}",
+                        reinterpret_cast<const void*>(&(*p_descriptorPool)));
     vk::DescriptorSetAllocateInfo allocateInfo(
         *p_descriptorPool,
         maxNumFramesInFlight,
         descriptorSetLayouts.data()
     );
 
-    LOG_TRACE(PIPELINE, "Attempting to allocate {} vk::DescriptorSet(s)", descriptorSetLayouts.size());
-    std::vector<vk::DescriptorSet> descriptorSets = p_logicalDevice->allocateDescriptorSets(allocateInfo);
+    LOG_TRACE(PIPELINE, "Attempting to allocate {} vk::DescriptorSet(s)",
+              descriptorSetLayouts.size());
+    std::vector<vk::DescriptorSet> descriptorSets =
+        p_logicalDevice->allocateDescriptorSets(allocateInfo);
 
     if (descriptorSets.size() != descriptorSetLayouts.size()) {
-        LOG_CRITICAL(PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}", descriptorSets.size(), descriptorSetLayouts.size());
+        LOG_CRITICAL(PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}",
+                     descriptorSets.size(), descriptorSetLayouts.size());
         throw std::runtime_error("");
     }
 
@@ -162,7 +181,9 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
             LOG_CRITICAL(PIPELINE, "Failed to allocate vk::DescriptorSet {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {} with instance at {}", i, reinterpret_cast<void*>(&(descriptorSets[i])));
+        LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {} with "
+                            "instance at {}",
+                            i, reinterpret_cast<void*>(&(descriptorSets[i])));
 
         vk::DescriptorBufferInfo bufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
@@ -244,7 +265,8 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::RenderPass");
-    vk::UniqueRenderPass p_renderPass = p_logicalDevice->createRenderPassUnique(renderPassCreateInfo);
+    vk::UniqueRenderPass p_renderPass =
+        p_logicalDevice->createRenderPassUnique(renderPassCreateInfo);
 
     if (!p_renderPass) {
         LOG_CRITICAL(PIPELINE, "Failed to create vk::RenderPass");
@@ -270,7 +292,10 @@ vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayout
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::PipelineLayout");
-    vk::UniquePipelineLayout p_pipelineLayout = p_logicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
+    vk::UniquePipelineLayout p_pipelineLayout =
+        p_logicalDevice->createPipelineLayoutUnique(
+            pipelineLayoutCreateInfo
+        );
 
     if (!p_pipelineLayout) {
         LOG_CRITICAL(PIPELINE, "Failed to create vk::PipelineLayout");
@@ -317,23 +342,26 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
     // ----- vertex input tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineVertexInputStateCreateInfo");
-    vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo(
-        {},
-        vertexInputBindingDescriptions,
-        vertexInputAttributeDescriptions
-    );
+    vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo =
+        vk::PipelineVertexInputStateCreateInfo(
+            {},
+            vertexInputBindingDescriptions,
+            vertexInputAttributeDescriptions
+        );
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineInputAssemblyStateCreateInfo");
-    vk::PipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo(
-        {},
-        vk::PrimitiveTopology::eTriangleList,
-        false
-    );
+    vk::PipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo =
+        vk::PipelineInputAssemblyStateCreateInfo(
+            {},
+            vk::PrimitiveTopology::eTriangleList,
+            false
+        );
 
     // ----- tessellation tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineTessellationStateCreateInfo");
-    vk::PipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo = vk::PipelineTessellationStateCreateInfo();
+    vk::PipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo =
+        vk::PipelineTessellationStateCreateInfo();
 
     // ----- viewport and scissor tings ----- //
 
@@ -344,71 +372,79 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
     }
     LOG_TRACE(PIPELINE, "  - using {} scissor rectangles", scissorRectangles.size());
     for (const vk::Rect2D& scissorRectangle : scissorRectangles) {
-        LOG_TRACE(PIPELINE, "    - {} , {}", scissorRectangle.offset.x, scissorRectangle.offset.y);
+        LOG_TRACE(PIPELINE, "    - {} , {}",
+                  scissorRectangle.offset.x, scissorRectangle.offset.y);
     }
-    vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo(
-        {},
-        viewports,
-        scissorRectangles
-    );
+    vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo =
+        vk::PipelineViewportStateCreateInfo(
+            {},
+            viewports,
+            scissorRectangles
+        );
 
     // ----- rasterizer tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineRasterizationStateCreateInfo");
-    vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo(
-        {},
-        false,
-        false,
-        vk::PolygonMode::eFill,
-        vk::CullModeFlagBits::eBack,
-        vk::FrontFace::eCounterClockwise,
-        false,
-        0.0f,
-        0.0f,
-        0.0f,
-        1.0f
-    );
+    vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo =
+        vk::PipelineRasterizationStateCreateInfo(
+            {},
+            false,
+            false,
+            vk::PolygonMode::eFill,
+            vk::CullModeFlagBits::eBack,
+            vk::FrontFace::eCounterClockwise,
+            false,
+            0.0f,
+            0.0f,
+            0.0f,
+            1.0f
+        );
 
     // ----- multisample tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineMultisampleStateCreateInfo");
-    vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo(
-        {},
-        vk::SampleCountFlagBits::e1,
-        false,
-        1.0f,
-        nullptr,
-        false,
-        false
-    );
+    vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo =
+        vk::PipelineMultisampleStateCreateInfo(
+            {},
+            vk::SampleCountFlagBits::e1,
+            false,
+            1.0f,
+            nullptr,
+            false,
+            false
+        );
 
     // ----- depth stencil tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineDepthStencilStateCreateInfo");
-    vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo();
+    vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo =
+        vk::PipelineDepthStencilStateCreateInfo();
 
     // ----- color blend tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineColorBlendStateCreateInfo");
-    vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo(
-        {},
-        false,
-        vk::LogicOp::eCopy,
-        colorBlendAttachmentStates,
-        { 0.0f, 0.0f, 0.0f, 0.0f}
-    );
+    vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo =
+        vk::PipelineColorBlendStateCreateInfo(
+            {},
+            false,
+            vk::LogicOp::eCopy,
+            colorBlendAttachmentStates,
+            { 0.0f, 0.0f, 0.0f, 0.0f}
+        );
 
     // ----- dynamic state tings ----- //
 
-    LOG_TRACE(PIPELINE, "Creating vk::PipelineDynamicStateCreateInfo", dynamicStates.size());
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineDynamicStateCreateInfo",
+              dynamicStates.size());
     LOG_TRACE(PIPELINE, "  - using {} dynamic states", dynamicStates.size());
     for (const vk::DynamicState& dynamicState : dynamicStates) {
         LOG_TRACE(PIPELINE, "    - {}", static_cast<uint32_t>(dynamicState));
     }
-    vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo(
-        {},
-        dynamicStates
-    );
+    vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo =
+        vk::PipelineDynamicStateCreateInfo(
+            {},
+            dynamicStates
+        );
 
     // ----- actually creating the graphics pipeline ----- //
 
@@ -433,7 +469,8 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::Pipeline");
-    vk::ResultValue<vk::UniquePipeline> graphicsPipelineCreationResult = p_logicalDevice->createGraphicsPipelineUnique(
+    vk::ResultValue<vk::UniquePipeline> graphicsPipelineCreationResult =
+        p_logicalDevice->createGraphicsPipelineUnique(
         VK_NULL_HANDLE,
         graphicsPipelineCreateInfo
     );
@@ -454,8 +491,12 @@ quartz::rendering::Pipeline::Pipeline(
 ) :
     m_maxNumFramesInFlight(maxNumFramesInFlight),
     m_currentInFlightFrameIndex(0),
-    m_vulkanVertexInputBindingDescriptions(quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()),
-    m_vulkanVertexInputAttributeDescriptions(quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions()),
+    m_vulkanVertexInputBindingDescriptions(
+        quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()
+    ),
+    m_vulkanVertexInputAttributeDescriptions(
+        quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions()
+    ),
     m_vulkanViewports({
         vk::Viewport(
             0.0f,
@@ -493,53 +534,75 @@ quartz::rendering::Pipeline::Pipeline(
         vk::DynamicState::eViewport,
         vk::DynamicState::eScissor
     }),
-    mp_vulkanVertexShaderModule(quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        util::FileSystem::getAbsoluteFilepathInProject("shader.vert.spv")
-    )),
-    mp_vulkanFragmentShaderModule(quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        util::FileSystem::getAbsoluteFilepathInProject("shader.frag.spv")
-    )),
-    m_uniformBuffers(quartz::rendering::Pipeline::createUniformBuffers(
-        renderingDevice,
-        m_maxNumFramesInFlight
-    )),
-    mp_vulkanDescriptorSetLayout(quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr()
-    )),
-    m_vulkanDescriptorPoolPtr(quartz::rendering::Pipeline::createVulkanDescriptorPoolUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        m_maxNumFramesInFlight
-    )),
-    m_vulkanDescriptorSets(quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        m_maxNumFramesInFlight,
-        m_uniformBuffers,
-        mp_vulkanDescriptorSetLayout,
-        m_vulkanDescriptorPoolPtr
-    )),
-    mp_vulkanRenderPass(quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfaceFormat()
-    )),
-    mp_vulkanPipelineLayout(quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        mp_vulkanDescriptorSetLayout
-    )),
-    mp_vulkanGraphicsPipeline(quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        m_vulkanVertexInputBindingDescriptions,
-        m_vulkanVertexInputAttributeDescriptions,
-        m_vulkanViewports,
-        m_vulkanScissorRectangles,
-        m_vulkanColorBlendAttachmentStates,
-        m_vulkanDynamicStates,
-        mp_vulkanVertexShaderModule,
-        mp_vulkanFragmentShaderModule,
-        mp_vulkanPipelineLayout,
-        mp_vulkanRenderPass
-    ))
+    mp_vulkanVertexShaderModule(
+        quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            util::FileSystem::getAbsoluteFilepathInProject(
+                "shader.vert.spv"
+            )
+        )
+    ),
+    mp_vulkanFragmentShaderModule(
+        quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            util::FileSystem::getAbsoluteFilepathInProject(
+                "shader.frag.spv"
+            )
+        )
+    ),
+    m_uniformBuffers(
+        quartz::rendering::Pipeline::createUniformBuffers(
+            renderingDevice,
+            m_maxNumFramesInFlight
+        )
+    ),
+    mp_vulkanDescriptorSetLayout(
+        quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr()
+        )
+    ),
+    m_vulkanDescriptorPoolPtr(
+        quartz::rendering::Pipeline::createVulkanDescriptorPoolUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            m_maxNumFramesInFlight
+        )
+    ),
+    m_vulkanDescriptorSets(
+        quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            m_maxNumFramesInFlight,
+            m_uniformBuffers,
+            mp_vulkanDescriptorSetLayout,
+            m_vulkanDescriptorPoolPtr
+        )
+    ),
+    mp_vulkanRenderPass(
+        quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanSurfaceFormat()
+        )
+    ),
+    mp_vulkanPipelineLayout(
+        quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            mp_vulkanDescriptorSetLayout
+        )
+    ),
+    mp_vulkanGraphicsPipeline(
+        quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            m_vulkanVertexInputBindingDescriptions,
+            m_vulkanVertexInputAttributeDescriptions,
+            m_vulkanViewports,
+            m_vulkanScissorRectangles,
+            m_vulkanColorBlendAttachmentStates,
+            m_vulkanDynamicStates,
+            mp_vulkanVertexShaderModule,
+            mp_vulkanFragmentShaderModule,
+            mp_vulkanPipelineLayout,
+            mp_vulkanRenderPass
+        )
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -562,33 +625,45 @@ void quartz::rendering::Pipeline::recreate(
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    mp_vulkanRenderPass = quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfaceFormat()
-    );
-    mp_vulkanPipelineLayout = quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        mp_vulkanDescriptorSetLayout
-    );
-    mp_vulkanGraphicsPipeline = quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        m_vulkanVertexInputBindingDescriptions,
-        m_vulkanVertexInputAttributeDescriptions,
-        m_vulkanViewports,
-        m_vulkanScissorRectangles,
-        m_vulkanColorBlendAttachmentStates,
-        m_vulkanDynamicStates,
-        mp_vulkanVertexShaderModule,
-        mp_vulkanFragmentShaderModule,
-        mp_vulkanPipelineLayout,
-        mp_vulkanRenderPass
-    );
+    mp_vulkanRenderPass =
+        quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanSurfaceFormat()
+        );
+    mp_vulkanPipelineLayout =
+        quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            mp_vulkanDescriptorSetLayout
+        );
+    mp_vulkanGraphicsPipeline =
+        quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            m_vulkanVertexInputBindingDescriptions,
+            m_vulkanVertexInputAttributeDescriptions,
+            m_vulkanViewports,
+            m_vulkanScissorRectangles,
+            m_vulkanColorBlendAttachmentStates,
+            m_vulkanDynamicStates,
+            mp_vulkanVertexShaderModule,
+            mp_vulkanFragmentShaderModule,
+            mp_vulkanPipelineLayout,
+            mp_vulkanRenderPass
+        );
 }
 
-void quartz::rendering::Pipeline::updateUniformBuffer(const quartz::rendering::Window& renderingWindow) {
-    static std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
-    std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
-    float executionDurationTimeCount = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+void quartz::rendering::Pipeline::updateUniformBuffer(
+    const quartz::rendering::Window& renderingWindow
+) {
+    static std::chrono::high_resolution_clock::time_point startTime =
+        std::chrono::high_resolution_clock::now();
+
+    std::chrono::high_resolution_clock::time_point currentTime =
+        std::chrono::high_resolution_clock::now();
+
+    float executionDurationTimeCount =
+        std::chrono::duration<float, std::chrono::seconds::period>(
+            currentTime - startTime
+        ).count();
 
     quartz::rendering::UniformBufferObject ubo;
     ubo.model = glm::rotate(
@@ -603,11 +678,15 @@ void quartz::rendering::Pipeline::updateUniformBuffer(const quartz::rendering::W
     );
     ubo.projection = glm::perspective(
         glm::radians(45.0f),
-        static_cast<float>(renderingWindow.getVulkanExtent().width) / static_cast<float>(renderingWindow.getVulkanExtent().height),
+    (
+            static_cast<float>(renderingWindow.getVulkanExtent().width) /
+            static_cast<float>(renderingWindow.getVulkanExtent().height)
+        ),
         0.1f,
         10.0f
     );
-    ubo.projection[1][1] *= -1; // Because glm is meant for OpenGL where Y clip coordinate is inverted
+    // Because glm is meant for OpenGL where Y clip coordinate is inverted
+    ubo.projection[1][1] *= -1;
 
     memcpy(
         m_uniformBuffers[m_currentInFlightFrameIndex].getMappedLocalMemoryPtr(),
