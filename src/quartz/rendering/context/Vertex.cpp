@@ -5,10 +5,12 @@
 
 quartz::rendering::Vertex::Vertex(
     const glm::vec3& worldPosition_,
-    const glm::vec3& color_
+    const glm::vec3& color_,
+    const glm::vec2& textureCoordinate_
 ) :
     worldPosition(worldPosition_),
-    color(color_)
+    color(color_),
+    textureCoordinate(textureCoordinate_)
 {}
 
 vk::VertexInputBindingDescription quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
@@ -21,8 +23,8 @@ vk::VertexInputBindingDescription quartz::rendering::Vertex::getVulkanVertexInpu
     return vertexInputBindingDescription;
 }
 
-std::array<vk::VertexInputAttributeDescription, 2> quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
-    std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions = {
+std::array<vk::VertexInputAttributeDescription, 3> quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
+    std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription(
             0,
             0,
@@ -34,6 +36,12 @@ std::array<vk::VertexInputAttributeDescription, 2> quartz::rendering::Vertex::ge
             0,
             vk::Format::eR32G32B32Sfloat,
             offsetof(quartz::rendering::Vertex, color)
+        ),
+        vk::VertexInputAttributeDescription(
+            2,
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, textureCoordinate)
         )
     };
 

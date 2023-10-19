@@ -8,8 +8,10 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
 
 layout(location = 0) in vec3 inWorldPosition;
 layout(location = 1) in vec3 inColor;
+layout(location = 2) in vec2 inTextureCoordinate;
 
 layout(location = 0) out vec3 outFragmentColor;
+layout(location = 1) out vec2 outTextureCoordinate;
 
 void main() {
     // ----- Set the position of the vertex in clip space ----- //
@@ -19,4 +21,5 @@ void main() {
     // ----- set the output fragment color for the fragment shader to use as input ----- //
 
     outFragmentColor = inColor;
+    outTextureCoordinate = inTextureCoordinate;
 }

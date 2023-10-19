@@ -354,7 +354,7 @@ vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayout
 vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-    const std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions,
+    const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,
     const std::vector<vk::Viewport> viewports,
     const std::vector<vk::Rect2D> scissorRectangles,
     const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,

@@ -10,10 +10,26 @@ std::vector<quartz::rendering::Vertex> quartz::rendering::Mesh::loadVertices() {
     LOG_FUNCTION_SCOPE_TRACE(MESH, "");
 
     std::vector<quartz::rendering::Vertex> vertices = {
-        quartz::rendering::Vertex({-0.5f, -0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}),
-        quartz::rendering::Vertex({ 0.5f, -0.5f,  0.0f}, {0.0f, 1.0f, 0.0f}),
-        quartz::rendering::Vertex({ 0.5f, 0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}),
-        quartz::rendering::Vertex({-0.5f,  0.5f,  0.0f}, {1.0f, 1.0f, 1.0f})
+        quartz::rendering::Vertex(
+            {-0.5f, -0.5f,  0.0f},
+            {1.0f, 0.0f, 0.0f},
+            {1.0f, 0.0f}
+        ),
+        quartz::rendering::Vertex(
+            { 0.5f, -0.5f,  0.0f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 0.0f}
+        ),
+        quartz::rendering::Vertex(
+            { 0.5f,  0.5f,  0.0f},
+            {0.0f, 0.0f, 1.0f},
+            {0.0f, 1.0f}
+        ),
+        quartz::rendering::Vertex(
+            {-0.5f,  0.5f,  0.0f},
+            {1.0f, 1.0f, 1.0f},
+            {1.0f, 1.0f}
+        )
     };
 
     LOG_TRACE(MESH, "Loaded {} vertices", vertices.size());
