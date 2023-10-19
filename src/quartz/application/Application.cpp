@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+#include "util/file_system/FileSystem.hpp"
+
 #include "quartz/Loggers.hpp"
 
 #include "quartz/application/Application.hpp"
@@ -12,12 +14,14 @@
 #include "quartz/rendering/context/Swapchain.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
-std::vector<quartz::rendering::Mesh> quartz::Application::loadMeshes(const quartz::rendering::Device& renderingDevice) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "Loading meshes");
+std::vector<quartz::rendering::Mesh> quartz::Application::loadMeshes(
+    const quartz::rendering::Device& renderingDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "Loading meshes");
 
     std::vector<quartz::rendering::Mesh> meshes;
     meshes.emplace_back(renderingDevice);
-    LOG_TRACE(quartz::loggers::APPLICATION, "Loaded {} meshes", meshes.size());
+    LOG_TRACE(APPLICATION, "Loaded {} meshes", meshes.size());
 
     return meshes;
 }
@@ -44,7 +48,11 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    m_meshes()
+    m_meshes(),
+    m_texture(
+        m_renderingContext.getRenderingDevice(),
+        util::FileSystem::getAbsoluteFilepathInProject("texture.jpg")
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -57,7 +65,10 @@ void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     LOG_TRACEthis("Loading scene");
-    m_meshes = quartz::Application::loadMeshes(m_renderingContext.getRenderingDevice());
+    m_meshes = quartz::Application::loadMeshes(
+        m_renderingContext.getRenderingDevice()
+    );
+    m_renderingContext.loadScene(m_texture);
 
     LOG_TRACEthis("Beginning main loop");
     while(!m_renderingContext.getRenderingWindow().shouldClose()) {

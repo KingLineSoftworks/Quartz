@@ -9,6 +9,7 @@
 #include "quartz/rendering/context/Mesh.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Swapchain.hpp"
+#include "quartz/rendering/context/Texture.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
 namespace quartz {
@@ -29,6 +30,8 @@ public: // member functions
         const bool validationLayersEnabled
     );
     ~Context();
+
+    void loadScene(const quartz::rendering::Texture& texture);
 
     USE_LOGGER(CONTEXT);
 

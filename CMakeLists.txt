@@ -111,6 +111,9 @@ list(APPEND VENDOR_LIBS glm)
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 list(APPEND VENDOR_LIBS spdlog)
 
+# STB
+include_directories("${VENDOR_ROOT_DIR}/stb")
+
 #====================================================================
 # Define preprocessor directives for the Quartz libraries
 #====================================================================

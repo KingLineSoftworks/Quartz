@@ -244,57 +244,69 @@ private: // private static variables
  * @note the first argument of the variadic arguments must be a formatting string
  */
 
-#define LOG_TRACE(registrationInfo, ...) \
-    util::Logger::trace(registrationInfo.loggerName, __VA_ARGS__)
-#define LOG_TRACEthis(...) LOG_TRACE(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+#define LOG_TRACE(REGISTRATION_NAME, ...) \
+    util::Logger::trace(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
+#define LOG_TRACEthis(...) \
+    util::Logger::trace(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
-#define LOG_DEBUG(registrationInfo, ...) \
-    util::Logger::debug(registrationInfo.loggerName, __VA_ARGS__)
-#define LOG_DEBUGthis(...) LOG_DEBUG(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+#define LOG_DEBUG(REGISTRATION_NAME, ...) \
+    util::Logger::debug(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
+#define LOG_DEBUGthis(...) \
+    util::Logger::debug(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
-#define LOG_INFO(registrationInfo, ...) \
-    util::Logger::info(registrationInfo.loggerName, __VA_ARGS__)
-#define LOG_INFOthis(...) LOG_INFO(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+#define LOG_INFO(REGISTRATION_NAME, ...) \
+    util::Logger::info(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
+#define LOG_INFOthis(...) \
+    util::Logger::info(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
-#define LOG_WARNING(registrationInfo, ...) \
-    util::Logger::warning(registrationInfo.loggerName, __VA_ARGS__)
-#define LOG_WARNINGthis(...) LOG_WARNING(this->getLoggerRegistrationInfo(), __VA_ARGS__)
-    
-#define LOG_ERROR(registrationInfo, ...) \
-    util::Logger::error(registrationInfo.loggerName, __VA_ARGS__)
-#define LOG_ERRORthis(...) LOG_ERROR(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+#define LOG_WARNING(REGISTRATION_NAME, ...) \
+    util::Logger::warning(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
+#define LOG_WARNINGthis(...) \
+    util::Logger::warning(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
-#define LOG_CRITICAL(registrationInfo, ...) \
-    util::Logger::critical(registrationInfo.loggerName, __VA_ARGS__)
-#define LOG_CRITICALthis(...) LOG_CRITICAL(this->getLoggerRegistrationInfo(), __VA_ARGS__)
+#define LOG_ERROR(REGISTRATION_NAME, ...) \
+    util::Logger::error(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
+#define LOG_ERRORthis(...) \
+    util::Logger::error(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
+
+#define LOG_CRITICAL(REGISTRATION_NAME, ...) \
+    util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
+#define LOG_CRITICALthis(...) \
+    util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
 /**
  * @brief Log a scope change
  */
 
-#define LOG_SCOPE_CHANGE_TRACE(registrationInfo) \
-    const util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, util::Logger::Level::trace)
-#define LOG_SCOPE_CHANGE_TRACEthis() LOG_SCOPE_CHANGE_TRACE(this->getLoggerRegistrationInfo())
+#define LOG_SCOPE_CHANGE_TRACE(REGISTRATION_NAME) \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::trace)
+#define LOG_SCOPE_CHANGE_TRACEthis() \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::trace)
 
-#define LOG_SCOPE_CHANGE_DEBUG(registrationInfo) \
-    const util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, util::Logger::Level::debug)
-#define LOG_SCOPE_CHANGE_DEBUGthis() LOG_SCOPE_CHANGE_DEBUG(this->getLoggerRegistrationInfo())
+#define LOG_SCOPE_CHANGE_DEBUG(REGISTRATION_NAME) \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::debug)
+#define LOG_SCOPE_CHANGE_DEBUGthis() \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::debug)
 
-#define LOG_SCOPE_CHANGE_INFO(registrationInfo) \
-    const util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, util::Logger::Level::info)
-#define LOG_SCOPE_CHANGE_INFOthis() LOG_SCOPE_CHANGE_INFO(this->getLoggerRegistrationInfo())
+#define LOG_SCOPE_CHANGE_INFO(REGISTRATION_NAME) \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::info)
+#define LOG_SCOPE_CHANGE_INFOthis() \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::info)
 
-#define LOG_SCOPE_CHANGE_WARNING(registrationInfo) \
-    const util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, util::Logger::Level::warning)
-#define LOG_SCOPE_CHANGE_WARNINGthis() LOG_SCOPE_CHANGE_WARNING(this->getLoggerRegistrationInfo())
+#define LOG_SCOPE_CHANGE_WARNING(REGISTRATION_NAME) \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::warning)
+#define LOG_SCOPE_CHANGE_WARNINGthis() \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::warning)
 
-#define LOG_SCOPE_CHANGE_ERROR(registrationInfo) \
-    const util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, util::Logger::Level::error)
-#define LOG_SCOPE_CHANGE_ERRORthis() LOG_SCOPE_CHANGE_ERROR(this->getLoggerRegistrationInfo())
+#define LOG_SCOPE_CHANGE_ERROR(REGISTRATION_NAME) \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::error)
+#define LOG_SCOPE_CHANGE_ERRORthis() \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::error)
 
-#define LOG_SCOPE_CHANGE_CRITICAL(registrationInfo) \
-    const util::Logger::Scoper UNIQUE_NAME(scoper)(registrationInfo.loggerName, util::Logger::Level::critical)
-#define LOG_SCOPE_CHANGE_CRITICALthis() LOG_SCOPE_CHANGE_CRITICAL(this->getLoggerRegistrationInfo())
+#define LOG_SCOPE_CHANGE_CRITICAL(REGISTRATION_NAME) \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::critical)
+#define LOG_SCOPE_CHANGE_CRITICALthis() \
+    const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::critical)
 
 /**
  * @brief log a function call *WITHOUT* scope change
@@ -305,85 +317,127 @@ private: // private static variables
  * so we can only output 1 space instead of 2 if there is nothing inside of them
  */
 
-#define LOG_FUNCTION_CALL_TRACE(registrationInfo, format, ...) \
+#define LOG_FUNCTION_CALL_TRACE(REGISTRATION_NAME, format, ...) \
     util::Logger::trace( \
-        registrationInfo.loggerName, \
+        quartz::loggers::REGISTRATION_NAME.loggerName, \
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
-#define LOG_FUNCTION_CALL_TRACEthis(format, ...) LOG_FUNCTION_CALL_TRACE(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_CALL_TRACEthis(format, ...)  \
+    util::Logger::trace( \
+        this->getLoggerRegistrationInfo().loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
 
-#define LOG_FUNCTION_CALL_DEBUG(registrationInfo, format, ...) \
+#define LOG_FUNCTION_CALL_DEBUG(REGISTRATION_NAME, format, ...) \
     util::Logger::debug( \
-        registrationInfo.loggerName, \
+        quartz::loggers::REGISTRATION_NAME.loggerName, \
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
-#define LOG_FUNCTION_CALL_DEBUGthis(format, ...) LOG_FUNCTION_CALL_DEBUG(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_CALL_DEBUGthis(format, ...)  \
+    util::Logger::debug( \
+        this->getLoggerRegistrationInfo().loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
 
-#define LOG_FUNCTION_CALL_INFO(registrationInfo, format, ...) \
+#define LOG_FUNCTION_CALL_INFO(REGISTRATION_NAME, format, ...) \
     util::Logger::info( \
-        registrationInfo.loggerName, \
+        quartz::loggers::REGISTRATION_NAME.loggerName, \
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
-#define LOG_FUNCTION_CALL_INFOthis(format, ...) LOG_FUNCTION_CALL_INFO(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_CALL_INFOthis(format, ...)  \
+    util::Logger::info( \
+        this->getLoggerRegistrationInfo().loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
 
-#define LOG_FUNCTION_CALL_WARNING(registrationInfo, format, ...) \
+#define LOG_FUNCTION_CALL_WARNING(REGISTRATION_NAME, format, ...) \
     util::Logger::warning( \
-        registrationInfo.loggerName, \
+        quartz::loggers::REGISTRATION_NAME.loggerName, \
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
-#define LOG_FUNCTION_CALL_WARNINGthis(format, ...) LOG_FUNCTION_CALL_WARNING(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_CALL_WARNINGthis(format, ...)  \
+    util::Logger::warning( \
+        this->getLoggerRegistrationInfo().loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
 
-#define LOG_FUNCTION_CALL_ERROR(registrationInfo, format, ...) \
+#define LOG_FUNCTION_CALL_ERROR(REGISTRATION_NAME, format, ...) \
     util::Logger::error( \
-        registrationInfo.loggerName, \
+        quartz::loggers::REGISTRATION_NAME.loggerName, \
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
-#define LOG_FUNCTION_CALL_ERRORthis(format, ...) LOG_FUNCTION_CALL_ERROR(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_CALL_ERRORthis(format, ...)  \
+    util::Logger::error( \
+        this->getLoggerRegistrationInfo().loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
 
-#define LOG_FUNCTION_CALL_CRITICAL(registrationInfo, format, ...) \
+#define LOG_FUNCTION_CALL_CRITICAL(REGISTRATION_NAME, format, ...) \
     util::Logger::critical( \
-        registrationInfo.loggerName, \
+        quartz::loggers::REGISTRATION_NAME.loggerName, \
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
-#define LOG_FUNCTION_CALL_CRITICALthis(format, ...) LOG_FUNCTION_CALL_CRITICAL(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_CALL_CRITICALthis(format, ...)  \
+    util::Logger::critical( \
+        this->getLoggerRegistrationInfo().loggerName, \
+        __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
+        __VA_ARGS__ \
+    )
 
 /**
  * @brief log a function call and its scope change
  */
 
-#define LOG_FUNCTION_SCOPE_TRACE(registrationInfo, format, ...) \
-    LOG_FUNCTION_CALL_TRACE(registrationInfo, format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_TRACE(registrationInfo)
-#define LOG_FUNCTION_SCOPE_TRACEthis(format, ...) LOG_FUNCTION_SCOPE_TRACE(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_SCOPE_TRACE(REGISTRATION_NAME, format, ...) \
+    LOG_FUNCTION_CALL_TRACE(REGISTRATION_NAME, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_TRACE(REGISTRATION_NAME)
+#define LOG_FUNCTION_SCOPE_TRACEthis(format, ...) \
+    LOG_FUNCTION_CALL_TRACEthis(format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_TRACEthis()
     
-#define LOG_FUNCTION_SCOPE_DEBUG(registrationInfo, format, ...) \
-    LOG_FUNCTION_CALL_DEBUG(registrationInfo, format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_DEBUG(registrationInfo)
-#define LOG_FUNCTION_SCOPE_DEBUGthis(format, ...) LOG_FUNCTION_SCOPE_DEBUG(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_SCOPE_DEBUG(REGISTRATION_NAME, format, ...) \
+    LOG_FUNCTION_CALL_DEBUG(REGISTRATION_NAME, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_DEBUG(REGISTRATION_NAME)
+#define LOG_FUNCTION_SCOPE_DEBUGthis(format, ...) \
+    LOG_FUNCTION_CALL_DEBUGthis(format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_DEBUGthis()
     
-#define LOG_FUNCTION_SCOPE_INFO(registrationInfo, format, ...) \
-    LOG_FUNCTION_CALL_INFO(registrationInfo, format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_INFO(registrationInfo)
-#define LOG_FUNCTION_SCOPE_INFOthis(format, ...) LOG_FUNCTION_SCOPE_INFO(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_SCOPE_INFO(REGISTRATION_NAME, format, ...) \
+    LOG_FUNCTION_CALL_INFO(REGISTRATION_NAME, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_INFO(REGISTRATION_NAME)
+#define LOG_FUNCTION_SCOPE_INFOthis(format, ...) \
+    LOG_FUNCTION_CALL_INFOthis(format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_INFOthis()
     
-#define LOG_FUNCTION_SCOPE_WARNING(registrationInfo, format, ...) \
-    LOG_FUNCTION_CALL_WARNING(registrationInfo, format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_WARNING(registrationInfo)
-#define LOG_FUNCTION_SCOPE_WARNINGthis(format, ...) LOG_FUNCTION_SCOPE_WARNING(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_SCOPE_WARNING(REGISTRATION_NAME, format, ...) \
+    LOG_FUNCTION_CALL_WARNING(REGISTRATION_NAME, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_WARNING(REGISTRATION_NAME)
+#define LOG_FUNCTION_SCOPE_WARNINGthis(format, ...) \
+    LOG_FUNCTION_CALL_WARNINGthis(format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_WARNINGthis()
     
-#define LOG_FUNCTION_SCOPE_ERROR(registrationInfo, format, ...) \
-    LOG_FUNCTION_CALL_ERROR(registrationInfo, format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_ERROR(registrationInfo)
-#define LOG_FUNCTION_SCOPE_ERRORthis(format, ...) LOG_FUNCTION_SCOPE_ERROR(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_SCOPE_ERROR(REGISTRATION_NAME, format, ...) \
+    LOG_FUNCTION_CALL_ERROR(REGISTRATION_NAME, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_ERROR(REGISTRATION_NAME)
+#define LOG_FUNCTION_SCOPE_ERRORthis(format, ...) \
+    LOG_FUNCTION_CALL_ERRORthis(format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_ERRORthis()
     
-#define LOG_FUNCTION_SCOPE_CRITICAL(registrationInfo, format, ...) \
-    LOG_FUNCTION_CALL_CRITICAL(registrationInfo, format, __VA_ARGS__); \
-    LOG_SCOPE_CHANGE_CRITICAL(registrationInfo)
-#define LOG_FUNCTION_SCOPE_CRITICALthis(format, ...) LOG_FUNCTION_SCOPE_CRITICAL(this->getLoggerRegistrationInfo(), format, __VA_ARGS__)
+#define LOG_FUNCTION_SCOPE_CRITICAL(REGISTRATION_NAME, format, ...) \
+    LOG_FUNCTION_CALL_CRITICAL(REGISTRATION_NAME, format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_CRITICAL(REGISTRATION_NAME)
+#define LOG_FUNCTION_SCOPE_CRITICALthis(format, ...) \
+    LOG_FUNCTION_CALL_CRITICALthis(format, __VA_ARGS__); \
+    LOG_SCOPE_CHANGE_CRITICALthis()
     

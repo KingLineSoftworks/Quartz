@@ -7,29 +7,45 @@
 #include "quartz/rendering/context/Mesh.hpp"
 
 std::vector<quartz::rendering::Vertex> quartz::rendering::Mesh::loadVertices() {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::MESH, "");
+    LOG_FUNCTION_SCOPE_TRACE(MESH, "");
 
     std::vector<quartz::rendering::Vertex> vertices = {
-        quartz::rendering::Vertex({-0.5f, -0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}),
-        quartz::rendering::Vertex({ 0.5f, -0.5f,  0.0f}, {0.0f, 1.0f, 0.0f}),
-        quartz::rendering::Vertex({ 0.5f, 0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}),
-        quartz::rendering::Vertex({-0.5f,  0.5f,  0.0f}, {1.0f, 1.0f, 1.0f})
+        quartz::rendering::Vertex(
+            {-0.5f, -0.5f,  0.0f},
+            {1.0f, 0.0f, 0.0f},
+            {1.0f, 0.0f}
+        ),
+        quartz::rendering::Vertex(
+            { 0.5f, -0.5f,  0.0f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 0.0f}
+        ),
+        quartz::rendering::Vertex(
+            { 0.5f,  0.5f,  0.0f},
+            {0.0f, 0.0f, 1.0f},
+            {0.0f, 1.0f}
+        ),
+        quartz::rendering::Vertex(
+            {-0.5f,  0.5f,  0.0f},
+            {1.0f, 1.0f, 1.0f},
+            {1.0f, 1.0f}
+        )
     };
 
-    LOG_TRACE(quartz::loggers::MESH, "Loaded {} vertices", vertices.size());
+    LOG_TRACE(MESH, "Loaded {} vertices", vertices.size());
 
     return vertices;
 }
 
 std::vector<uint32_t> quartz::rendering::Mesh::loadIndices() {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::MESH, "");
+    LOG_FUNCTION_SCOPE_TRACE(MESH, "");
 
     std::vector<uint32_t> indices = {
         0, 1, 2,
         2, 3, 0
     };
 
-    LOG_TRACE(quartz::loggers::MESH, "Loaded {} indices", indices.size());
+    LOG_TRACE(MESH, "Loaded {} indices", indices.size());
 
     return indices;
 }

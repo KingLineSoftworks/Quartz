@@ -6,7 +6,8 @@
 #include "quartz/Loggers.hpp"
 
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/context/Device.hpp"
+#include "quartz/rendering/context/Mesh.hpp"
+#include "quartz/rendering/context/Texture.hpp"
 
 namespace quartz {
     class Application;
@@ -30,7 +31,9 @@ public: // member functions
     void run();
 
 private: // static functions
-    static std::vector<quartz::rendering::Mesh> loadMeshes(const quartz::rendering::Device& renderingDevice);
+    static std::vector<quartz::rendering::Mesh> loadMeshes(
+        const quartz::rendering::Device& renderingDevice
+    );
 
 private: // member variables
     const std::string m_applicationName;
@@ -40,4 +43,6 @@ private: // member variables
 
     quartz::rendering::Context m_renderingContext;
     std::vector<quartz::rendering::Mesh> m_meshes;
+    quartz::rendering::Texture m_texture;
+
 };
