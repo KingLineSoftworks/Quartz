@@ -11,11 +11,12 @@
 
 quartz::rendering::Texture::Texture(
     const quartz::rendering::Device& renderingDevice
-)
-{
+) {
     LOG_FUNCTION_CALL_TRACEthis("");
 
-    const std::string filepath = util::FileSystem::getAbsoluteFilepathInProject("texture.jpg");
+    const std::string filepath = util::FileSystem::getAbsoluteFilepathInProject(
+        "texture.jpg"
+    );
 
     int textureWidth;
     int textureHeight;
@@ -34,7 +35,14 @@ quartz::rendering::Texture::Texture(
     }
 
     uint32_t imageSizeBytes = textureWidth * textureHeight * 4; // x4 for rgba (32 bits = 4 bytes)
-    LOG_TRACEthis("Successfully loaded {}x{} texture with {} channels ( {} bytes ) from {}", textureWidth, textureHeight, textureChannelCount, imageSizeBytes, filepath);
+    LOG_TRACEthis(
+        "Successfully loaded {}x{} texture with {} channels ( {} bytes ) from {}",
+        textureWidth,
+        textureHeight,
+        textureChannelCount,
+        imageSizeBytes,
+        filepath
+    );
 
     quartz::rendering::ImageBuffer imageBuffer(
         renderingDevice,
@@ -49,6 +57,32 @@ quartz::rendering::Texture::Texture(
 
     LOG_TRACEthis("Freeing stbi texture");
     stbi_image_free(p_texturePixels);
+
+    vk::ImageViewCreateInfo imageViewCreateInfo(
+        {},
+        *imageBuffer.getVulkanImagePtr(),
+        vk::ImageViewType::e2D,
+        vk::Format::eR8G8B8A8Srgb,
+        {},
+        {
+            vk::ImageAspectFlagBits::eColor,
+            0,
+            1,
+            0,
+            1
+        }
+    );
+
+    LOG_TRACEthis("Attempting to crate vk::ImageView");
+    vk::UniqueImageView p_imageView = renderingDevice.getVulkanLogicalDevicePtr()->createImageViewUnique(
+        imageViewCreateInfo
+    );
+
+    if (!p_imageView) {
+        LOG_CRITICALthis("Failed to create vk::ImageView");
+        throw std::runtime_error("");
+    }
+    LOG_TRACEthis("Successfully created vk::ImageView");
 }
 
 quartz::rendering::Texture::~Texture() {
