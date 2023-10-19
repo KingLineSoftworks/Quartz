@@ -154,9 +154,31 @@ private: // static functions
     );
     static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceImageMemory(
         const vk::PhysicalDevice& physicalDevice,
+        const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,
+        const vk::Queue& graphicsQueue,
+        const uint32_t imageWidth,
+        const uint32_t imageHeight,
+        const vk::UniqueBuffer& p_stagingBuffer,
         const vk::UniqueImage& p_image,
         const vk::MemoryPropertyFlags memoryPropertyFlags
+    );
+    static void transitionImageLayout(
+        const uint32_t graphicsQueueFamilyIndex,
+        const vk::UniqueDevice& p_logicalDevice,
+        const vk::Queue& graphicsQueue,
+        const vk::UniqueImage& p_image,
+        const vk::ImageLayout inputLayout,
+        const vk::ImageLayout outputLayout
+    );
+    static void copyStagedBufferToImage(
+        const uint32_t graphicsQueueFamilyIndex,
+        const vk::UniqueDevice& p_logicalDevice,
+        const vk::Queue& graphicsQueue,
+        const uint32_t imageWidth,
+        const uint32_t imageHeight,
+        const vk::UniqueBuffer& p_stagingBuffer,
+        const vk::UniqueImage& p_image
     );
 
 private: // member variables

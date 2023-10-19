@@ -15,8 +15,6 @@ quartz::rendering::Texture::Texture(
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 
-    // ----- load the texture ----- //
-
     const std::string filepath = util::FileSystem::getAbsoluteFilepathInProject("texture.jpg");
 
     int textureWidth;
