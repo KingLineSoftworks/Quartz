@@ -52,6 +52,12 @@ quartz::rendering::Context::~Context() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
+void quartz::rendering::Context::loadScene(const quartz::rendering::Texture& texture) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    m_renderingPipeline.allocateVulkanDescriptorSets(m_renderingDevice, texture);
+}
+
 void quartz::rendering::Context::draw(const std::vector<quartz::rendering::Mesh>& meshes) {
     m_renderingSwapchain.waitForInFlightFence(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
 

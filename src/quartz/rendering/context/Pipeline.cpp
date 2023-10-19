@@ -79,16 +79,32 @@ vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescripto
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
-    vk::DescriptorSetLayoutBinding layoutBinding(
+    vk::DescriptorSetLayoutBinding uniformBufferLayoutBinding(
         0,
         vk::DescriptorType::eUniformBuffer,
-        1, vk::ShaderStageFlagBits::eVertex,
+        1,
+        vk::ShaderStageFlagBits::eVertex,
         {}
     );
 
+    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+        1,
+        vk::DescriptorType::eCombinedImageSampler,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    std::array<vk::DescriptorSetLayoutBinding, 2> layoutBindings = {
+        uniformBufferLayoutBinding,
+        textureSamplerLayoutBinding
+    };
+
+    LOG_TRACE(PIPELINE, "Using {} layout bindings", layoutBindings.size());
+
     vk::DescriptorSetLayoutCreateInfo layoutCreateInfo(
         {},
-        layoutBinding
+        layoutBindings
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::DescriptorSetLayout");
@@ -110,18 +126,29 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t numDescriptorSets
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight",
-                             numDescriptorSets);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} descriptor sets", numDescriptorSets);
 
-    vk::DescriptorPoolSize poolSize(
+    vk::DescriptorPoolSize uniformBufferObjectPoolSize(
         vk::DescriptorType::eUniformBuffer,
         numDescriptorSets
     );
 
+    vk::DescriptorPoolSize textureSamplerPoolSize(
+        vk::DescriptorType::eCombinedImageSampler,
+        numDescriptorSets
+    );
+
+    std::array<vk::DescriptorPoolSize, 2> descriptorPoolSizes = {
+        uniformBufferObjectPoolSize,
+        textureSamplerPoolSize
+    };
+
+    LOG_TRACE(PIPELINE, "Using {} pool sizes", descriptorPoolSizes.size());
+
     vk::DescriptorPoolCreateInfo poolCreateInfo(
         {},
         numDescriptorSets,
-        poolSize
+        descriptorPoolSizes
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::DescriptorPool");
@@ -142,23 +169,17 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
     const uint32_t maxNumFramesInFlight,
     const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
-    const vk::UniqueDescriptorPool& p_descriptorPool
+    const vk::UniqueDescriptorPool& p_descriptorPool,
+    const quartz::rendering::Texture& texture
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight",
                              maxNumFramesInFlight);
 
-    LOG_TRACE(PIPELINE, "Creating vector of {} vk::DescriptorSetLayout(s) from "
-                        "vk::UniqueDescriptorSetLayout with instance at {}",
-                        maxNumFramesInFlight,
-                        reinterpret_cast<const void*>(&(*p_descriptorSetLayout)));
     std::vector<const vk::DescriptorSetLayout> descriptorSetLayouts(
         maxNumFramesInFlight,
         *p_descriptorSetLayout
     );
 
-    LOG_TRACE(PIPELINE, "Creating vk::DescriptorSetAllocateInfo using "
-                        "vk::UniqueDescriptorPool with instance at {}",
-                        reinterpret_cast<const void*>(&(*p_descriptorPool)));
     vk::DescriptorSetAllocateInfo allocateInfo(
         *p_descriptorPool,
         maxNumFramesInFlight,
@@ -185,27 +206,51 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
                             "instance at {}",
                             i, reinterpret_cast<void*>(&(descriptorSets[i])));
 
-        vk::DescriptorBufferInfo bufferInfo(
+        vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
             0,
             sizeof(quartz::rendering::UniformBufferObject)
         );
 
-        vk::WriteDescriptorSet descriptorSetWrite(
+        vk::WriteDescriptorSet uniformBufferObjectDescriptorWriteSet(
             descriptorSets[i],
             0,
             0,
             1,
             vk::DescriptorType::eUniformBuffer,
             {},
-            &bufferInfo,
+            &uniformBufferObjectBufferInfo,
             {}
         );
 
-        LOG_TRACE(PIPELINE, "  - updating");
-        p_logicalDevice->updateDescriptorSets(
+        vk::DescriptorImageInfo textureImageInfo(
+            *texture.getVulkanSamplerPtr(),
+            *texture.getVulkanImageViewPtr(),
+            vk::ImageLayout::eShaderReadOnlyOptimal
+        );
+
+        vk::WriteDescriptorSet textureDescriptorWriteSet(
+            descriptorSets[i],
             1,
-            &descriptorSetWrite,
+            0,
+            1,
+            vk::DescriptorType::eCombinedImageSampler,
+            &textureImageInfo,
+            {},
+            {}
+        );
+
+        std::array<vk::WriteDescriptorSet, 2> writeDescriptorSets = {
+            uniformBufferObjectDescriptorWriteSet,
+            textureDescriptorWriteSet
+        };
+
+        LOG_TRACE(PIPELINE, "  - updating with {} writes",
+                  writeDescriptorSets.size());
+
+        p_logicalDevice->updateDescriptorSets(
+            writeDescriptorSets.size(),
+            writeDescriptorSets.data(),
             0,
             nullptr
         );
@@ -567,15 +612,7 @@ quartz::rendering::Pipeline::Pipeline(
             m_maxNumFramesInFlight
         )
     ),
-    m_vulkanDescriptorSets(
-        quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            m_maxNumFramesInFlight,
-            m_uniformBuffers,
-            mp_vulkanDescriptorSetLayout,
-            m_vulkanDescriptorPoolPtr
-        )
-    ),
+    m_vulkanDescriptorSets(),
     mp_vulkanRenderPass(
         quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
@@ -649,6 +686,24 @@ void quartz::rendering::Pipeline::recreate(
             mp_vulkanPipelineLayout,
             mp_vulkanRenderPass
         );
+}
+
+void quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Texture& texture
+) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    m_vulkanDescriptorSets.clear();
+
+    m_vulkanDescriptorSets = quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        m_maxNumFramesInFlight,
+        m_uniformBuffers,
+        mp_vulkanDescriptorSetLayout,
+        m_vulkanDescriptorPoolPtr,
+        texture
+    );
 }
 
 void quartz::rendering::Pipeline::updateUniformBuffer(

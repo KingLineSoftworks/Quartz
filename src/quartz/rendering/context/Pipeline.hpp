@@ -9,6 +9,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
+#include "quartz/rendering/context/Texture.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
 namespace quartz {
@@ -49,6 +50,11 @@ public: // member functions
         const quartz::rendering::Window& renderingWindow
     );
 
+    void allocateVulkanDescriptorSets(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Texture& texture
+    );
+
     USE_LOGGER(PIPELINE);
 
     uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
@@ -79,10 +85,11 @@ private: // static functions
     );
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t maxNumFramesInFlight,
+        const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
-        const vk::UniqueDescriptorPool& uniqueDescriptorPool
+        const vk::UniqueDescriptorPool& uniqueDescriptorPool,
+        const quartz::rendering::Texture& texture
     );
     static vk::UniqueRenderPass createVulkanRenderPassUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,

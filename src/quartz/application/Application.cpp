@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+#include "util/file_system/FileSystem.hpp"
+
 #include "quartz/Loggers.hpp"
 
 #include "quartz/application/Application.hpp"
@@ -47,7 +49,10 @@ quartz::Application::Application(
         validationLayersEnabled
     ),
     m_meshes(),
-    m_texture(m_renderingContext.getRenderingDevice())
+    m_texture(
+        m_renderingContext.getRenderingDevice(),
+        util::FileSystem::getAbsoluteFilepathInProject("texture.jpg")
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -63,6 +68,7 @@ void quartz::Application::run() {
     m_meshes = quartz::Application::loadMeshes(
         m_renderingContext.getRenderingDevice()
     );
+    m_renderingContext.loadScene(m_texture);
 
     LOG_TRACEthis("Beginning main loop");
     while(!m_renderingContext.getRenderingWindow().shouldClose()) {

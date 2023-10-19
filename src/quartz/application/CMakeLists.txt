@@ -21,6 +21,7 @@ target_link_libraries(
 #        vulkan
 
         PUBLIC
+        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
