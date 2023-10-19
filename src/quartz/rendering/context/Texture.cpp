@@ -34,7 +34,8 @@ quartz::rendering::Texture::Texture(
         throw std::runtime_error("");
     }
 
-    uint32_t imageSizeBytes = textureWidth * textureHeight * 4; // x4 for rgba (32 bits = 4 bytes)
+    // x4 for rgba (32 bits = 4 bytes)
+    uint32_t imageSizeBytes = textureWidth * textureHeight * 4;
     LOG_TRACEthis(
         "Successfully loaded {}x{} texture with {} channels ( {} bytes ) from {}",
         textureWidth,
@@ -74,15 +75,50 @@ quartz::rendering::Texture::Texture(
     );
 
     LOG_TRACEthis("Attempting to crate vk::ImageView");
-    vk::UniqueImageView p_imageView = renderingDevice.getVulkanLogicalDevicePtr()->createImageViewUnique(
-        imageViewCreateInfo
-    );
+    vk::UniqueImageView p_imageView =
+        renderingDevice.getVulkanLogicalDevicePtr()->createImageViewUnique(
+            imageViewCreateInfo
+        );
 
     if (!p_imageView) {
         LOG_CRITICALthis("Failed to create vk::ImageView");
         throw std::runtime_error("");
     }
     LOG_TRACEthis("Successfully created vk::ImageView");
+
+    vk::PhysicalDeviceProperties physicalDeviceProperties =
+        renderingDevice.getVulkanPhysicalDevice().getProperties();
+
+    vk::SamplerCreateInfo samplerCreateInfo(
+        {},
+        vk::Filter::eLinear,
+        vk::Filter::eLinear,
+        vk::SamplerMipmapMode::eLinear,
+        vk::SamplerAddressMode::eRepeat,
+        vk::SamplerAddressMode::eRepeat,
+        vk::SamplerAddressMode::eRepeat,
+        0.0f,
+        true,
+        physicalDeviceProperties.limits.maxSamplerAnisotropy,
+        false,
+        vk::CompareOp::eAlways,
+        0.0f,
+        0.0f,
+        vk::BorderColor::eIntOpaqueBlack,
+        false
+    );
+
+    LOG_TRACEthis("Attempting to create vk::Sampler");
+    vk::UniqueSampler p_sampler =
+        renderingDevice.getVulkanLogicalDevicePtr()->createSamplerUnique(
+            samplerCreateInfo
+        );
+
+    if (!p_sampler) {
+        LOG_CRITICALthis("Failed to create vk::Sampler");
+        throw std::runtime_error("");
+    }
+    LOG_TRACEthis("Successfully created vk::Sampler");
 }
 
 quartz::rendering::Texture::~Texture() {

@@ -128,6 +128,7 @@ vk::UniqueDevice quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
     }
 
     vk::PhysicalDeviceFeatures physicalDeviceFeatures;
+    physicalDeviceFeatures.samplerAnisotropy = true;
 
     vk::DeviceCreateInfo logicalDeviceCreateInfo(
         {},
