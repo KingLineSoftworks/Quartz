@@ -45,7 +45,7 @@ vk::UniqueBuffer quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
     const uint32_t sizeBytes,
     const vk::BufferUsageFlags bufferUsageFlags
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
     vk::BufferCreateInfo bufferCreateInfo(
         {},
@@ -54,14 +54,14 @@ vk::UniqueBuffer quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
         vk::SharingMode::eExclusive
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::Buffer ({} buffer)", quartz::rendering::BufferHelper::getUsageFlagsString(bufferUsageFlags));
+    LOG_TRACE(BUFFER, "Attempting to create vk::Buffer ({} buffer)", quartz::rendering::BufferHelper::getUsageFlagsString(bufferUsageFlags));
     vk::UniqueBuffer p_buffer = p_logicalDevice->createBufferUnique(bufferCreateInfo);
 
     if (!p_buffer) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::Buffer");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::Buffer");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::Buffer instance at {}", static_cast<void*>(&(*p_buffer)));
+    LOG_TRACE(BUFFER, "Successfully created vk::Buffer instance at {}", static_cast<void*>(&(*p_buffer)));
 
     return p_buffer;
 }
@@ -74,7 +74,7 @@ vk::UniqueDeviceMemory quartz::rendering::BufferHelper::allocateVulkanPhysicalDe
     const vk::UniqueBuffer& p_logicalBuffer,
     const vk::MemoryPropertyFlags memoryPropertyFlags
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
     vk::MemoryRequirements memoryRequirements = p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
 
@@ -90,7 +90,7 @@ vk::UniqueDeviceMemory quartz::rendering::BufferHelper::allocateVulkanPhysicalDe
         }
     }
     if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to find a suitable memory type");
+        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
         throw std::runtime_error("");
     }
 
@@ -99,14 +99,14 @@ vk::UniqueDeviceMemory quartz::rendering::BufferHelper::allocateVulkanPhysicalDe
         chosenMemoryTypeIndex.value()
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Attempting to allocate vk::DeviceMemory");
     vk::UniqueDeviceMemory p_bufferMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
 
     if (!p_bufferMemory) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::DeviceMemory");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
 
     p_logicalDevice->bindBufferMemory(
         *p_logicalBuffer,
@@ -114,26 +114,26 @@ vk::UniqueDeviceMemory quartz::rendering::BufferHelper::allocateVulkanPhysicalDe
         0
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Memory *IS* allocated for a source buffer. Populating device's buffer memory with input raw data");
+    LOG_TRACE(BUFFER, "Memory *IS* allocated for a source buffer. Populating device's buffer memory with input raw data");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "  - Creating mapping for allocated device memory of size {}", sizeBytes);
+    LOG_TRACE(BUFFER, "  - Creating mapping for allocated device memory of size {}", sizeBytes);
     void* p_mappedDestinationDeviceMemory = p_logicalDevice->mapMemory(
         *p_bufferMemory,
         0,
         sizeBytes
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "  - Copying {} bytes to mapped device memory at {} from buffer at {}", sizeBytes, p_mappedDestinationDeviceMemory, p_bufferData);
+    LOG_TRACE(BUFFER, "  - Copying {} bytes to mapped device memory at {} from buffer at {}", sizeBytes, p_mappedDestinationDeviceMemory, p_bufferData);
     memcpy(
         p_mappedDestinationDeviceMemory,
         p_bufferData,
         sizeBytes
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "  - Unmapping device memory");
+    LOG_TRACE(BUFFER, "  - Unmapping device memory");
     p_logicalDevice->unmapMemory(*p_bufferMemory);
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully copied input data to device's buffer memory");
+    LOG_TRACE(BUFFER, "Successfully copied input data to device's buffer memory");
     return p_bufferMemory;
 }
 
@@ -144,7 +144,7 @@ vk::UniqueDeviceMemory quartz::rendering::LocallyMappedBuffer::allocateVulkanPhy
     const vk::UniqueBuffer& p_logicalBuffer,
     const vk::MemoryPropertyFlags requiredMemoryProperties
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
     vk::MemoryRequirements memoryRequirements = p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
 
@@ -160,7 +160,7 @@ vk::UniqueDeviceMemory quartz::rendering::LocallyMappedBuffer::allocateVulkanPhy
         }
     }
     if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to find a suitable memory type");
+        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
         throw std::runtime_error("");
     }
 
@@ -169,16 +169,16 @@ vk::UniqueDeviceMemory quartz::rendering::LocallyMappedBuffer::allocateVulkanPhy
         chosenMemoryTypeIndex.value()
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Attempting to allocate vk::DeviceMemory");
     vk::UniqueDeviceMemory p_logicalBufferMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
 
     if (!p_logicalBufferMemory) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to allocated vk::DeviceMemory");
+        LOG_CRITICAL(BUFFER, "Failed to allocated vk::DeviceMemory");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully allocated vk::DeviceMemory instance at {}", static_cast<void*>(&(*p_logicalBufferMemory)));
+    LOG_TRACE(BUFFER, "Successfully allocated vk::DeviceMemory instance at {}", static_cast<void*>(&(*p_logicalBufferMemory)));
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Binding memory to logical device");
+    LOG_TRACE(BUFFER, "Binding memory to logical device");
     p_logicalDevice->bindBufferMemory(
         *p_logicalBuffer,
         *p_logicalBufferMemory,
@@ -193,16 +193,16 @@ void* quartz::rendering::LocallyMappedBuffer::mapVulkanPhysicalDeviceMemoryToLoc
     const uint32_t sizeBytes,
     const vk::UniqueDeviceMemory& p_physicalDeviceMemory
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Mapping memory from physical device memory to local memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
+    LOG_TRACE(BUFFER, "Mapping memory from physical device memory to local memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
     void* p_mappedLocalMemory = p_logicalDevice->mapMemory(
         *(p_physicalDeviceMemory),
         0,
         sizeBytes
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Mapped to {}", p_mappedLocalMemory);
+    LOG_TRACE(BUFFER, "Mapped to {}", p_mappedLocalMemory);
     return p_mappedLocalMemory;
 }
 
@@ -261,7 +261,7 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
     const vk::MemoryPropertyFlags memoryPropertyFlags,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
     vk::MemoryRequirements memoryRequirements = p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
 
@@ -277,7 +277,7 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
         }
     }
     if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to find a suitable memory type");
+        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
         throw std::runtime_error("");
     }
 
@@ -286,14 +286,14 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
         chosenMemoryTypeIndex.value()
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Attempting to allocate vk::DeviceMemory");
     vk::UniqueDeviceMemory uniqueDestinationBufferMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
 
     if (!uniqueDestinationBufferMemory) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::DeviceMemory");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
 
     p_logicalDevice->bindBufferMemory(
         *p_logicalBuffer,
@@ -301,9 +301,9 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
         0
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Memory is *NOT* allocated for a source buffer. Populating with input source buffer instead");
+    LOG_TRACE(BUFFER, "Memory is *NOT* allocated for a source buffer. Populating with input source buffer instead");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::CommandPool");
+    LOG_TRACE(BUFFER, "Attempting to create vk::CommandPool");
 
     vk::CommandPoolCreateInfo commandPoolCreateInfo(
         vk::CommandPoolCreateFlagBits::eTransient,
@@ -313,12 +313,12 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
     vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::CommandPool");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::CommandPool");
+    LOG_TRACE(BUFFER, "Successfully created vk::CommandPool");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
+    LOG_TRACE(BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *p_commandPool,
@@ -329,11 +329,11 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
     std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
 
     if (!(commandBufferPtrs[0])) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to allocate vk::CommandBuffer for copying data");
+        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer for copying data");
         throw std::runtime_error("");
     }
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Recording commands to newly created command buffer");
+    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     commandBufferPtrs[0]->begin(commandBufferBeginInfo);
@@ -352,7 +352,7 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
 
     commandBufferPtrs[0]->end();
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Submitting command buffer and waiting idly for it to complete the transfer of data into this buffer");
+    LOG_TRACE(BUFFER, "Submitting command buffer and waiting idly for it to complete the transfer of data into this buffer");
 
     vk::SubmitInfo submitInfo(
         0,
@@ -366,7 +366,7 @@ vk::UniqueDeviceMemory quartz::rendering::StagedBuffer::allocateVulkanPhysicalDe
     graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
     graphicsQueue.waitIdle();
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully copied data from source buffer to this buffer's memory");
+    LOG_TRACE(BUFFER, "Successfully copied data from source buffer to this buffer's memory");
 
     return uniqueDestinationBufferMemory;
 }
@@ -434,7 +434,7 @@ vk::UniqueImage quartz::rendering::ImageBuffer::createVulkanImagePtr(
     const vk::Format format,
     const vk::ImageTiling tiling
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::ImageCreateInfo imageCreateInfo(
         {},
@@ -453,13 +453,13 @@ vk::UniqueImage quartz::rendering::ImageBuffer::createVulkanImagePtr(
         vk::SharingMode::eExclusive
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::Image");
+    LOG_TRACE(BUFFER, "Attempting to create vk::Image");
     vk::UniqueImage p_vulkanImage = p_logicalDevice->createImageUnique(imageCreateInfo);
     if (!p_vulkanImage) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::Image");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::Image");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::Image");
+    LOG_TRACE(BUFFER, "Successfully created vk::Image");
 
     return p_vulkanImage;
 }
@@ -475,7 +475,7 @@ vk::UniqueDeviceMemory quartz::rendering::ImageBuffer::allocateVulkanPhysicalDev
     const vk::UniqueImage& p_image,
     const vk::MemoryPropertyFlags memoryPropertyFlags
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::MemoryRequirements memoryRequirements = p_logicalDevice->getImageMemoryRequirements(*p_image);
 
@@ -491,7 +491,7 @@ vk::UniqueDeviceMemory quartz::rendering::ImageBuffer::allocateVulkanPhysicalDev
         }
     }
     if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to find a suitable memory type");
+        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
         throw std::runtime_error("");
     }
 
@@ -500,13 +500,13 @@ vk::UniqueDeviceMemory quartz::rendering::ImageBuffer::allocateVulkanPhysicalDev
         chosenMemoryTypeIndex.value()
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Attempting to create vk::DeviceMemory");
     vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
     if (!p_vulkanPhysicalDeviceTextureMemory) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::DeviceMemory");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
 
     p_logicalDevice->bindImageMemory(
         *p_image,
@@ -514,7 +514,7 @@ vk::UniqueDeviceMemory quartz::rendering::ImageBuffer::allocateVulkanPhysicalDev
         0
     );
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Transitioning image layout and populating memory with input buffer data");
+    LOG_TRACE(BUFFER, "Transitioning image layout and populating memory with input buffer data");
 
     quartz::rendering::ImageBuffer::transitionImageLayout(
         graphicsQueueFamilyIndex,
@@ -553,9 +553,9 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
     const vk::ImageLayout inputLayout,
     const vk::ImageLayout outputLayout
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::CommandPool");
+    LOG_TRACE(BUFFER, "Attempting to create vk::CommandPool");
 
     vk::CommandPoolCreateInfo commandPoolCreateInfo(
         vk::CommandPoolCreateFlagBits::eTransient,
@@ -565,12 +565,12 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
     vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::CommandPool");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::CommandPool");
+    LOG_TRACE(BUFFER, "Successfully created vk::CommandPool");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
+    LOG_TRACE(BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *p_commandPool,
@@ -581,11 +581,11 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
     std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
 
     if (!(commandBufferPtrs[0])) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to allocate vk::CommandBuffer for transitioning image's layout");
+        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer for transitioning image's layout");
         throw std::runtime_error("");
     }
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Recording commands to newly created command buffer for transitioning image's layout");
+    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer for transitioning image's layout");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     commandBufferPtrs[0]->begin(commandBufferBeginInfo);
@@ -598,7 +598,7 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
         inputLayout == vk::ImageLayout::eUndefined &&
         outputLayout == vk::ImageLayout::eTransferDstOptimal
     ) {
-        LOG_TRACE(quartz::loggers::BUFFER, "Transferring image from undefined layout to optimal transfer destination layout");
+        LOG_TRACE(BUFFER, "Transferring image from undefined layout to optimal transfer destination layout");
 
         destinationAccessMask = vk::AccessFlagBits::eTransferWrite;
 
@@ -608,7 +608,7 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
         inputLayout == vk::ImageLayout::eTransferDstOptimal &&
         outputLayout == vk::ImageLayout::eShaderReadOnlyOptimal
     ) {
-        LOG_TRACE(quartz::loggers::BUFFER, "Transferring image from optimal transfer destination layout to optimal shader read only format");
+        LOG_TRACE(BUFFER, "Transferring image from optimal transfer destination layout to optimal shader read only format");
 
         sourceAccessMask = vk::AccessFlagBits::eTransferWrite;
         destinationAccessMask = vk::AccessFlagBits::eShaderRead;
@@ -616,7 +616,7 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
         sourceStage = vk::PipelineStageFlagBits::eTransfer;
         destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
     } else {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Unsupported image layout transition");
+        LOG_CRITICAL(BUFFER, "Unsupported image layout transition");
         throw std::runtime_error("");
     }
 
@@ -648,7 +648,7 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
 
     commandBufferPtrs[0]->end();
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Submitting command buffer and waiting idly for it to complete the transition of image's layout");
+    LOG_TRACE(BUFFER, "Submitting command buffer and waiting idly for it to complete the transition of image's layout");
 
     vk::SubmitInfo submitInfo(
         0,
@@ -662,7 +662,7 @@ void quartz::rendering::ImageBuffer::transitionImageLayout(
     graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
     graphicsQueue.waitIdle();
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully transitioned image's layout");
+    LOG_TRACE(BUFFER, "Successfully transitioned image's layout");
 }
 
 void quartz::rendering::ImageBuffer::copyStagedBufferToImage(
@@ -674,9 +674,9 @@ void quartz::rendering::ImageBuffer::copyStagedBufferToImage(
     const vk::UniqueBuffer& p_stagingBuffer,
     const vk::UniqueImage& p_image
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to create vk::CommandPool");
+    LOG_TRACE(BUFFER, "Attempting to create vk::CommandPool");
 
     vk::CommandPoolCreateInfo commandPoolCreateInfo(
         vk::CommandPoolCreateFlagBits::eTransient,
@@ -686,12 +686,12 @@ void quartz::rendering::ImageBuffer::copyStagedBufferToImage(
     vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to create vk::CommandPool");
+        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully created vk::CommandPool");
+    LOG_TRACE(BUFFER, "Successfully created vk::CommandPool");
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
+    LOG_TRACE(BUFFER, "Attempting to allocate vk::CommandBuffer for copying data");
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *p_commandPool,
@@ -702,11 +702,11 @@ void quartz::rendering::ImageBuffer::copyStagedBufferToImage(
     std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
 
     if (!(commandBufferPtrs[0])) {
-        LOG_CRITICAL(quartz::loggers::BUFFER, "Failed to allocate vk::CommandBuffer for transitioning image's layout");
+        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer for transitioning image's layout");
         throw std::runtime_error("");
     }
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Recording commands to newly created command buffer for copying data from staged buffer to image");
+    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer for copying data from staged buffer to image");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     commandBufferPtrs[0]->begin(commandBufferBeginInfo);
@@ -742,7 +742,7 @@ void quartz::rendering::ImageBuffer::copyStagedBufferToImage(
 
     commandBufferPtrs[0]->end();
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Submitting command buffer and waiting idly for it to complete the copy of data from staging buffer to image");
+    LOG_TRACE(BUFFER, "Submitting command buffer and waiting idly for it to complete the copy of data from staging buffer to image");
 
     vk::SubmitInfo submitInfo(
         0,
@@ -756,7 +756,7 @@ void quartz::rendering::ImageBuffer::copyStagedBufferToImage(
     graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
     graphicsQueue.waitIdle();
 
-    LOG_TRACE(quartz::loggers::BUFFER, "Successfully copied data");
+    LOG_TRACE(BUFFER, "Successfully copied data");
 }
 
 quartz::rendering::ImageBuffer::ImageBuffer(

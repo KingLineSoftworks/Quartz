@@ -21,7 +21,7 @@ void quartz::rendering::Window::glfwFramebufferSizeCallback(
     );
 
     if (!p_quartzWindow) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "Retrieved invalid window pointer from glfw window user pointer");
+        LOG_CRITICAL(WINDOW, "Retrieved invalid window pointer from glfw window user pointer");
     }
 
     p_quartzWindow->m_widthPixels = updatedWindowWidthPixels;
@@ -35,7 +35,7 @@ std::shared_ptr<GLFWwindow> quartz::rendering::Window::createGLFWwindowPtr(
     const uint32_t heightPixels,
     const void* p_windowUser
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::WINDOW, "{} ({}x{}) , user = {}", name, widthPixels, heightPixels, p_windowUser);
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "{} ({}x{}) , user = {}", name, widthPixels, heightPixels, p_windowUser);
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -53,17 +53,17 @@ std::shared_ptr<GLFWwindow> quartz::rendering::Window::createGLFWwindowPtr(
         ),
         [](GLFWwindow* p_window) { glfwDestroyWindow(p_window); }
     );
-    LOG_TRACE(quartz::loggers::WINDOW, "Created GLFW window pointer at {}", static_cast<void*>(p_glfwWindow.get()));
+    LOG_TRACE(WINDOW, "Created GLFW window pointer at {}", static_cast<void*>(p_glfwWindow.get()));
     if (!p_glfwWindow) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "Failed to create GLFW window pointer. Terminating");
+        LOG_CRITICAL(WINDOW, "Failed to create GLFW window pointer. Terminating");
         glfwTerminate();
         throw std::runtime_error("");
     }
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Setting GLFW window user pointer to this");
+    LOG_TRACE(WINDOW, "Setting GLFW window user pointer to this");
     glfwSetWindowUserPointer(p_glfwWindow.get(), const_cast<void*>(p_windowUser));
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Setting GLFW framebuffer size callback");
+    LOG_TRACE(WINDOW, "Setting GLFW framebuffer size callback");
     glfwSetFramebufferSizeCallback(p_glfwWindow.get(), quartz::rendering::Window::glfwFramebufferSizeCallback);
 
     return p_glfwWindow;
@@ -73,15 +73,15 @@ vk::UniqueSurfaceKHR quartz::rendering::Window::createVulkanSurfaceUniquePtr(
     const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
     const vk::UniqueInstance& uniqueInstance
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::WINDOW, "");
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
 #ifndef ON_MAC
-    LOG_CRITICAL(quartz::loggers::WINDOW, "No support for non-mac platforms currently. Unable to create vk::SurfaceKHR");
+    LOG_CRITICAL(WINDOW, "No support for non-mac platforms currently. Unable to create vk::SurfaceKHR");
     throw std::runtime_error("");
 #endif
 
     VkSurfaceKHR rawVulkanSurface;
-    LOG_TRACE(quartz::loggers::WINDOW, "Attempting to create VkSurfaceKHR");
+    LOG_TRACE(WINDOW, "Attempting to create VkSurfaceKHR");
     VkResult createResult = glfwCreateWindowSurface(
         *uniqueInstance,
         const_cast<GLFWwindow*>(p_GLFWwindow.get()),
@@ -89,20 +89,20 @@ vk::UniqueSurfaceKHR quartz::rendering::Window::createVulkanSurfaceUniquePtr(
         &rawVulkanSurface
     );
     if (createResult != VK_SUCCESS) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "Failed to create VkSurfaceKHR ( {} )", static_cast<int64_t>(createResult));
+        LOG_CRITICAL(WINDOW, "Failed to create VkSurfaceKHR ( {} )", static_cast<int64_t>(createResult));
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::WINDOW, "Successfully created VkSurfaceKHR");
+    LOG_TRACE(WINDOW, "Successfully created VkSurfaceKHR");
 
     vk::UniqueSurfaceKHR p_surface(
         rawVulkanSurface,
         *uniqueInstance
     );
     if (!p_surface) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
+        LOG_CRITICAL(WINDOW, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::WINDOW, "Successfully created vk::SurfaceKHR from VkSurfaceKHR");
+    LOG_TRACE(WINDOW, "Successfully created vk::SurfaceKHR from VkSurfaceKHR");
 
     return p_surface;
 }
@@ -111,27 +111,27 @@ vk::SurfaceFormatKHR quartz::rendering::Window::getBestSurfaceFormat(
     const vk::UniqueSurfaceKHR& p_surface,
     const vk::PhysicalDevice& physicalDevice
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::WINDOW, "");
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Getting surface formats from physical device");
+    LOG_TRACE(WINDOW, "Getting surface formats from physical device");
     std::vector<vk::SurfaceFormatKHR> surfaceFormats = physicalDevice.getSurfaceFormatsKHR(*p_surface);
     if (surfaceFormats.empty()) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "No surface formats available for chosen physical device");
+        LOG_CRITICAL(WINDOW, "No surface formats available for chosen physical device");
         throw std::runtime_error("");
     }
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Choosing suitable surface format");
+    LOG_TRACE(WINDOW, "Choosing suitable surface format");
     for (const vk::SurfaceFormatKHR& surfaceFormat : surfaceFormats) {
         if (
             surfaceFormat.format == vk::Format::eB8G8R8A8Srgb &&
             surfaceFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear
             ) {
-            LOG_TRACE(quartz::loggers::WINDOW, "  - found suitable surface format");
+            LOG_TRACE(WINDOW, "  - found suitable surface format");
             return surfaceFormat;
         }
     }
 
-    LOG_CRITICAL(quartz::loggers::WINDOW, "No suitable surface formats found");
+    LOG_CRITICAL(WINDOW, "No suitable surface formats found");
     throw std::runtime_error("");
 }
 
@@ -139,17 +139,17 @@ vk::PresentModeKHR quartz::rendering::Window::getBestPresentMode(
     const vk::UniqueSurfaceKHR& p_surface,
     const vk::PhysicalDevice& physicalDevice
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::WINDOW, "");
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Getting present modes from physical device");
+    LOG_TRACE(WINDOW, "Getting present modes from physical device");
     std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(*p_surface);
     if (presentModes.empty()) {
-        LOG_CRITICAL(quartz::loggers::WINDOW, "No present modes available for chosen physical device");
+        LOG_CRITICAL(WINDOW, "No present modes available for chosen physical device");
         throw std::runtime_error("");
     }
 
     vk::PresentModeKHR bestPresentMode = vk::PresentModeKHR::eFifo;
-    LOG_TRACE(quartz::loggers::WINDOW, "Choosing best present mode");
+    LOG_TRACE(WINDOW, "Choosing best present mode");
     for (const vk::PresentModeKHR& presentMode : presentModes) {
         if (presentMode == vk::PresentModeKHR::eMailbox) {
             bestPresentMode = presentMode;
@@ -158,9 +158,9 @@ vk::PresentModeKHR quartz::rendering::Window::getBestPresentMode(
     }
 
     if (bestPresentMode == vk::PresentModeKHR::eMailbox) {
-        LOG_TRACE(quartz::loggers::WINDOW, "Using mailbox present mode");
+        LOG_TRACE(WINDOW, "Using mailbox present mode");
     } else {
-        LOG_TRACE(quartz::loggers::WINDOW, "Using fifo present mode");
+        LOG_TRACE(WINDOW, "Using fifo present mode");
     }
 
     return bestPresentMode;
@@ -170,15 +170,15 @@ vk::Extent2D quartz::rendering::Window::getBestVulkanExtent(
     const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
     const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::WINDOW, "");
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Choosing best swap extent");
+    LOG_TRACE(WINDOW, "Choosing best swap extent");
     if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-        LOG_TRACE(quartz::loggers::WINDOW, "Using capabilities's current swap extent of size {} x {}", surfaceCapabilities.currentExtent.width, surfaceCapabilities.currentExtent.height);
+        LOG_TRACE(WINDOW, "Using capabilities's current swap extent of size {} x {}", surfaceCapabilities.currentExtent.width, surfaceCapabilities.currentExtent.height);
         return surfaceCapabilities.currentExtent;
     }
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Creating our own swap extent (current extent of surface capabilities has width of uint32_t max value, so we must handle manually)");
+    LOG_TRACE(WINDOW, "Creating our own swap extent (current extent of surface capabilities has width of uint32_t max value, so we must handle manually)");
     int32_t widthPixels;
     int32_t heightPixels;
     glfwGetFramebufferSize(
@@ -186,23 +186,23 @@ vk::Extent2D quartz::rendering::Window::getBestVulkanExtent(
         &widthPixels,
         &heightPixels
     );
-    LOG_TRACE(quartz::loggers::WINDOW, "Got GLFW framebuffer size of W {} pix x H {} pix", widthPixels, heightPixels);
+    LOG_TRACE(WINDOW, "Got GLFW framebuffer size of W {} pix x H {} pix", widthPixels, heightPixels);
 
     uint32_t adjustedWidthPixels = std::clamp(
         static_cast<uint32_t>(widthPixels),
         surfaceCapabilities.minImageExtent.width,
         surfaceCapabilities.maxImageExtent.width
     );
-    LOG_TRACE(quartz::loggers::WINDOW, "Adjusted width of {} pixels (after clamping between {} and {})", adjustedWidthPixels, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+    LOG_TRACE(WINDOW, "Adjusted width of {} pixels (after clamping between {} and {})", adjustedWidthPixels, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
 
     uint32_t adjustedHeightPixels = std::clamp(
         static_cast<uint32_t>(heightPixels),
         surfaceCapabilities.minImageExtent.height,
         surfaceCapabilities.maxImageExtent.height
     );
-    LOG_TRACE(quartz::loggers::WINDOW, "Adjusted height of {} pixels (after clamping between {} and {})", adjustedHeightPixels, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+    LOG_TRACE(WINDOW, "Adjusted height of {} pixels (after clamping between {} and {})", adjustedHeightPixels, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 
-    LOG_TRACE(quartz::loggers::WINDOW, "Creating custom extent of W {} pix x H {} pix", adjustedWidthPixels, adjustedHeightPixels);
+    LOG_TRACE(WINDOW, "Creating custom extent of W {} pix x H {} pix", adjustedWidthPixels, adjustedHeightPixels);
     vk::Extent2D customExtent(
         static_cast<uint32_t>(adjustedWidthPixels),
         static_cast<uint32_t>(adjustedHeightPixels)

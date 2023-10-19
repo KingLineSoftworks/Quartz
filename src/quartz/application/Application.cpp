@@ -13,11 +13,11 @@
 #include "quartz/rendering/context/Window.hpp"
 
 std::vector<quartz::rendering::Mesh> quartz::Application::loadMeshes(const quartz::rendering::Device& renderingDevice) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::APPLICATION, "Loading meshes");
+    LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "Loading meshes");
 
     std::vector<quartz::rendering::Mesh> meshes;
     meshes.emplace_back(renderingDevice);
-    LOG_TRACE(quartz::loggers::APPLICATION, "Loaded {} meshes", meshes.size());
+    LOG_TRACE(APPLICATION, "Loaded {} meshes", meshes.size());
 
     return meshes;
 }

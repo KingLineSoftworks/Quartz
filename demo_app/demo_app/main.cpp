@@ -31,7 +31,7 @@ int main() {
         {"APPLICATION", util::Logger::Level::trace},
         {"BUFFER", util::Logger::Level::trace},
         {"CONTEXT", util::Logger::Level::info},
-        {"DEVICE", util::Logger::Level::info},
+        {"DEVICE", util::Logger::Level::trace},
         {"INSTANCE", util::Logger::Level::info},
         {"MESH", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},
@@ -42,25 +42,25 @@ int main() {
     });
 
     if (shouldLogPreamble) {
-        LOG_INFO(quartz::loggers::GENERAL, "Quartz version   : {}.{}.{}", QUARTZ_MAJOR_VERSION, QUARTZ_MINOR_VERSION, QUARTZ_PATCH_VERSION);
-        LOG_INFO(quartz::loggers::GENERAL, "Demo app version : {}.{}.{}", APPLICATION_MAJOR_VERSION, APPLICATION_MINOR_VERSION, APPLICATION_PATCH_VERSION);
+        LOG_INFO(GENERAL, "Quartz version   : {}.{}.{}", QUARTZ_MAJOR_VERSION, QUARTZ_MINOR_VERSION, QUARTZ_PATCH_VERSION);
+        LOG_INFO(GENERAL, "Demo app version : {}.{}.{}", APPLICATION_MAJOR_VERSION, APPLICATION_MINOR_VERSION, APPLICATION_PATCH_VERSION);
 
 #ifdef QUARTZ_DEBUG
-        LOG_INFO(quartz::loggers::GENERAL, "Quartz built in debug mode ( QUARTZ_DEBUG )");
+        LOG_INFO(GENERAL, "Quartz built in debug mode ( QUARTZ_DEBUG )");
 #endif
 #ifdef QUARTZ_TEST
-        LOG_INFO(quartz::loggers::GENERAL, "Quartz built in test mode ( QUARTZ_TEST )");
+        LOG_INFO(GENERAL, "Quartz built in test mode ( QUARTZ_TEST )");
 #endif
 #ifdef QUARTZ_RELEASE
-        LOG_INFO(quartz::loggers::GENERAL, "Quartz built in release mode ( QUARTZ_RELEASE )");
+        LOG_INFO(GENERAL, "Quartz built in release mode ( QUARTZ_RELEASE )");
 #endif
 
 #ifdef ON_MAC
-        LOG_INFO(quartz::loggers::GENERAL, "On Mac ( ON_MAC )");
-        LOG_INFO(quartz::loggers::GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
-        LOG_INFO(quartz::loggers::GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
+        LOG_INFO(GENERAL, "On Mac ( ON_MAC )");
+        LOG_INFO(GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
+        LOG_INFO(GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
 #else
-        LOG_INFO(quartz::loggers::GENERAL, "Not on Mac ( ON_MAC )");
+        LOG_INFO(GENERAL, "Not on Mac ( ON_MAC )");
 #endif // ON_MAC
     }
 
@@ -71,10 +71,10 @@ int main() {
 #endif
 
     if (!glfwInit()) {
-        LOG_CRITICAL(quartz::loggers::GENERAL, "Failed to initialize GLFW");
+        LOG_CRITICAL(GENERAL, "Failed to initialize GLFW");
         return EXIT_FAILURE;
     }
-    LOG_INFO(quartz::loggers::GENERAL, "GLFW initialized");
+    LOG_INFO(GENERAL, "GLFW initialized");
 
     quartz::Application application(
         APPLICATION_NAME,
@@ -89,10 +89,10 @@ int main() {
     try {
         application.run();
     } catch (const std::exception& e) {
-        LOG_CRITICAL(quartz::loggers::GENERAL, "{}", e.what());
+        LOG_CRITICAL(GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }
 
-    LOG_TRACE(quartz::loggers::GENERAL, "Terminating");
+    LOG_TRACE(GENERAL, "Terminating");
     return EXIT_SUCCESS;
 }

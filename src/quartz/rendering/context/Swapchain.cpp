@@ -16,7 +16,7 @@ vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUnique
     const vk::PresentModeKHR& presentMode,
     const vk::Extent2D& swapchainExtent
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "");
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
 
     uint32_t imageCount = (surfaceCapabilities.maxImageCount != 0) ?
                           surfaceCapabilities.maxImageCount :
@@ -43,14 +43,14 @@ vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUnique
         true
     );
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to create the vk::SwapchainKHR");
+    LOG_TRACE(SWAPCHAIN, "Attempting to create the vk::SwapchainKHR");
     vk::UniqueSwapchainKHR uniqueSwapchain = p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
 
     if (!uniqueSwapchain) {
-        LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create the vk::SwapchainKHR");
+        LOG_CRITICAL(SWAPCHAIN, "Failed to create the vk::SwapchainKHR");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created the vk::SwapchainKHR");
+    LOG_TRACE(SWAPCHAIN, "Successfully created the vk::SwapchainKHR");
 
     return uniqueSwapchain;
 }
@@ -60,7 +60,7 @@ std::vector<vk::UniqueImageView> quartz::rendering::Swapchain::createVulkanSwapc
     const vk::SurfaceFormatKHR& surfaceFormat,
     const std::vector<vk::Image>& swapchainImages
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "");
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
 
     std::vector<vk::UniqueImageView> imageViewPtrs;
     imageViewPtrs.reserve(swapchainImages.size());
@@ -93,15 +93,15 @@ std::vector<vk::UniqueImageView> quartz::rendering::Swapchain::createVulkanSwapc
         vk::UniqueImageView p_imageView = p_logicalDevice->createImageViewUnique(imageViewCreateInfo);
 
         if (!p_imageView) {
-            LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::ImageView {}", i);
+            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::ImageView {}", i);
             throw std::runtime_error("");
         }
 
-        LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::ImageView {}", i);
+        LOG_TRACE(SWAPCHAIN, "Successfully created vk::ImageView {}", i);
         imageViewPtrs.push_back(std::move(p_imageView));
     }
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created all {} vk::ImageViews(s)", swapchainImages.size());
+    LOG_TRACE(SWAPCHAIN, "Successfully created all {} vk::ImageViews(s)", swapchainImages.size());
     return imageViewPtrs;
 }
 
@@ -111,7 +111,7 @@ std::vector<vk::UniqueFramebuffer> quartz::rendering::Swapchain::createVulkanFra
     const std::vector<vk::UniqueImageView>& swapchainImageViewPtrs,
     const vk::UniqueRenderPass& p_renderPass
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "{} swapchain image views", swapchainImageViewPtrs.size());
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} swapchain image views", swapchainImageViewPtrs.size());
 
     std::vector<vk::UniqueFramebuffer> framebufferPtrs(swapchainImageViewPtrs.size());
 
@@ -128,12 +128,12 @@ std::vector<vk::UniqueFramebuffer> quartz::rendering::Swapchain::createVulkanFra
         framebufferPtrs[i] = p_logicalDevice->createFramebufferUnique(framebufferCreateInfo);
 
         if (!framebufferPtrs[i]) {
-            LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::Framebuffer {}", i);
+            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Framebuffer {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::Framebuffer {}", i);
+        LOG_TRACE(SWAPCHAIN, "Successfully created vk::Framebuffer {}", i);
     }
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created {} vk::Framebuffer(s)", framebufferPtrs.size());
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Framebuffer(s)", framebufferPtrs.size());
 
     return framebufferPtrs;
 }
@@ -142,21 +142,21 @@ vk::UniqueCommandPool quartz::rendering::Swapchain::createVulkanCommandPoolUniqu
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "");
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
 
     vk::CommandPoolCreateInfo commandPoolCreateInfo(
         vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
         graphicsQueueFamilyIndex
     );
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to create vk::CommandPool");
+    LOG_TRACE(SWAPCHAIN, "Attempting to create vk::CommandPool");
     vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::CommandPool");
+        LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::CommandPool");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::CommandPool");
+    LOG_TRACE(SWAPCHAIN, "Successfully created vk::CommandPool");
 
     return p_commandPool;
 }
@@ -166,7 +166,7 @@ std::vector<vk::UniqueCommandBuffer> quartz::rendering::Swapchain::createVulkanD
     const vk::UniqueCommandPool& p_commandPool,
     const uint32_t desiredCommandBufferCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "{} max frames in flight", desiredCommandBufferCount);
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight", desiredCommandBufferCount);
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *p_commandPool,
@@ -174,22 +174,22 @@ std::vector<vk::UniqueCommandBuffer> quartz::rendering::Swapchain::createVulkanD
         desiredCommandBufferCount
     );
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to allocate {} vk::CommandBuffer(s)", desiredCommandBufferCount);
+    LOG_TRACE(SWAPCHAIN, "Attempting to allocate {} vk::CommandBuffer(s)", desiredCommandBufferCount);
     std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
 
     if (commandBufferPtrs.size() != desiredCommandBufferCount) {
-        LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Allocated {} vk::CommandBuffer(s) instead of {}", commandBufferPtrs.size(), desiredCommandBufferCount);
+        LOG_CRITICAL(SWAPCHAIN, "Allocated {} vk::CommandBuffer(s) instead of {}", commandBufferPtrs.size(), desiredCommandBufferCount);
         throw std::runtime_error("");
     }
 
     for (uint32_t i = 0; i < commandBufferPtrs.size(); ++i) {
         if (!commandBufferPtrs[i]) {
-            LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to allocate vk::CommandBuffer {}", i);
+            LOG_CRITICAL(SWAPCHAIN, "Failed to allocate vk::CommandBuffer {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully allocated vk::CommandBuffer {}", i);
+        LOG_TRACE(SWAPCHAIN, "Successfully allocated vk::CommandBuffer {}", i);
     }
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created {} vk::CommandBuffer(s)", commandBufferPtrs.size());
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::CommandBuffer(s)", commandBufferPtrs.size());
 
     return commandBufferPtrs;
 }
@@ -198,21 +198,21 @@ std::vector<vk::UniqueSemaphore> quartz::rendering::Swapchain::createVulkanSemap
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t desiredSemaphoreCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "{} semaphores desired", desiredSemaphoreCount);
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} semaphores desired", desiredSemaphoreCount);
 
     std::vector<vk::UniqueSemaphore> semaphorePtrs(desiredSemaphoreCount);
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to create {} vk::Semaphore(s)", desiredSemaphoreCount);
+    LOG_TRACE(SWAPCHAIN, "Attempting to create {} vk::Semaphore(s)", desiredSemaphoreCount);
     for (uint32_t i = 0; i < desiredSemaphoreCount; ++i) {
         vk::SemaphoreCreateInfo semaphoreCreateInfo;
 
         semaphorePtrs[i] = p_logicalDevice->createSemaphoreUnique(semaphoreCreateInfo);
 
         if (!semaphorePtrs[i]) {
-            LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::Semaphore {}", i);
+            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Semaphore {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::Semaphore {}", i);
+        LOG_TRACE(SWAPCHAIN, "Successfully created vk::Semaphore {}", i);
     }
 
     return semaphorePtrs;
@@ -222,11 +222,11 @@ std::vector<vk::UniqueFence> quartz::rendering::Swapchain::createVulkanFenceUniq
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t desiredFenceCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::SWAPCHAIN, "{} max frames in flight", desiredFenceCount);
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight", desiredFenceCount);
 
     std::vector<vk::UniqueFence> fencePtrs(desiredFenceCount);
 
-    LOG_TRACE(quartz::loggers::SWAPCHAIN, "Attempting to create {} vk::Fence(s)", desiredFenceCount);
+    LOG_TRACE(SWAPCHAIN, "Attempting to create {} vk::Fence(s)", desiredFenceCount);
     for (uint32_t i = 0; i < desiredFenceCount; ++i) {
         vk::FenceCreateInfo fenceCreateInfo(
             vk::FenceCreateFlagBits::eSignaled
@@ -235,10 +235,10 @@ std::vector<vk::UniqueFence> quartz::rendering::Swapchain::createVulkanFenceUniq
         fencePtrs[i] = p_logicalDevice->createFenceUnique(fenceCreateInfo);
 
         if (!fencePtrs[i]) {
-            LOG_CRITICAL(quartz::loggers::SWAPCHAIN, "Failed to create vk::Fence {}", i);
+            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Fence {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(quartz::loggers::SWAPCHAIN, "Successfully created vk::Fence {}", i);
+        LOG_TRACE(SWAPCHAIN, "Successfully created vk::Fence {}", i);
     }
 
     return fencePtrs;

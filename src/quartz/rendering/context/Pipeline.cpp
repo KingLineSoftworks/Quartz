@@ -27,7 +27,7 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
     const vk::UniqueDevice& p_logicalDevice,
     const std::string& filepath
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "{}", filepath);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{}", filepath);
 
     const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(filepath);
 
@@ -37,14 +37,14 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
         reinterpret_cast<const uint32_t*>(shaderBytes.data())
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::ShaderModule");
+    LOG_TRACE(PIPELINE, "Attempting to create vk::ShaderModule");
     vk::UniqueShaderModule p_shaderModule = p_logicalDevice->createShaderModuleUnique(shaderModuleCreateInfo);
 
     if (!p_shaderModule) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::ShaderModule");
+        LOG_CRITICAL(PIPELINE, "Failed to create vk::ShaderModule");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::ShaderModule");
+    LOG_TRACE(PIPELINE, "Successfully created vk::ShaderModule");
 
     return p_shaderModule;
 }
@@ -53,12 +53,12 @@ std::vector<quartz::rendering::LocallyMappedBuffer> quartz::rendering::Pipeline:
     const quartz::rendering::Device& renderingDevice,
     const uint32_t numBuffers
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "{} buffers", numBuffers);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} buffers", numBuffers);
 
     std::vector<quartz::rendering::LocallyMappedBuffer> buffers;
 
     for (uint32_t i = 0; i < numBuffers; ++i) {
-        LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "Creating uniform buffer {}", i);
+        LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "Creating uniform buffer {}", i);
         buffers.emplace_back(
             renderingDevice,
             sizeof(quartz::rendering::UniformBufferObject),
@@ -73,7 +73,7 @@ std::vector<quartz::rendering::LocallyMappedBuffer> quartz::rendering::Pipeline:
 vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
     const vk::UniqueDevice& p_logicalDevice
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     vk::DescriptorSetLayoutBinding layoutBinding(
         0,
@@ -87,16 +87,16 @@ vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescripto
         layoutBinding
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::DescriptorSetLayout");
+    LOG_TRACE(PIPELINE, "Attempting to create vk::DescriptorSetLayout");
     vk::UniqueDescriptorSetLayout p_descriptorSetLayout = p_logicalDevice->createDescriptorSetLayoutUnique(
         layoutCreateInfo
     );
 
     if (!p_descriptorSetLayout) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::DescriptorSetLayout");
+        LOG_CRITICAL(PIPELINE, "Failed to create vk::DescriptorSetLayout");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::DescriptorSetLayout");
+    LOG_TRACE(PIPELINE, "Successfully created vk::DescriptorSetLayout");
 
     return p_descriptorSetLayout;
 }
@@ -105,7 +105,7 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t numDescriptorSets
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "{} frames in flight", numDescriptorSets);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", numDescriptorSets);
 
     vk::DescriptorPoolSize poolSize(
         vk::DescriptorType::eUniformBuffer,
@@ -118,14 +118,14 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
         poolSize
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::DescriptorPool");
+    LOG_TRACE(PIPELINE, "Attempting to create vk::DescriptorPool");
     vk::UniqueDescriptorPool uniqueDescriptorPool = p_logicalDevice->createDescriptorPoolUnique(poolCreateInfo);
 
     if (!uniqueDescriptorPool) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::DescriptorPool");
+        LOG_CRITICAL(PIPELINE, "Failed to create vk::DescriptorPool");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::DescriptorPool");
+    LOG_TRACE(PIPELINE, "Successfully created vk::DescriptorPool");
 
     return uniqueDescriptorPool;
 }
@@ -137,32 +137,32 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "{} frames in flight", maxNumFramesInFlight);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vector of {} vk::DescriptorSetLayout(s) from vk::UniqueDescriptorSetLayout with instance at {}", maxNumFramesInFlight, reinterpret_cast<const void*>(&(*p_descriptorSetLayout)));
+    LOG_TRACE(PIPELINE, "Creating vector of {} vk::DescriptorSetLayout(s) from vk::UniqueDescriptorSetLayout with instance at {}", maxNumFramesInFlight, reinterpret_cast<const void*>(&(*p_descriptorSetLayout)));
     std::vector<const vk::DescriptorSetLayout> descriptorSetLayouts(maxNumFramesInFlight,  *p_descriptorSetLayout);
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::DescriptorSetAllocateInfo using vk::UniqueDescriptorPool with instance at {}", reinterpret_cast<const void*>(&(*p_descriptorPool)));
+    LOG_TRACE(PIPELINE, "Creating vk::DescriptorSetAllocateInfo using vk::UniqueDescriptorPool with instance at {}", reinterpret_cast<const void*>(&(*p_descriptorPool)));
     vk::DescriptorSetAllocateInfo allocateInfo(
         *p_descriptorPool,
         maxNumFramesInFlight,
         descriptorSetLayouts.data()
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to allocate {} vk::DescriptorSet(s)", descriptorSetLayouts.size());
+    LOG_TRACE(PIPELINE, "Attempting to allocate {} vk::DescriptorSet(s)", descriptorSetLayouts.size());
     std::vector<vk::DescriptorSet> descriptorSets = p_logicalDevice->allocateDescriptorSets(allocateInfo);
 
     if (descriptorSets.size() != descriptorSetLayouts.size()) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}", descriptorSets.size(), descriptorSetLayouts.size());
+        LOG_CRITICAL(PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}", descriptorSets.size(), descriptorSetLayouts.size());
         throw std::runtime_error("");
     }
 
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         if (!descriptorSets[i]) {
-            LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to allocate vk::DescriptorSet {}", i);
+            LOG_CRITICAL(PIPELINE, "Failed to allocate vk::DescriptorSet {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(quartz::loggers::PIPELINE, "Successfully allocated vk::DescriptorSet {} with instance at {}", i, reinterpret_cast<void*>(&(descriptorSets[i])));
+        LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {} with instance at {}", i, reinterpret_cast<void*>(&(descriptorSets[i])));
 
         vk::DescriptorBufferInfo bufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
@@ -181,7 +181,7 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
             {}
         );
 
-        LOG_TRACE(quartz::loggers::PIPELINE, "  - updating");
+        LOG_TRACE(PIPELINE, "  - updating");
         p_logicalDevice->updateDescriptorSets(
             1,
             &descriptorSetWrite,
@@ -197,7 +197,7 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
     const vk::UniqueDevice& p_logicalDevice,
     const vk::SurfaceFormatKHR& surfaceFormat
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     vk::AttachmentDescription colorAttachment(
         {},
@@ -243,14 +243,14 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
         subpassDependency
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::RenderPass");
+    LOG_TRACE(PIPELINE, "Attempting to create vk::RenderPass");
     vk::UniqueRenderPass p_renderPass = p_logicalDevice->createRenderPassUnique(renderPassCreateInfo);
 
     if (!p_renderPass) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::RenderPass");
+        LOG_CRITICAL(PIPELINE, "Failed to create vk::RenderPass");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::RenderPass");
+    LOG_TRACE(PIPELINE, "Successfully created vk::RenderPass");
 
     return p_renderPass;
 }
@@ -259,7 +259,7 @@ vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayout
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
         {},
@@ -269,14 +269,14 @@ vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayout
         nullptr
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::PipelineLayout");
+    LOG_TRACE(PIPELINE, "Attempting to create vk::PipelineLayout");
     vk::UniquePipelineLayout p_pipelineLayout = p_logicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
 
     if (!p_pipelineLayout) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::PipelineLayout");
+        LOG_CRITICAL(PIPELINE, "Failed to create vk::PipelineLayout");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::PipelineLayout");
+    LOG_TRACE(PIPELINE, "Successfully created vk::PipelineLayout");
 
     return p_pipelineLayout;
 }
@@ -294,11 +294,11 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
     const vk::UniquePipelineLayout& p_pipelineLayout,
     const vk::UniqueRenderPass& p_renderPass
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(quartz::loggers::PIPELINE, "");
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     // ----- shader stage tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineShaderStageCreateInfo(s)");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineShaderStageCreateInfo(s)");
     std::vector<vk::PipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos = {
         vk::PipelineShaderStageCreateInfo(
             {},
@@ -316,14 +316,14 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- vertex input tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineVertexInputStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineVertexInputStateCreateInfo");
     vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo(
         {},
         vertexInputBindingDescriptions,
         vertexInputAttributeDescriptions
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineInputAssemblyStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineInputAssemblyStateCreateInfo");
     vk::PipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo(
         {},
         vk::PrimitiveTopology::eTriangleList,
@@ -332,19 +332,19 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- tessellation tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineTessellationStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineTessellationStateCreateInfo");
     vk::PipelineTessellationStateCreateInfo pipelineTessellationStateCreateInfo = vk::PipelineTessellationStateCreateInfo();
 
     // ----- viewport and scissor tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineViewportStateCreateInfo");
-    LOG_TRACE(quartz::loggers::PIPELINE, "  - using {} viewports", viewports.size());
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineViewportStateCreateInfo");
+    LOG_TRACE(PIPELINE, "  - using {} viewports", viewports.size());
     for (const vk::Viewport& viewport : viewports) {
-        LOG_TRACE(quartz::loggers::PIPELINE, "    - {} x {}", viewport.width, viewport.height);
+        LOG_TRACE(PIPELINE, "    - {} x {}", viewport.width, viewport.height);
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "  - using {} scissor rectangles", scissorRectangles.size());
+    LOG_TRACE(PIPELINE, "  - using {} scissor rectangles", scissorRectangles.size());
     for (const vk::Rect2D& scissorRectangle : scissorRectangles) {
-        LOG_TRACE(quartz::loggers::PIPELINE, "    - {} , {}", scissorRectangle.offset.x, scissorRectangle.offset.y);
+        LOG_TRACE(PIPELINE, "    - {} , {}", scissorRectangle.offset.x, scissorRectangle.offset.y);
     }
     vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo(
         {},
@@ -354,7 +354,7 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- rasterizer tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineRasterizationStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineRasterizationStateCreateInfo");
     vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo(
         {},
         false,
@@ -371,7 +371,7 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- multisample tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineMultisampleStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineMultisampleStateCreateInfo");
     vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo(
         {},
         vk::SampleCountFlagBits::e1,
@@ -384,12 +384,12 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- depth stencil tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineDepthStencilStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineDepthStencilStateCreateInfo");
     vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo();
 
     // ----- color blend tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineColorBlendStateCreateInfo");
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineColorBlendStateCreateInfo");
     vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo(
         {},
         false,
@@ -400,10 +400,10 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- dynamic state tings ----- //
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Creating vk::PipelineDynamicStateCreateInfo", dynamicStates.size());
-    LOG_TRACE(quartz::loggers::PIPELINE, "  - using {} dynamic states", dynamicStates.size());
+    LOG_TRACE(PIPELINE, "Creating vk::PipelineDynamicStateCreateInfo", dynamicStates.size());
+    LOG_TRACE(PIPELINE, "  - using {} dynamic states", dynamicStates.size());
     for (const vk::DynamicState& dynamicState : dynamicStates) {
-        LOG_TRACE(quartz::loggers::PIPELINE, "    - {}", static_cast<uint32_t>(dynamicState));
+        LOG_TRACE(PIPELINE, "    - {}", static_cast<uint32_t>(dynamicState));
     }
     vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo(
         {},
@@ -432,17 +432,17 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
         -1
     );
 
-    LOG_TRACE(quartz::loggers::PIPELINE, "Attempting to create vk::Pipeline");
+    LOG_TRACE(PIPELINE, "Attempting to create vk::Pipeline");
     vk::ResultValue<vk::UniquePipeline> graphicsPipelineCreationResult = p_logicalDevice->createGraphicsPipelineUnique(
         VK_NULL_HANDLE,
         graphicsPipelineCreateInfo
     );
 
     if (graphicsPipelineCreationResult.result != vk::Result::eSuccess) {
-        LOG_CRITICAL(quartz::loggers::PIPELINE, "Failed to create vk::Pipeline");
+        LOG_CRITICAL(PIPELINE, "Failed to create vk::Pipeline");
         throw std::runtime_error("");
     }
-    LOG_TRACE(quartz::loggers::PIPELINE, "Successfully created vk::Pipeline");
+    LOG_TRACE(PIPELINE, "Successfully created vk::Pipeline");
 
     return std::move(graphicsPipelineCreationResult.value);
 }
