@@ -52,37 +52,69 @@ quartz::rendering::Context::~Context() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-void quartz::rendering::Context::loadScene(const quartz::rendering::Texture& texture) {
+void quartz::rendering::Context::loadScene(
+    const std::vector<quartz::rendering::Model>& models
+) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    m_renderingPipeline.allocateVulkanDescriptorSets(m_renderingDevice, texture);
+    m_renderingPipeline.allocateVulkanDescriptorSets(
+        m_renderingDevice,
+        models[0].getTexture()
+    );
 }
 
-void quartz::rendering::Context::draw(const std::vector<quartz::rendering::Mesh>& meshes) {
-    m_renderingSwapchain.waitForInFlightFence(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
+void quartz::rendering::Context::draw(
+    const std::vector<quartz::rendering::Model>& models
+) {
+    m_renderingSwapchain.waitForInFlightFence(
+        m_renderingDevice,
+        m_renderingPipeline.getCurrentInFlightFrameIndex()
+    );
 
-    const uint32_t availableSwapchainImageIndex = m_renderingSwapchain.getAvailableImageIndex(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
-    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
+    const uint32_t availableSwapchainImageIndex =
+        m_renderingSwapchain.getAvailableImageIndex(
+            m_renderingDevice,
+            m_renderingPipeline.getCurrentInFlightFrameIndex()
+        );
+
+    if (
+        m_renderingSwapchain.getShouldRecreate() ||
+        m_renderingWindow.getWasResized()
+    ) {
         recreateSwapchain();
         return;
     }
 
     m_renderingPipeline.updateUniformBuffer(m_renderingWindow);
 
-    m_renderingSwapchain.resetInFlightFence(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
+    m_renderingSwapchain.resetInFlightFence(
+        m_renderingDevice,
+        m_renderingPipeline.getCurrentInFlightFrameIndex()
+    );
 
     m_renderingSwapchain.resetAndRecordDrawingCommandBuffer(
         m_renderingWindow,
         m_renderingPipeline,
-        meshes,
+        models,
         m_renderingPipeline.getCurrentInFlightFrameIndex(),
         availableSwapchainImageIndex
     );
 
-    m_renderingSwapchain.submitDrawingCommandBuffer(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex());
+    m_renderingSwapchain.submitDrawingCommandBuffer(
+        m_renderingDevice,
+        m_renderingPipeline.getCurrentInFlightFrameIndex()
+    );
 
-    m_renderingSwapchain.presentImage(m_renderingDevice, m_renderingPipeline.getCurrentInFlightFrameIndex(), availableSwapchainImageIndex);
-    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
+    m_renderingSwapchain.presentImage(
+        m_renderingDevice,
+        m_renderingPipeline.getCurrentInFlightFrameIndex(),
+        availableSwapchainImageIndex
+    );
+
+    if (
+        m_renderingSwapchain.getShouldRecreate() ||
+        m_renderingWindow.getWasResized()
+    ) {
         recreateSwapchain();
         return;
     }

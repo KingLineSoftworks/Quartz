@@ -18,6 +18,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const std::string& filepath
     );
+    Texture(Texture&& other);
     ~Texture();
 
     USE_LOGGER(TEXTURE);

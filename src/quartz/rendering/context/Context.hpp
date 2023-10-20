@@ -6,7 +6,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Instance.hpp"
-#include "quartz/rendering/context/Mesh.hpp"
+#include "quartz/rendering/context/Model.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Swapchain.hpp"
 #include "quartz/rendering/context/Texture.hpp"
@@ -31,14 +31,14 @@ public: // member functions
     );
     ~Context();
 
-    void loadScene(const quartz::rendering::Texture& texture);
+    void loadScene(const std::vector<quartz::rendering::Model>& models);
 
     USE_LOGGER(CONTEXT);
 
     const quartz::rendering::Device& getRenderingDevice() const { return m_renderingDevice; }
     const quartz::rendering::Window& getRenderingWindow() const { return m_renderingWindow; }
 
-    void draw(const std::vector<quartz::rendering::Mesh>& meshes);
+    void draw(const std::vector<quartz::rendering::Model>& models);
     void recreateSwapchain();
     void finish();
 

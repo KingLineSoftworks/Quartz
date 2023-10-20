@@ -6,7 +6,7 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Mesh.hpp"
+#include "quartz/rendering/context/Model.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
@@ -51,7 +51,7 @@ public: // member functions
     void resetAndRecordDrawingCommandBuffer(
         const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::Pipeline& renderingPipeline,
-        const std::vector<quartz::rendering::Mesh>& meshes,
+        const std::vector<quartz::rendering::Model>& models,
         const uint32_t inFlightFrameIndex,
         const uint32_t availableSwapchainImageIndex
     );
