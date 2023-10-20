@@ -9,6 +9,7 @@ add_library(
         Device.cpp
         Instance.cpp
         Mesh.cpp
+        Model.cpp
         Pipeline.cpp
         Swapchain.cpp
         Texture.cpp

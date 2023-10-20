@@ -14,16 +14,21 @@
 #include "quartz/rendering/context/Swapchain.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
-std::vector<quartz::rendering::Mesh> quartz::Application::loadMeshes(
+std::vector<quartz::rendering::Model> quartz::Application::loadModels(
     const quartz::rendering::Device& renderingDevice
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "Loading meshes");
+    LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "");
 
-    std::vector<quartz::rendering::Mesh> meshes;
-    meshes.emplace_back(renderingDevice);
-    LOG_TRACE(APPLICATION, "Loaded {} meshes", meshes.size());
+    std::vector<quartz::rendering::Model> models;
+    models.emplace_back(
+        renderingDevice,
+        util::FileSystem::getAbsoluteFilepathInProject(
+            "texture.jpg"
+        )
+    );
+    LOG_TRACE(APPLICATION, "Loaded {} models", models.size());
 
-    return meshes;
+    return models;
 }
 
 quartz::Application::Application(
@@ -48,11 +53,7 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    m_meshes(),
-    m_texture(
-        m_renderingContext.getRenderingDevice(),
-        util::FileSystem::getAbsoluteFilepathInProject("texture.jpg")
-    )
+    m_models()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -65,10 +66,10 @@ void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     LOG_TRACEthis("Loading scene");
-    m_meshes = quartz::Application::loadMeshes(
+    m_models = quartz::Application::loadModels(
         m_renderingContext.getRenderingDevice()
     );
-    m_renderingContext.loadScene(m_texture);
+    m_renderingContext.loadScene(m_models);
 
     LOG_TRACEthis("Beginning main loop");
     while(!m_renderingContext.getRenderingWindow().shouldClose()) {
@@ -78,7 +79,7 @@ void quartz::Application::run() {
         // Simulate the game world
 
         // Draw the game world
-        m_renderingContext.draw(m_meshes);
+        m_renderingContext.draw(m_models);
     }
 
     LOG_TRACEthis("Finishing");

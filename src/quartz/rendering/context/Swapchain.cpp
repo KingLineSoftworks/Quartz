@@ -18,13 +18,16 @@ vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUnique
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
 
-    uint32_t imageCount = (surfaceCapabilities.maxImageCount != 0) ?
-                          surfaceCapabilities.maxImageCount :
-                          surfaceCapabilities.minImageCount + 1
-    ;
+    uint32_t imageCount =
+        (surfaceCapabilities.maxImageCount != 0) ?
+            surfaceCapabilities.maxImageCount :
+            surfaceCapabilities.minImageCount + 1;
 
     std::set<uint32_t> uniqueQueueFamilyIndicesSet = {graphicsQueueFamilyIndex};
-    std::vector uniqueQueueFamilyIndicesVector(uniqueQueueFamilyIndicesSet.begin(), uniqueQueueFamilyIndicesSet.end());
+    std::vector uniqueQueueFamilyIndicesVector(
+        uniqueQueueFamilyIndicesSet.begin(),
+        uniqueQueueFamilyIndicesSet.end()
+    );
 
     vk::SwapchainCreateInfoKHR swapchainCreateInfo(
         {},
@@ -35,7 +38,9 @@ vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUnique
         swapchainExtent,
         1,
         vk::ImageUsageFlagBits::eColorAttachment,
-        (uniqueQueueFamilyIndicesSet.size() > 1) ? vk::SharingMode::eConcurrent : vk::SharingMode::eExclusive,
+        (uniqueQueueFamilyIndicesSet.size() > 1) ?
+            vk::SharingMode::eConcurrent :
+            vk::SharingMode::eExclusive,
         uniqueQueueFamilyIndicesVector,
         surfaceCapabilities.currentTransform,
         vk::CompositeAlphaFlagBitsKHR::eOpaque,
@@ -44,7 +49,8 @@ vk::UniqueSwapchainKHR quartz::rendering::Swapchain::createVulkanSwapchainUnique
     );
 
     LOG_TRACE(SWAPCHAIN, "Attempting to create the vk::SwapchainKHR");
-    vk::UniqueSwapchainKHR uniqueSwapchain = p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
+    vk::UniqueSwapchainKHR uniqueSwapchain =
+        p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
 
     if (!uniqueSwapchain) {
         LOG_CRITICAL(SWAPCHAIN, "Failed to create the vk::SwapchainKHR");
@@ -90,7 +96,10 @@ std::vector<vk::UniqueImageView> quartz::rendering::Swapchain::createVulkanSwapc
             imageSubresourceRange
         );
 
-        vk::UniqueImageView p_imageView = p_logicalDevice->createImageViewUnique(imageViewCreateInfo);
+        vk::UniqueImageView p_imageView =
+            p_logicalDevice->createImageViewUnique(
+                imageViewCreateInfo
+            );
 
         if (!p_imageView) {
             LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::ImageView {}", i);
@@ -101,7 +110,9 @@ std::vector<vk::UniqueImageView> quartz::rendering::Swapchain::createVulkanSwapc
         imageViewPtrs.push_back(std::move(p_imageView));
     }
 
-    LOG_TRACE(SWAPCHAIN, "Successfully created all {} vk::ImageViews(s)", swapchainImages.size());
+    LOG_TRACE(SWAPCHAIN, "Successfully created all {} vk::ImageViews",
+              swapchainImages.size());
+
     return imageViewPtrs;
 }
 
@@ -111,9 +122,12 @@ std::vector<vk::UniqueFramebuffer> quartz::rendering::Swapchain::createVulkanFra
     const std::vector<vk::UniqueImageView>& swapchainImageViewPtrs,
     const vk::UniqueRenderPass& p_renderPass
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} swapchain image views", swapchainImageViewPtrs.size());
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} swapchain image views",
+                             swapchainImageViewPtrs.size());
 
-    std::vector<vk::UniqueFramebuffer> framebufferPtrs(swapchainImageViewPtrs.size());
+    std::vector<vk::UniqueFramebuffer> framebufferPtrs(
+        swapchainImageViewPtrs.size()
+    );
 
     for (uint32_t i = 0; i < swapchainImageViewPtrs.size(); ++i) {
         vk::FramebufferCreateInfo framebufferCreateInfo(
@@ -125,7 +139,9 @@ std::vector<vk::UniqueFramebuffer> quartz::rendering::Swapchain::createVulkanFra
             1
         );
 
-        framebufferPtrs[i] = p_logicalDevice->createFramebufferUnique(framebufferCreateInfo);
+        framebufferPtrs[i] = p_logicalDevice->createFramebufferUnique(
+            framebufferCreateInfo
+        );
 
         if (!framebufferPtrs[i]) {
             LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Framebuffer {}", i);
@@ -133,7 +149,8 @@ std::vector<vk::UniqueFramebuffer> quartz::rendering::Swapchain::createVulkanFra
         }
         LOG_TRACE(SWAPCHAIN, "Successfully created vk::Framebuffer {}", i);
     }
-    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Framebuffer(s)", framebufferPtrs.size());
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Framebuffer",
+              framebufferPtrs.size());
 
     return framebufferPtrs;
 }
@@ -150,7 +167,10 @@ vk::UniqueCommandPool quartz::rendering::Swapchain::createVulkanCommandPoolUniqu
     );
 
     LOG_TRACE(SWAPCHAIN, "Attempting to create vk::CommandPool");
-    vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
+    vk::UniqueCommandPool p_commandPool =
+        p_logicalDevice->createCommandPoolUnique(
+            commandPoolCreateInfo
+        );
 
     if (!p_commandPool) {
         LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::CommandPool");
@@ -166,7 +186,8 @@ std::vector<vk::UniqueCommandBuffer> quartz::rendering::Swapchain::createVulkanD
     const vk::UniqueCommandPool& p_commandPool,
     const uint32_t desiredCommandBufferCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight", desiredCommandBufferCount);
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight",
+                             desiredCommandBufferCount);
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *p_commandPool,
@@ -174,11 +195,17 @@ std::vector<vk::UniqueCommandBuffer> quartz::rendering::Swapchain::createVulkanD
         desiredCommandBufferCount
     );
 
-    LOG_TRACE(SWAPCHAIN, "Attempting to allocate {} vk::CommandBuffer(s)", desiredCommandBufferCount);
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
+    LOG_TRACE(SWAPCHAIN, "Attempting to allocate {} vk::CommandBuffer",
+              desiredCommandBufferCount);
+
+    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
+        p_logicalDevice->allocateCommandBuffersUnique(
+            commandBufferAllocateInfo
+        );
 
     if (commandBufferPtrs.size() != desiredCommandBufferCount) {
-        LOG_CRITICAL(SWAPCHAIN, "Allocated {} vk::CommandBuffer(s) instead of {}", commandBufferPtrs.size(), desiredCommandBufferCount);
+        LOG_CRITICAL(SWAPCHAIN, "Allocated {} vk::CommandBuffer instead of {}",
+                     commandBufferPtrs.size(), desiredCommandBufferCount);
         throw std::runtime_error("");
     }
 
@@ -187,9 +214,9 @@ std::vector<vk::UniqueCommandBuffer> quartz::rendering::Swapchain::createVulkanD
             LOG_CRITICAL(SWAPCHAIN, "Failed to allocate vk::CommandBuffer {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(SWAPCHAIN, "Successfully allocated vk::CommandBuffer {}", i);
     }
-    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::CommandBuffer(s)", commandBufferPtrs.size());
+    LOG_TRACE(SWAPCHAIN, "Successfully allocated {} vk::CommandBuffer",
+              commandBufferPtrs.size());
 
     return commandBufferPtrs;
 }
@@ -198,22 +225,28 @@ std::vector<vk::UniqueSemaphore> quartz::rendering::Swapchain::createVulkanSemap
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t desiredSemaphoreCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} semaphores desired", desiredSemaphoreCount);
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} semaphores desired",
+                             desiredSemaphoreCount);
 
     std::vector<vk::UniqueSemaphore> semaphorePtrs(desiredSemaphoreCount);
 
-    LOG_TRACE(SWAPCHAIN, "Attempting to create {} vk::Semaphore(s)", desiredSemaphoreCount);
+    LOG_TRACE(SWAPCHAIN, "Attempting to create {} vk::Semaphore",
+              desiredSemaphoreCount);
+
     for (uint32_t i = 0; i < desiredSemaphoreCount; ++i) {
         vk::SemaphoreCreateInfo semaphoreCreateInfo;
 
-        semaphorePtrs[i] = p_logicalDevice->createSemaphoreUnique(semaphoreCreateInfo);
+        semaphorePtrs[i] = p_logicalDevice->createSemaphoreUnique(
+            semaphoreCreateInfo
+        );
 
         if (!semaphorePtrs[i]) {
             LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Semaphore {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(SWAPCHAIN, "Successfully created vk::Semaphore {}", i);
     }
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Semaphores",
+              semaphorePtrs.size());
 
     return semaphorePtrs;
 }
@@ -222,24 +255,29 @@ std::vector<vk::UniqueFence> quartz::rendering::Swapchain::createVulkanFenceUniq
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t desiredFenceCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight", desiredFenceCount);
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight",
+                             desiredFenceCount);
 
     std::vector<vk::UniqueFence> fencePtrs(desiredFenceCount);
 
-    LOG_TRACE(SWAPCHAIN, "Attempting to create {} vk::Fence(s)", desiredFenceCount);
+    LOG_TRACE(SWAPCHAIN, "Attempting to create {} vk::Fence",
+              desiredFenceCount);
+
     for (uint32_t i = 0; i < desiredFenceCount; ++i) {
         vk::FenceCreateInfo fenceCreateInfo(
             vk::FenceCreateFlagBits::eSignaled
         );
 
-        fencePtrs[i] = p_logicalDevice->createFenceUnique(fenceCreateInfo);
+        fencePtrs[i] = p_logicalDevice->createFenceUnique(
+            fenceCreateInfo
+        );
 
         if (!fencePtrs[i]) {
             LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Fence {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(SWAPCHAIN, "Successfully created vk::Fence {}", i);
     }
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Fence", fencePtrs.size());
 
     return fencePtrs;
 }
@@ -250,48 +288,67 @@ quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Pipeline& renderingPipeline
 ):
     m_shouldRecreate(false),
-    mp_vulkanSwapchain(quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
-        renderingDevice.getGraphicsQueueFamilyIndex(),
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfacePtr(),
-        renderingWindow.getVulkanSurfaceCapabilities(),
-        renderingWindow.getVulkanSurfaceFormat(),
-        renderingWindow.getVulkanPresentMode(),
-        renderingWindow.getVulkanExtent()
+    mp_vulkanSwapchain(
+        quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
+            renderingDevice.getGraphicsQueueFamilyIndex(),
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanSurfacePtr(),
+            renderingWindow.getVulkanSurfaceCapabilities(),
+            renderingWindow.getVulkanSurfaceFormat(),
+            renderingWindow.getVulkanPresentMode(),
+            renderingWindow.getVulkanExtent()
     )),
-    m_vulkanImages(renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(*mp_vulkanSwapchain)),
-    m_vulkanImageViewPtrs(quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfaceFormat(),
-        m_vulkanImages
-    )),
-    m_vulkanFramebufferPtrs(quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanExtent(),
-        m_vulkanImageViewPtrs,
-        renderingPipeline.getVulkanRenderPassPtr()
-    )),
-    mp_vulkanDrawingCommandPool(quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
-        renderingDevice.getGraphicsQueueFamilyIndex(),
-        renderingDevice.getVulkanLogicalDevicePtr()
-    )),
-    m_vulkanDrawingCommandBufferPtrs(quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        mp_vulkanDrawingCommandPool,
-        renderingPipeline.getMaxNumFramesInFlight()
-    )),
-    m_vulkanImageAvailableSemaphorePtrs(quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
-    )),
-    m_vulkanRenderFinishedSemaphorePtrs(quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
-    )),
-    m_vulkanInFlightFencePtrs(quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
-    ))
+    m_vulkanImages(
+        renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(
+            *mp_vulkanSwapchain
+        )
+    ),
+    m_vulkanImageViewPtrs(
+        quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanSurfaceFormat(),
+            m_vulkanImages
+        )
+    ),
+    m_vulkanFramebufferPtrs(
+        quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanExtent(),
+            m_vulkanImageViewPtrs,
+            renderingPipeline.getVulkanRenderPassPtr()
+        )
+    ),
+    mp_vulkanDrawingCommandPool(
+        quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
+            renderingDevice.getGraphicsQueueFamilyIndex(),
+            renderingDevice.getVulkanLogicalDevicePtr()
+        )
+    ),
+    m_vulkanDrawingCommandBufferPtrs(
+        quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            mp_vulkanDrawingCommandPool,
+            renderingPipeline.getMaxNumFramesInFlight()
+        )
+    ),
+    m_vulkanImageAvailableSemaphorePtrs(
+        quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingPipeline.getMaxNumFramesInFlight()
+        )
+    ),
+    m_vulkanRenderFinishedSemaphorePtrs(
+        quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingPipeline.getMaxNumFramesInFlight()
+        )
+    ),
+    m_vulkanInFlightFencePtrs(
+        quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingPipeline.getMaxNumFramesInFlight()
+        )
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -303,7 +360,7 @@ quartz::rendering::Swapchain::~Swapchain() {
 void quartz::rendering::Swapchain::reset() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    for (vk::UniqueFence& uniqueInFlightFence : m_vulkanInFlightFencePtrs) { uniqueInFlightFence.reset(); }
+    for (vk::UniqueFence& uniqueInFlightFence : m_vulkanInFlightFencePtrs) {uniqueInFlightFence.reset(); }
     for (vk::UniqueSemaphore& uniqueRenderFinishedSemaphore : m_vulkanRenderFinishedSemaphorePtrs) { uniqueRenderFinishedSemaphore.reset(); }
     for (vk::UniqueSemaphore& uniqueImageAvailableSemaphore : m_vulkanImageAvailableSemaphorePtrs) { uniqueImageAvailableSemaphore.reset(); }
     for (vk::UniqueCommandBuffer& uniqueCommandBuffer : m_vulkanDrawingCommandBufferPtrs) { uniqueCommandBuffer.reset(); }
@@ -320,48 +377,58 @@ void quartz::rendering::Swapchain::recreate(
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    mp_vulkanSwapchain = quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
-        renderingDevice.getGraphicsQueueFamilyIndex(),
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfacePtr(),
-        renderingWindow.getVulkanSurfaceCapabilities(),
-        renderingWindow.getVulkanSurfaceFormat(),
-        renderingWindow.getVulkanPresentMode(),
-        renderingWindow.getVulkanExtent()
-    );
-    m_vulkanImages = renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(*mp_vulkanSwapchain);
+    mp_vulkanSwapchain =
+        quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
+            renderingDevice.getGraphicsQueueFamilyIndex(),
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanSurfacePtr(),
+            renderingWindow.getVulkanSurfaceCapabilities(),
+            renderingWindow.getVulkanSurfaceFormat(),
+            renderingWindow.getVulkanPresentMode(),
+            renderingWindow.getVulkanExtent()
+        );
+    m_vulkanImages =
+        renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(
+            *mp_vulkanSwapchain
+        );
     m_vulkanImageViewPtrs = quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfaceFormat(),
-        m_vulkanImages
-    );
-    m_vulkanFramebufferPtrs = quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanExtent(),
-        m_vulkanImageViewPtrs,
-        renderingPipeline.getVulkanRenderPassPtr()
-    );
-    mp_vulkanDrawingCommandPool = quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
-        renderingDevice.getGraphicsQueueFamilyIndex(),
-        renderingDevice.getVulkanLogicalDevicePtr()
-    );
-    m_vulkanDrawingCommandBufferPtrs = quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        mp_vulkanDrawingCommandPool,
-        renderingPipeline.getMaxNumFramesInFlight()
-    );
-    m_vulkanImageAvailableSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
-    );
-    m_vulkanRenderFinishedSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
-    );
-    m_vulkanInFlightFencePtrs = quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
-    );
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanSurfaceFormat(),
+            m_vulkanImages
+        );
+    m_vulkanFramebufferPtrs =
+        quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingWindow.getVulkanExtent(),
+            m_vulkanImageViewPtrs,
+            renderingPipeline.getVulkanRenderPassPtr()
+        );
+    mp_vulkanDrawingCommandPool =
+        quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
+            renderingDevice.getGraphicsQueueFamilyIndex(),
+            renderingDevice.getVulkanLogicalDevicePtr()
+        );
+    m_vulkanDrawingCommandBufferPtrs =
+        quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            mp_vulkanDrawingCommandPool,
+            renderingPipeline.getMaxNumFramesInFlight()
+        );
+    m_vulkanImageAvailableSemaphorePtrs =
+        quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingPipeline.getMaxNumFramesInFlight()
+        );
+    m_vulkanRenderFinishedSemaphorePtrs =
+        quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingPipeline.getMaxNumFramesInFlight()
+        );
+    m_vulkanInFlightFencePtrs =
+        quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            renderingPipeline.getMaxNumFramesInFlight()
+        );
 
     LOG_TRACEthis("Clearing the \"should recreate\" flag");
     m_shouldRecreate = false;
@@ -371,14 +438,16 @@ void quartz::rendering::Swapchain::waitForInFlightFence(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
 ) {
-    vk::Result result = renderingDevice.getVulkanLogicalDevicePtr()->waitForFences(
-        *(m_vulkanInFlightFencePtrs[inFlightFrameIndex]),
-        true,
-        std::numeric_limits<uint64_t>::max()
-    );
+    vk::Result result =
+        renderingDevice.getVulkanLogicalDevicePtr()->waitForFences(
+            *(m_vulkanInFlightFencePtrs[inFlightFrameIndex]),
+            true,
+            std::numeric_limits<uint64_t>::max()
+        );
 
     if (result != vk::Result::eSuccess) {
-        LOG_ERRORthis("Failed to wait for previous frame to finish: {}", static_cast<uint32_t>(result));
+        LOG_ERRORthis("Failed to wait for previous frame to finish: {}",
+                      static_cast<uint32_t>(result));
     }
 }
 
@@ -387,22 +456,26 @@ uint32_t quartz::rendering::Swapchain::getAvailableImageIndex(
     const uint32_t inFlightFrameIndex
 ) {
     uint32_t availableImageIndex;
-    vk::Result acquireAvailableImageIndexResult = renderingDevice.getVulkanLogicalDevicePtr()->acquireNextImageKHR(
-        *mp_vulkanSwapchain,
-        std::numeric_limits<uint64_t>::max(),
-        *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
-        {},
-        &availableImageIndex
-    );
+    vk::Result acquireAvailableImageIndexResult =
+        renderingDevice.getVulkanLogicalDevicePtr()->acquireNextImageKHR(
+            *mp_vulkanSwapchain,
+            std::numeric_limits<uint64_t>::max(),
+            *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
+            {},
+            &availableImageIndex
+        );
 
     if (acquireAvailableImageIndexResult == vk::Result::eErrorOutOfDateKHR) {
-        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
+        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )",
+                     static_cast<uint32_t>(acquireAvailableImageIndexResult));
         m_shouldRecreate = true;
     } else if (acquireAvailableImageIndexResult == vk::Result::eSuboptimalKHR) {
-        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
+        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )",
+                     static_cast<uint32_t>(acquireAvailableImageIndexResult));
         m_shouldRecreate = true;
     } else if (acquireAvailableImageIndexResult != vk::Result::eSuccess) {
-        LOG_ERRORthis("Failed to retrieve available image index ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
+        LOG_ERRORthis("Failed to retrieve available image index ( {} )",
+                      static_cast<uint32_t>(acquireAvailableImageIndexResult));
     }
 
     return availableImageIndex;
@@ -412,13 +485,15 @@ void quartz::rendering::Swapchain::resetInFlightFence(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
 ) {
-    renderingDevice.getVulkanLogicalDevicePtr()->resetFences(*(m_vulkanInFlightFencePtrs[inFlightFrameIndex]));
+    renderingDevice.getVulkanLogicalDevicePtr()->resetFences(
+        *(m_vulkanInFlightFencePtrs[inFlightFrameIndex])
+    );
 }
 
 void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
     const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::Pipeline& renderingPipeline,
-    const std::vector<quartz::rendering::Mesh>& meshes,
+    const std::vector<quartz::rendering::Model>& models,
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
 ) {
@@ -434,7 +509,9 @@ void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
         {}
     );
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->begin(commandBufferBeginInfo);
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->begin(
+        commandBufferBeginInfo
+    );
 
     // ----- start a render pass ----- //
 
@@ -456,11 +533,17 @@ void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
         clearScreenColor
     );
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->beginRenderPass(
+        renderPassBeginInfo,
+        vk::SubpassContents::eInline
+    );
 
     // ----- draw (but first bind graphics pipeline and set up viewport and scissor) ----- //
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindPipeline(vk::PipelineBindPoint::eGraphics, *renderingPipeline.getVulkanGraphicsPipelinePtr());
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindPipeline(
+        vk::PipelineBindPoint::eGraphics,
+        *renderingPipeline.getVulkanGraphicsPipelinePtr()
+    );
 
     vk::Viewport viewport(
         0.0f,
@@ -487,12 +570,12 @@ void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
     uint32_t offset = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
-        *(meshes[0].getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        *(models[0].getMesh().getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
         offset
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(meshes[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        *(models[0].getMesh().getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );
@@ -508,7 +591,7 @@ void quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        meshes[0].getIndices().size(),
+        models[0].getMesh().getIndices().size(),
         1,
         0,
         0,
@@ -526,7 +609,9 @@ void quartz::rendering::Swapchain::submitDrawingCommandBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
 ) {
-    vk::PipelineStageFlags waitStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+    vk::PipelineStageFlags waitStageMask(
+        vk::PipelineStageFlagBits::eColorAttachmentOutput
+    );
 
     vk::SubmitInfo commandBufferSubmitInfo(
         *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
@@ -553,16 +638,19 @@ void quartz::rendering::Swapchain::presentImage(
         {}
     );
 
-    vk::Result presentResult = renderingDevice.getVulkanPresentQueue().presentKHR(presentInfo);
-
+    vk::Result presentResult =
+        renderingDevice.getVulkanPresentQueue().presentKHR(presentInfo);
 
     if (presentResult == vk::Result::eErrorOutOfDateKHR) {
-        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )", static_cast<uint32_t>(presentResult));
+        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )",
+                     static_cast<uint32_t>(presentResult));
         m_shouldRecreate = true;
     } else if (presentResult == vk::Result::eSuboptimalKHR) {
-        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )", static_cast<uint32_t>(presentResult));
+        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )",
+                     static_cast<uint32_t>(presentResult));
         m_shouldRecreate = true;
     } else if (presentResult != vk::Result::eSuccess) {
-        LOG_ERRORthis("Failed to retrieve available image index ( {} )", static_cast<uint32_t>(presentResult));
+        LOG_ERRORthis("Failed to retrieve available image index ( {} )",
+                      static_cast<uint32_t>(presentResult));
     }
 }

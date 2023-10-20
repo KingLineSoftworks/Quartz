@@ -212,6 +212,18 @@ quartz::rendering::Texture::Texture(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
+quartz::rendering::Texture::Texture(quartz::rendering::Texture&& other) :
+    m_filepath(other.m_filepath),
+    m_width(other.m_width),
+    m_height(other.m_height),
+    m_channelCount(other.m_channelCount),
+    m_imageBuffer(std::move(other.m_imageBuffer)),
+    mp_vulkanImageView(std::move(other.mp_vulkanImageView)),
+    mp_vulkanSampler(std::move(other.mp_vulkanSampler))
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
 quartz::rendering::Texture::~Texture() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
