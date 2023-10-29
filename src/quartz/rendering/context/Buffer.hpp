@@ -213,6 +213,7 @@ public: // member functions
     USE_LOGGER(BUFFER);
 
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
+    const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
 
 private: // static functions
     static vk::UniqueImage createVulkanImagePtr(

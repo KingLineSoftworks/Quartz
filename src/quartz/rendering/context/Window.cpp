@@ -274,6 +274,50 @@ quartz::rendering::Window::getBestVulkanExtent(
     return customExtent;
 }
 
+vk::Format
+quartz::rendering::Window::getBestVulkanDepthBufferFormat(
+    const vk::PhysicalDevice& physicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
+
+    std::vector<vk::Format> formatCandidates = {
+        vk::Format::eD32Sfloat,
+        vk::Format::eD32SfloatS8Uint,
+        vk::Format::eD24UnormS8Uint
+    };
+
+    vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
+
+    vk::FormatFeatureFlags features =
+        vk::FormatFeatureFlagBits::eDepthStencilAttachment;
+
+    for (const vk::Format& format : formatCandidates) {
+        vk::FormatProperties properties = physicalDevice.getFormatProperties(
+            format
+        );
+
+        if (
+            tiling == vk::ImageTiling::eLinear &&
+            (properties.linearTilingFeatures & features) == features
+        ) {
+            LOG_TRACE(WINDOW, "Using linear image tiling");
+            return format;
+        } else if (
+            tiling == vk::ImageTiling::eOptimal &&
+            (properties.optimalTilingFeatures & features) == features
+        ) {
+            LOG_TRACE(WINDOW, "Using optimal image tiling");
+            return format;
+        }
+    }
+
+    LOG_CRITICAL(
+        WINDOW,
+        "Failed to find supported depth buffer image format"
+    );
+    throw std::runtime_error("");
+}
+
 quartz::rendering::Window::Window(
     const std::string& name,
     const uint32_t windowWidthPixels,
@@ -320,6 +364,11 @@ quartz::rendering::Window::Window(
         quartz::rendering::Window::getBestVulkanExtent(
             mp_glfwWindow,
             m_vulkanSurfaceCapabilities
+        )
+    ),
+    m_vulkanDepthBufferFormat(
+        quartz::rendering::Window::getBestVulkanDepthBufferFormat(
+            renderingDevice.getVulkanPhysicalDevice()
         )
     )
 {

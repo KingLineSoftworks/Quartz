@@ -85,6 +85,7 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const vk::Extent2D& swapchainExtent,
         const std::vector<vk::UniqueImageView>& swapchainImageViewPtrs,
+        const vk::UniqueImageView& p_depthBufferImageView,
         const vk::UniqueRenderPass& p_renderPass
     );
     static vk::UniqueCommandPool createVulkanCommandPoolUniquePtr(
@@ -105,16 +106,14 @@ private: // static functions
         const uint32_t desiredFenceCount
     );
 
-    static vk::Format getVulkanDepthFormat(
-        const vk::PhysicalDevice& physicalDevice
-    );
-
 private: // member variables
     bool m_shouldRecreate;
 
     vk::UniqueSwapchainKHR mp_vulkanSwapchain;
     std::vector<vk::Image> m_vulkanImages;
     std::vector<vk::UniqueImageView> m_vulkanImageViewPtrs;
+
+    quartz::rendering::DepthBuffer m_depthBuffer;
 
     std::vector<vk::UniqueFramebuffer> m_vulkanFramebufferPtrs;
 
@@ -123,7 +122,4 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphorePtrs;
     std::vector<vk::UniqueSemaphore> m_vulkanRenderFinishedSemaphorePtrs;
     std::vector<vk::UniqueFence> m_vulkanInFlightFencePtrs;
-
-    vk::Format m_vulkanDepthFormat;
-    quartz::rendering::DepthBuffer m_depthBuffer;
 };

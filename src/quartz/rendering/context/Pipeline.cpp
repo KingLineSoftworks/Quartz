@@ -279,7 +279,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 vk::UniqueRenderPass
 quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
-    const vk::SurfaceFormatKHR& surfaceFormat
+    const vk::SurfaceFormatKHR& surfaceFormat,
+    const vk::Format& depthFormat
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
@@ -294,10 +295,25 @@ quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
         vk::ImageLayout::eUndefined,
         vk::ImageLayout::ePresentSrcKHR
     );
-
     vk::AttachmentReference colorAttachmentRef(
         0,
         vk::ImageLayout::eColorAttachmentOptimal
+    );
+
+    vk::AttachmentDescription depthAttachment(
+        {},
+        depthFormat,
+        vk::SampleCountFlagBits::e1,
+        vk::AttachmentLoadOp::eClear,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::AttachmentLoadOp::eDontCare,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::ImageLayout::eUndefined,
+        vk::ImageLayout::eDepthStencilAttachmentOptimal
+    );
+    vk::AttachmentReference depthAttachmentRef(
+        1,
+        vk::ImageLayout::eDepthStencilAttachmentOptimal
     );
 
     vk::SubpassDescription subpassDescription(
@@ -306,23 +322,36 @@ quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
         {},
         colorAttachmentRef,
         {},
-        {},
+        &depthAttachmentRef,
         {}
     );
 
     vk::SubpassDependency subpassDependency(
         VK_SUBPASS_EXTERNAL,
         0,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        (
+            vk::PipelineStageFlagBits::eColorAttachmentOutput |
+            vk::PipelineStageFlagBits::eEarlyFragmentTests
+        ),
+        (
+            vk::PipelineStageFlagBits::eColorAttachmentOutput |
+            vk::PipelineStageFlagBits::eEarlyFragmentTests
+        ),
         {},
-        vk::AccessFlagBits::eColorAttachmentWrite,
+        (
+            vk::AccessFlagBits::eColorAttachmentWrite |
+            vk::AccessFlagBits::eDepthStencilAttachmentWrite
+        ),
         {}
     );
 
+    std::vector<vk::AttachmentDescription> attachments = {
+        colorAttachment,
+        depthAttachment
+    };
     vk::RenderPassCreateInfo renderPassCreateInfo(
         {},
-        colorAttachment,
+        attachments,
         subpassDescription,
         subpassDependency
     );
@@ -486,8 +515,18 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
     // ----- depth stencil tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineDepthStencilStateCreateInfo");
-    vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo =
-        vk::PipelineDepthStencilStateCreateInfo();
+    vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo(
+        {},
+        true,
+        true,
+        vk::CompareOp::eLess,
+        false, /// @todo enable with phys dev features
+        false,
+        {},
+        {},
+        0.0f,
+        1.0f
+    );
 
     // ----- color blend tings ----- //
 
@@ -642,7 +681,8 @@ quartz::rendering::Pipeline::Pipeline(
     mp_vulkanRenderPass(
         quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfaceFormat()
+            renderingWindow.getVulkanSurfaceFormat(),
+            renderingWindow.getVulkanDepthBufferFormat()
         )
     ),
     mp_vulkanPipelineLayout(
@@ -693,7 +733,8 @@ quartz::rendering::Pipeline::recreate(
     mp_vulkanRenderPass =
         quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfaceFormat()
+            renderingWindow.getVulkanSurfaceFormat(),
+            renderingWindow.getVulkanDepthBufferFormat()
         );
     mp_vulkanPipelineLayout =
         quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(

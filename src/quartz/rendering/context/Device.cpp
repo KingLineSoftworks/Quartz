@@ -27,10 +27,19 @@ quartz::rendering::Device::getBestPhysicalDevice(
     // ----- choose the best (first) suitable physical device, ----- //
     //       get best queue family index                             //
 
+    int64_t suitablePhysicalDeviceIndex = -1;
     for (uint32_t i = 0; i < physicalDevices.size(); ++i) {
         LOG_TRACE(DEVICE, "  - checking suitability of physical device {}", i);
 
         vk::PhysicalDevice physicalDevice = physicalDevices[i];
+
+        vk::PhysicalDeviceFeatures supportedFeatures =
+            physicalDevice.getFeatures();
+        if (!supportedFeatures.samplerAnisotropy) {
+            LOG_TRACE(DEVICE, "    - Sampler anisotropy not supported. Next");
+            continue;
+        }
+        /// @todo check for supportedFeatures.depthBounds
 
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties =
             physicalDevice.getQueueFamilyProperties();
@@ -39,29 +48,42 @@ quartz::rendering::Device::getBestPhysicalDevice(
             queueFamilyProperties.size()
         );
 
+        int64_t suitableQueueFamilyIndex = -1;
         for (uint32_t j = 0; j < queueFamilyProperties.size(); ++j) {
             const vk::QueueFamilyProperties properties =
                 queueFamilyProperties[j];
 
-            if (properties.queueFlags & vk::QueueFlagBits::eGraphics) {
+            if (!(properties.queueFlags & vk::QueueFlagBits::eGraphics)) {
                 LOG_TRACE(
-                    DEVICE,
-                    "        - queue family {} supports graphics queues", j
+                    DEVICE, "      - Queue family {} doesn't support graphics",
+                    j
                 );
-                LOG_TRACE(
-                    DEVICE,
-                    "          - assuming implied support for present queues "
-                    "as well"
-                );
-                return physicalDevice;
+                continue;
             }
+
+            LOG_TRACE(DEVICE, "      - queue family {} supports graphics", j);
+            LOG_TRACE(DEVICE, "      - assuming implied support for present");
+
+            suitableQueueFamilyIndex = j;
+            break;
         }
 
-        LOG_TRACE(DEVICE, "    - device not suitable");
+        if (suitableQueueFamilyIndex == -1) {
+            LOG_TRACE(DEVICE, "    - Graphics queue not supported. Next");
+            continue;
+        }
+
+        LOG_INFO(DEVICE, "  - Physical device {} is suitable", i);
+        suitablePhysicalDeviceIndex = i;
+        break;
     }
 
-    LOG_CRITICAL(DEVICE, "No suitable devices found");
-    throw std::runtime_error("");
+    if (suitablePhysicalDeviceIndex == -1) {
+        LOG_CRITICAL(DEVICE, "No suitable devices found");
+        throw std::runtime_error("");
+    }
+
+    return physicalDevices[suitablePhysicalDeviceIndex];
 }
 
 uint32_t
@@ -188,15 +210,16 @@ quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
         );
     }
 
-    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
-    physicalDeviceFeatures.samplerAnisotropy = true;
+    vk::PhysicalDeviceFeatures requestedPhysicalDeviceFeatures;
+    requestedPhysicalDeviceFeatures.samplerAnisotropy = true;
+    /// @todo enable requestedPhysicalDeviceFeatures.depthBounds
 
     vk::DeviceCreateInfo logicalDeviceCreateInfo(
         {},
         deviceQueueCreateInfos,
         validationLayerNames,
         physicalDeviceExtensionNames,
-        &physicalDeviceFeatures
+        &requestedPhysicalDeviceFeatures
     );
 
     LOG_TRACE(DEVICE, "Attempting to create logical device");

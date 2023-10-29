@@ -125,6 +125,7 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Extent2D& swapchainExtent,
     const std::vector<vk::UniqueImageView>& swapchainImageViewPtrs,
+    const vk::UniqueImageView& p_depthBufferImageView,
     const vk::UniqueRenderPass& p_renderPass
 ) {
     LOG_FUNCTION_SCOPE_TRACE(
@@ -136,10 +137,16 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
     );
 
     for (uint32_t i = 0; i < swapchainImageViewPtrs.size(); ++i) {
+
+        std::vector<vk::ImageView> attachments = {
+            *swapchainImageViewPtrs[i],
+            *p_depthBufferImageView
+        };
+
         vk::FramebufferCreateInfo framebufferCreateInfo(
             {},
             *p_renderPass,
-            *swapchainImageViewPtrs[i],
+            attachments,
             swapchainExtent.width,
             swapchainExtent.height,
             1
@@ -310,50 +317,6 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
     return fencePtrs;
 }
 
-vk::Format
-quartz::rendering::Swapchain::getVulkanDepthFormat(
-    const vk::PhysicalDevice& physicalDevice
-) {
-    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
-
-    std::vector<vk::Format> formatCandidates = {
-        vk::Format::eD32Sfloat,
-        vk::Format::eD32SfloatS8Uint,
-        vk::Format::eD24UnormS8Uint
-    };
-
-    vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
-
-    vk::FormatFeatureFlags features =
-        vk::FormatFeatureFlagBits::eDepthStencilAttachment;
-
-    for (const vk::Format& format : formatCandidates) {
-        vk::FormatProperties properties = physicalDevice.getFormatProperties(
-            format
-        );
-
-        if (
-            tiling == vk::ImageTiling::eLinear &&
-            (properties.linearTilingFeatures & features) == features
-        ) {
-            LOG_TRACE(SWAPCHAIN, "Using linear image tiling");
-            return format;
-        } else if (
-            tiling == vk::ImageTiling::eOptimal &&
-            (properties.optimalTilingFeatures & features) == features
-        ) {
-            LOG_TRACE(SWAPCHAIN, "Using optimal image tiling");
-            return format;
-        }
-    }
-
-    LOG_CRITICAL(
-        SWAPCHAIN,
-        "Failed to find supported depth buffer image format"
-    );
-    throw std::runtime_error("");
-}
-
 quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
@@ -382,11 +345,20 @@ quartz::rendering::Swapchain::Swapchain(
             m_vulkanImages
         )
     ),
+    m_depthBuffer(
+        renderingDevice,
+        renderingWindow.getVulkanExtent().width,
+        renderingWindow.getVulkanExtent().height,
+        vk::ImageUsageFlagBits::eDepthStencilAttachment,
+        renderingWindow.getVulkanDepthBufferFormat(),
+        vk::ImageTiling::eOptimal
+    ),
     m_vulkanFramebufferPtrs(
         quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingWindow.getVulkanExtent(),
             m_vulkanImageViewPtrs,
+            m_depthBuffer.getVulkanImageViewPtr(),
             renderingPipeline.getVulkanRenderPassPtr()
         )
     ),
@@ -420,19 +392,6 @@ quartz::rendering::Swapchain::Swapchain(
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingPipeline.getMaxNumFramesInFlight()
         )
-    ),
-    m_vulkanDepthFormat(
-        quartz::rendering::Swapchain::getVulkanDepthFormat(
-            renderingDevice.getVulkanPhysicalDevice()
-        )
-    ),
-    m_depthBuffer(
-        renderingDevice,
-        renderingWindow.getVulkanExtent().width,
-        renderingWindow.getVulkanExtent().height,
-        vk::ImageUsageFlagBits::eDepthStencilAttachment,
-        m_vulkanDepthFormat,
-        vk::ImageTiling::eOptimal
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -509,11 +468,13 @@ quartz::rendering::Swapchain::recreate(
             renderingWindow.getVulkanSurfaceFormat(),
             m_vulkanImages
         );
+//    m_depthBuffer = ();
     m_vulkanFramebufferPtrs =
         quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingWindow.getVulkanExtent(),
             m_vulkanImageViewPtrs,
+            m_depthBuffer.getVulkanImageViewPtr(),
             renderingPipeline.getVulkanRenderPassPtr()
         );
     mp_vulkanDrawingCommandPool =
@@ -640,11 +601,22 @@ quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
 
     // ----- start a render pass ----- //
 
-    vk::ClearValue clearScreenColor(
-        vk::ClearColorValue(
-            std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f }
+    std::array<vk::ClearValue, 2> clearValues = {
+        // Screen color clear
+        vk::ClearValue(
+            vk::ClearColorValue(
+                std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f }
+            )
+        ),
+
+        // Depth buffer stencil clear
+        vk::ClearValue(
+            vk::ClearDepthStencilValue(
+                1.0f, // set everything to the furthest possible value
+                0.0f
+            )
         )
-    );
+    };
 
     vk::Rect2D renderPassRenderArea(
         vk::Offset2D(0.0f, 0.0f),
@@ -655,7 +627,7 @@ quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
         *renderingPipeline.getVulkanRenderPassPtr(),
         *(m_vulkanFramebufferPtrs[availableSwapchainImageIndex]),
         renderPassRenderArea,
-        clearScreenColor
+        clearValues
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->beginRenderPass(
