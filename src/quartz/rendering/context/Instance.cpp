@@ -4,7 +4,8 @@
 
 #include "quartz/rendering/context/Instance.hpp"
 
-VKAPI_ATTR VkBool32 VKAPI_CALL quartz::rendering::Instance::vulkanDebugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL
+quartz::rendering::Instance::vulkanDebugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT* p_callbackData,
@@ -28,44 +29,54 @@ VKAPI_ATTR VkBool32 VKAPI_CALL quartz::rendering::Instance::vulkanDebugCallback(
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            LOG_TRACE(VULKAN, "( {} ) {}",
-                      messageTypeString,
-                      p_callbackData->pMessage);
+            LOG_TRACE(
+                VULKAN, "( {} ) {}",
+                messageTypeString, p_callbackData->pMessage
+            );
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            LOG_INFO(VULKAN, "( {} ) {}",
-                     messageTypeString,
-                     p_callbackData->pMessage);
+            LOG_INFO(
+                VULKAN, "( {} ) {}",
+                messageTypeString, p_callbackData->pMessage
+            );
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            LOG_WARNING(VULKAN, "( {} ) {}",
-                        messageTypeString,
-                        p_callbackData->pMessage);
+            LOG_WARNING(
+                VULKAN, "( {} ) {}",
+                messageTypeString, p_callbackData->pMessage
+            );
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-            LOG_ERROR(VULKAN, "( {} ) {}",
-                      messageTypeString,
-                      p_callbackData->pMessage);
+            LOG_ERROR(
+                VULKAN, "( {} ) {}",
+                messageTypeString, p_callbackData->pMessage
+            );
             break;
         default:
-            LOG_CRITICAL(VULKAN, "( {} ) {}",
-                         messageTypeString,
-                         p_callbackData->pMessage);
+            LOG_CRITICAL(
+                VULKAN, "( {} ) {}",
+                messageTypeString, p_callbackData->pMessage
+            );
             break;
     }
 
     return VK_FALSE;
 }
 
-std::vector<const char*> quartz::rendering::Instance::getEnabledValidationLayerNames(
+std::vector<const char*>
+quartz::rendering::Instance::getEnabledValidationLayerNames(
     const bool validationLayersEnabled
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "enable validation layers = {}",
-                             validationLayersEnabled);
+    LOG_FUNCTION_SCOPE_TRACE(
+        INSTANCE, "enable validation layers = {}", validationLayersEnabled
+    );
 
     if (!validationLayersEnabled) {
-        LOG_TRACE(INSTANCE, "Validation layer support not requested. "
-                            "Not getting any validation layers");
+        LOG_TRACE(
+            INSTANCE,
+            "Validation layer support not requested. Not getting any "
+            "validation layers"
+        );
         return {};
     }
 
@@ -73,14 +84,16 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledValidationLayerN
 
     std::vector<vk::LayerProperties> supportedLayerProperties =
         vk::enumerateInstanceLayerProperties();
-    LOG_TRACE(INSTANCE, "{} extensions available",
-              supportedLayerProperties.size());
+    LOG_TRACE(
+        INSTANCE, "{} extensions available", supportedLayerProperties.size());
     for (
         const vk::LayerProperties& layerProperties :
         supportedLayerProperties
     ) {
-        LOG_TRACE(INSTANCE, "  - {} [ version {} ]",
-                  layerProperties.layerName, layerProperties.specVersion);
+        LOG_TRACE(
+            INSTANCE, "  - {} [ version {} ]",
+            layerProperties.layerName, layerProperties.specVersion
+        );
     }
 
     // ----- get the required validation layers ----- //
@@ -92,8 +105,10 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledValidationLayerN
     // ----- ensure all required validation layers are available ----- //
 
 
-    LOG_TRACE(INSTANCE, "{} instance validation layers required",
-              requiredValidationLayerNames.size());
+    LOG_TRACE(
+        INSTANCE, "{} instance validation layers required",
+        requiredValidationLayerNames.size()
+    );
     for (
         const std::string& requiredValidationLayerName :
         requiredValidationLayerNames
@@ -115,8 +130,10 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledValidationLayerN
         }
 
         if (!found) {
-            LOG_CRITICAL(INSTANCE, "Required validation layer {} is not "
-                                   "available", requiredValidationLayerName);
+            LOG_CRITICAL(
+                INSTANCE, "Required validation layer {} is not available",
+                requiredValidationLayerName
+            );
             throw std::runtime_error("");
         }
     }
@@ -124,25 +141,30 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledValidationLayerN
     return requiredValidationLayerNames;
 }
 
-std::vector<const char*> quartz::rendering::Instance::getEnabledInstanceExtensionNames(
+std::vector<const char*>
+quartz::rendering::Instance::getEnabledInstanceExtensionNames(
     const bool validationLayersEnabled
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "enable validation layers = {}",
-                             validationLayersEnabled);
+    LOG_FUNCTION_SCOPE_TRACE(
+        INSTANCE, "enable validation layers = {}", validationLayersEnabled
+    );
 
     // ----- determine what instance extensions are available ----- //
 
     std::vector<vk::ExtensionProperties> availableInstanceExtensionProperties =
         vk::enumerateInstanceExtensionProperties();
-    LOG_TRACE(INSTANCE, "{} instance extensions available",
-              availableInstanceExtensionProperties.size());
+    LOG_TRACE(
+        INSTANCE, "{} instance extensions available",
+        availableInstanceExtensionProperties.size()
+    );
     for (
         const vk::ExtensionProperties& extensionProperties :
         availableInstanceExtensionProperties
     ) {
-        LOG_TRACE(INSTANCE, "  - {} [ version {} ]",
-                  extensionProperties.extensionName,
-                  extensionProperties.specVersion);
+        LOG_TRACE(
+            INSTANCE, "  - {} [ version {} ]",
+            extensionProperties.extensionName, extensionProperties.specVersion
+        );
     }
 
     // ----- get the extensions required by glfw ----- //
@@ -152,8 +174,10 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledInstanceExtensio
     glfwExtensions = glfwGetRequiredInstanceExtensions(
         &glfwExtensionCount
     );
-    LOG_TRACE(INSTANCE, "{} required instance extensions from glfw",
-              glfwExtensionCount);
+    LOG_TRACE(
+        INSTANCE, "{} required instance extensions from glfw",
+        glfwExtensionCount
+    );
     std::vector<const char*> requiredInstanceExtensionNames(
         glfwExtensions,
         glfwExtensions + glfwExtensionCount
@@ -170,8 +194,10 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledInstanceExtensio
 
     // ----- ensure that all of our required extensions are available ----- //
 
-    LOG_TRACE(INSTANCE, "{} instance extensions required",
-              requiredInstanceExtensionNames.size());
+    LOG_TRACE(
+        INSTANCE, "{} instance extensions required",
+        requiredInstanceExtensionNames.size()
+    );
     for (
         const char* requiredInstanceExtensionName :
         requiredInstanceExtensionNames
@@ -193,8 +219,10 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledInstanceExtensio
         }
 
         if (!found) {
-            LOG_CRITICAL(INSTANCE, "Required instance extension {} is not "
-                                   "available", requiredInstanceExtensionName);
+            LOG_CRITICAL(
+                INSTANCE, "Required instance extension {} is not available",
+                requiredInstanceExtensionName
+            );
             throw std::runtime_error("");
         }
     }
@@ -202,7 +230,8 @@ std::vector<const char*> quartz::rendering::Instance::getEnabledInstanceExtensio
     return requiredInstanceExtensionNames;
 }
 
-vk::UniqueInstance quartz::rendering::Instance::createVulkanInstanceUniquePtr(
+vk::UniqueInstance
+quartz::rendering::Instance::createVulkanInstanceUniquePtr(
     const std::string &applicationName,
     const uint32_t applicationMajorVersion,
     const uint32_t applicationMinorVersion,
@@ -210,11 +239,13 @@ vk::UniqueInstance quartz::rendering::Instance::createVulkanInstanceUniquePtr(
     const std::vector<const char*>& enabledValidationLayerNames,
     const std::vector<const char*>& enabledExtensionNames
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "{} {}.{}.{}",
-                             applicationName,
-                             applicationMajorVersion,
-                             applicationMinorVersion,
-                             applicationPatchVersion);
+    LOG_FUNCTION_SCOPE_TRACE(
+        INSTANCE, "{} {}.{}.{}",
+        applicationName,
+        applicationMajorVersion,
+        applicationMinorVersion,
+        applicationPatchVersion
+    );
 
     vk::ApplicationInfo applicationInfo(
         applicationName.c_str(),
@@ -255,17 +286,22 @@ vk::UniqueInstance quartz::rendering::Instance::createVulkanInstanceUniquePtr(
     return p_instance;
 }
 
-vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> quartz::rendering::Instance::createVulkanDebugUtilsMessengerUniquePtr(
+vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
+quartz::rendering::Instance::createVulkanDebugUtilsMessengerUniquePtr(
     const vk::UniqueInstance& p_instance,
     const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
     const bool validationLayersEnabled
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "enable validation layers = {}",
-                             validationLayersEnabled);
+    LOG_FUNCTION_SCOPE_TRACE(
+        INSTANCE, "enable validation layers = {}", validationLayersEnabled
+    );
 
     if (!validationLayersEnabled) {
-        LOG_TRACE(INSTANCE, "Default constructing DebugUtilsMessengerEXT "
-                            "because validation layers aren't enabled");
+        LOG_TRACE(
+            INSTANCE,
+            "Default constructing DebugUtilsMessengerEXT because validation "
+            "layers aren't enabled"
+        );
         return {};
     }
 

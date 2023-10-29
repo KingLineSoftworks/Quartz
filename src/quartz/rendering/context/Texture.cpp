@@ -8,14 +8,22 @@
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Texture.hpp"
 
-uint32_t quartz::rendering::Texture::getWidth(
+uint32_t
+quartz::rendering::Texture::getWidth(
     const std::string& filepath
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "{}", filepath);
 
     int width;
-    if (!stbi_info(filepath.c_str(), &width, nullptr, nullptr)) {
-        LOG_CRITICAL(TEXTURE, "Failed to retrieve image information for {}", filepath);
+    if (!stbi_info(
+        filepath.c_str(),
+        &width,
+        nullptr,
+        nullptr
+    )) {
+        LOG_CRITICAL(
+            TEXTURE, "Failed to retrieve image information for {}", filepath
+        );
         throw std::runtime_error("");
     }
 
@@ -24,14 +32,22 @@ uint32_t quartz::rendering::Texture::getWidth(
     return static_cast<uint32_t>(width);
 }
 
-uint32_t quartz::rendering::Texture::getHeight(
+uint32_t
+quartz::rendering::Texture::getHeight(
     const std::string& filepath
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "{}", filepath);
 
     int height;
-    if (!stbi_info(filepath.c_str(), nullptr, &height, nullptr)) {
-        LOG_CRITICAL(TEXTURE, "Failed to retrieve image information for {}", filepath);
+    if (!stbi_info(
+        filepath.c_str(),
+        nullptr,
+        &height,
+        nullptr
+    )) {
+        LOG_CRITICAL(
+            TEXTURE, "Failed to retrieve image information for {}", filepath
+        );
         throw std::runtime_error("");
     }
 
@@ -40,14 +56,22 @@ uint32_t quartz::rendering::Texture::getHeight(
     return static_cast<uint32_t>(height);
 }
 
-uint32_t quartz::rendering::Texture::getChannelCount(
+uint32_t
+quartz::rendering::Texture::getChannelCount(
     const std::string& filepath
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "{}", filepath);
 
     int channelCount;
-    if (!stbi_info(filepath.c_str(), nullptr, nullptr, &channelCount)) {
-        LOG_CRITICAL(TEXTURE, "Failed to retrieve image information for {}", filepath);
+    if (!stbi_info(
+        filepath.c_str(),
+        nullptr,
+        nullptr,
+        &channelCount
+    )) {
+        LOG_CRITICAL(
+            TEXTURE, "Failed to retrieve image information for {}", filepath
+        );
         throw std::runtime_error("");
     }
 
@@ -56,7 +80,8 @@ uint32_t quartz::rendering::Texture::getChannelCount(
     return static_cast<uint32_t>(channelCount);
 }
 
-quartz::rendering::ImageBuffer quartz::rendering::Texture::createImageBuffer(
+quartz::rendering::ImageBuffer
+quartz::rendering::Texture::createImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const std::string& filepath
 ) {
@@ -80,13 +105,16 @@ quartz::rendering::ImageBuffer quartz::rendering::Texture::createImageBuffer(
 
     // x4 for rgba (32 bits = 4 bytes)
     uint32_t imageSizeBytes = textureWidth * textureHeight * 4;
-    LOG_TRACE(TEXTURE, "Successfully loaded {}x{} texture with {} channels "
-              "( {} bytes ) from {}",
-              textureWidth,
-              textureHeight,
-              textureChannelCount,
-              imageSizeBytes,
-              filepath);
+    LOG_TRACE(
+        TEXTURE,
+        "Successfully loaded {}x{} texture with {} channels "
+        "( {} bytes ) from {}",
+        textureWidth,
+        textureHeight,
+        textureChannelCount,
+        imageSizeBytes,
+        filepath
+    );
 
     quartz::rendering::ImageBuffer imageBuffer(
         renderingDevice,
@@ -105,7 +133,8 @@ quartz::rendering::ImageBuffer quartz::rendering::Texture::createImageBuffer(
     return imageBuffer;
 }
 
-vk::UniqueImageView quartz::rendering::Texture::createVulkanImageViewPtr(
+vk::UniqueImageView
+quartz::rendering::Texture::createVulkanImageViewPtr(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::ImageBuffer& imageBuffer
 ) {

@@ -52,7 +52,8 @@ quartz::rendering::Context::~Context() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-void quartz::rendering::Context::loadScene(
+void
+quartz::rendering::Context::loadScene(
     const std::vector<quartz::rendering::Model>& models
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
@@ -63,7 +64,8 @@ void quartz::rendering::Context::loadScene(
     );
 }
 
-void quartz::rendering::Context::draw(
+void
+quartz::rendering::Context::draw(
     const std::vector<quartz::rendering::Model>& models
 ) {
     m_renderingSwapchain.waitForInFlightFence(
@@ -122,7 +124,8 @@ void quartz::rendering::Context::draw(
     m_renderingPipeline.incrementCurrentInFlightFrameIndex();
 }
 
-void quartz::rendering::Context::recreateSwapchain() {
+void
+quartz::rendering::Context::recreateSwapchain() {
     LOG_FUNCTION_SCOPE_INFOthis("");
     m_renderingDevice.waitIdle();
 
@@ -145,7 +148,8 @@ void quartz::rendering::Context::recreateSwapchain() {
     );
 }
 
-void quartz::rendering::Context::finish() {
+void
+quartz::rendering::Context::finish() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     m_renderingDevice.waitIdle();
 }

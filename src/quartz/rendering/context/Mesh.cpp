@@ -6,10 +6,14 @@
 #include "quartz/rendering/context/Vertex.hpp"
 #include "quartz/rendering/context/Mesh.hpp"
 
-std::vector<quartz::rendering::Vertex> quartz::rendering::Mesh::loadVertices() {
+std::vector<quartz::rendering::Vertex>
+quartz::rendering::Mesh::loadVertices() {
     LOG_FUNCTION_SCOPE_TRACE(MESH, "");
 
     std::vector<quartz::rendering::Vertex> vertices = {
+
+        // square 1
+
         quartz::rendering::Vertex(
             {-0.5f, -0.5f,  0.0f},
             {1.0f, 0.0f, 0.0f},
@@ -29,6 +33,29 @@ std::vector<quartz::rendering::Vertex> quartz::rendering::Mesh::loadVertices() {
             {-0.5f,  0.5f,  0.0f},
             {1.0f, 1.0f, 1.0f},
             {1.0f, 1.0f}
+        ),
+
+        // square 2
+
+        quartz::rendering::Vertex(
+            {-0.5f, -0.5f, -0.5f},
+            {1.0f, 0.0f, 0.0f},
+            {1.0f, 0.0f}
+        ),
+        quartz::rendering::Vertex(
+            { 0.5f, -0.5f, -0.5f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 0.0f}
+        ),
+        quartz::rendering::Vertex(
+            { 0.5f,  0.5f, -0.5f},
+            {0.0f, 0.0f, 1.0f},
+            {0.0f, 1.0f}
+        ),
+        quartz::rendering::Vertex(
+            {-0.5f,  0.5f, -0.5f},
+            {1.0f, 1.0f, 1.0f},
+            {1.0f, 1.0f}
         )
     };
 
@@ -37,12 +64,22 @@ std::vector<quartz::rendering::Vertex> quartz::rendering::Mesh::loadVertices() {
     return vertices;
 }
 
-std::vector<uint32_t> quartz::rendering::Mesh::loadIndices() {
+std::vector<uint32_t>
+quartz::rendering::Mesh::loadIndices() {
     LOG_FUNCTION_SCOPE_TRACE(MESH, "");
 
     std::vector<uint32_t> indices = {
-        0, 1, 2,
-        2, 3, 0
+
+        // square 1
+
+        0, 1, 2, // tri 1
+        2, 3, 0, // tri 2
+
+        // square 2
+
+        4, 5, 6, // tri 1
+        6, 7, 4  // tri 2
+
     };
 
     LOG_TRACE(MESH, "Loaded {} indices", indices.size());
@@ -50,7 +87,9 @@ std::vector<uint32_t> quartz::rendering::Mesh::loadIndices() {
     return indices;
 }
 
-quartz::rendering::Mesh::Mesh(const quartz::rendering::Device& renderingDevice) :
+quartz::rendering::Mesh::Mesh(
+    const quartz::rendering::Device& renderingDevice
+) :
     m_vertices(quartz::rendering::Mesh::loadVertices()),
     m_indices(quartz::rendering::Mesh::loadIndices()),
     m_stagedVertexBuffer(

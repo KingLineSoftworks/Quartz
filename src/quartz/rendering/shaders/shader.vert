@@ -14,12 +14,19 @@ layout(location = 0) out vec3 outFragmentColor;
 layout(location = 1) out vec2 outTextureCoordinate;
 
 void main() {
+
     // ----- Set the position of the vertex in clip space ----- //
 
-    gl_Position = ubo.projection * ubo.view * ubo.model * vec4(inWorldPosition, 1.0);
+    gl_Position =
+        ubo.projection *
+        ubo.view *
+        ubo.model *
+        vec4(inWorldPosition, 1.0)
+    ;
 
-    // ----- set the output fragment color for the fragment shader to use as input ----- //
+    // ----- set output for fragment shader to use as input ----- //
 
     outFragmentColor = inColor;
     outTextureCoordinate = inTextureCoordinate;
+
 }

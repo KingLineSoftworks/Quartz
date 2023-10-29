@@ -13,7 +13,8 @@ quartz::rendering::Vertex::Vertex(
     textureCoordinate(textureCoordinate_)
 {}
 
-vk::VertexInputBindingDescription quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
+vk::VertexInputBindingDescription
+quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
     vk::VertexInputBindingDescription vertexInputBindingDescription(
         0,
         sizeof(quartz::rendering::Vertex),
@@ -23,8 +24,12 @@ vk::VertexInputBindingDescription quartz::rendering::Vertex::getVulkanVertexInpu
     return vertexInputBindingDescription;
 }
 
-std::array<vk::VertexInputAttributeDescription, 3> quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
-    std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions = {
+std::array<vk::VertexInputAttributeDescription, 3>
+quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
+    std::array<
+        vk::VertexInputAttributeDescription,
+        3
+    > vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription(
             0,
             0,
