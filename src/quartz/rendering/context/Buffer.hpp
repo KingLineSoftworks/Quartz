@@ -208,7 +208,10 @@ public: // member functions
         const vk::ImageTiling tiling
     );
     DepthBuffer(DepthBuffer&& other);
+    DepthBuffer& operator=(DepthBuffer&& other);
     ~DepthBuffer();
+
+    void reset();
 
     USE_LOGGER(BUFFER);
 

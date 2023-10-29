@@ -432,6 +432,8 @@ quartz::rendering::Swapchain::reset() {
         m_vulkanFramebufferPtrs
     ) { uniqueFramebuffer.reset(); }
 
+    m_depthBuffer.reset();
+
     for (
         vk::UniqueImageView& uniqueImageView :
         m_vulkanImageViewPtrs
@@ -468,7 +470,14 @@ quartz::rendering::Swapchain::recreate(
             renderingWindow.getVulkanSurfaceFormat(),
             m_vulkanImages
         );
-//    m_depthBuffer = ();
+    m_depthBuffer = quartz::rendering::DepthBuffer(
+        renderingDevice,
+        renderingWindow.getVulkanExtent().width,
+        renderingWindow.getVulkanExtent().height,
+        vk::ImageUsageFlagBits::eDepthStencilAttachment,
+        renderingWindow.getVulkanDepthBufferFormat(),
+        vk::ImageTiling::eOptimal
+    );
     m_vulkanFramebufferPtrs =
         quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
