@@ -41,6 +41,7 @@ public: // interface
     const vk::SurfaceFormatKHR& getVulkanSurfaceFormat() const { return m_vulkanSurfaceFormat; }
     const vk::PresentModeKHR& getVulkanPresentMode() const { return m_vulkanPresentMode; }
     const vk::Extent2D& getVulkanExtent() const { return m_vulkanExtent; }
+    const vk::Format& getVulkanDepthBufferFormat() const { return m_vulkanDepthBufferFormat; }
 
     bool shouldClose() const;
 
@@ -77,6 +78,9 @@ private: // static functions
         const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
         const vk::SurfaceCapabilitiesKHR& surfaceCapabilities
     );
+    static vk::Format getBestVulkanDepthBufferFormat(
+        const vk::PhysicalDevice& physicalDevice
+    );
 
 private: // member variables
     const std::string m_name;
@@ -92,6 +96,8 @@ private: // member variables
     vk::SurfaceFormatKHR m_vulkanSurfaceFormat;
     vk::PresentModeKHR m_vulkanPresentMode;
     vk::Extent2D m_vulkanExtent;
+
+    vk::Format m_vulkanDepthBufferFormat;
 
 private: // friends
     friend void quartz::rendering::Window::glfwFramebufferSizeCallback(

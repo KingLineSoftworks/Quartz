@@ -93,7 +93,8 @@ private: // static functions
     );
     static vk::UniqueRenderPass createVulkanRenderPassUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,
-        const vk::SurfaceFormatKHR& surfaceFormat
+        const vk::SurfaceFormatKHR& surfaceFormat,
+        const vk::Format& depthFormat
     );
     static vk::UniquePipelineLayout createVulkanPipelineLayoutUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,

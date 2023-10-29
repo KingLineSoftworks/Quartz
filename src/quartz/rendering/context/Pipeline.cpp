@@ -23,14 +23,16 @@ quartz::rendering::UniformBufferObject::UniformBufferObject(
     projection(projection_)
 {}
 
-vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
+vk::UniqueShaderModule
+quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::string& filepath
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{}", filepath);
 
-    const std::vector<char> shaderBytes =
-        util::FileSystem::readBytesFromFile(filepath);
+    const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(
+        filepath
+    );
 
     vk::ShaderModuleCreateInfo shaderModuleCreateInfo(
         {},
@@ -39,7 +41,10 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
     );
 
     LOG_TRACE(PIPELINE, "Attempting to create vk::ShaderModule");
-    vk::UniqueShaderModule p_shaderModule =p_logicalDevice->createShaderModuleUnique(shaderModuleCreateInfo);
+    vk::UniqueShaderModule p_shaderModule =
+        p_logicalDevice->createShaderModuleUnique(
+            shaderModuleCreateInfo
+        );
 
     if (!p_shaderModule) {
         LOG_CRITICAL(PIPELINE, "Failed to create vk::ShaderModule");
@@ -50,7 +55,8 @@ vk::UniqueShaderModule quartz::rendering::Pipeline::createVulkanShaderModuleUniq
     return p_shaderModule;
 }
 
-std::vector<quartz::rendering::LocallyMappedBuffer> quartz::rendering::Pipeline::createUniformBuffers(
+std::vector<quartz::rendering::LocallyMappedBuffer>
+quartz::rendering::Pipeline::createUniformBuffers(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t numBuffers
 ) {
@@ -74,7 +80,8 @@ std::vector<quartz::rendering::LocallyMappedBuffer> quartz::rendering::Pipeline:
     return buffers;
 }
 
-vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
+vk::UniqueDescriptorSetLayout
+quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
     const vk::UniqueDevice& p_logicalDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
@@ -122,7 +129,8 @@ vk::UniqueDescriptorSetLayout quartz::rendering::Pipeline::createVulkanDescripto
     return p_descriptorSetLayout;
 }
 
-vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPoolUniquePtr(
+vk::UniqueDescriptorPool
+quartz::rendering::Pipeline::createVulkanDescriptorPoolUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t numDescriptorSets
 ) {
@@ -164,7 +172,8 @@ vk::UniqueDescriptorPool quartz::rendering::Pipeline::createVulkanDescriptorPool
     return uniqueDescriptorPool;
 }
 
-std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
+std::vector<vk::DescriptorSet>
+quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t maxNumFramesInFlight,
     const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
@@ -172,8 +181,9 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
     const vk::UniqueDescriptorPool& p_descriptorPool,
     const quartz::rendering::Texture& texture
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight",
-                             maxNumFramesInFlight);
+    LOG_FUNCTION_SCOPE_TRACE(
+        PIPELINE, "{} frames in flight", maxNumFramesInFlight
+    );
 
     std::vector<const vk::DescriptorSetLayout> descriptorSetLayouts(
         maxNumFramesInFlight,
@@ -186,14 +196,18 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
         descriptorSetLayouts.data()
     );
 
-    LOG_TRACE(PIPELINE, "Attempting to allocate {} vk::DescriptorSet(s)",
-              descriptorSetLayouts.size());
+    LOG_TRACE(
+        PIPELINE, "Attempting to allocate {} vk::DescriptorSet(s)",
+        descriptorSetLayouts.size()
+    );
     std::vector<vk::DescriptorSet> descriptorSets =
         p_logicalDevice->allocateDescriptorSets(allocateInfo);
 
     if (descriptorSets.size() != descriptorSetLayouts.size()) {
-        LOG_CRITICAL(PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}",
-                     descriptorSets.size(), descriptorSetLayouts.size());
+        LOG_CRITICAL(
+            PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}",
+            descriptorSets.size(), descriptorSetLayouts.size()
+        );
         throw std::runtime_error("");
     }
 
@@ -202,9 +216,11 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
             LOG_CRITICAL(PIPELINE, "Failed to allocate vk::DescriptorSet {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {} with "
-                            "instance at {}",
-                            i, reinterpret_cast<void*>(&(descriptorSets[i])));
+        LOG_TRACE(
+            PIPELINE,
+            "Successfully allocated vk::DescriptorSet {} with instance at {}",
+            i, reinterpret_cast<void*>(&(descriptorSets[i]))
+        );
 
         vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
@@ -245,8 +261,9 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
             textureDescriptorWriteSet
         };
 
-        LOG_TRACE(PIPELINE, "  - updating with {} writes",
-                  writeDescriptorSets.size());
+        LOG_TRACE(
+            PIPELINE, "  - updating with {} writes", writeDescriptorSets.size()
+        );
 
         p_logicalDevice->updateDescriptorSets(
             writeDescriptorSets.size(),
@@ -259,9 +276,11 @@ std::vector<vk::DescriptorSet> quartz::rendering::Pipeline::allocateVulkanDescri
     return descriptorSets;
 }
 
-vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+vk::UniqueRenderPass
+quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
-    const vk::SurfaceFormatKHR& surfaceFormat
+    const vk::SurfaceFormatKHR& surfaceFormat,
+    const vk::Format& depthFormat
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
@@ -276,10 +295,25 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
         vk::ImageLayout::eUndefined,
         vk::ImageLayout::ePresentSrcKHR
     );
-
     vk::AttachmentReference colorAttachmentRef(
         0,
         vk::ImageLayout::eColorAttachmentOptimal
+    );
+
+    vk::AttachmentDescription depthAttachment(
+        {},
+        depthFormat,
+        vk::SampleCountFlagBits::e1,
+        vk::AttachmentLoadOp::eClear,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::AttachmentLoadOp::eDontCare,
+        vk::AttachmentStoreOp::eDontCare,
+        vk::ImageLayout::eUndefined,
+        vk::ImageLayout::eDepthStencilAttachmentOptimal
+    );
+    vk::AttachmentReference depthAttachmentRef(
+        1,
+        vk::ImageLayout::eDepthStencilAttachmentOptimal
     );
 
     vk::SubpassDescription subpassDescription(
@@ -288,23 +322,36 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
         {},
         colorAttachmentRef,
         {},
-        {},
+        &depthAttachmentRef,
         {}
     );
 
     vk::SubpassDependency subpassDependency(
         VK_SUBPASS_EXTERNAL,
         0,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
-        vk::PipelineStageFlagBits::eColorAttachmentOutput,
+        (
+            vk::PipelineStageFlagBits::eColorAttachmentOutput |
+            vk::PipelineStageFlagBits::eEarlyFragmentTests
+        ),
+        (
+            vk::PipelineStageFlagBits::eColorAttachmentOutput |
+            vk::PipelineStageFlagBits::eEarlyFragmentTests
+        ),
         {},
-        vk::AccessFlagBits::eColorAttachmentWrite,
+        (
+            vk::AccessFlagBits::eColorAttachmentWrite |
+            vk::AccessFlagBits::eDepthStencilAttachmentWrite
+        ),
         {}
     );
 
+    std::vector<vk::AttachmentDescription> attachments = {
+        colorAttachment,
+        depthAttachment
+    };
     vk::RenderPassCreateInfo renderPassCreateInfo(
         {},
-        colorAttachment,
+        attachments,
         subpassDescription,
         subpassDependency
     );
@@ -322,7 +369,8 @@ vk::UniqueRenderPass quartz::rendering::Pipeline::createVulkanRenderPassUniquePt
     return p_renderPass;
 }
 
-vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+vk::UniquePipelineLayout
+quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
 ) {
@@ -351,7 +399,8 @@ vk::UniquePipelineLayout quartz::rendering::Pipeline::createVulkanPipelineLayout
     return p_pipelineLayout;
 }
 
-vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+vk::UniquePipeline
+quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
     const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,
@@ -415,10 +464,14 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
     for (const vk::Viewport& viewport : viewports) {
         LOG_TRACE(PIPELINE, "    - {} x {}", viewport.width, viewport.height);
     }
-    LOG_TRACE(PIPELINE, "  - using {} scissor rectangles", scissorRectangles.size());
+    LOG_TRACE(
+        PIPELINE, "  - using {} scissor rectangles", scissorRectangles.size()
+    );
     for (const vk::Rect2D& scissorRectangle : scissorRectangles) {
-        LOG_TRACE(PIPELINE, "    - {} , {}",
-                  scissorRectangle.offset.x, scissorRectangle.offset.y);
+        LOG_TRACE(
+            PIPELINE, "    - {} , {}",
+            scissorRectangle.offset.x, scissorRectangle.offset.y
+        );
     }
     vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo =
         vk::PipelineViewportStateCreateInfo(
@@ -462,8 +515,18 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
     // ----- depth stencil tings ----- //
 
     LOG_TRACE(PIPELINE, "Creating vk::PipelineDepthStencilStateCreateInfo");
-    vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo =
-        vk::PipelineDepthStencilStateCreateInfo();
+    vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo(
+        {},
+        true,
+        true,
+        vk::CompareOp::eLess,
+        false, /// @todo enable with phys dev features
+        false,
+        {},
+        {},
+        0.0f,
+        1.0f
+    );
 
     // ----- color blend tings ----- //
 
@@ -479,8 +542,10 @@ vk::UniquePipeline quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniq
 
     // ----- dynamic state tings ----- //
 
-    LOG_TRACE(PIPELINE, "Creating vk::PipelineDynamicStateCreateInfo",
-              dynamicStates.size());
+    LOG_TRACE(
+        PIPELINE, "Creating vk::PipelineDynamicStateCreateInfo",
+        dynamicStates.size()
+    );
     LOG_TRACE(PIPELINE, "  - using {} dynamic states", dynamicStates.size());
     for (const vk::DynamicState& dynamicState : dynamicStates) {
         LOG_TRACE(PIPELINE, "    - {}", static_cast<uint32_t>(dynamicState));
@@ -616,7 +681,8 @@ quartz::rendering::Pipeline::Pipeline(
     mp_vulkanRenderPass(
         quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfaceFormat()
+            renderingWindow.getVulkanSurfaceFormat(),
+            renderingWindow.getVulkanDepthBufferFormat()
         )
     ),
     mp_vulkanPipelineLayout(
@@ -648,7 +714,8 @@ quartz::rendering::Pipeline::~Pipeline() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-void quartz::rendering::Pipeline::reset() {
+void
+quartz::rendering::Pipeline::reset() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     mp_vulkanGraphicsPipeline.reset();
@@ -656,7 +723,8 @@ void quartz::rendering::Pipeline::reset() {
     mp_vulkanRenderPass.reset();
 }
 
-void quartz::rendering::Pipeline::recreate(
+void
+quartz::rendering::Pipeline::recreate(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow
 ) {
@@ -665,7 +733,8 @@ void quartz::rendering::Pipeline::recreate(
     mp_vulkanRenderPass =
         quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfaceFormat()
+            renderingWindow.getVulkanSurfaceFormat(),
+            renderingWindow.getVulkanDepthBufferFormat()
         );
     mp_vulkanPipelineLayout =
         quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
@@ -688,7 +757,8 @@ void quartz::rendering::Pipeline::recreate(
         );
 }
 
-void quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
+void
+quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Texture& texture
 ) {
@@ -696,17 +766,19 @@ void quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
     m_vulkanDescriptorSets.clear();
 
-    m_vulkanDescriptorSets = quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        m_maxNumFramesInFlight,
-        m_uniformBuffers,
-        mp_vulkanDescriptorSetLayout,
-        m_vulkanDescriptorPoolPtr,
-        texture
-    );
+    m_vulkanDescriptorSets =
+        quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            m_maxNumFramesInFlight,
+            m_uniformBuffers,
+            mp_vulkanDescriptorSetLayout,
+            m_vulkanDescriptorPoolPtr,
+            texture
+        );
 }
 
-void quartz::rendering::Pipeline::updateUniformBuffer(
+void
+quartz::rendering::Pipeline::updateUniformBuffer(
     const quartz::rendering::Window& renderingWindow
 ) {
     static std::chrono::high_resolution_clock::time_point startTime =

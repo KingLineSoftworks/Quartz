@@ -14,7 +14,8 @@
 #include "quartz/rendering/context/Swapchain.hpp"
 #include "quartz/rendering/context/Window.hpp"
 
-std::vector<quartz::rendering::Model> quartz::Application::loadModels(
+std::vector<quartz::rendering::Model>
+quartz::Application::loadModels(
     const quartz::rendering::Device& renderingDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "");

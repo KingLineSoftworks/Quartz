@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Model.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
@@ -84,6 +85,7 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const vk::Extent2D& swapchainExtent,
         const std::vector<vk::UniqueImageView>& swapchainImageViewPtrs,
+        const vk::UniqueImageView& p_depthBufferImageView,
         const vk::UniqueRenderPass& p_renderPass
     );
     static vk::UniqueCommandPool createVulkanCommandPoolUniquePtr(
@@ -110,6 +112,8 @@ private: // member variables
     vk::UniqueSwapchainKHR mp_vulkanSwapchain;
     std::vector<vk::Image> m_vulkanImages;
     std::vector<vk::UniqueImageView> m_vulkanImageViewPtrs;
+
+    quartz::rendering::DepthBuffer m_depthBuffer;
 
     std::vector<vk::UniqueFramebuffer> m_vulkanFramebufferPtrs;
 
