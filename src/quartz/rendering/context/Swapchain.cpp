@@ -310,6 +310,50 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
     return fencePtrs;
 }
 
+vk::Format
+quartz::rendering::Swapchain::getVulkanDepthFormat(
+    const vk::PhysicalDevice& physicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
+
+    std::vector<vk::Format> formatCandidates = {
+        vk::Format::eD32Sfloat,
+        vk::Format::eD32SfloatS8Uint,
+        vk::Format::eD24UnormS8Uint
+    };
+
+    vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
+
+    vk::FormatFeatureFlags features =
+        vk::FormatFeatureFlagBits::eDepthStencilAttachment;
+
+    for (const vk::Format& format : formatCandidates) {
+        vk::FormatProperties properties = physicalDevice.getFormatProperties(
+            format
+        );
+
+        if (
+            tiling == vk::ImageTiling::eLinear &&
+            (properties.linearTilingFeatures & features) == features
+        ) {
+            LOG_TRACE(SWAPCHAIN, "Using linear image tiling");
+            return format;
+        } else if (
+            tiling == vk::ImageTiling::eOptimal &&
+            (properties.optimalTilingFeatures & features) == features
+        ) {
+            LOG_TRACE(SWAPCHAIN, "Using optimal image tiling");
+            return format;
+        }
+    }
+
+    LOG_CRITICAL(
+        SWAPCHAIN,
+        "Failed to find supported depth buffer image format"
+    );
+    throw std::runtime_error("");
+}
+
 quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
@@ -376,6 +420,19 @@ quartz::rendering::Swapchain::Swapchain(
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingPipeline.getMaxNumFramesInFlight()
         )
+    ),
+    m_vulkanDepthFormat(
+        quartz::rendering::Swapchain::getVulkanDepthFormat(
+            renderingDevice.getVulkanPhysicalDevice()
+        )
+    ),
+    m_depthBuffer(
+        renderingDevice,
+        renderingWindow.getVulkanExtent().width,
+        renderingWindow.getVulkanExtent().height,
+        vk::ImageUsageFlagBits::eDepthStencilAttachment,
+        m_vulkanDepthFormat,
+        vk::ImageTiling::eOptimal
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");

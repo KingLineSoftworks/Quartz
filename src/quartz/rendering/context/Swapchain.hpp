@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
 #include "quartz/rendering/context/Model.hpp"
 #include "quartz/rendering/context/Pipeline.hpp"
@@ -104,6 +105,10 @@ private: // static functions
         const uint32_t desiredFenceCount
     );
 
+    static vk::Format getVulkanDepthFormat(
+        const vk::PhysicalDevice& physicalDevice
+    );
+
 private: // member variables
     bool m_shouldRecreate;
 
@@ -118,4 +123,7 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphorePtrs;
     std::vector<vk::UniqueSemaphore> m_vulkanRenderFinishedSemaphorePtrs;
     std::vector<vk::UniqueFence> m_vulkanInFlightFencePtrs;
+
+    vk::Format m_vulkanDepthFormat;
+    quartz::rendering::DepthBuffer m_depthBuffer;
 };
