@@ -53,7 +53,7 @@ quartz::rendering::Mesh::loadVerticesAndIndices(
         }
     }
 
-    LOG_TRACE(MESH, "Loaded {} vertices", vertices.size());
+    LOG_TRACE(MESH, "Loaded {} unique vertices", vertices.size());
     LOG_TRACE(MESH, "Loaded {} indices", indices.size());
 
     return true;
@@ -62,8 +62,7 @@ quartz::rendering::Mesh::loadVerticesAndIndices(
 quartz::rendering::Mesh::Mesh(
     const quartz::rendering::Device& renderingDevice,
     const tinyobj::attrib_t& tinyobjAttribute,
-    const std::vector<tinyobj::shape_t>& tinyobjShapes,
-    UNUSED const std::vector<tinyobj::material_t>& tinyobjMaterials
+    const std::vector<tinyobj::shape_t>& tinyobjShapes
 ) :
     m_vertices(),
     m_indices(),

@@ -67,33 +67,6 @@ quartz::rendering::Model::loadModel(
     LOG_DEBUG(MODEL, "  - {} shapes", tinyobjShapes.size());
 
     return true;
-
-    for (const tinyobj::shape_t& shape : tinyobjShapes) {
-        for (const tinyobj::index_t& index : shape.mesh.indices) {
-            glm::vec3 position = {
-                tinyobjAttribute.vertices[3 * index.vertex_index + 0],
-                tinyobjAttribute.vertices[3 * index.vertex_index + 1],
-                tinyobjAttribute.vertices[3 * index.vertex_index + 2]
-            };
-
-            glm::vec3 color = {
-                1.0f,
-                1.0f,
-                1.0f
-            };
-
-            glm::vec2 textureCoordinate = {
-                0.0f + tinyobjAttribute.texcoords[2 * index.texcoord_index + 0],
-                1.0f - tinyobjAttribute.texcoords[2 * index.texcoord_index + 1]
-            };
-
-            quartz::rendering::Vertex vertex(
-                position,
-                color,
-                textureCoordinate
-            );
-        }
-    }
 }
 
 quartz::rendering::Model::Model(
@@ -115,8 +88,7 @@ quartz::rendering::Model::Model(
     m_mesh(
         renderingDevice,
         m_tinyobjAttribute,
-        m_tinyobjShapes,
-        m_tinyobjMaterials
+        m_tinyobjShapes
     ),
     m_texture(renderingDevice, textureFilepath)
 {

@@ -22,8 +22,7 @@ public: // member functions
     Mesh(
         const quartz::rendering::Device& renderingDevice,
         const tinyobj::attrib_t& tinyobjAttribute,
-        const std::vector<tinyobj::shape_t>& tinyobjShapes,
-        const std::vector<tinyobj::material_t>& tinyobjMaterials
+        const std::vector<tinyobj::shape_t>& tinyobjShapes
     );
     Mesh(Mesh&& other);
     ~Mesh();
