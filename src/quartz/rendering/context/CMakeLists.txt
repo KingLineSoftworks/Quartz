@@ -29,6 +29,7 @@ target_link_libraries(
         glm
         vulkan
         glfw
+        tinyobjloader
 
         PUBLIC
         UTIL_FileSystem

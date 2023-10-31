@@ -4,6 +4,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include <tiny_obj_loader.h>
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Buffer.hpp"
 #include "quartz/rendering/context/Device.hpp"
@@ -17,7 +19,12 @@ namespace rendering {
 
 class quartz::rendering::Mesh {
 public: // member functions
-    Mesh(const quartz::rendering::Device& renderingDevice);
+    Mesh(
+        const quartz::rendering::Device& renderingDevice,
+        const tinyobj::attrib_t& tinyobjAttribute,
+        const std::vector<tinyobj::shape_t>& tinyobjShapes,
+        const std::vector<tinyobj::material_t>& tinyobjMaterials
+    );
     Mesh(Mesh&& other);
     ~Mesh();
 
@@ -28,12 +35,18 @@ public: // member functions
     const quartz::rendering::StagedBuffer& getStagedIndexBuffer() const { return m_stagedIndexBuffer; }
 
 private: // static functions
-    static std::vector<quartz::rendering::Vertex> loadVertices();
-    static std::vector<uint32_t> loadIndices();
+    static bool loadVerticesAndIndices(
+        const tinyobj::attrib_t& tinyobjAttribute,
+        const std::vector<tinyobj::shape_t>& tinyobjShapes,
+        std::vector<quartz::rendering::Vertex>& vertices,
+        std::vector<uint32_t>& indices
+    );
 
 private: // member variables
     std::vector<quartz::rendering::Vertex> m_vertices;
     std::vector<uint32_t> m_indices;
+    bool m_loadedSuccessfully;
+
     quartz::rendering::StagedBuffer m_stagedVertexBuffer;
     quartz::rendering::StagedBuffer m_stagedIndexBuffer;
 };

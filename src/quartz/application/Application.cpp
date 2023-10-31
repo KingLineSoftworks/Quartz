@@ -24,7 +24,10 @@ quartz::Application::loadModels(
     models.emplace_back(
         renderingDevice,
         util::FileSystem::getAbsoluteFilepathInProject(
-            "texture.jpg"
+            "viking_room.obj"
+        ),
+        util::FileSystem::getAbsoluteFilepathInProject(
+            "viking_room.png"
         )
     );
     LOG_TRACE(APPLICATION, "Loaded {} models", models.size());
