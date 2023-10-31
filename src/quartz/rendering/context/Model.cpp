@@ -60,11 +60,17 @@ quartz::rendering::Model::loadModel(
         LOG_ERROR(MODEL, "tinyobj::load error : {}", errorString);
     }
 
+    uint32_t totalShapeIndices = 0;
+    for (const tinyobj::shape_t& shape : tinyobjShapes) {
+        totalShapeIndices += shape.mesh.indices.size();
+    }
+
     LOG_DEBUG(MODEL, "Loaded object at {}", filepath);
-    LOG_DEBUG(MODEL, "  - {} vertices", tinyobjAttribute.vertices.size());
-    LOG_DEBUG(MODEL, "  - {} normals", tinyobjAttribute.normals.size());
-    LOG_DEBUG(MODEL, "  - {} texture coordinates", tinyobjAttribute.texcoords.size());
+    LOG_DEBUG(MODEL, "  - {} attribute vertices", tinyobjAttribute.vertices.size());
+    LOG_DEBUG(MODEL, "  - {} attribute normals", tinyobjAttribute.normals.size());
+    LOG_DEBUG(MODEL, "  - {} attribute texture coordinates", tinyobjAttribute.texcoords.size());
     LOG_DEBUG(MODEL, "  - {} shapes", tinyobjShapes.size());
+    LOG_DEBUG(MODEL, "    - {} total indices", totalShapeIndices);
 
     return true;
 }
