@@ -30,7 +30,7 @@ cmake_install.cmake
 .clion-test
 
 # ========================================
-# Compiled stuff
+# Compiled stuff and assets
 # ========================================
 
 # ----- manual cmake tings ----- #
@@ -48,3 +48,8 @@ build/
 # ----- images ----- #
 
 *.jpg
+*.png
+
+# ----- 3d objects ----- #
+
+*.obj

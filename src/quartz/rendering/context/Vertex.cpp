@@ -13,6 +13,24 @@ quartz::rendering::Vertex::Vertex(
     textureCoordinate(textureCoordinate_)
 {}
 
+bool
+quartz::rendering::Vertex::operator==(
+    const quartz::rendering::Vertex& other
+) const {
+    return (
+        worldPosition.x == other.worldPosition.x &&
+        worldPosition.y == other.worldPosition.y &&
+        worldPosition.z == other.worldPosition.z &&
+
+        color.x == other.color.x &&
+        color.y == other.color.y &&
+        color.z == other.color.z &&
+
+        textureCoordinate.x == other.textureCoordinate.x &&
+        textureCoordinate.y == other.textureCoordinate.y
+    );
+}
+
 vk::VertexInputBindingDescription
 quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
     vk::VertexInputBindingDescription vertexInputBindingDescription(

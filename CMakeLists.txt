@@ -2,9 +2,10 @@
 # Quartz project and version
 #====================================================================
 set(PROJECT_NAME "Quartz")
-set(QUARTZ_MAJOR_VERSION 0)
-set(QUARTZ_MINOR_VERSION 0)
-set(QUARTZ_PATCH_VERSION 1)
+
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(QuartzVersion) # Gives us version for quartz
+include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
 
 cmake_minimum_required(VERSION 3.14)
 
@@ -17,8 +18,6 @@ project(
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 #====================================================================
 # Build type information
@@ -64,8 +63,6 @@ endif ()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
-
 set(QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS
     -Wall
     -Wextra
@@ -88,12 +85,12 @@ set(
 )
 add_library(vulkan SHARED IMPORTED)
 set_target_properties(
-        vulkan
-        PROPERTIES
-        IMPORTED_LOCATION
-            "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
-        INTERFACE_INCLUDE_DIRECTORIES
-            "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
+    vulkan
+    PROPERTIES
+    IMPORTED_LOCATION
+        "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
+    INTERFACE_INCLUDE_DIRECTORIES
+        "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
 )
 
 # GLFW
@@ -113,6 +110,10 @@ list(APPEND VENDOR_LIBS spdlog)
 
 # STB
 include_directories("${VENDOR_ROOT_DIR}/stb")
+
+# tinyobjloader
+add_subdirectory("${VENDOR_ROOT_DIR}/tinyobjloader")
+list(APPEND VENDOR_LIBS tinyobjloader)
 
 #====================================================================
 # Define preprocessor directives for the Quartz libraries
