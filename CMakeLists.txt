@@ -2,9 +2,10 @@
 # Quartz project and version
 #====================================================================
 set(PROJECT_NAME "Quartz")
-set(QUARTZ_MAJOR_VERSION 0)
-set(QUARTZ_MINOR_VERSION 0)
-set(QUARTZ_PATCH_VERSION 1)
+
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(QuartzVersion) # Gives us version for quartz
+include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
 
 cmake_minimum_required(VERSION 3.14)
 
@@ -17,8 +18,6 @@ project(
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 #====================================================================
 # Build type information
@@ -63,8 +62,6 @@ endif ()
 #====================================================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
 
 set(QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS
     -Wall

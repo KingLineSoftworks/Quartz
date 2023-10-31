@@ -2,9 +2,8 @@
 # The executable target application (the *game* oooooh)
 #====================================================================
 set(APPLICATION_NAME "Demo_App_The_Sequel")
-set(APPLICATION_MAJOR_VERSION 0)
-set(APPLICATION_MINOR_VERSION 0)
-set(APPLICATION_PATCH_VERSION 0)
+
+include(ApplicationVersion)
 
 add_executable(
     ${APPLICATION_NAME} ${APPLICATION_SOURCE_DIR}/main.cpp
