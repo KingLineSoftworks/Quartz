@@ -2,15 +2,15 @@
 
 #include <vector>
 
-#include <glm/mat4x4.hpp>
+#include "glm/mat4x4.hpp"
 
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Buffer.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Texture.hpp"
-#include "quartz/rendering/context/Window.hpp"
+#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
+#include "quartz/rendering/window/Window.hpp"
 
 namespace quartz {
 namespace rendering {

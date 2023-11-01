@@ -3,9 +3,9 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Swapchain.hpp"
-#include "quartz/rendering/context/Window.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/swapchain/Swapchain.hpp"
+#include "quartz/rendering/window/Window.hpp"
 
 vk::UniqueSwapchainKHR
 quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(

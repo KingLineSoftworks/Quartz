@@ -1,5 +1,5 @@
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -7,11 +7,11 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Buffer.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Pipeline.hpp"
-#include "quartz/rendering/context/Window.hpp"
-#include "quartz/rendering/context/Vertex.hpp"
+#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/window/Window.hpp"
+#include "quartz/rendering/mesh/Vertex.hpp"
 
 quartz::rendering::UniformBufferObject::UniformBufferObject(
     glm::mat4 model_,

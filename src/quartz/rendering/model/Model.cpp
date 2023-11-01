@@ -1,7 +1,7 @@
 #define TINY0BJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include "tiny_obj_loader.h"
 
-#include "quartz/rendering/context/Model.hpp"
+#include "quartz/rendering/model/Model.hpp"
 
 bool
 quartz::rendering::Model::loadModel(

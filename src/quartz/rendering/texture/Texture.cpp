@@ -1,12 +1,12 @@
 #include <vulkan/vulkan.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "stb_image.h"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Buffer.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Texture.hpp"
+#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
 
 uint32_t
 quartz::rendering::Texture::getWidth(

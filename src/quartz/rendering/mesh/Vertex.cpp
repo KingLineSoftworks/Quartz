@@ -1,7 +1,8 @@
-#include "quartz/rendering/context/Vertex.hpp"
 #include "glm/vec3.hpp"
 
 #include <vulkan/vulkan.hpp>
+
+#include "quartz/rendering/mesh/Vertex.hpp"
 
 quartz::rendering::Vertex::Vertex(
     const glm::vec3& worldPosition_,

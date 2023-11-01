@@ -6,9 +6,9 @@
 #include "util/platform.hpp"
 #include "util/logger/Logger.hpp"
 
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Instance.hpp"
-#include "quartz/rendering/context/Window.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/instance/Instance.hpp"
+#include "quartz/rendering/window/Window.hpp"
 
 void
 quartz::rendering::Window::glfwFramebufferSizeCallback(

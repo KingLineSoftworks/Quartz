@@ -77,7 +77,25 @@ set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING
 #====================================================================
 set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 
-# MoltenVK and Vulkan
+# glfw
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory("${VENDOR_ROOT_DIR}/glfw")
+
+# glm
+add_subdirectory("${VENDOR_ROOT_DIR}/glm")
+
+# spdlog
+add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
+
+# stb
+include_directories("${VENDOR_ROOT_DIR}/stb")
+
+# tinyobjloader
+add_subdirectory("${VENDOR_ROOT_DIR}/tinyobjloader")
+
+# vulkan
 set(
     VULKAN_INTERFACE_INCLUDE_DIRECTORIES
     "${VENDOR_ROOT_DIR}/vulkan/moltenvk-headers/include"
@@ -87,33 +105,11 @@ add_library(vulkan SHARED IMPORTED)
 set_target_properties(
     vulkan
     PROPERTIES
-    IMPORTED_LOCATION
-        "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
-    INTERFACE_INCLUDE_DIRECTORIES
-        "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
+        IMPORTED_LOCATION
+            "${VENDOR_ROOT_DIR}/vulkan/lib/libvulkan.dylib"
+        INTERFACE_INCLUDE_DIRECTORIES
+            "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
 )
-
-# GLFW
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory("${VENDOR_ROOT_DIR}/glfw")
-list(APPEND VENDOR_LIBS glfw)
-
-# GLM
-add_subdirectory("${VENDOR_ROOT_DIR}/glm")
-list(APPEND VENDOR_LIBS glm)
-
-# Spdlog
-add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
-list(APPEND VENDOR_LIBS spdlog)
-
-# STB
-include_directories("${VENDOR_ROOT_DIR}/stb")
-
-# tinyobjloader
-add_subdirectory("${VENDOR_ROOT_DIR}/tinyobjloader")
-list(APPEND VENDOR_LIBS tinyobjloader)
 
 #====================================================================
 # Define preprocessor directives for the Quartz libraries
@@ -143,15 +139,20 @@ include_directories(
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
 add_subdirectory("${UTIL_SOURCE_DIR}/file_system")
 add_subdirectory("${UTIL_SOURCE_DIR}/logger")
-list(APPEND UTIL_LIBS UTIL_FileSystem)
-list(APPEND UTIL_LIBS UTIL_Logger)
 
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/buffer")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/context")
-list(APPEND QUARTZ_LIBS QUARTZ_Application)
-list(APPEND QUARTZ_LIBS QUARTZ_RENDERING_Context)
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/device")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/instance")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/mesh")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/model")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/pipeline")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/swapchain")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/texture")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
 
 #====================================================================
 # The demo application

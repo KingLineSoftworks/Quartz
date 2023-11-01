@@ -3,7 +3,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Buffer.hpp"
+#include "quartz/rendering/buffer/Buffer.hpp"
 
 std::string
 quartz::rendering::BufferHelper::getUsageFlagsString(

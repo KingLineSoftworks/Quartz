@@ -4,12 +4,12 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <tiny_obj_loader.h>
+#include "tiny_obj_loader.h"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Buffer.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Vertex.hpp"
+#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/mesh/Vertex.hpp"
 
 namespace quartz {
 namespace rendering {

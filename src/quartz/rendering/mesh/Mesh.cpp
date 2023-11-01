@@ -3,8 +3,8 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Vertex.hpp"
-#include "quartz/rendering/context/Mesh.hpp"
+#include "quartz/rendering/mesh/Vertex.hpp"
+#include "quartz/rendering/mesh/Mesh.hpp"
 
 bool
 quartz::rendering::Mesh::loadVerticesAndIndices(

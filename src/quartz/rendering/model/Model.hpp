@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include <tiny_obj_loader.h>
+#include "tiny_obj_loader.h"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Mesh.hpp"
-#include "quartz/rendering/context/Texture.hpp"
+#include "quartz/rendering/mesh/Mesh.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
 
 namespace quartz {
 namespace rendering {

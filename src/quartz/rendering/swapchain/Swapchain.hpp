@@ -5,11 +5,11 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Buffer.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Model.hpp"
-#include "quartz/rendering/context/Pipeline.hpp"
-#include "quartz/rendering/context/Window.hpp"
+#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/model/Model.hpp"
+#include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/window/Window.hpp"
 
 namespace quartz {
 namespace rendering {
