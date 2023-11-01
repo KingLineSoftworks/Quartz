@@ -5,7 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/buffer/DepthBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"

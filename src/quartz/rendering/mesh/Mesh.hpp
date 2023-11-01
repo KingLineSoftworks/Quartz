@@ -7,7 +7,7 @@
 #include "tiny_obj_loader.h"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/mesh/Vertex.hpp"
 
