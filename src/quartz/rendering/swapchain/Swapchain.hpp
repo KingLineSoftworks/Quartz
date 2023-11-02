@@ -5,10 +5,10 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/DepthBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/texture/DepthBuffer.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
 namespace quartz {
@@ -113,7 +113,7 @@ private: // member variables
     std::vector<vk::Image> m_vulkanImages;
     std::vector<vk::UniqueImageView> m_vulkanImageViewPtrs;
 
-    quartz::rendering::DepthBuffer m_depthBuffer;
+    quartz::rendering::DepthBufferTex m_depthBuffer;
 
     std::vector<vk::UniqueFramebuffer> m_vulkanFramebufferPtrs;
 

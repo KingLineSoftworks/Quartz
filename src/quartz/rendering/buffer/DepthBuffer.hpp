@@ -30,8 +30,8 @@ public: // member functions
 
     USE_LOGGER(BUFFER);
 
+    const vk::Format& getVulkanFormat() const { return m_format; }
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
-    const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
 
 private: // static functions
     static vk::UniqueImage createVulkanImagePtr(
@@ -48,11 +48,6 @@ private: // static functions
         const vk::UniqueImage& p_image,
         const vk::MemoryPropertyFlags memoryPropertyFlags
     );
-    static vk::UniqueImageView createVulkanImageViewPtr(
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::Format format,
-        const vk::UniqueImage& p_image
-    );
 
 private: // member variables
     uint32_t m_imageWidth;
@@ -63,5 +58,4 @@ private: // member variables
 
     vk::UniqueImage mp_vulkanImage;
     vk::UniqueDeviceMemory mp_vulkanPhysicalDeviceMemory;
-    vk::UniqueImageView mp_vulkanImageView;
 };
