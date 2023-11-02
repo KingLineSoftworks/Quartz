@@ -137,7 +137,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
 }
 
 void
-quartz::rendering::BufferHelper::populatePhysicalDeviceMemoryWithRawData(
+quartz::rendering::BufferHelper::populateVulkanPhysicalDeviceMemoryWithLocalData(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
     const void* p_bufferData,
@@ -199,7 +199,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
             requiredMemoryProperties
         );
 
-    quartz::rendering::BufferHelper::populatePhysicalDeviceMemoryWithRawData(
+    quartz::rendering::BufferHelper::populateVulkanPhysicalDeviceMemoryWithLocalData(
         p_logicalDevice,
         sizeBytes,
         p_bufferData,

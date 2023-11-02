@@ -28,6 +28,14 @@ public: // member functions
     const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }
 
 private: // static functions
+    static void populateVulkanLogicalBufferWithStagedData(
+        const uint32_t graphicsQueueFamilyIndex,
+        const vk::UniqueDevice& p_logicalDevice,
+        const vk::Queue& graphicsQueue,
+        const uint32_t sizeBytes,
+        const vk::UniqueBuffer& p_logicalBuffer,
+        const vk::UniqueBuffer& p_logicalStagingBuffer
+    );
     static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceDestinationMemoryUniquePtr(
         const vk::PhysicalDevice& physicalDevice,
         const uint32_t graphicsQueueFamilyIndex,

@@ -4,32 +4,21 @@
 #include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 
-vk::UniqueDeviceMemory
-quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUniquePtr(
-    const vk::PhysicalDevice& physicalDevice,
+void
+quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Queue& graphicsQueue,
     const uint32_t sizeBytes,
     const vk::UniqueBuffer& p_logicalBuffer,
-    const vk::MemoryPropertyFlags requiredMemoryProperties,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
-    
-    vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
-        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
-            physicalDevice,
-            p_logicalDevice,
-            sizeBytes,
-            p_logicalBuffer,
-            requiredMemoryProperties
-        );
 
     LOG_TRACE(
         BUFFER,
-        "Memory is *NOT* allocated for a source buffer. Populating with input "
-        "source buffer instead"
+        "Memory is *NOT* allocated for a source buffer. Populating with data "
+        "from staged buffer instead"
     );
 
     LOG_TRACE(BUFFER, "Attempting to create vk::CommandPool");
@@ -110,6 +99,38 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUn
     LOG_TRACE(
         BUFFER,
         "Successfully copied data from staging buffer into this buffer's memory"
+    );
+}
+
+vk::UniqueDeviceMemory
+quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUniquePtr(
+    const vk::PhysicalDevice& physicalDevice,
+    const uint32_t graphicsQueueFamilyIndex,
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::Queue& graphicsQueue,
+    const uint32_t sizeBytes,
+    const vk::UniqueBuffer& p_logicalBuffer,
+    const vk::MemoryPropertyFlags requiredMemoryProperties,
+    const vk::UniqueBuffer& p_logicalStagingBuffer
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+    
+    vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
+        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+            physicalDevice,
+            p_logicalDevice,
+            sizeBytes,
+            p_logicalBuffer,
+            requiredMemoryProperties
+        );
+
+    quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
+        graphicsQueueFamilyIndex,
+        p_logicalDevice,
+        graphicsQueue,
+        sizeBytes,
+        p_logicalBuffer,
+        p_logicalStagingBuffer
     );
 
     return p_logicalBufferPhysicalMemory;

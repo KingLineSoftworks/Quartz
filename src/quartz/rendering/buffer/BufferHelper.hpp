@@ -38,7 +38,7 @@ private: // static functions
         const vk::UniqueBuffer& p_logicalBuffer,
         const vk::MemoryPropertyFlags requiredMemoryProperties
     );
-    static void populatePhysicalDeviceMemoryWithRawData(
+    static void populateVulkanPhysicalDeviceMemoryWithLocalData(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t sizeBytes,
         const void* p_bufferData,
