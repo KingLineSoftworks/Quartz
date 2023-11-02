@@ -12,52 +12,19 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUn
     const vk::Queue& graphicsQueue,
     const uint32_t sizeBytes,
     const vk::UniqueBuffer& p_logicalBuffer,
-    const vk::MemoryPropertyFlags memoryPropertyFlags,
+    const vk::MemoryPropertyFlags requiredMemoryProperties,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
-
-    vk::MemoryRequirements memoryRequirements =
-        p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
-
-    vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties =
-        physicalDevice.getMemoryProperties();
-
-    std::optional<uint32_t> chosenMemoryTypeIndex;
-    for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i) {
-        if (
-            (memoryRequirements.memoryTypeBits & (1 << i)) &&
-            physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & memoryPropertyFlags
-        ) {
-            chosenMemoryTypeIndex = i;
-            break;
-        }
-    }
-    if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
-        throw std::runtime_error("");
-    }
-
-    vk::MemoryAllocateInfo memoryAllocateInfo(
-        memoryRequirements.size,
-        chosenMemoryTypeIndex.value()
-    );
-
-    LOG_TRACE(BUFFER, "Attempting to allocate vk::DeviceMemory");
-    vk::UniqueDeviceMemory uniqueDestinationBufferMemory =
-        p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
-
-    if (!uniqueDestinationBufferMemory) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
-
-    p_logicalDevice->bindBufferMemory(
-        *p_logicalBuffer,
-        *uniqueDestinationBufferMemory,
-        0
-    );
+    
+    vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
+        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+            physicalDevice,
+            p_logicalDevice,
+            sizeBytes,
+            p_logicalBuffer,
+            requiredMemoryProperties
+        );
 
     LOG_TRACE(
         BUFFER,
@@ -145,7 +112,7 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUn
         "Successfully copied data from staging buffer into this buffer's memory"
     );
 
-    return uniqueDestinationBufferMemory;
+    return p_logicalBufferPhysicalMemory;
 }
 
 quartz::rendering::StagedBuffer::StagedBuffer(

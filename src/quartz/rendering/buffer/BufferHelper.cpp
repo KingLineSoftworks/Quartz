@@ -136,6 +136,49 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
     return p_logicalBufferPhysicalMemory;
 }
 
+void
+quartz::rendering::BufferHelper::populatePhysicalDeviceMemoryWithRawData(
+    const vk::UniqueDevice& p_logicalDevice,
+    const uint32_t sizeBytes,
+    const void* p_bufferData,
+    vk::UniqueDeviceMemory& p_physicalMemory
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+
+    LOG_TRACE(
+        BUFFER,
+        "Memory *IS* allocated for a source buffer. Populating "
+        "device's buffer memory with input raw data"
+    );
+
+    LOG_TRACE(
+        BUFFER,
+        "  - Creating mapping for allocated device memory of size {}",
+        sizeBytes
+    );
+    void* p_mappedDestinationDeviceMemory = p_logicalDevice->mapMemory(
+        *p_physicalMemory,
+        0,
+        sizeBytes
+    );
+
+    LOG_TRACE(
+        BUFFER,
+        "  - Copying {} bytes to mapped device memory at {} from buffer at {}",
+        sizeBytes, p_mappedDestinationDeviceMemory, p_bufferData
+    );
+    memcpy(
+        p_mappedDestinationDeviceMemory,
+        p_bufferData,
+        sizeBytes
+    );
+
+    LOG_TRACE(BUFFER, "  - Unmapping device memory");
+    p_logicalDevice->unmapMemory(*p_physicalMemory);
+
+    LOG_TRACE(BUFFER, "Successfully copied input data to device buffer memory");
+}
+
 vk::UniqueDeviceMemory
 quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
     const vk::PhysicalDevice& physicalDevice,
@@ -156,34 +199,12 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
             requiredMemoryProperties
         );
 
-    LOG_TRACE(
-        BUFFER, "Memory *IS* allocated for a source buffer. Populating "
-        "device's buffer memory with input raw data"
-    );
-
-    LOG_TRACE(
-        BUFFER, "  - Creating mapping for allocated device memory of size {}",
-        sizeBytes
-    );
-    void* p_mappedDestinationDeviceMemory = p_logicalDevice->mapMemory(
-        *p_logicalBufferPhysicalMemory,
-        0,
-        sizeBytes
-    );
-
-    LOG_TRACE(
-        BUFFER, "  - Copying {} bytes to mapped device memory at {} from buffer at {}",
-        sizeBytes, p_mappedDestinationDeviceMemory, p_bufferData
-    );
-    memcpy(
-        p_mappedDestinationDeviceMemory,
+    quartz::rendering::BufferHelper::populatePhysicalDeviceMemoryWithRawData(
+        p_logicalDevice,
+        sizeBytes,
         p_bufferData,
-        sizeBytes
+        p_logicalBufferPhysicalMemory
     );
 
-    LOG_TRACE(BUFFER, "  - Unmapping device memory");
-    p_logicalDevice->unmapMemory(*p_logicalBufferPhysicalMemory);
-
-    LOG_TRACE(BUFFER, "Successfully copied input data to device buffer memory");
     return p_logicalBufferPhysicalMemory;
 }

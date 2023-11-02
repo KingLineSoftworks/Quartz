@@ -38,6 +38,12 @@ private: // static functions
         const vk::UniqueBuffer& p_logicalBuffer,
         const vk::MemoryPropertyFlags requiredMemoryProperties
     );
+    static void populatePhysicalDeviceMemoryWithRawData(
+        const vk::UniqueDevice& p_logicalDevice,
+        const uint32_t sizeBytes,
+        const void* p_bufferData,
+        vk::UniqueDeviceMemory& p_logicalBufferPhysicalMemory
+    );
     static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
         const vk::PhysicalDevice& physicalDevice,
         const vk::UniqueDevice& p_logicalDevice,
