@@ -3,7 +3,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/buffer/BufferHelper.hpp"
 
 std::string
 quartz::rendering::BufferHelper::getUsageFlagsString(
@@ -79,13 +79,12 @@ quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
 }
 
 vk::UniqueDeviceMemory
-quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
-    const void* p_bufferData,
     const vk::UniqueBuffer& p_logicalBuffer,
-    const vk::MemoryPropertyFlags memoryPropertyFlags
+    const vk::MemoryPropertyFlags requiredMemoryProperties
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
@@ -94,18 +93,12 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
 
     vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties =
         physicalDevice.getMemoryProperties();
+
     std::optional<uint32_t> chosenMemoryTypeIndex;
-    for (
-        uint32_t i = 0;
-        i < physicalDeviceMemoryProperties.memoryTypeCount;
-        ++i
-    ) {
+    for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i) {
         if (
             (memoryRequirements.memoryTypeBits & (1 << i)) &&
-            (
-                physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags &
-                memoryPropertyFlags
-            )
+            physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & requiredMemoryProperties
         ) {
             chosenMemoryTypeIndex = i;
             break;
@@ -122,41 +115,64 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
     );
 
     LOG_TRACE(BUFFER, "Attempting to allocate vk::DeviceMemory");
-    vk::UniqueDeviceMemory p_bufferMemory =
+    vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
         p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
 
-    if (!p_bufferMemory) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
+    if (!p_logicalBufferPhysicalMemory) {
+        LOG_CRITICAL(BUFFER, "Failed to allocated vk::DeviceMemory");
         throw std::runtime_error("");
     }
-    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
+    LOG_TRACE(BUFFER, "Successfully allocated vk::DeviceMemory instance at {}",
+        static_cast<void*>(&(*p_logicalBufferPhysicalMemory))
+    );
 
+    LOG_TRACE(BUFFER, "Binding memory to logical device");
     p_logicalDevice->bindBufferMemory(
         *p_logicalBuffer,
-        *p_bufferMemory,
+        *p_logicalBufferPhysicalMemory,
         0
     );
 
+    return p_logicalBufferPhysicalMemory;
+}
+
+vk::UniqueDeviceMemory
+quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+    const vk::PhysicalDevice& physicalDevice,
+    const vk::UniqueDevice& p_logicalDevice,
+    const uint32_t sizeBytes,
+    const void* p_bufferData,
+    const vk::UniqueBuffer& p_logicalBuffer,
+    const vk::MemoryPropertyFlags requiredMemoryProperties
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+
+    vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
+        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+            physicalDevice,
+            p_logicalDevice,
+            sizeBytes,
+            p_logicalBuffer,
+            requiredMemoryProperties
+        );
+
     LOG_TRACE(
-        BUFFER,
-        "Memory *IS* allocated for a source buffer. Populating device's buffer "
-        "memory with input raw data"
+        BUFFER, "Memory *IS* allocated for a source buffer. Populating "
+        "device's buffer memory with input raw data"
     );
 
     LOG_TRACE(
-        BUFFER,
-        "  - Creating mapping for allocated device memory of size {}",
+        BUFFER, "  - Creating mapping for allocated device memory of size {}",
         sizeBytes
     );
     void* p_mappedDestinationDeviceMemory = p_logicalDevice->mapMemory(
-        *p_bufferMemory,
+        *p_logicalBufferPhysicalMemory,
         0,
         sizeBytes
     );
 
     LOG_TRACE(
-        BUFFER,
-        "  - Copying {} bytes to mapped device memory at {} from buffer at {}",
+        BUFFER, "  - Copying {} bytes to mapped device memory at {} from buffer at {}",
         sizeBytes, p_mappedDestinationDeviceMemory, p_bufferData
     );
     memcpy(
@@ -166,8 +182,8 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
     );
 
     LOG_TRACE(BUFFER, "  - Unmapping device memory");
-    p_logicalDevice->unmapMemory(*p_bufferMemory);
+    p_logicalDevice->unmapMemory(*p_logicalBufferPhysicalMemory);
 
     LOG_TRACE(BUFFER, "Successfully copied input data to device buffer memory");
-    return p_bufferMemory;
+    return p_logicalBufferPhysicalMemory;
 }

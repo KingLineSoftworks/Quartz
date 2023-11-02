@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
@@ -29,13 +29,6 @@ public: // member functions
     void* getMappedLocalMemoryPtr() { return mp_mappedLocalMemory; }
 
 private: // static functions
-    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceMemoryUniquePtr(
-        const vk::PhysicalDevice& physicalDevice,
-        const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t bufferSizeBytes,
-        const vk::UniqueBuffer& p_logicalBuffer,
-        const vk::MemoryPropertyFlags requiredMemoryProperties
-    );
     static void* mapVulkanPhysicalDeviceMemoryToLocalMemory(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t bufferSizeBytes,

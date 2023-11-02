@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/Buffer.hpp"
+#include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
