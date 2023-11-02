@@ -4,99 +4,6 @@
 #include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/buffer/ImageBuffer.hpp"
 
-vk::UniqueImage
-quartz::rendering::ImageBuffer::createVulkanImagePtr(
-    const vk::UniqueDevice& p_logicalDevice,
-    const uint32_t imageWidth,
-    const uint32_t imageHeight,
-    const vk::ImageUsageFlags usageFlags,
-    const vk::Format format,
-    const vk::ImageTiling tiling
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::ImageCreateInfo imageCreateInfo(
-        {},
-        vk::ImageType::e2D,
-        format,
-        {
-            static_cast<uint32_t>(imageWidth),
-            static_cast<uint32_t>(imageHeight),
-            1
-        },
-        1,
-        1,
-        vk::SampleCountFlagBits::e1,
-        tiling,
-        usageFlags,
-        vk::SharingMode::eExclusive
-    );
-
-    LOG_TRACE(BUFFER, "Attempting to create vk::Image");
-    vk::UniqueImage p_vulkanImage = p_logicalDevice->createImageUnique(imageCreateInfo);
-    if (!p_vulkanImage) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::Image");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::Image");
-
-    return p_vulkanImage;
-}
-
-
-vk::UniqueDeviceMemory
-quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
-    const vk::PhysicalDevice& physicalDevice,
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::UniqueImage& p_image,
-    const vk::MemoryPropertyFlags memoryPropertyFlags
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::MemoryRequirements memoryRequirements =
-        p_logicalDevice->getImageMemoryRequirements(*p_image);
-
-    vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties =
-        physicalDevice.getMemoryProperties();
-
-    std::optional<uint32_t> chosenMemoryTypeIndex;
-    for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i) {
-        if (
-            (memoryRequirements.memoryTypeBits & (1 << i)) &&
-            physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & memoryPropertyFlags
-        ) {
-            chosenMemoryTypeIndex = i;
-            break;
-        }
-    }
-    if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
-        throw std::runtime_error("");
-    }
-
-    vk::MemoryAllocateInfo memoryAllocateInfo(
-        memoryRequirements.size,
-        chosenMemoryTypeIndex.value()
-    );
-
-    LOG_TRACE(BUFFER, "Attempting to create vk::DeviceMemory");
-    vk::UniqueDeviceMemory p_vulkanPhysicalDeviceDepthMemory =
-        p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
-    if (!p_vulkanPhysicalDeviceDepthMemory) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
-
-    p_logicalDevice->bindImageMemory(
-        *p_image,
-        *p_vulkanPhysicalDeviceDepthMemory,
-        0
-    );
-
-    return p_vulkanPhysicalDeviceDepthMemory;
-}
-
 quartz::rendering::ImageBuffer::ImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
@@ -111,7 +18,7 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     m_format(format),
     m_tiling(tiling),
     mp_vulkanImage(
-        quartz::rendering::ImageBuffer::createVulkanImagePtr(
+        quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
@@ -121,7 +28,7 @@ quartz::rendering::ImageBuffer::ImageBuffer(
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
+        quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanImage,

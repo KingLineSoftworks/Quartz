@@ -18,7 +18,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const uint32_t sizeBytes,
         const vk::BufferUsageFlags usageFlags,
-        const vk::MemoryPropertyFlags memoryPropertyFlags
+        const vk::MemoryPropertyFlags requiredMemoryProperties
     );
     LocallyMappedBuffer(LocallyMappedBuffer&& other);
     ~LocallyMappedBuffer();
@@ -38,7 +38,7 @@ private: // static functions
 private: // member variables
     uint32_t m_sizeBytes;
     vk::BufferUsageFlags m_usageFlags;
-    vk::MemoryPropertyFlags m_memoryPropertyFlags;
+    vk::MemoryPropertyFlags m_requiredMemoryProperties;
 
     vk::UniqueBuffer mp_vulkanLogicalBuffer;
     vk::UniqueDeviceMemory mp_vulkanPhysicalDeviceMemory;

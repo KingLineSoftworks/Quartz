@@ -32,25 +32,6 @@ public: // member functions
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
 
 private: // static functions
-    static vk::UniqueImage createVulkanImagePtr(
-        const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t imageWidth,
-        const uint32_t imageHeight,
-        const vk::ImageUsageFlags usageFlags,
-        const vk::Format format,
-        const vk::ImageTiling tiling
-    );
-    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceImageMemory(
-        const vk::PhysicalDevice& physicalDevice,
-        const uint32_t graphicsQueueFamilyIndex,
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::Queue& graphicsQueue,
-        const uint32_t imageWidth,
-        const uint32_t imageHeight,
-        const vk::UniqueBuffer& p_stagingBuffer,
-        const vk::UniqueImage& p_image,
-        const vk::MemoryPropertyFlags memoryPropertyFlags
-    );
     static void transitionImageLayout(
         const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,
@@ -59,7 +40,7 @@ private: // static functions
         const vk::ImageLayout inputLayout,
         const vk::ImageLayout outputLayout
     );
-    static void copyStagedBufferToImage(
+    static void populateVulkanImageWithStagedData(
         const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,
         const vk::Queue& graphicsQueue,
@@ -67,6 +48,17 @@ private: // static functions
         const uint32_t imageHeight,
         const vk::UniqueBuffer& p_stagingBuffer,
         const vk::UniqueImage& p_image
+    );
+    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceImageMemoryAndPopulateWithStagedData(
+        const vk::PhysicalDevice& physicalDevice,
+        const uint32_t graphicsQueueFamilyIndex,
+        const vk::UniqueDevice& p_logicalDevice,
+        const vk::Queue& graphicsQueue,
+        const uint32_t imageWidth,
+        const uint32_t imageHeight,
+        const vk::UniqueBuffer& p_stagingBuffer,
+        const vk::UniqueImage& p_image,
+        const vk::MemoryPropertyFlags requiredMemoryProperties
     );
 
 private: // member variables

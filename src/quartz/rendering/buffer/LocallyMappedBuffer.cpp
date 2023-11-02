@@ -29,11 +29,11 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t sizeBytes,
     const vk::BufferUsageFlags usageFlags,
-    const vk::MemoryPropertyFlags memoryPropertyFlags
+    const vk::MemoryPropertyFlags requiredMemoryProperties
 ) :
     m_sizeBytes(sizeBytes),
     m_usageFlags(usageFlags),
-    m_memoryPropertyFlags(memoryPropertyFlags),
+    m_requiredMemoryProperties(requiredMemoryProperties),
     mp_vulkanLogicalBuffer(
         quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
@@ -47,7 +47,7 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             mp_vulkanLogicalBuffer,
-            memoryPropertyFlags
+            requiredMemoryProperties
         )
     ),
     mp_mappedLocalMemory(
@@ -70,8 +70,8 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
     m_usageFlags(
         other.m_usageFlags
     ),
-    m_memoryPropertyFlags(
-        other.m_memoryPropertyFlags
+    m_requiredMemoryProperties(
+        other.m_requiredMemoryProperties
     ),
     mp_vulkanLogicalBuffer(std::move(
         other.mp_vulkanLogicalBuffer

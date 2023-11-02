@@ -4,131 +4,6 @@
 #include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 
-vk::UniqueImage
-quartz::rendering::StagedImageBuffer::createVulkanImagePtr(
-    const vk::UniqueDevice& p_logicalDevice,
-    const uint32_t imageWidth,
-    const uint32_t imageHeight,
-    const vk::ImageUsageFlags usageFlags,
-    const vk::Format format,
-    const vk::ImageTiling tiling
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::ImageCreateInfo imageCreateInfo(
-        {},
-        vk::ImageType::e2D,
-        format,
-        {
-            static_cast<uint32_t>(imageWidth),
-            static_cast<uint32_t>(imageHeight),
-            1
-        },
-        1,
-        1,
-        vk::SampleCountFlagBits::e1,
-        tiling,
-        usageFlags,
-        vk::SharingMode::eExclusive
-    );
-
-    LOG_TRACE(BUFFER, "Attempting to create vk::Image");
-    vk::UniqueImage p_vulkanImage = p_logicalDevice->createImageUnique(imageCreateInfo);
-    if (!p_vulkanImage) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::Image");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::Image");
-
-    return p_vulkanImage;
-}
-
-vk::UniqueDeviceMemory
-quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
-    const vk::PhysicalDevice& physicalDevice,
-    const uint32_t graphicsQueueFamilyIndex,
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::Queue& graphicsQueue,
-    const uint32_t imageWidth,
-    const uint32_t imageHeight,
-    const vk::UniqueBuffer& p_stagingBuffer,
-    const vk::UniqueImage& p_image,
-    const vk::MemoryPropertyFlags memoryPropertyFlags
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::MemoryRequirements memoryRequirements =
-        p_logicalDevice->getImageMemoryRequirements(*p_image);
-
-    vk::PhysicalDeviceMemoryProperties physicalDeviceMemoryProperties =
-        physicalDevice.getMemoryProperties();
-
-    std::optional<uint32_t> chosenMemoryTypeIndex;
-    for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i) {
-        if (
-            (memoryRequirements.memoryTypeBits & (1 << i)) &&
-            physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & memoryPropertyFlags
-        ) {
-            chosenMemoryTypeIndex = i;
-            break;
-        }
-    }
-    if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_CRITICAL(BUFFER, "Failed to find a suitable memory type");
-        throw std::runtime_error("");
-    }
-
-    vk::MemoryAllocateInfo memoryAllocateInfo(
-        memoryRequirements.size,
-        chosenMemoryTypeIndex.value()
-    );
-
-    LOG_TRACE(BUFFER, "Attempting to create vk::DeviceMemory");
-    vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory =
-        p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
-    if (!p_vulkanPhysicalDeviceTextureMemory) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory");
-
-    p_logicalDevice->bindImageMemory(
-        *p_image,
-        *p_vulkanPhysicalDeviceTextureMemory,
-        0
-    );
-
-    LOG_TRACE(BUFFER, "Transitioning layout and populating memory from buffer");
-
-    quartz::rendering::StagedImageBuffer::transitionImageLayout(
-        graphicsQueueFamilyIndex,
-        p_logicalDevice,
-        graphicsQueue,
-        p_image,
-        vk::ImageLayout::eUndefined,
-        vk::ImageLayout::eTransferDstOptimal
-    );
-    quartz::rendering::StagedImageBuffer::copyStagedBufferToImage(
-        graphicsQueueFamilyIndex,
-        p_logicalDevice,
-        graphicsQueue,
-        imageWidth,
-        imageHeight,
-        p_stagingBuffer,
-        p_image
-    );
-    quartz::rendering::StagedImageBuffer::transitionImageLayout(
-        graphicsQueueFamilyIndex,
-        p_logicalDevice,
-        graphicsQueue,
-        p_image,
-        vk::ImageLayout::eTransferDstOptimal,
-        vk::ImageLayout::eShaderReadOnlyOptimal
-    );
-
-    return p_vulkanPhysicalDeviceTextureMemory;
-}
-
 void
 quartz::rendering::StagedImageBuffer::transitionImageLayout(
     const uint32_t graphicsQueueFamilyIndex,
@@ -273,7 +148,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
 }
 
 void
-quartz::rendering::StagedImageBuffer::copyStagedBufferToImage(
+quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Queue& graphicsQueue,
@@ -383,6 +258,59 @@ quartz::rendering::StagedImageBuffer::copyStagedBufferToImage(
     LOG_TRACE(BUFFER, "Successfully copied data");
 }
 
+vk::UniqueDeviceMemory
+quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAndPopulateWithStagedData(
+    const vk::PhysicalDevice& physicalDevice,
+    const uint32_t graphicsQueueFamilyIndex,
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::Queue& graphicsQueue,
+    const uint32_t imageWidth,
+    const uint32_t imageHeight,
+    const vk::UniqueBuffer& p_stagingBuffer,
+    const vk::UniqueImage& p_image,
+    const vk::MemoryPropertyFlags requiredMemoryProperties
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+
+    vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory =
+        quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
+            physicalDevice,
+            p_logicalDevice,
+            p_image,
+            requiredMemoryProperties
+        );
+
+    LOG_TRACE(BUFFER, "Transitioning layout and populating memory from buffer");
+
+    quartz::rendering::StagedImageBuffer::transitionImageLayout(
+        graphicsQueueFamilyIndex,
+        p_logicalDevice,
+        graphicsQueue,
+        p_image,
+        vk::ImageLayout::eUndefined,
+        vk::ImageLayout::eTransferDstOptimal
+    );
+    quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
+        graphicsQueueFamilyIndex,
+        p_logicalDevice,
+        graphicsQueue,
+        imageWidth,
+        imageHeight,
+        p_stagingBuffer,
+        p_image
+    );
+    quartz::rendering::StagedImageBuffer::transitionImageLayout(
+        graphicsQueueFamilyIndex,
+        p_logicalDevice,
+        graphicsQueue,
+        p_image,
+        vk::ImageLayout::eTransferDstOptimal,
+        vk::ImageLayout::eShaderReadOnlyOptimal
+    );
+
+    return p_vulkanPhysicalDeviceTextureMemory;
+}
+
 quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
@@ -420,7 +348,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
         )
     ),
     mp_vulkanImage(
-        quartz::rendering::StagedImageBuffer::createVulkanImagePtr(
+        quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
@@ -430,7 +358,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
+        quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAndPopulateWithStagedData(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getGraphicsQueueFamilyIndex(),
             renderingDevice.getVulkanLogicalDevicePtr(),

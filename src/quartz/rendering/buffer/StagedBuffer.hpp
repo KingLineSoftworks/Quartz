@@ -43,7 +43,7 @@ private: // static functions
         const vk::Queue& graphicsQueue,
         const uint32_t sizeBytes,
         const vk::UniqueBuffer& p_logicalBuffer,
-        const vk::MemoryPropertyFlags memoryPropertyFlags,
+        const vk::MemoryPropertyFlags requiredMemoryProperties,
         const vk::UniqueBuffer& p_logicalStagingBuffer
     );
 

@@ -9,6 +9,7 @@
 namespace quartz {
 namespace rendering {
     class ImageBuffer;
+    class StagedImageBuffer;
 }
 }
 
@@ -34,20 +35,6 @@ public: // member functions
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
 
 private: // static functions
-    static vk::UniqueImage createVulkanImagePtr(
-        const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t imageWidth,
-        const uint32_t imageHeight,
-        const vk::ImageUsageFlags usageFlags,
-        const vk::Format format,
-        const vk::ImageTiling tiling
-    );
-    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceImageMemory(
-        const vk::PhysicalDevice& physicalDevice,
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::UniqueImage& p_image,
-        const vk::MemoryPropertyFlags memoryPropertyFlags
-    );
 
 private: // member variables
     uint32_t m_imageWidth;
