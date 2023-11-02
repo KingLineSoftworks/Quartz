@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/DepthBuffer.hpp"
+#include "quartz/rendering/buffer/ImageBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
@@ -42,6 +42,6 @@ private: // static functions
 private: // member variables
     uint32_t m_imageWidth;
     uint32_t m_imageHeight;
-    quartz::rendering::DepthBuffer m_depthBuffer;
+    quartz::rendering::ImageBuffer m_imageBuffer;
     vk::UniqueImageView mp_vulkanImageView;
 };

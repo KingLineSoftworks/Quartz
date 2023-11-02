@@ -5,10 +5,10 @@ add_library(
         QUARTZ_RENDERING_Buffer
         SHARED
         Buffer.cpp
-        DepthBuffer.cpp
-        StagedImageBuffer.cpp
+        ImageBuffer.cpp
         LocallyMappedBuffer.cpp
         StagedBuffer.cpp
+        StagedImageBuffer.cpp
 )
 
 target_compile_options(

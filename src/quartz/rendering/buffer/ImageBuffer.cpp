@@ -2,10 +2,10 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/Buffer.hpp"
-#include "quartz/rendering/buffer/DepthBuffer.hpp"
+#include "quartz/rendering/buffer/ImageBuffer.hpp"
 
 vk::UniqueImage
-quartz::rendering::DepthBuffer::createVulkanImagePtr(
+quartz::rendering::ImageBuffer::createVulkanImagePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
@@ -45,7 +45,7 @@ quartz::rendering::DepthBuffer::createVulkanImagePtr(
 
 
 vk::UniqueDeviceMemory
-quartz::rendering::DepthBuffer::allocateVulkanPhysicalDeviceImageMemory(
+quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueImage& p_image,
@@ -97,7 +97,7 @@ quartz::rendering::DepthBuffer::allocateVulkanPhysicalDeviceImageMemory(
     return p_vulkanPhysicalDeviceDepthMemory;
 }
 
-quartz::rendering::DepthBuffer::DepthBuffer(
+quartz::rendering::ImageBuffer::ImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
@@ -111,7 +111,7 @@ quartz::rendering::DepthBuffer::DepthBuffer(
     m_format(format),
     m_tiling(tiling),
     mp_vulkanImage(
-        quartz::rendering::DepthBuffer::createVulkanImagePtr(
+        quartz::rendering::ImageBuffer::createVulkanImagePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
@@ -121,7 +121,7 @@ quartz::rendering::DepthBuffer::DepthBuffer(
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::DepthBuffer::allocateVulkanPhysicalDeviceImageMemory(
+        quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanImage,
@@ -132,8 +132,8 @@ quartz::rendering::DepthBuffer::DepthBuffer(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::DepthBuffer::DepthBuffer(
-    quartz::rendering::DepthBuffer&& other
+quartz::rendering::ImageBuffer::ImageBuffer(
+    quartz::rendering::ImageBuffer&& other
 ) :
     m_imageWidth(
         other.m_imageWidth
@@ -160,9 +160,9 @@ quartz::rendering::DepthBuffer::DepthBuffer(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::DepthBuffer&
-quartz::rendering::DepthBuffer::operator=(
-    quartz::rendering::DepthBuffer&& other
+quartz::rendering::ImageBuffer&
+quartz::rendering::ImageBuffer::operator=(
+    quartz::rendering::ImageBuffer&& other
 ) {
     LOG_FUNCTION_CALL_TRACEthis("");
 
@@ -186,12 +186,12 @@ quartz::rendering::DepthBuffer::operator=(
     return *this;
 }
 
-quartz::rendering::DepthBuffer::~DepthBuffer() {
+quartz::rendering::ImageBuffer::~ImageBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 void
-quartz::rendering::DepthBuffer::reset() {
+quartz::rendering::ImageBuffer::reset() {
     LOG_FUNCTION_CALL_TRACEthis("");
 
     mp_vulkanPhysicalDeviceMemory.reset();

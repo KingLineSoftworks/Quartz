@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/DepthBuffer.hpp"
+#include "quartz/rendering/buffer/ImageBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/DepthBuffer.hpp"
 
@@ -51,7 +51,7 @@ quartz::rendering::DepthBufferTex::DepthBufferTex(
 ) :
     m_imageWidth(imageWidth),
     m_imageHeight(imageHeight),
-    m_depthBuffer(
+    m_imageBuffer(
         renderingDevice,
         m_imageWidth,
         m_imageHeight,
@@ -62,8 +62,8 @@ quartz::rendering::DepthBufferTex::DepthBufferTex(
     mp_vulkanImageView(
         quartz::rendering::DepthBufferTex::createVulkanImageViewPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            m_depthBuffer.getVulkanFormat(),
-            m_depthBuffer.getVulkanImagePtr()
+            m_imageBuffer.getVulkanFormat(),
+            m_imageBuffer.getVulkanImagePtr()
         )
     )
 {
@@ -75,7 +75,7 @@ quartz::rendering::DepthBufferTex::DepthBufferTex(
 ) :
     m_imageWidth(other.m_imageWidth),
     m_imageHeight(other.m_imageHeight),
-    m_depthBuffer(std::move(other.m_depthBuffer)),
+    m_imageBuffer(std::move(other.m_imageBuffer)),
     mp_vulkanImageView(std::move(other.mp_vulkanImageView))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -97,7 +97,7 @@ quartz::rendering::DepthBufferTex::operator=(
 
     m_imageWidth = other.m_imageWidth;
     m_imageHeight = other.m_imageHeight;
-    m_depthBuffer = std::move(other.m_depthBuffer);
+    m_imageBuffer = std::move(other.m_imageBuffer);
     mp_vulkanImageView = std::move(other.mp_vulkanImageView);
 
     return *this;
@@ -107,6 +107,6 @@ void
 quartz::rendering::DepthBufferTex::reset() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    m_depthBuffer.reset();
+    m_imageBuffer.reset();
     mp_vulkanImageView.reset();
 }

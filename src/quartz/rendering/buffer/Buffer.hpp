@@ -14,7 +14,7 @@ namespace rendering {
     class LocallyMappedBuffer;
     class StagedBuffer;
     class StagedImageBuffer;
-    class DepthBuffer;
+    class ImageBuffer;
 }
 }
 

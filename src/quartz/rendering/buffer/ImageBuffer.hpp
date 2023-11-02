@@ -8,13 +8,13 @@
 
 namespace quartz {
 namespace rendering {
-    class DepthBuffer;
+    class ImageBuffer;
 }
 }
 
-class quartz::rendering::DepthBuffer {
+class quartz::rendering::ImageBuffer {
 public: // member functions
-    DepthBuffer(
+    ImageBuffer(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t imageWidth,
         const uint32_t imageHeight,
@@ -22,9 +22,9 @@ public: // member functions
         const vk::Format format,
         const vk::ImageTiling tiling
     );
-    DepthBuffer(DepthBuffer&& other);
-    DepthBuffer& operator=(DepthBuffer&& other);
-    ~DepthBuffer();
+    ImageBuffer(ImageBuffer&& other);
+    ImageBuffer& operator=(ImageBuffer&& other);
+    ~ImageBuffer();
 
     void reset();
 
