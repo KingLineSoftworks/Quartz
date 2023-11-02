@@ -13,7 +13,7 @@ namespace rendering {
     class BufferHelper;
     class LocallyMappedBuffer;
     class StagedBuffer;
-    class ImageBuffer;
+    class StagedImageBuffer;
     class DepthBuffer;
 }
 }
@@ -43,5 +43,5 @@ private: // static functions
 private: // friends
     friend class quartz::rendering::LocallyMappedBuffer;
     friend class quartz::rendering::StagedBuffer;
-    friend class quartz::rendering::ImageBuffer;
+    friend class quartz::rendering::StagedImageBuffer;
 };

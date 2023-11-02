@@ -8,13 +8,13 @@
 
 namespace quartz {
 namespace rendering {
-    class ImageBuffer;
+    class StagedImageBuffer;
 }
 }
 
-class quartz::rendering::ImageBuffer {
+class quartz::rendering::StagedImageBuffer {
 public: // member functions
-    ImageBuffer(
+    StagedImageBuffer(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t imageWidth,
         const uint32_t imageHeight,
@@ -24,8 +24,8 @@ public: // member functions
         const vk::ImageTiling tiling,
         const void* p_bufferData
     );
-    ImageBuffer(ImageBuffer&& other);
-    ~ImageBuffer();
+    StagedImageBuffer(StagedImageBuffer&& other);
+    ~StagedImageBuffer();
 
     USE_LOGGER(BUFFER);
 

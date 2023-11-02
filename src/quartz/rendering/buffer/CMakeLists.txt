@@ -6,7 +6,7 @@ add_library(
         SHARED
         Buffer.cpp
         DepthBuffer.cpp
-        ImageBuffer.cpp
+        StagedImageBuffer.cpp
         LocallyMappedBuffer.cpp
         StagedBuffer.cpp
 )

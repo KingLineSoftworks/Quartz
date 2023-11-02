@@ -4,7 +4,7 @@
 #include "stb_image.h"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/ImageBuffer.hpp"
+#include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 
@@ -80,7 +80,7 @@ quartz::rendering::Texture::getChannelCount(
     return static_cast<uint32_t>(channelCount);
 }
 
-quartz::rendering::ImageBuffer
+quartz::rendering::StagedImageBuffer
 quartz::rendering::Texture::createImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const std::string& filepath
@@ -116,7 +116,7 @@ quartz::rendering::Texture::createImageBuffer(
         filepath
     );
 
-    quartz::rendering::ImageBuffer imageBuffer(
+    quartz::rendering::StagedImageBuffer stagedImageBuffer(
         renderingDevice,
         static_cast<uint32_t>(textureWidth),
         static_cast<uint32_t>(textureHeight),
@@ -130,19 +130,19 @@ quartz::rendering::Texture::createImageBuffer(
     LOG_TRACE(TEXTURE, "Freeing stbi texture");
     stbi_image_free(p_texturePixels);
 
-    return imageBuffer;
+    return stagedImageBuffer;
 }
 
 vk::UniqueImageView
 quartz::rendering::Texture::createVulkanImageViewPtr(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::ImageBuffer& imageBuffer
+    const quartz::rendering::StagedImageBuffer& stagedImageBuffer
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
     vk::ImageViewCreateInfo imageViewCreateInfo(
         {},
-        *imageBuffer.getVulkanImagePtr(),
+        *stagedImageBuffer.getVulkanImagePtr(),
         vk::ImageViewType::e2D,
         vk::Format::eR8G8B8A8Srgb,
         {},
@@ -226,13 +226,13 @@ quartz::rendering::Texture::Texture(
     m_channelCount(quartz::rendering::Texture::getChannelCount(
         m_filepath
     )),
-    m_imageBuffer(quartz::rendering::Texture::createImageBuffer(
+    m_stagedImageBuffer(quartz::rendering::Texture::createImageBuffer(
         renderingDevice,
         m_filepath
     )),
     mp_vulkanImageView(quartz::rendering::Texture::createVulkanImageViewPtr(
         renderingDevice,
-        m_imageBuffer
+        m_stagedImageBuffer
     )),
     mp_vulkanSampler(quartz::rendering::Texture::createVulkanSamplerPtr(
         renderingDevice
@@ -246,7 +246,7 @@ quartz::rendering::Texture::Texture(quartz::rendering::Texture&& other) :
     m_width(other.m_width),
     m_height(other.m_height),
     m_channelCount(other.m_channelCount),
-    m_imageBuffer(std::move(other.m_imageBuffer)),
+    m_stagedImageBuffer(std::move(other.m_stagedImageBuffer)),
     mp_vulkanImageView(std::move(other.mp_vulkanImageView)),
     mp_vulkanSampler(std::move(other.mp_vulkanSampler))
 {

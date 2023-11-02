@@ -2,10 +2,10 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/Buffer.hpp"
-#include "quartz/rendering/buffer/ImageBuffer.hpp"
+#include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 
 vk::UniqueImage
-quartz::rendering::ImageBuffer::createVulkanImagePtr(
+quartz::rendering::StagedImageBuffer::createVulkanImagePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
@@ -44,7 +44,7 @@ quartz::rendering::ImageBuffer::createVulkanImagePtr(
 }
 
 vk::UniqueDeviceMemory
-quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
+quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
     const vk::PhysicalDevice& physicalDevice,
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
@@ -100,7 +100,7 @@ quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
 
     LOG_TRACE(BUFFER, "Transitioning layout and populating memory from buffer");
 
-    quartz::rendering::ImageBuffer::transitionImageLayout(
+    quartz::rendering::StagedImageBuffer::transitionImageLayout(
         graphicsQueueFamilyIndex,
         p_logicalDevice,
         graphicsQueue,
@@ -108,7 +108,7 @@ quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
         vk::ImageLayout::eUndefined,
         vk::ImageLayout::eTransferDstOptimal
     );
-    quartz::rendering::ImageBuffer::copyStagedBufferToImage(
+    quartz::rendering::StagedImageBuffer::copyStagedBufferToImage(
         graphicsQueueFamilyIndex,
         p_logicalDevice,
         graphicsQueue,
@@ -117,7 +117,7 @@ quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
         p_stagingBuffer,
         p_image
     );
-    quartz::rendering::ImageBuffer::transitionImageLayout(
+    quartz::rendering::StagedImageBuffer::transitionImageLayout(
         graphicsQueueFamilyIndex,
         p_logicalDevice,
         graphicsQueue,
@@ -130,7 +130,7 @@ quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
 }
 
 void
-quartz::rendering::ImageBuffer::transitionImageLayout(
+quartz::rendering::StagedImageBuffer::transitionImageLayout(
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Queue& graphicsQueue,
@@ -273,7 +273,7 @@ quartz::rendering::ImageBuffer::transitionImageLayout(
 }
 
 void
-quartz::rendering::ImageBuffer::copyStagedBufferToImage(
+quartz::rendering::StagedImageBuffer::copyStagedBufferToImage(
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Queue& graphicsQueue,
@@ -383,7 +383,7 @@ quartz::rendering::ImageBuffer::copyStagedBufferToImage(
     LOG_TRACE(BUFFER, "Successfully copied data");
 }
 
-quartz::rendering::ImageBuffer::ImageBuffer(
+quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
@@ -420,7 +420,7 @@ quartz::rendering::ImageBuffer::ImageBuffer(
         )
     ),
     mp_vulkanImage(
-        quartz::rendering::ImageBuffer::createVulkanImagePtr(
+        quartz::rendering::StagedImageBuffer::createVulkanImagePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
@@ -430,7 +430,7 @@ quartz::rendering::ImageBuffer::ImageBuffer(
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::ImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
+        quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemory(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getGraphicsQueueFamilyIndex(),
             renderingDevice.getVulkanLogicalDevicePtr(),
@@ -446,8 +446,8 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::ImageBuffer::ImageBuffer(
-    quartz::rendering::ImageBuffer&& other
+quartz::rendering::StagedImageBuffer::StagedImageBuffer(
+    quartz::rendering::StagedImageBuffer&& other
 ) :
     m_imageWidth(
         other.m_imageWidth
@@ -483,6 +483,6 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::ImageBuffer::~ImageBuffer() {
+quartz::rendering::StagedImageBuffer::~StagedImageBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

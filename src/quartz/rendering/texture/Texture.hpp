@@ -3,7 +3,7 @@
 #include <string>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/ImageBuffer.hpp"
+#include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
@@ -36,13 +36,13 @@ private: // static functions
     static uint32_t getChannelCount(
         const std::string& filepath
     );
-    static quartz::rendering::ImageBuffer createImageBuffer(
+    static quartz::rendering::StagedImageBuffer createImageBuffer(
         const quartz::rendering::Device& renderingDevice,
         const std::string& filepath
     );
     static vk::UniqueImageView createVulkanImageViewPtr(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::ImageBuffer& imageBuffer
+        const quartz::rendering::StagedImageBuffer& stagedImageBuffer
     );
     static vk::UniqueSampler createVulkanSamplerPtr(
         const quartz::rendering::Device& renderingDevice
@@ -53,7 +53,7 @@ private: // member variables
     const uint32_t m_width;
     const uint32_t m_height;
     const uint32_t m_channelCount;
-    quartz::rendering::ImageBuffer m_imageBuffer;
+    quartz::rendering::StagedImageBuffer m_stagedImageBuffer;
     vk::UniqueImageView mp_vulkanImageView;
     vk::UniqueSampler mp_vulkanSampler;
 };
