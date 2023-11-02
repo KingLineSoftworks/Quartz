@@ -6,7 +6,7 @@
 #include "quartz/rendering/texture/DepthBuffer.hpp"
 
 vk::UniqueImageView
-quartz::rendering::DepthBufferTex::createVulkanImageViewPtr(
+quartz::rendering::DepthBuffer::createVulkanImageViewPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Format format,
     const vk::UniqueImage& p_image
@@ -41,7 +41,7 @@ quartz::rendering::DepthBufferTex::createVulkanImageViewPtr(
     return p_imageView;
 }
 
-quartz::rendering::DepthBufferTex::DepthBufferTex(
+quartz::rendering::DepthBuffer::DepthBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
@@ -60,7 +60,7 @@ quartz::rendering::DepthBufferTex::DepthBufferTex(
         tiling
     ),
     mp_vulkanImageView(
-        quartz::rendering::DepthBufferTex::createVulkanImageViewPtr(
+        quartz::rendering::DepthBuffer::createVulkanImageViewPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageBuffer.getVulkanFormat(),
             m_imageBuffer.getVulkanImagePtr()
@@ -70,8 +70,8 @@ quartz::rendering::DepthBufferTex::DepthBufferTex(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::DepthBufferTex::DepthBufferTex(
-    quartz::rendering::DepthBufferTex&& other
+quartz::rendering::DepthBuffer::DepthBuffer(
+    quartz::rendering::DepthBuffer&& other
 ) :
     m_imageWidth(other.m_imageWidth),
     m_imageHeight(other.m_imageHeight),
@@ -81,13 +81,13 @@ quartz::rendering::DepthBufferTex::DepthBufferTex(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::DepthBufferTex::~DepthBufferTex() {
+quartz::rendering::DepthBuffer::~DepthBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::DepthBufferTex&
-quartz::rendering::DepthBufferTex::operator=(
-    quartz::rendering::DepthBufferTex&& other
+quartz::rendering::DepthBuffer&
+quartz::rendering::DepthBuffer::operator=(
+    quartz::rendering::DepthBuffer&& other
 ) {
     LOG_FUNCTION_CALL_TRACEthis("");
 
@@ -104,7 +104,7 @@ quartz::rendering::DepthBufferTex::operator=(
 }
 
 void
-quartz::rendering::DepthBufferTex::reset() {
+quartz::rendering::DepthBuffer::reset() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     m_imageBuffer.reset();

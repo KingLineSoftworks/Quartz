@@ -113,7 +113,7 @@ private: // member variables
     std::vector<vk::Image> m_vulkanImages;
     std::vector<vk::UniqueImageView> m_vulkanImageViewPtrs;
 
-    quartz::rendering::DepthBufferTex m_depthBuffer;
+    quartz::rendering::DepthBuffer m_depthBuffer;
 
     std::vector<vk::UniqueFramebuffer> m_vulkanFramebufferPtrs;
 

@@ -470,7 +470,7 @@ quartz::rendering::Swapchain::recreate(
             renderingWindow.getVulkanSurfaceFormat(),
             m_vulkanImages
         );
-    m_depthBuffer = quartz::rendering::DepthBufferTex(
+    m_depthBuffer = quartz::rendering::DepthBuffer(
         renderingDevice,
         renderingWindow.getVulkanExtent().width,
         renderingWindow.getVulkanExtent().height,
