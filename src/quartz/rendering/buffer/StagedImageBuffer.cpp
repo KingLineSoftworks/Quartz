@@ -15,50 +15,23 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    LOG_TRACE(BUFFER, "Attempting to create vk::CommandPool");
-
-    vk::CommandPoolCreateInfo commandPoolCreateInfo(
-        vk::CommandPoolCreateFlagBits::eTransient,
-        graphicsQueueFamilyIndex
-    );
-
     vk::UniqueCommandPool p_commandPool =
-        p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
-
-    if (!p_commandPool) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::CommandPool");
-
-    LOG_TRACE(BUFFER, "Attempting to allocate vk::CommandBuffer");
-
-    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
-        *p_commandPool,
-        vk::CommandBufferLevel::ePrimary,
-        1
-    );
-
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
-        p_logicalDevice->allocateCommandBuffersUnique(
-            commandBufferAllocateInfo
+        quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
+            graphicsQueueFamilyIndex,
+            p_logicalDevice
         );
 
-    if (!(commandBufferPtrs[0])) {
-        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer");
-        throw std::runtime_error("");
-    }
+    vk::UniqueCommandBuffer p_commandBuffer =
+        quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
+            p_logicalDevice,
+            p_commandPool
+        );
 
     LOG_TRACE(
         BUFFER,
         "Recording commands to newly created command buffer for transitioning "
         "image's layout"
     );
-
-    vk::CommandBufferBeginInfo commandBufferBeginInfo(
-        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-    );
-    commandBufferPtrs[0]->begin(commandBufferBeginInfo);
 
     vk::AccessFlags sourceAccessMask;
     vk::AccessFlags destinationAccessMask;
@@ -115,7 +88,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         }
     );
 
-    commandBufferPtrs[0]->pipelineBarrier(
+    p_commandBuffer->pipelineBarrier(
         sourceStage,
         destinationStage,
         {},
@@ -124,25 +97,10 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         imageMemoryBarrier
     );
 
-    commandBufferPtrs[0]->end();
-
-    LOG_TRACE(
-        BUFFER,
-        "Submitting command buffer and waiting idly for it to complete the "
-        "transition of image's layout"
+    quartz::rendering::BufferHelper::endAndSubmitVulkanCommandBufferUniquePtr(
+        graphicsQueue,
+        p_commandBuffer
     );
-
-    vk::SubmitInfo submitInfo(
-        0,
-        nullptr,
-        nullptr,
-        1,
-        &(*(commandBufferPtrs[0])),
-        0,
-        nullptr
-    );
-    graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
-    graphicsQueue.waitIdle();
 
     LOG_TRACE(BUFFER, "Successfully transitioned image's layout");
 }
@@ -159,52 +117,23 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    LOG_TRACE(BUFFER, "Attempting to create vk::CommandPool");
-
-    vk::CommandPoolCreateInfo commandPoolCreateInfo(
-        vk::CommandPoolCreateFlagBits::eTransient,
-        graphicsQueueFamilyIndex
-    );
-
     vk::UniqueCommandPool p_commandPool =
-        p_logicalDevice->createCommandPoolUnique(
-            commandPoolCreateInfo
+        quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
+            graphicsQueueFamilyIndex,
+            p_logicalDevice
         );
 
-    if (!p_commandPool) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(BUFFER, "Successfully created vk::CommandPool");
-
-    LOG_TRACE(BUFFER, "Attempting to allocate vk::CommandBuffer");
-
-    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
-        *p_commandPool,
-        vk::CommandBufferLevel::ePrimary,
-        1
-    );
-
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
-        p_logicalDevice->allocateCommandBuffersUnique(
-            commandBufferAllocateInfo
+    vk::UniqueCommandBuffer p_commandBuffer =
+        quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
+            p_logicalDevice,
+            p_commandPool
         );
-
-    if (!(commandBufferPtrs[0])) {
-        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer");
-        throw std::runtime_error("");
-    }
 
     LOG_TRACE(
         BUFFER,
         "Recording commands to newly created command buffer for copying data "
         "from staged buffer to image"
     );
-
-    vk::CommandBufferBeginInfo commandBufferBeginInfo(
-        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-    );
-    commandBufferPtrs[0]->begin(commandBufferBeginInfo);
 
     vk::BufferImageCopy bufferImageCopy(
         0,
@@ -228,32 +157,17 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
         }
     );
 
-    commandBufferPtrs[0]->copyBufferToImage(
+    p_commandBuffer->copyBufferToImage(
         *p_stagingBuffer,
         *p_image,
         vk::ImageLayout::eTransferDstOptimal,
         bufferImageCopy
     );
 
-    commandBufferPtrs[0]->end();
-
-    LOG_TRACE(
-        BUFFER,
-        "Submitting command buffer and waiting idly for it to "
-        "complete the copy of data from staging buffer to image"
+    quartz::rendering::BufferHelper::endAndSubmitVulkanCommandBufferUniquePtr(
+        graphicsQueue,
+        p_commandBuffer
     );
-
-    vk::SubmitInfo submitInfo(
-        0,
-        nullptr,
-        nullptr,
-        1,
-        &(*(commandBufferPtrs[0])),
-        0,
-        nullptr
-    );
-    graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
-    graphicsQueue.waitIdle();
 
     LOG_TRACE(BUFFER, "Successfully copied data");
 }

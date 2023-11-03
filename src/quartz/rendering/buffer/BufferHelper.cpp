@@ -228,6 +228,82 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
     return p_logicalBufferPhysicalMemory;
 }
 
+vk::UniqueCommandPool
+quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
+    const uint32_t graphicsQueueFamilyIndex,
+    const vk::UniqueDevice& p_logicalDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+
+    vk::CommandPoolCreateInfo commandPoolCreateInfo(
+        vk::CommandPoolCreateFlagBits::eTransient,
+        graphicsQueueFamilyIndex
+    );
+
+    vk::UniqueCommandPool p_commandPool =
+        p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
+
+    if (!p_commandPool) {
+        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
+        throw std::runtime_error("");
+    }
+
+    return p_commandPool;
+}
+
+vk::UniqueCommandBuffer
+quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::UniqueCommandPool& p_commandPool
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+
+    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
+        *p_commandPool,
+        vk::CommandBufferLevel::ePrimary,
+        1
+    );
+
+    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
+        p_logicalDevice->allocateCommandBuffersUnique(
+            commandBufferAllocateInfo
+        );
+
+    if (!(commandBufferPtrs[0])) {
+        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer");
+        throw std::runtime_error("");
+    }
+
+    vk::CommandBufferBeginInfo commandBufferBeginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+    );
+    commandBufferPtrs[0]->begin(commandBufferBeginInfo);
+
+    return std::move(commandBufferPtrs[0]);
+}
+
+void
+quartz::rendering::BufferHelper::endAndSubmitVulkanCommandBufferUniquePtr(
+    const vk::Queue& graphicsQueue,
+    const vk::UniqueCommandBuffer& p_commandBuffer
+) {
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+
+    p_commandBuffer->end();
+
+    vk::SubmitInfo submitInfo(
+        0,
+        nullptr,
+        nullptr,
+        1,
+        &(*p_commandBuffer),
+        0,
+        nullptr
+    );
+    graphicsQueue.submit(submitInfo, VK_NULL_HANDLE);
+    graphicsQueue.waitIdle();
+}
+
 vk::UniqueImage
 quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
     const vk::UniqueDevice& p_logicalDevice,
