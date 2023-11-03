@@ -61,7 +61,7 @@ private: // static functions
 
     // ----- command buffer things ----- //
 
-    static void endAndSubmitVulkanCommandBufferUniquePtr(
+    static void submitVulkanCommandBufferUniquePtr(
         const vk::Queue& graphicsQueue,
         const vk::UniqueCommandBuffer& p_commandBuffer
     );

@@ -229,13 +229,11 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
 }
 
 void
-quartz::rendering::BufferHelper::endAndSubmitVulkanCommandBufferUniquePtr(
+quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
     const vk::Queue& graphicsQueue,
     const vk::UniqueCommandBuffer& p_commandBuffer
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    p_commandBuffer->end();
 
     vk::SubmitInfo submitInfo(
         0,

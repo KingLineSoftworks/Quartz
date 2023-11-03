@@ -54,7 +54,9 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
         bufferCopyRegion
     );
 
-    quartz::rendering::BufferHelper::endAndSubmitVulkanCommandBufferUniquePtr(
+    p_commandBuffer->end();
+
+    quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
         graphicsQueue,
         p_commandBuffer
     );
