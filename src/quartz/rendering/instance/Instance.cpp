@@ -237,7 +237,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
 }
 
 vk::UniqueInstance
-quartz::rendering::Instance::createVulkanInstanceUniquePtr(
+quartz::rendering::Instance::createVulkanInstancePtr(
     const std::string &applicationName,
     const uint32_t applicationMajorVersion,
     const uint32_t applicationMinorVersion,
@@ -291,7 +291,7 @@ quartz::rendering::Instance::createVulkanInstanceUniquePtr(
 }
 
 vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
-quartz::rendering::Instance::createVulkanDebugUtilsMessengerUniquePtr(
+quartz::rendering::Instance::createVulkanDebugUtilsMessengerPtr(
     const vk::UniqueInstance& p_instance,
     const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
     const bool validationLayersEnabled
@@ -367,7 +367,7 @@ quartz::rendering::Instance::Instance(
         )
     ),
     mp_vulkanInstance(
-        quartz::rendering::Instance::createVulkanInstanceUniquePtr(
+        quartz::rendering::Instance::createVulkanInstancePtr(
         applicationName,
         applicationMajorVersion,
         applicationMinorVersion,
@@ -380,7 +380,7 @@ quartz::rendering::Instance::Instance(
         vkGetInstanceProcAddr
     ),
     mp_vulkanDebugMessenger(
-        quartz::rendering::Instance::createVulkanDebugUtilsMessengerUniquePtr(
+        quartz::rendering::Instance::createVulkanDebugUtilsMessengerPtr(
             mp_vulkanInstance,
             m_vulkanDispatchLoaderDynamic,
             validationLayersEnabled

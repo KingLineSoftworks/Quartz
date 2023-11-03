@@ -36,7 +36,7 @@ private: // static functions
     static std::vector<const char*> getEnabledPhysicalDeviceExtensionNames(
         const vk::PhysicalDevice& physicalDevice
     );
-    static vk::UniqueDevice createVulkanLogicalDeviceUniquePtr(
+    static vk::UniqueDevice createVulkanLogicalDevicePtr(
         const vk::PhysicalDevice& physicalDevice,
         const uint32_t graphicsQueueFamilyIndex,
         const std::vector<const char*>& validationLayerNames,

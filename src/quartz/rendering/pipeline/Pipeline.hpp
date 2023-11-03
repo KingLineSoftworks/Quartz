@@ -68,7 +68,7 @@ public: // member functions
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions
-    static vk::UniqueShaderModule createVulkanShaderModuleUniquePtr(
+    static vk::UniqueShaderModule createVulkanShaderModulePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
@@ -76,10 +76,10 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const uint32_t numBuffers
     );
-    static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutUniquePtr(
+    static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice
     );
-    static vk::UniqueDescriptorPool createVulkanDescriptorPoolUniquePtr(
+    static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t numDescriptorSets
     );
@@ -91,16 +91,16 @@ private: // static functions
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
         const quartz::rendering::Texture& texture
     );
-    static vk::UniqueRenderPass createVulkanRenderPassUniquePtr(
+    static vk::UniqueRenderPass createVulkanRenderPassPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const vk::Format& depthFormat
     );
-    static vk::UniquePipelineLayout createVulkanPipelineLayoutUniquePtr(
+    static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
     );
-    static vk::UniquePipeline createVulkanGraphicsPipelineUniquePtr(
+    static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
         const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,

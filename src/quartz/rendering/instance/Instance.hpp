@@ -26,7 +26,7 @@ public: // member functions
     USE_LOGGER(INSTANCE);
 
     const std::vector<const char*>& getValidationLayerNames() const { return m_validationLayerNames; }
-    const vk::UniqueInstance& getVulkanInstanceUniquePtr() const { return mp_vulkanInstance; }
+    const vk::UniqueInstance& getVulkanInstancePtr() const { return mp_vulkanInstance; }
 
 public: // static functions
     static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(
@@ -43,7 +43,7 @@ private: // static functions
     static std::vector<const char*> getEnabledInstanceExtensionNames(
         const bool validationLayersEnabled
     );
-    static vk::UniqueInstance createVulkanInstanceUniquePtr(
+    static vk::UniqueInstance createVulkanInstancePtr(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
         const uint32_t applicationMinorVersion,
@@ -51,7 +51,7 @@ private: // static functions
         const std::vector<const char*>& enabledValidationLayerNames,
         const std::vector<const char*>& enabledExtensionNames
     );
-    static vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> createVulkanDebugUtilsMessengerUniquePtr(
+    static vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> createVulkanDebugUtilsMessengerPtr(
         const vk::UniqueInstance& p_instance,
         const vk::DispatchLoaderDynamic& dispatchLoaderDynamic,
         const bool validationLayersEnabled

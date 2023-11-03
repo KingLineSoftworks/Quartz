@@ -43,7 +43,7 @@ quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
 
 
 vk::UniqueCommandPool
-quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
+quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::CommandPoolCreateFlags flags
@@ -67,7 +67,7 @@ quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
 }
 
 std::vector<vk::UniqueCommandBuffer>
-quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
+quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueCommandPool& p_commandPool,
     UNUSED const uint32_t desiredCommandBufferCount

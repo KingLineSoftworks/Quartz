@@ -67,7 +67,7 @@ public: // member functions
     );
 
 private: // static functions
-    static vk::UniqueSwapchainKHR createVulkanSwapchainUniquePtr(
+    static vk::UniqueSwapchainKHR createVulkanSwapchainPtr(
         const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueSurfaceKHR& p_surface,

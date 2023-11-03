@@ -36,7 +36,7 @@ private: // static functions
         const vk::UniqueBuffer& p_logicalBuffer,
         const vk::UniqueBuffer& p_logicalStagingBuffer
     );
-    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceDestinationMemoryUniquePtr(
+    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceDestinationMemoryPtr(
         const vk::PhysicalDevice& physicalDevice,
         const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,

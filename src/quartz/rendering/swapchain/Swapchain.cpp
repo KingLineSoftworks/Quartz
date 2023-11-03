@@ -9,7 +9,7 @@
 #include "quartz/rendering/window/Window.hpp"
 
 vk::UniqueSwapchainKHR
-quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
+quartz::rendering::Swapchain::createVulkanSwapchainPtr(
     const uint32_t graphicsQueueFamilyIndex,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueSurfaceKHR& p_surface,
@@ -214,7 +214,7 @@ quartz::rendering::Swapchain::Swapchain(
 ):
     m_shouldRecreate(false),
     mp_vulkanSwapchain(
-        quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
+        quartz::rendering::Swapchain::createVulkanSwapchainPtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingWindow.getVulkanSurfacePtr(),
@@ -253,14 +253,14 @@ quartz::rendering::Swapchain::Swapchain(
         )
     ),
     mp_vulkanDrawingCommandPool(
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             vk::CommandPoolCreateFlagBits::eResetCommandBuffer
         )
     ),
     m_vulkanDrawingCommandBufferPtrs(
-        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDrawingCommandPool,
             renderingPipeline.getMaxNumFramesInFlight()
@@ -342,7 +342,7 @@ quartz::rendering::Swapchain::recreate(
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     mp_vulkanSwapchain =
-        quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
+        quartz::rendering::Swapchain::createVulkanSwapchainPtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingWindow.getVulkanSurfacePtr(),
@@ -378,13 +378,13 @@ quartz::rendering::Swapchain::recreate(
             renderingPipeline.getVulkanRenderPassPtr()
         );
     mp_vulkanDrawingCommandPool =
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             vk::CommandPoolCreateFlagBits::eResetCommandBuffer
         );
     m_vulkanDrawingCommandBufferPtrs =
-        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDrawingCommandPool,
             renderingPipeline.getMaxNumFramesInFlight()

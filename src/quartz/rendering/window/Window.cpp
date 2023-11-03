@@ -91,7 +91,7 @@ quartz::rendering::Window::createGLFWwindowPtr(
 }
 
 vk::UniqueSurfaceKHR
-quartz::rendering::Window::createVulkanSurfaceUniquePtr(
+quartz::rendering::Window::createVulkanSurfacePtr(
     const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
     const vk::UniqueInstance& uniqueInstance
 ) {
@@ -330,9 +330,9 @@ quartz::rendering::Window::Window(
         )
     ),
     mp_vulkanSurface(
-        quartz::rendering::Window::createVulkanSurfaceUniquePtr(
+        quartz::rendering::Window::createVulkanSurfacePtr(
             mp_glfwWindow,
-            renderingInstance.getVulkanInstanceUniquePtr()
+            renderingInstance.getVulkanInstancePtr()
         )
     ),
     m_vulkanSurfaceCapabilities(
@@ -395,9 +395,9 @@ quartz::rendering::Window::recreate(
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    mp_vulkanSurface = quartz::rendering::Window::createVulkanSurfaceUniquePtr(
+    mp_vulkanSurface = quartz::rendering::Window::createVulkanSurfacePtr(
         mp_glfwWindow,
-        renderingInstance.getVulkanInstanceUniquePtr()
+        renderingInstance.getVulkanInstancePtr()
     );
 
     m_vulkanSurfaceCapabilities =

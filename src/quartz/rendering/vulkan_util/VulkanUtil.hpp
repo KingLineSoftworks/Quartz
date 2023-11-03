@@ -28,12 +28,12 @@ public: // static functions
 
     // ----- command pool and command buffer things ----- //
 
-    static vk::UniqueCommandPool createVulkanCommandPoolUniquePtr(
+    static vk::UniqueCommandPool createVulkanCommandPoolPtr(
         const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,
         const vk::CommandPoolCreateFlags flags
     );
-    static std::vector<vk::UniqueCommandBuffer> allocateVulkanCommandBufferUniquePtr(
+    static std::vector<vk::UniqueCommandBuffer> allocateVulkanCommandBufferPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueCommandPool& p_commandPool,
         const uint32_t desiredCommandBufferCount

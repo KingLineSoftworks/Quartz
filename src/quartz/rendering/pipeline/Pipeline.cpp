@@ -24,7 +24,7 @@ quartz::rendering::UniformBufferObject::UniformBufferObject(
 {}
 
 vk::UniqueShaderModule
-quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
+quartz::rendering::Pipeline::createVulkanShaderModulePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::string& filepath
 ) {
@@ -79,7 +79,7 @@ quartz::rendering::Pipeline::createUniformBuffers(
 }
 
 vk::UniqueDescriptorSetLayout
-quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
+quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
@@ -126,7 +126,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
 }
 
 vk::UniqueDescriptorPool
-quartz::rendering::Pipeline::createVulkanDescriptorPoolUniquePtr(
+quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t numDescriptorSets
 ) {
@@ -261,7 +261,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 }
 
 vk::UniqueRenderPass
-quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+quartz::rendering::Pipeline::createVulkanRenderPassPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::SurfaceFormatKHR& surfaceFormat,
     const vk::Format& depthFormat
@@ -352,7 +352,7 @@ quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
 }
 
 vk::UniquePipelineLayout
-quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
 ) {
@@ -380,7 +380,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
 }
 
 vk::UniquePipeline
-quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
     const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,
@@ -610,7 +610,7 @@ quartz::rendering::Pipeline::Pipeline(
         vk::DynamicState::eScissor
     }),
     mp_vulkanVertexShaderModule(
-        quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
+        quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             util::FileSystem::getAbsoluteFilepathInProject(
                 "shader.vert.spv"
@@ -618,7 +618,7 @@ quartz::rendering::Pipeline::Pipeline(
         )
     ),
     mp_vulkanFragmentShaderModule(
-        quartz::rendering::Pipeline::createVulkanShaderModuleUniquePtr(
+        quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             util::FileSystem::getAbsoluteFilepathInProject(
                 "shader.frag.spv"
@@ -632,32 +632,32 @@ quartz::rendering::Pipeline::Pipeline(
         )
     ),
     mp_vulkanDescriptorSetLayout(
-        quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutUniquePtr(
+        quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr()
         )
     ),
     m_vulkanDescriptorPoolPtr(
-        quartz::rendering::Pipeline::createVulkanDescriptorPoolUniquePtr(
+        quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_maxNumFramesInFlight
         )
     ),
     m_vulkanDescriptorSets(),
     mp_vulkanRenderPass(
-        quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+        quartz::rendering::Pipeline::createVulkanRenderPassPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingWindow.getVulkanSurfaceFormat(),
             renderingWindow.getVulkanDepthBufferFormat()
         )
     ),
     mp_vulkanPipelineLayout(
-        quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+        quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDescriptorSetLayout
         )
     ),
     mp_vulkanGraphicsPipeline(
-        quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+        quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_vulkanVertexInputBindingDescriptions,
             m_vulkanVertexInputAttributeDescriptions,
@@ -696,18 +696,18 @@ quartz::rendering::Pipeline::recreate(
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     mp_vulkanRenderPass =
-        quartz::rendering::Pipeline::createVulkanRenderPassUniquePtr(
+        quartz::rendering::Pipeline::createVulkanRenderPassPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             renderingWindow.getVulkanSurfaceFormat(),
             renderingWindow.getVulkanDepthBufferFormat()
         );
     mp_vulkanPipelineLayout =
-        quartz::rendering::Pipeline::createVulkanPipelineLayoutUniquePtr(
+        quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDescriptorSetLayout
         );
     mp_vulkanGraphicsPipeline =
-        quartz::rendering::Pipeline::createVulkanGraphicsPipelineUniquePtr(
+        quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_vulkanVertexInputBindingDescriptions,
             m_vulkanVertexInputAttributeDescriptions,

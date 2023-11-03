@@ -35,14 +35,14 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
     m_usageFlags(usageFlags),
     m_requiredMemoryProperties(requiredMemoryProperties),
     mp_vulkanLogicalBuffer(
-        quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
+        quartz::rendering::BufferUtil::createVulkanBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             m_usageFlags
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,

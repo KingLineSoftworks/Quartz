@@ -17,14 +17,14 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
             graphicsQueueFamilyIndex,
             p_logicalDevice,
             vk::CommandPoolCreateFlagBits::eTransient
         );
 
     vk::UniqueCommandBuffer p_commandBuffer = std::move(
-        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
             p_logicalDevice,
             p_commandPool,
             1
@@ -108,7 +108,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
 
     p_commandBuffer->end();
 
-    quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
+    quartz::rendering::BufferUtil::submitVulkanCommandBufferPtr(
         graphicsQueue,
         p_commandBuffer
     );
@@ -129,14 +129,14 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
             graphicsQueueFamilyIndex,
             p_logicalDevice,
             vk::CommandPoolCreateFlagBits::eTransient
         );
 
     vk::UniqueCommandBuffer p_commandBuffer = std::move(
-        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
             p_logicalDevice,
             p_commandPool,
             1
@@ -185,7 +185,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
 
     p_commandBuffer->end();
 
-    quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
+    quartz::rendering::BufferUtil::submitVulkanCommandBufferPtr(
         graphicsQueue,
         p_commandBuffer
     );
@@ -265,14 +265,14 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     m_format(format),
     m_tiling(tiling),
     mp_vulkanLogicalStagingBuffer(
-        quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
+        quartz::rendering::BufferUtil::createVulkanBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             vk::BufferUsageFlagBits::eTransferSrc
         )
     ),
     mp_vulkanPhysicalDeviceStagingMemory(
-        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryPtr(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,

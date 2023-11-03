@@ -61,7 +61,7 @@ private: // static functions
         const uint32_t heightPixels,
         const void* p_windowUser
     );
-    static vk::UniqueSurfaceKHR createVulkanSurfaceUniquePtr(
+    static vk::UniqueSurfaceKHR createVulkanSurfacePtr(
         const std::shared_ptr<const GLFWwindow>& p_GLFWwindow,
         const vk::UniqueInstance& p_instance
     );

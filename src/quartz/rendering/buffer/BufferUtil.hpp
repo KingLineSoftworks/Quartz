@@ -27,7 +27,7 @@ public: // static functions
     static std::string getUsageFlagsString(const vk::BufferUsageFlags bufferUsageFlags);
 
 private: // static functions
-    static vk::UniqueBuffer createVulkanBufferUniquePtr(
+    static vk::UniqueBuffer createVulkanBufferPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t bufferSizeBytes,
         const vk::BufferUsageFlags bufferUsageFlags
@@ -37,7 +37,7 @@ private: // static functions
         const vk::MemoryPropertyFlags requiredMemoryProperties,
         const vk::MemoryRequirements& memoryRequirements
     );
-    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceMemoryUniquePtr(
+    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceMemoryPtr(
         const vk::PhysicalDevice& physicalDevice,
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t sizeBytes,
@@ -50,7 +50,7 @@ private: // static functions
         const void* p_bufferData,
         vk::UniqueDeviceMemory& p_logicalBufferPhysicalMemory
     );
-    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+    static vk::UniqueDeviceMemory allocateVulkanPhysicalDeviceStagingMemoryPtr(
         const vk::PhysicalDevice& physicalDevice,
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t sizeBytes,
@@ -61,7 +61,7 @@ private: // static functions
 
     // ----- command buffer things ----- //
 
-    static void submitVulkanCommandBufferUniquePtr(
+    static void submitVulkanCommandBufferPtr(
         const vk::Queue& graphicsQueue,
         const vk::UniqueCommandBuffer& p_commandBuffer
     );

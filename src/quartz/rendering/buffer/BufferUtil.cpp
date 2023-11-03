@@ -44,7 +44,7 @@ quartz::rendering::BufferUtil::getUsageFlagsString(
 }
 
 vk::UniqueBuffer
-quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
+quartz::rendering::BufferUtil::createVulkanBufferPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
     const vk::BufferUsageFlags bufferUsageFlags
@@ -109,7 +109,7 @@ quartz::rendering::BufferUtil::chooseMemoryTypeIndex(
 
 
 vk::UniqueDeviceMemory
-quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
@@ -199,7 +199,7 @@ quartz::rendering::BufferUtil::populateVulkanPhysicalDeviceMemoryWithLocalData(
 }
 
 vk::UniqueDeviceMemory
-quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryPtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
@@ -210,7 +210,7 @@ quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePt
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
     vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
-        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(
             physicalDevice,
             p_logicalDevice,
             sizeBytes,
@@ -229,7 +229,7 @@ quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePt
 }
 
 void
-quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
+quartz::rendering::BufferUtil::submitVulkanCommandBufferPtr(
     const vk::Queue& graphicsQueue,
     const vk::UniqueCommandBuffer& p_commandBuffer
 ) {

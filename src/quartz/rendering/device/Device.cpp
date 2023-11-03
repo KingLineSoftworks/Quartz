@@ -172,7 +172,7 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
 }
 
 vk::UniqueDevice
-quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
+quartz::rendering::Device::createVulkanLogicalDevicePtr(
     const vk::PhysicalDevice& physicalDevice,
     const uint32_t graphicsQueueFamilyIndex,
     const std::vector<const char*>& validationLayerNames,
@@ -235,7 +235,7 @@ quartz::rendering::Device::Device(
 ) :
     m_vulkanPhysicalDevice(
         quartz::rendering::Device::getBestPhysicalDevice(
-            renderingInstance.getVulkanInstanceUniquePtr()
+            renderingInstance.getVulkanInstancePtr()
         )
     ),
     m_graphicsQueueFamilyIndex(
@@ -249,7 +249,7 @@ quartz::rendering::Device::Device(
         )
     ),
     mp_vulkanLogicalDevice(
-        quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
+        quartz::rendering::Device::createVulkanLogicalDevicePtr(
             m_vulkanPhysicalDevice,
             m_graphicsQueueFamilyIndex,
             renderingInstance.getValidationLayerNames(),
