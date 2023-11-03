@@ -18,6 +18,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const uint32_t imageWidth,
         const uint32_t imageHeight,
+        const uint32_t channelCount,
         const uint32_t sizeBytes,
         const vk::ImageUsageFlags usageFlags,
         const vk::Format format,
@@ -29,6 +30,7 @@ public: // member functions
 
     USE_LOGGER(BUFFER);
 
+    const vk::Format& getVulkanFormat() const { return m_format; }
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
 
 private: // static functions
@@ -64,6 +66,7 @@ private: // static functions
 private: // member variables
     uint32_t m_imageWidth;
     uint32_t m_imageHeight;
+    uint32_t m_channelCount;
     uint32_t m_sizeBytes;
     vk::ImageUsageFlags m_usageFlags;
     vk::Format m_format;

@@ -3,6 +3,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
 void
 quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
@@ -22,9 +23,10 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
     );
 
     vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
             graphicsQueueFamilyIndex,
-            p_logicalDevice
+            p_logicalDevice,
+            vk::CommandPoolCreateFlagBits::eTransient
         );
 
     vk::UniqueCommandBuffer p_commandBuffer =

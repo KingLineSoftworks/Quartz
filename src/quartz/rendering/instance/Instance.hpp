@@ -14,7 +14,6 @@ namespace rendering {
 
 class quartz::rendering::Instance {
 public: // member functions
-
     Instance(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
@@ -30,7 +29,6 @@ public: // member functions
     const vk::UniqueInstance& getVulkanInstanceUniquePtr() const { return mp_vulkanInstance; }
 
 public: // static functions
-
     static VKAPI_ATTR VkBool32 VKAPI_CALL vulkanDebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -39,9 +37,12 @@ public: // static functions
     );
 
 private: // static functions
-
-    static std::vector<const char*> getEnabledValidationLayerNames(const bool validationLayersEnabled);
-    static std::vector<const char*> getEnabledInstanceExtensionNames(const bool validationLayersEnabled);
+    static std::vector<const char*> getEnabledValidationLayerNames(
+        const bool validationLayersEnabled
+    );
+    static std::vector<const char*> getEnabledInstanceExtensionNames(
+        const bool validationLayersEnabled
+    );
     static vk::UniqueInstance createVulkanInstanceUniquePtr(
         const std::string& applicationName,
         const uint32_t applicationMajorVersion,
@@ -57,7 +58,6 @@ private: // static functions
     );
 
 private: // member variables
-
     const std::vector<const char*> m_validationLayerNames;
     const std::vector<const char*> m_instanceExtensionNames;
     vk::UniqueInstance mp_vulkanInstance;

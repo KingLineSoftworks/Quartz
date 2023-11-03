@@ -1,33 +1,28 @@
 #====================================================================
-# The Rendering Swapchain library
+# The Rendering Depth Buffer library
 #====================================================================
 add_library(
-        QUARTZ_RENDERING_Swapchain
+        QUARTZ_RENDERING_DepthBuffer
         SHARED
-        Swapchain.cpp
+        DepthBuffer.cpp
 )
 
 target_compile_options(
-        QUARTZ_RENDERING_Swapchain
+        QUARTZ_RENDERING_DepthBuffer
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_RENDERING_Swapchain
+        QUARTZ_RENDERING_DepthBuffer
 
         PUBLIC
         vulkan
 
         PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
         QUARTZ_RENDERING_Buffer
         QUARTZ_RENDERING_Device
-        QUARTZ_RENDERING_DepthBuffer
-        QUARTZ_RENDERING_Model
-        QUARTZ_RENDERING_Pipeline
-        QUARTZ_RENDERING_Window
         QUARTZ_RENDERING_VulkanUtil
 )

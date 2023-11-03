@@ -151,9 +151,7 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
             std::string("VK_KHR_portability_subset")
         ) {
             LOG_TRACE(DEVICE, "    - portability subset extension found");
-            requiredPhysicalDeviceExtensionNames.push_back(
-                "VK_KHR_portability_subset"
-            );
+            requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
         }
 
         if (
@@ -166,9 +164,7 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
     }
 
     if (!swapchainExtensionFound) {
-        LOG_CRITICAL(
-            DEVICE, "{} extension not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        );
+        LOG_CRITICAL(DEVICE, "{} extension not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         throw std::runtime_error("");
     }
 
@@ -197,6 +193,7 @@ quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
         "Creating vk::DeviceQueueCreateInfo for each of the unique queue "
         "family indices"
     );
+
     std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos;
     for (const uint32_t queueFamilyIndex : uniqueQueueFamilyIndices) {
         LOG_TRACE(DEVICE, "  - Unique index {}", queueFamilyIndex);
@@ -222,7 +219,6 @@ quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
         &requestedPhysicalDeviceFeatures
     );
 
-    LOG_TRACE(DEVICE, "Attempting to create logical device");
     vk::UniqueDevice uniqueLogicalDevice =
         physicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
 
@@ -230,7 +226,6 @@ quartz::rendering::Device::createVulkanLogicalDeviceUniquePtr(
         LOG_CRITICAL(DEVICE, "Failed to create logical device");
         throw std::runtime_error("");
     }
-    LOG_TRACE(DEVICE, "Successfully created logical device");
 
     return uniqueLogicalDevice;
 }

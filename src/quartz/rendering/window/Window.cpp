@@ -61,21 +61,21 @@ quartz::rendering::Window::createGLFWwindowPtr(
             nullptr,
             nullptr
         ),
-        [](GLFWwindow* p_window) { glfwDestroyWindow(p_window); }
+        [] (GLFWwindow* p_window) {
+            glfwDestroyWindow(p_window);
+        }
     );
     LOG_TRACE(
         WINDOW, "Created GLFW window pointer at {}",
         static_cast<void*>(p_glfwWindow.get())
     );
     if (!p_glfwWindow) {
-        LOG_CRITICAL(
-            WINDOW, "Failed to create GLFW window pointer. Terminating"
-        );
+        LOG_CRITICAL(WINDOW, "Failed to create GLFW window pointer");
         glfwTerminate();
         throw std::runtime_error("");
     }
 
-    LOG_TRACE(WINDOW, "Setting GLFW window user pointer to this");
+    LOG_TRACE(WINDOW, "Setting GLFW window user pointer");
     glfwSetWindowUserPointer(
         p_glfwWindow.get(),
         const_cast<void*>(p_windowUser)
@@ -103,7 +103,6 @@ quartz::rendering::Window::createVulkanSurfaceUniquePtr(
 #endif
 
     VkSurfaceKHR rawVulkanSurface;
-    LOG_TRACE(WINDOW, "Attempting to create VkSurfaceKHR");
     VkResult createResult = glfwCreateWindowSurface(
         *uniqueInstance,
         const_cast<GLFWwindow*>(p_GLFWwindow.get()),
@@ -117,19 +116,15 @@ quartz::rendering::Window::createVulkanSurfaceUniquePtr(
         );
         throw std::runtime_error("");
     }
-    LOG_TRACE(WINDOW, "Successfully created VkSurfaceKHR");
 
     vk::UniqueSurfaceKHR p_surface(
         rawVulkanSurface,
         *uniqueInstance
     );
     if (!p_surface) {
-        LOG_CRITICAL(
-            WINDOW, "Failed to create vk::SurfaceKHR from VkSurfaceKHR"
-        );
+        LOG_CRITICAL(WINDOW, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
         throw std::runtime_error("");
     }
-    LOG_TRACE(WINDOW, "Successfully created vk::SurfaceKHR from VkSurfaceKHR");
 
     return p_surface;
 }
@@ -141,13 +136,11 @@ quartz::rendering::Window::getBestSurfaceFormat(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    LOG_TRACE(WINDOW, "Getting surface formats from physical device");
     std::vector<vk::SurfaceFormatKHR> surfaceFormats =
         physicalDevice.getSurfaceFormatsKHR(*p_surface);
+
     if (surfaceFormats.empty()) {
-        LOG_CRITICAL(
-            WINDOW, "No surface formats available for chosen physical device"
-        );
+        LOG_CRITICAL(WINDOW, "No surface formats available for chosen physical device");
         throw std::runtime_error("");
     }
 
@@ -173,17 +166,16 @@ quartz::rendering::Window::getBestPresentMode(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    LOG_TRACE(WINDOW, "Getting present modes from physical device");
     std::vector<vk::PresentModeKHR> presentModes =
         physicalDevice.getSurfacePresentModesKHR(*p_surface);
+
     if (presentModes.empty()) {
-        LOG_CRITICAL(
-            WINDOW, "No present modes available for chosen physical device"
-        );
+        LOG_CRITICAL(WINDOW, "No present modes available for chosen physical device");
         throw std::runtime_error("");
     }
 
     vk::PresentModeKHR bestPresentMode = vk::PresentModeKHR::eFifo;
+
     LOG_TRACE(WINDOW, "Choosing best present mode");
     for (const vk::PresentModeKHR& presentMode : presentModes) {
         if (presentMode == vk::PresentModeKHR::eMailbox) {
@@ -226,6 +218,7 @@ quartz::rendering::Window::getBestVulkanExtent(
         "Creating our own swap extent (current extent of surface capabilities "
         "has width of uint32_t max value, so we must handle manually)"
     );
+
     int32_t widthPixels;
     int32_t heightPixels;
     glfwGetFramebufferSize(
@@ -292,9 +285,8 @@ quartz::rendering::Window::getBestVulkanDepthBufferFormat(
         vk::FormatFeatureFlagBits::eDepthStencilAttachment;
 
     for (const vk::Format& format : formatCandidates) {
-        vk::FormatProperties properties = physicalDevice.getFormatProperties(
-            format
-        );
+        vk::FormatProperties properties =
+            physicalDevice.getFormatProperties(format);
 
         if (
             tiling == vk::ImageTiling::eLinear &&

@@ -5,10 +5,10 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/depth_buffer/DepthBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
-#include "quartz/rendering/texture/DepthBuffer.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
 namespace quartz {
@@ -87,10 +87,6 @@ private: // static functions
         const std::vector<vk::UniqueImageView>& swapchainImageViewPtrs,
         const vk::UniqueImageView& p_depthBufferImageView,
         const vk::UniqueRenderPass& p_renderPass
-    );
-    static vk::UniqueCommandPool createVulkanCommandPoolUniquePtr(
-        const uint32_t graphicsQueueFamilyIndex,
-        const vk::UniqueDevice& p_logicalDevice
     );
     static std::vector<vk::UniqueCommandBuffer> createVulkanDrawingCommandBufferUniquePtrs(
         const vk::UniqueDevice& p_logicalDevice,

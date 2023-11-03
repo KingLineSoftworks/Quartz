@@ -27,22 +27,9 @@ public: // member functions
     const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanSampler; }
 
 private: // static functions
-    static uint32_t getWidth(
-        const std::string& filepath
-    );
-    static uint32_t getHeight(
-        const std::string& filepath
-    );
-    static uint32_t getChannelCount(
-        const std::string& filepath
-    );
     static quartz::rendering::StagedImageBuffer createImageBuffer(
         const quartz::rendering::Device& renderingDevice,
         const std::string& filepath
-    );
-    static vk::UniqueImageView createVulkanImageViewPtr(
-        const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::StagedImageBuffer& stagedImageBuffer
     );
     static vk::UniqueSampler createVulkanSamplerPtr(
         const quartz::rendering::Device& renderingDevice
@@ -50,9 +37,6 @@ private: // static functions
 
 private: // member variables
     const std::string m_filepath;
-    const uint32_t m_width;
-    const uint32_t m_height;
-    const uint32_t m_channelCount;
     quartz::rendering::StagedImageBuffer m_stagedImageBuffer;
     vk::UniqueImageView mp_vulkanImageView;
     vk::UniqueSampler mp_vulkanSampler;

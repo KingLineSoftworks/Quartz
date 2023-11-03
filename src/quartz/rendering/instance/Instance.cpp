@@ -84,8 +84,11 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
 
     std::vector<vk::LayerProperties> supportedLayerProperties =
         vk::enumerateInstanceLayerProperties();
+
     LOG_TRACE(
-        INSTANCE, "{} extensions available", supportedLayerProperties.size());
+        INSTANCE, "{} extensions available", supportedLayerProperties.size()
+    );
+
     for (
         const vk::LayerProperties& layerProperties :
         supportedLayerProperties
@@ -109,6 +112,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
         INSTANCE, "{} instance validation layers required",
         requiredValidationLayerNames.size()
     );
+
     for (
         const std::string& requiredValidationLayerName :
         requiredValidationLayerNames
@@ -116,10 +120,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
         LOG_TRACE(INSTANCE, "  - {}", requiredValidationLayerName);
 
         bool found = false;
-        for (
-            const vk::LayerProperties& layerProperties :
-            supportedLayerProperties
-        ) {
+        for (const vk::LayerProperties& layerProperties : supportedLayerProperties) {
             if (
                 layerProperties.layerName ==
                 std::string(requiredValidationLayerName)
@@ -153,10 +154,12 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
 
     std::vector<vk::ExtensionProperties> availableInstanceExtensionProperties =
         vk::enumerateInstanceExtensionProperties();
+
     LOG_TRACE(
         INSTANCE, "{} instance extensions available",
         availableInstanceExtensionProperties.size()
     );
+
     for (
         const vk::ExtensionProperties& extensionProperties :
         availableInstanceExtensionProperties
@@ -174,10 +177,12 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
     glfwExtensions = glfwGetRequiredInstanceExtensions(
         &glfwExtensionCount
     );
+
     LOG_TRACE(
         INSTANCE, "{} required instance extensions from glfw",
         glfwExtensionCount
     );
+
     std::vector<const char*> requiredInstanceExtensionNames(
         glfwExtensions,
         glfwExtensions + glfwExtensionCount
@@ -198,6 +203,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
         INSTANCE, "{} instance extensions required",
         requiredInstanceExtensionNames.size()
     );
+
     for (
         const char* requiredInstanceExtensionName :
         requiredInstanceExtensionNames
@@ -272,7 +278,6 @@ quartz::rendering::Instance::createVulkanInstanceUniquePtr(
         enabledExtensionNames
     );
 
-    LOG_TRACE(INSTANCE, "Attempting to create the vk::Instance");
     vk::UniqueInstance p_instance = vk::createInstanceUnique(
         instanceCreateInfo
     );
@@ -281,7 +286,6 @@ quartz::rendering::Instance::createVulkanInstanceUniquePtr(
         LOG_CRITICAL(INSTANCE, "Failed to create the vk::Instance");
         throw std::runtime_error("");
     }
-    LOG_TRACE(INSTANCE, "Successfully created the vk::Instance");
 
     return p_instance;
 }
@@ -328,7 +332,6 @@ quartz::rendering::Instance::createVulkanDebugUtilsMessengerUniquePtr(
         nullptr
     );
 
-    LOG_TRACE(INSTANCE, "Attempting to create vk::DebugUtilsMessengerEXT");
     vk::UniqueHandle<
         vk::DebugUtilsMessengerEXT,
         vk::DispatchLoaderDynamic
@@ -342,7 +345,6 @@ quartz::rendering::Instance::createVulkanDebugUtilsMessengerUniquePtr(
         LOG_CRITICAL(INSTANCE, "Failed to create vk::DebugUtilsMessengerEXT");
         throw std::runtime_error("");
     }
-    LOG_TRACE(INSTANCE, "Successfully created vk::DebugUtilsMessengerEXT");
 
     return p_debugUtilsMessenger;
 }

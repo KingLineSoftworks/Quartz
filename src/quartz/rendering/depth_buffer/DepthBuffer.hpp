@@ -28,16 +28,11 @@ public: // member functions
 
     void reset();
 
-    USE_LOGGER(TEXTURE);
+    USE_LOGGER(DEPTHBUFFER);
 
     const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
 
 private: // static functions
-    static vk::UniqueImageView createVulkanImageViewPtr(
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::Format format,
-        const vk::UniqueImage& p_image
-    );
 
 private: // member variables
     uint32_t m_imageWidth;

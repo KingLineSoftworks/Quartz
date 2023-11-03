@@ -39,8 +39,10 @@ public: // member functions
     const quartz::rendering::Window& getRenderingWindow() const { return m_renderingWindow; }
 
     void draw(const std::vector<quartz::rendering::Model>& models);
-    void recreateSwapchain();
     void finish();
+
+private: // member functions
+    void recreateSwapchain();
 
 private: // member variables
     quartz::rendering::Instance m_renderingInstance;

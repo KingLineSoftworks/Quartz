@@ -3,6 +3,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/BufferHelper.hpp"
 #include "quartz/rendering/buffer/StagedImageBuffer.hpp"
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
 void
 quartz::rendering::StagedImageBuffer::transitionImageLayout(
@@ -16,9 +17,10 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
             graphicsQueueFamilyIndex,
-            p_logicalDevice
+            p_logicalDevice,
+            vk::CommandPoolCreateFlagBits::eTransient
         );
 
     vk::UniqueCommandBuffer p_commandBuffer =
@@ -118,9 +120,10 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
             graphicsQueueFamilyIndex,
-            p_logicalDevice
+            p_logicalDevice,
+            vk::CommandPoolCreateFlagBits::eTransient
         );
 
     vk::UniqueCommandBuffer p_commandBuffer =
@@ -229,6 +232,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
+    const uint32_t channelCount,
     const uint32_t sizeBytes,
     const vk::ImageUsageFlags usageFlags,
     const vk::Format format,
@@ -237,6 +241,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
 ) :
     m_imageWidth(imageWidth),
     m_imageHeight(imageHeight),
+    m_channelCount(channelCount),
     m_sizeBytes(sizeBytes),
     m_usageFlags(usageFlags),
     m_format(format),
@@ -296,6 +301,9 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     ),
     m_imageHeight(
         other.m_imageHeight
+    ),
+    m_channelCount(
+        other.m_channelCount
     ),
     m_sizeBytes(
         other.m_sizeBytes

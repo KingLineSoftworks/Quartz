@@ -17,7 +17,7 @@ namespace rendering {
 }
 
 class quartz::rendering::Window {
-public: // interface
+public: // member functions
     Window(
         const std::string& name,
         const uint32_t widthPixels,
@@ -44,7 +44,6 @@ public: // interface
     const vk::Format& getVulkanDepthBufferFormat() const { return m_vulkanDepthBufferFormat; }
 
     bool shouldClose() const;
-
     bool getWasResized() const { return m_wasResized; }
 
 public: // static functions

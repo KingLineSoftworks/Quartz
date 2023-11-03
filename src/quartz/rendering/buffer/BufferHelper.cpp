@@ -228,29 +228,6 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
     return p_logicalBufferPhysicalMemory;
 }
 
-vk::UniqueCommandPool
-quartz::rendering::BufferHelper::createVulkanCommandPoolUniquePtr(
-    const uint32_t graphicsQueueFamilyIndex,
-    const vk::UniqueDevice& p_logicalDevice
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::CommandPoolCreateInfo commandPoolCreateInfo(
-        vk::CommandPoolCreateFlagBits::eTransient,
-        graphicsQueueFamilyIndex
-    );
-
-    vk::UniqueCommandPool p_commandPool =
-        p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
-
-    if (!p_commandPool) {
-        LOG_CRITICAL(BUFFER, "Failed to create vk::CommandPool");
-        throw std::runtime_error("");
-    }
-
-    return p_commandPool;
-}
-
 vk::UniqueCommandBuffer
 quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -332,13 +309,11 @@ quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
         vk::SharingMode::eExclusive
     );
 
-    LOG_TRACE(BUFFER, "Attempting to create vk::Image");
     vk::UniqueImage p_vulkanImage = p_logicalDevice->createImageUnique(imageCreateInfo);
     if (!p_vulkanImage) {
         LOG_CRITICAL(BUFFER, "Failed to create vk::Image");
         throw std::runtime_error("");
     }
-    LOG_TRACE(BUFFER, "Successfully created vk::Image");
 
     return p_vulkanImage;
 }
@@ -367,14 +342,12 @@ quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
         chosenMemoryTypeIndex
     );
 
-    LOG_TRACE(BUFFER, "Attempting to create vk::DeviceMemory for vk::Image");
     vk::UniqueDeviceMemory p_vulkanPhysicalDeviceImageMemory =
         p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
     if (!p_vulkanPhysicalDeviceImageMemory) {
         LOG_CRITICAL(BUFFER, "Failed to create vk::DeviceMemory for vk::Image");
         throw std::runtime_error("");
     }
-    LOG_TRACE(BUFFER, "Successfully created vk::DeviceMemory for vk::Image");
 
     p_logicalDevice->bindImageMemory(
         *p_image,

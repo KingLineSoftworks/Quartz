@@ -2,44 +2,9 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/ImageBuffer.hpp"
+#include "quartz/rendering/depth_buffer/DepthBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/texture/DepthBuffer.hpp"
-
-vk::UniqueImageView
-quartz::rendering::DepthBuffer::createVulkanImageViewPtr(
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::Format format,
-    const vk::UniqueImage& p_image
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::ImageViewCreateInfo imageViewCreateInfo(
-        {},
-        *p_image,
-        vk::ImageViewType::e2D,
-        format,
-        {},
-        {
-            vk::ImageAspectFlagBits::eDepth,
-            0,
-            1,
-            0,
-            1
-        }
-    );
-
-    LOG_TRACE(TEXTURE, "Attempting to create vk::ImageView");
-    vk::UniqueImageView p_imageView =
-        p_logicalDevice->createImageViewUnique(imageViewCreateInfo);
-
-    if (!p_imageView) {
-        LOG_CRITICAL(TEXTURE, "Failed to create vk::ImageView");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(TEXTURE, "Successfully created vk::ImageView");
-
-    return p_imageView;
-}
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
 quartz::rendering::DepthBuffer::DepthBuffer(
     const quartz::rendering::Device& renderingDevice,
@@ -60,10 +25,12 @@ quartz::rendering::DepthBuffer::DepthBuffer(
         tiling
     ),
     mp_vulkanImageView(
-        quartz::rendering::DepthBuffer::createVulkanImageViewPtr(
+        quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
+            *(m_imageBuffer.getVulkanImagePtr()),
             m_imageBuffer.getVulkanFormat(),
-            m_imageBuffer.getVulkanImagePtr()
+            {},
+            vk::ImageAspectFlagBits::eDepth
         )
     )
 {

@@ -61,10 +61,6 @@ private: // static functions
 
     // ----- command buffer things ----- //
 
-    static vk::UniqueCommandPool createVulkanCommandPoolUniquePtr(
-        const uint32_t graphicsQueueFamilyIndex,
-        const vk::UniqueDevice& p_logicalDevice
-    );
     static vk::UniqueCommandBuffer allocateAndBeginVulkanCommandBufferUniquePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueCommandPool& p_commandPool

@@ -5,6 +5,7 @@
 
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
 vk::UniqueSwapchainKHR
@@ -49,7 +50,6 @@ quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
         true
     );
 
-    LOG_TRACE(SWAPCHAIN, "Attempting to create the vk::SwapchainKHR");
     vk::UniqueSwapchainKHR uniqueSwapchain =
         p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
 
@@ -57,7 +57,6 @@ quartz::rendering::Swapchain::createVulkanSwapchainUniquePtr(
         LOG_CRITICAL(SWAPCHAIN, "Failed to create the vk::SwapchainKHR");
         throw std::runtime_error("");
     }
-    LOG_TRACE(SWAPCHAIN, "Successfully created the vk::SwapchainKHR");
 
     return uniqueSwapchain;
 }
@@ -80,36 +79,16 @@ quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
         vk::ComponentSwizzle::eIdentity
     );
 
-    vk::ImageSubresourceRange imageSubresourceRange(
-        vk::ImageAspectFlagBits::eColor,
-        0,
-        1,
-        0,
-        1
-    );
-
-    for (uint32_t i = 0; i < swapchainImages.size(); ++i) {
-        vk::ImageViewCreateInfo imageViewCreateInfo(
-            {},
-            swapchainImages[i],
-            vk::ImageViewType::e2D,
-            surfaceFormat.format,
-            components,
-            imageSubresourceRange
+    for (const vk::Image& swapchainImage : swapchainImages) {
+        imageViewPtrs.push_back(
+            quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
+                p_logicalDevice,
+                swapchainImage,
+                surfaceFormat.format,
+                components,
+                vk::ImageAspectFlagBits::eColor
+            )
         );
-
-        vk::UniqueImageView p_imageView =
-            p_logicalDevice->createImageViewUnique(
-                imageViewCreateInfo
-            );
-
-        if (!p_imageView) {
-            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::ImageView {}", i);
-            throw std::runtime_error("");
-        }
-
-        LOG_TRACE(SWAPCHAIN, "Successfully created vk::ImageView {}", i);
-        imageViewPtrs.push_back(std::move(p_imageView));
     }
 
     LOG_TRACE(
@@ -160,41 +139,14 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
             LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Framebuffer {}", i);
             throw std::runtime_error("");
         }
-        LOG_TRACE(SWAPCHAIN, "Successfully created vk::Framebuffer {}", i);
     }
+
     LOG_TRACE(
-        SWAPCHAIN, "Successfully created {} vk::Framebuffer",
+        SWAPCHAIN, "Successfully created {} vk::Framebuffer(s)",
         framebufferPtrs.size()
     );
 
     return framebufferPtrs;
-}
-
-vk::UniqueCommandPool
-quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
-    const uint32_t graphicsQueueFamilyIndex,
-    const vk::UniqueDevice& p_logicalDevice
-) {
-    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "");
-
-    vk::CommandPoolCreateInfo commandPoolCreateInfo(
-        vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-        graphicsQueueFamilyIndex
-    );
-
-    LOG_TRACE(SWAPCHAIN, "Attempting to create vk::CommandPool");
-    vk::UniqueCommandPool p_commandPool =
-        p_logicalDevice->createCommandPoolUnique(
-            commandPoolCreateInfo
-        );
-
-    if (!p_commandPool) {
-        LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::CommandPool");
-        throw std::runtime_error("");
-    }
-    LOG_TRACE(SWAPCHAIN, "Successfully created vk::CommandPool");
-
-    return p_commandPool;
 }
 
 std::vector<vk::UniqueCommandBuffer>
@@ -276,7 +228,7 @@ quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         }
     }
     LOG_TRACE(
-        SWAPCHAIN, "Successfully created {} vk::Semaphores",
+        SWAPCHAIN, "Successfully created {} vk::Semaphore(s)",
         semaphorePtrs.size()
     );
 
@@ -312,7 +264,8 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
             throw std::runtime_error("");
         }
     }
-    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Fence", fencePtrs.size());
+
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Fence(s)", fencePtrs.size());
 
     return fencePtrs;
 }
@@ -363,9 +316,10 @@ quartz::rendering::Swapchain::Swapchain(
         )
     ),
     mp_vulkanDrawingCommandPool(
-        quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
-            renderingDevice.getVulkanLogicalDevicePtr()
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            vk::CommandPoolCreateFlagBits::eResetCommandBuffer
         )
     ),
     m_vulkanDrawingCommandBufferPtrs(
@@ -487,9 +441,10 @@ quartz::rendering::Swapchain::recreate(
             renderingPipeline.getVulkanRenderPassPtr()
         );
     mp_vulkanDrawingCommandPool =
-        quartz::rendering::Swapchain::createVulkanCommandPoolUniquePtr(
+        quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
-            renderingDevice.getVulkanLogicalDevicePtr()
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            vk::CommandPoolCreateFlagBits::eResetCommandBuffer
         );
     m_vulkanDrawingCommandBufferPtrs =
         quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
