@@ -16,12 +16,6 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
-    LOG_TRACE(
-        BUFFER,
-        "Memory is *NOT* allocated for a source buffer. Populating with data "
-        "from staged buffer instead"
-    );
-
     vk::UniqueCommandPool p_commandPool =
         quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
             graphicsQueueFamilyIndex,
@@ -29,11 +23,24 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
             vk::CommandPoolCreateFlagBits::eTransient
         );
 
-    vk::UniqueCommandBuffer p_commandBuffer =
-        quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
+    vk::UniqueCommandBuffer p_commandBuffer = std::move(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
             p_logicalDevice,
-            p_commandPool
-        );
+            p_commandPool,
+            1
+        )[0]
+    );
+
+    LOG_TRACE(
+        BUFFER,
+        "Memory is *NOT* allocated for a source buffer. Populating with data "
+        "from staged buffer instead"
+    );
+
+    vk::CommandBufferBeginInfo commandBufferBeginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+    );
+    p_commandBuffer->begin(commandBufferBeginInfo);
 
     vk::BufferCopy bufferCopyRegion(
         0,

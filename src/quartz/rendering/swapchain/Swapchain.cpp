@@ -149,71 +149,14 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
     return framebufferPtrs;
 }
 
-std::vector<vk::UniqueCommandBuffer>
-quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::UniqueCommandPool& p_commandPool,
-    const uint32_t desiredCommandBufferCount
-) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        SWAPCHAIN, "{} max frames in flight", desiredCommandBufferCount
-    );
-
-    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
-        *p_commandPool,
-        vk::CommandBufferLevel::ePrimary,
-        desiredCommandBufferCount
-    );
-
-    LOG_TRACE(
-        SWAPCHAIN, "Attempting to allocate {} vk::CommandBuffer",
-        desiredCommandBufferCount
-    );
-
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
-        p_logicalDevice->allocateCommandBuffersUnique(
-            commandBufferAllocateInfo
-        );
-
-    if (commandBufferPtrs.size() != desiredCommandBufferCount) {
-        LOG_CRITICAL(
-            SWAPCHAIN, "Allocated {} vk::CommandBuffer instead of {}",
-            commandBufferPtrs.size(), desiredCommandBufferCount
-        );
-        throw std::runtime_error("");
-    }
-
-    for (uint32_t i = 0; i < commandBufferPtrs.size(); ++i) {
-        if (!commandBufferPtrs[i]) {
-            LOG_CRITICAL(
-                SWAPCHAIN, "Failed to allocate vk::CommandBuffer {}", i
-            );
-            throw std::runtime_error("");
-        }
-    }
-    LOG_TRACE(
-        SWAPCHAIN, "Successfully allocated {} vk::CommandBuffer",
-        commandBufferPtrs.size()
-    );
-
-    return commandBufferPtrs;
-}
-
 std::vector<vk::UniqueSemaphore>
 quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t desiredSemaphoreCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        SWAPCHAIN, "{} semaphores desired", desiredSemaphoreCount
-    );
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} semaphores desired", desiredSemaphoreCount);
 
     std::vector<vk::UniqueSemaphore> semaphorePtrs(desiredSemaphoreCount);
-
-    LOG_TRACE(
-        SWAPCHAIN, "Attempting to create {} vk::Semaphore",
-        desiredSemaphoreCount
-    );
 
     for (uint32_t i = 0; i < desiredSemaphoreCount; ++i) {
         vk::SemaphoreCreateInfo semaphoreCreateInfo;
@@ -240,15 +183,9 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t desiredFenceCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        SWAPCHAIN, "{} max frames in flight", desiredFenceCount
-    );
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} max frames in flight", desiredFenceCount);
 
     std::vector<vk::UniqueFence> fencePtrs(desiredFenceCount);
-
-    LOG_TRACE(
-        SWAPCHAIN, "Attempting to create {} vk::Fence", desiredFenceCount
-    );
 
     for (uint32_t i = 0; i < desiredFenceCount; ++i) {
         vk::FenceCreateInfo fenceCreateInfo(
@@ -323,7 +260,7 @@ quartz::rendering::Swapchain::Swapchain(
         )
     ),
     m_vulkanDrawingCommandBufferPtrs(
-        quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDrawingCommandPool,
             renderingPipeline.getMaxNumFramesInFlight()
@@ -447,7 +384,7 @@ quartz::rendering::Swapchain::recreate(
             vk::CommandPoolCreateFlagBits::eResetCommandBuffer
         );
     m_vulkanDrawingCommandBufferPtrs =
-        quartz::rendering::Swapchain::createVulkanDrawingCommandBufferUniquePtrs(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDrawingCommandPool,
             renderingPipeline.getMaxNumFramesInFlight()

@@ -65,3 +65,47 @@ quartz::rendering::VulkanUtil::createVulkanCommandPoolUniquePtr(
 
     return p_commandPool;
 }
+
+std::vector<vk::UniqueCommandBuffer>
+quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
+    const vk::UniqueDevice& p_logicalDevice,
+    const vk::UniqueCommandPool& p_commandPool,
+    UNUSED const uint32_t desiredCommandBufferCount
+) {
+    LOG_FUNCTION_SCOPE_TRACE(
+        VULKANUTIL, "{} command buffers desired", desiredCommandBufferCount
+    );
+
+    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
+        *p_commandPool,
+        vk::CommandBufferLevel::ePrimary,
+        desiredCommandBufferCount
+    );
+
+    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
+        p_logicalDevice->allocateCommandBuffersUnique(
+            commandBufferAllocateInfo
+        );
+
+    if (commandBufferPtrs.size() != desiredCommandBufferCount) {
+        LOG_CRITICAL(
+            SWAPCHAIN, "Allocated {} vk::CommandBuffer(s) instead of {}",
+            commandBufferPtrs.size(), desiredCommandBufferCount
+        );
+        throw std::runtime_error("");
+    }
+
+    for (uint32_t i = 0; i < commandBufferPtrs.size(); ++i) {
+        if (!commandBufferPtrs[i]) {
+            LOG_CRITICAL(VULKANUTIL, "Failed to allocate vk::CommandBuffer {}", i);
+            throw std::runtime_error("");
+        }
+    }
+
+    LOG_TRACE(
+        VULKANUTIL, "Successfully allocated {} vk::CommandBuffer(s)",
+        commandBufferPtrs.size()
+    );
+
+    return commandBufferPtrs;
+}

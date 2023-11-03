@@ -23,17 +23,24 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
             vk::CommandPoolCreateFlagBits::eTransient
         );
 
-    vk::UniqueCommandBuffer p_commandBuffer =
-        quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
+    vk::UniqueCommandBuffer p_commandBuffer = std::move(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
             p_logicalDevice,
-            p_commandPool
-        );
+            p_commandPool,
+            1
+        )[0]
+    );
 
     LOG_TRACE(
         BUFFER,
         "Recording commands to newly created command buffer for transitioning "
         "image's layout"
     );
+
+    vk::CommandBufferBeginInfo commandBufferBeginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+    );
+    p_commandBuffer->begin(commandBufferBeginInfo);
 
     vk::AccessFlags sourceAccessMask;
     vk::AccessFlags destinationAccessMask;
@@ -126,17 +133,24 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
             vk::CommandPoolCreateFlagBits::eTransient
         );
 
-    vk::UniqueCommandBuffer p_commandBuffer =
-        quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
+    vk::UniqueCommandBuffer p_commandBuffer = std::move(
+        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferUniquePtr(
             p_logicalDevice,
-            p_commandPool
-        );
+            p_commandPool,
+            1
+        )[0]
+    );
 
     LOG_TRACE(
         BUFFER,
         "Recording commands to newly created command buffer for copying data "
         "from staged buffer to image"
     );
+
+    vk::CommandBufferBeginInfo commandBufferBeginInfo(
+        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
+    );
+    p_commandBuffer->begin(commandBufferBeginInfo);
 
     vk::BufferImageCopy bufferImageCopy(
         0,

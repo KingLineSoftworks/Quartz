@@ -88,11 +88,6 @@ private: // static functions
         const vk::UniqueImageView& p_depthBufferImageView,
         const vk::UniqueRenderPass& p_renderPass
     );
-    static std::vector<vk::UniqueCommandBuffer> createVulkanDrawingCommandBufferUniquePtrs(
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::UniqueCommandPool& p_commandPool,
-        const uint32_t desiredCommandBufferCount
-    );
     static std::vector<vk::UniqueSemaphore> createVulkanSemaphoresUniquePtrs(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t desiredSemaphoreCount

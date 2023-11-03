@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <vulkan/vulkan.hpp>
 
 namespace quartz {
@@ -30,5 +32,10 @@ public: // static functions
         const uint32_t graphicsQueueFamilyIndex,
         const vk::UniqueDevice& p_logicalDevice,
         const vk::CommandPoolCreateFlags flags
+    );
+    static std::vector<vk::UniqueCommandBuffer> allocateVulkanCommandBufferUniquePtr(
+        const vk::UniqueDevice& p_logicalDevice,
+        const vk::UniqueCommandPool& p_commandPool,
+        const uint32_t desiredCommandBufferCount
     );
 };

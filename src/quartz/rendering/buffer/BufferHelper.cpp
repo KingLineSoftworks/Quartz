@@ -228,37 +228,6 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
     return p_logicalBufferPhysicalMemory;
 }
 
-vk::UniqueCommandBuffer
-quartz::rendering::BufferHelper::allocateAndBeginVulkanCommandBufferUniquePtr(
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::UniqueCommandPool& p_commandPool
-) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
-
-    vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
-        *p_commandPool,
-        vk::CommandBufferLevel::ePrimary,
-        1
-    );
-
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
-        p_logicalDevice->allocateCommandBuffersUnique(
-            commandBufferAllocateInfo
-        );
-
-    if (!(commandBufferPtrs[0])) {
-        LOG_CRITICAL(BUFFER, "Failed to allocate vk::CommandBuffer");
-        throw std::runtime_error("");
-    }
-
-    vk::CommandBufferBeginInfo commandBufferBeginInfo(
-        vk::CommandBufferUsageFlagBits::eOneTimeSubmit
-    );
-    commandBufferPtrs[0]->begin(commandBufferBeginInfo);
-
-    return std::move(commandBufferPtrs[0]);
-}
-
 void
 quartz::rendering::BufferHelper::endAndSubmitVulkanCommandBufferUniquePtr(
     const vk::Queue& graphicsQueue,
