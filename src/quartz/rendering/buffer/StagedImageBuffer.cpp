@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/BufferHelper.hpp"
+#include "quartz/rendering/buffer/BufferUtil.hpp"
 #include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
@@ -108,7 +108,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
 
     p_commandBuffer->end();
 
-    quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
+    quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
         graphicsQueue,
         p_commandBuffer
     );
@@ -185,7 +185,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
 
     p_commandBuffer->end();
 
-    quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
+    quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
         graphicsQueue,
         p_commandBuffer
     );
@@ -208,7 +208,7 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory =
-        quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
+        quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
             physicalDevice,
             p_logicalDevice,
             p_image,
@@ -265,14 +265,14 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     m_format(format),
     m_tiling(tiling),
     mp_vulkanLogicalStagingBuffer(
-        quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+        quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             vk::BufferUsageFlagBits::eTransferSrc
         )
     ),
     mp_vulkanPhysicalDeviceStagingMemory(
-        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
@@ -285,7 +285,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
         )
     ),
     mp_vulkanImage(
-        quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
+        quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,

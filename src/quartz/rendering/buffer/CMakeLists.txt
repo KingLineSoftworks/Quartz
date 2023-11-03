@@ -4,7 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Buffer
         SHARED
-        BufferHelper.cpp
+        BufferUtil.cpp
         ImageBuffer.cpp
         LocallyMappedBuffer.cpp
         StagedBuffer.cpp

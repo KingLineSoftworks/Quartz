@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/BufferHelper.hpp"
+#include "quartz/rendering/buffer/BufferUtil.hpp"
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 
 void*
@@ -35,14 +35,14 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
     m_usageFlags(usageFlags),
     m_requiredMemoryProperties(requiredMemoryProperties),
     mp_vulkanLogicalBuffer(
-        quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+        quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             m_usageFlags
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,

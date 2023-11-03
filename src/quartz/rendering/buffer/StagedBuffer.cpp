@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/BufferHelper.hpp"
+#include "quartz/rendering/buffer/BufferUtil.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
@@ -56,7 +56,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
 
     p_commandBuffer->end();
 
-    quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
+    quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
         graphicsQueue,
         p_commandBuffer
     );
@@ -78,7 +78,7 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryUn
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
     
     vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
-        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
             physicalDevice,
             p_logicalDevice,
             sizeBytes,
@@ -107,14 +107,14 @@ quartz::rendering::StagedBuffer::StagedBuffer(
     m_sizeBytes(sizeBytes),
     m_usageFlags(usageFlags),
     mp_vulkanLogicalStagingBuffer(
-        quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+        quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             vk::BufferUsageFlagBits::eTransferSrc
         )
     ),
     mp_vulkanPhysicalDeviceStagingMemory(
-        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
@@ -127,7 +127,7 @@ quartz::rendering::StagedBuffer::StagedBuffer(
         )
     ),
     mp_vulkanLogicalBuffer(
-        quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+        quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_sizeBytes,
             vk::BufferUsageFlagBits::eTransferDst | m_usageFlags

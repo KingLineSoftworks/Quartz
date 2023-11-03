@@ -3,10 +3,10 @@
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/BufferHelper.hpp"
+#include "quartz/rendering/buffer/BufferUtil.hpp"
 
 std::string
-quartz::rendering::BufferHelper::getUsageFlagsString(
+quartz::rendering::BufferUtil::getUsageFlagsString(
     const vk::BufferUsageFlags bufferUsageFlags
 ) {
     std::string usageFlagsString = "[ ";
@@ -44,7 +44,7 @@ quartz::rendering::BufferHelper::getUsageFlagsString(
 }
 
 vk::UniqueBuffer
-quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
+quartz::rendering::BufferUtil::createVulkanBufferUniquePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
     const vk::BufferUsageFlags bufferUsageFlags
@@ -60,7 +60,7 @@ quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
 
     LOG_TRACE(
         BUFFER, "Attempting to create vk::Buffer ({} buffer)",
-        quartz::rendering::BufferHelper::getUsageFlagsString(bufferUsageFlags)
+        quartz::rendering::BufferUtil::getUsageFlagsString(bufferUsageFlags)
     );
     vk::UniqueBuffer p_buffer = p_logicalDevice->createBufferUnique(
         bufferCreateInfo
@@ -79,7 +79,7 @@ quartz::rendering::BufferHelper::createVulkanBufferUniquePtr(
 }
 
 uint32_t
-quartz::rendering::BufferHelper::chooseMemoryTypeIndex(
+quartz::rendering::BufferUtil::chooseMemoryTypeIndex(
     const vk::PhysicalDevice& physicalDevice,
     const vk::MemoryPropertyFlags requiredMemoryProperties,
     const vk::MemoryRequirements& memoryRequirements
@@ -109,7 +109,7 @@ quartz::rendering::BufferHelper::chooseMemoryTypeIndex(
 
 
 vk::UniqueDeviceMemory
-quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
@@ -122,7 +122,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
         p_logicalDevice->getBufferMemoryRequirements(*p_logicalBuffer);
 
     uint32_t chosenMemoryTypeIndex =
-        quartz::rendering::BufferHelper::chooseMemoryTypeIndex(
+        quartz::rendering::BufferUtil::chooseMemoryTypeIndex(
             physicalDevice,
             requiredMemoryProperties,
             memoryRequirements
@@ -156,7 +156,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
 }
 
 void
-quartz::rendering::BufferHelper::populateVulkanPhysicalDeviceMemoryWithLocalData(
+quartz::rendering::BufferUtil::populateVulkanPhysicalDeviceMemoryWithLocalData(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
     const void* p_bufferData,
@@ -199,7 +199,7 @@ quartz::rendering::BufferHelper::populateVulkanPhysicalDeviceMemoryWithLocalData
 }
 
 vk::UniqueDeviceMemory
-quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
+quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryUniquePtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t sizeBytes,
@@ -210,7 +210,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
 
     vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
-        quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceMemoryUniquePtr(
+        quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryUniquePtr(
             physicalDevice,
             p_logicalDevice,
             sizeBytes,
@@ -218,7 +218,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
             requiredMemoryProperties
         );
 
-    quartz::rendering::BufferHelper::populateVulkanPhysicalDeviceMemoryWithLocalData(
+    quartz::rendering::BufferUtil::populateVulkanPhysicalDeviceMemoryWithLocalData(
         p_logicalDevice,
         sizeBytes,
         p_bufferData,
@@ -229,7 +229,7 @@ quartz::rendering::BufferHelper::allocateVulkanPhysicalDeviceStagingMemoryUnique
 }
 
 void
-quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
+quartz::rendering::BufferUtil::submitVulkanCommandBufferUniquePtr(
     const vk::Queue& graphicsQueue,
     const vk::UniqueCommandBuffer& p_commandBuffer
 ) {
@@ -249,7 +249,7 @@ quartz::rendering::BufferHelper::submitVulkanCommandBufferUniquePtr(
 }
 
 vk::UniqueImage
-quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
+quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
@@ -286,7 +286,7 @@ quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
 }
 
 vk::UniqueDeviceMemory
-quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
+quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueImage& p_image,
@@ -298,7 +298,7 @@ quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
         p_logicalDevice->getImageMemoryRequirements(*p_image);
 
     uint32_t chosenMemoryTypeIndex =
-        quartz::rendering::BufferHelper::chooseMemoryTypeIndex(
+        quartz::rendering::BufferUtil::chooseMemoryTypeIndex(
             physicalDevice,
             requiredMemoryProperties,
             memoryRequirements

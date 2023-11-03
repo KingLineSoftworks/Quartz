@@ -10,18 +10,18 @@
 
 namespace quartz {
 namespace rendering {
-    class BufferHelper;
+    class BufferUtil;
     class ImageBuffer;
-    class ImageBufferHelper;
+    class ImageBufferUtil;
     class LocallyMappedBuffer;
     class StagedBuffer;
     class StagedImageBuffer;
 }
 }
 
-class quartz::rendering::BufferHelper {
+class quartz::rendering::BufferUtil {
 public: // member functions
-    BufferHelper() = delete;
+    BufferUtil() = delete;
 
 public: // static functions
     static std::string getUsageFlagsString(const vk::BufferUsageFlags bufferUsageFlags);
@@ -68,15 +68,15 @@ private: // static functions
 
 private: // friends
     friend class quartz::rendering::ImageBuffer;
-    friend class quartz::rendering::ImageBufferHelper;
+    friend class quartz::rendering::ImageBufferUtil;
     friend class quartz::rendering::LocallyMappedBuffer;
     friend class quartz::rendering::StagedBuffer;
     friend class quartz::rendering::StagedImageBuffer;
 };
 
-class quartz::rendering::ImageBufferHelper {
+class quartz::rendering::ImageBufferUtil {
 public: // member functions
-    ImageBufferHelper() = delete;
+    ImageBufferUtil() = delete;
 
 private: // static functions
     static vk::UniqueImage createVulkanImagePtr(

@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/BufferHelper.hpp"
+#include "quartz/rendering/buffer/BufferUtil.hpp"
 #include "quartz/rendering/buffer/ImageBuffer.hpp"
 
 quartz::rendering::ImageBuffer::ImageBuffer(
@@ -18,7 +18,7 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     m_format(format),
     m_tiling(tiling),
     mp_vulkanImage(
-        quartz::rendering::ImageBufferHelper::createVulkanImagePtr(
+        quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
@@ -28,7 +28,7 @@ quartz::rendering::ImageBuffer::ImageBuffer(
         )
     ),
     mp_vulkanPhysicalDeviceMemory(
-        quartz::rendering::ImageBufferHelper::allocateVulkanPhysicalDeviceImageMemory(
+        quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanImage,
