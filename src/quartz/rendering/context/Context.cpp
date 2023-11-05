@@ -66,6 +66,7 @@ quartz::rendering::Context::loadScene(
 
 void
 quartz::rendering::Context::draw(
+    const quartz::scene::Camera& camera,
     const std::vector<quartz::rendering::Model>& models
 ) {
     m_renderingSwapchain.waitForInFlightFence(
@@ -87,7 +88,10 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.updateUniformBuffer(m_renderingWindow);
+    m_renderingPipeline.updateCameraUniformBuffer(
+        camera,
+        m_renderingWindow
+    );
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,

@@ -24,13 +24,23 @@ int main() {
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(QUARTZ_MANAGERS);
     REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
+    REGISTER_LOGGER_GROUP(QUARTZ_SCENE);
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
     util::Logger::setLevels({
+        // demo app
         {"GENERAL", util::Logger::Level::info},
+
+        // util
         {"FILESYSTEM", util::Logger::Level::info},
-        {"APPLICATION", util::Logger::Level::debug},
-        {"INPUTMAN", util::Logger::Level::debug},
+
+        // quartz
+        {"APPLICATION", util::Logger::Level::info},
+
+        // rendering
+        {"INPUTMAN", util::Logger::Level::info},
+
+        // rendering
         {"BUFFER", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},
@@ -43,7 +53,10 @@ int main() {
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},
-        {"WINDOW", util::Logger::Level::debug},
+        {"WINDOW", util::Logger::Level::info},
+
+        // scene
+        {"CAMERA", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {

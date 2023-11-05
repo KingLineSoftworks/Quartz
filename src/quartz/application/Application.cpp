@@ -60,6 +60,7 @@ quartz::Application::Application(
     mp_inputManager(quartz::managers::InputManager::getPtr(
         m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
     )),
+    m_camera(),
     m_models(),
     m_shouldQuit(false),
     m_isPaused(false)
@@ -80,12 +81,26 @@ void quartz::Application::run() {
     );
     m_renderingContext.loadScene(m_models);
 
+    std::chrono::high_resolution_clock::time_point startTime =
+        std::chrono::high_resolution_clock::now();
+
+    std::chrono::high_resolution_clock::time_point currentTime;
+
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
+        currentTime = std::chrono::high_resolution_clock::now();
+
         // Capture input
         processInput();
 
         // Simulate the game world
+        m_camera.update(
+            static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().width),
+            static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height),
+            std::chrono::duration<float, std::chrono::seconds::period>(
+                currentTime - startTime
+            ).count()
+        );
 
         // Draw the game world
         draw();
@@ -115,5 +130,5 @@ quartz::Application::processInput() {
 
 void
 quartz::Application::draw() {
-    m_renderingContext.draw(m_models);
+    m_renderingContext.draw(m_camera, m_models);
 }

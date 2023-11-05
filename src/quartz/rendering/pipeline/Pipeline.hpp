@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "glm/mat4x4.hpp"
+#include <glm/mat4x4.hpp>
 
 #include <vulkan/vulkan.hpp>
 
@@ -11,19 +11,20 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
+#include "quartz/scene/camera/Camera.hpp"
 
 namespace quartz {
 namespace rendering {
-    struct UniformBufferObject;
+    struct CameraUniformBufferObject;
     class Pipeline;
 }
 }
 
-struct quartz::rendering::UniformBufferObject {
+struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
-    UniformBufferObject() = default;
+    CameraUniformBufferObject() = default;
 
-    UniformBufferObject(
+    CameraUniformBufferObject(
         glm::mat4 model_,
         glm::mat4 view_,
         glm::mat4 projection_
@@ -64,7 +65,10 @@ public: // member functions
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateUniformBuffer(const quartz::rendering::Window& renderingWindow);
+    void updateCameraUniformBuffer(
+        const quartz::scene::Camera& camera,
+        const quartz::rendering::Window& renderingWindow
+    );
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions

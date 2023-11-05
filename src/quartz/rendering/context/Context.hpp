@@ -11,6 +11,7 @@
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
+#include "quartz/scene/camera/Camera.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -40,7 +41,10 @@ public: // member functions
 
     quartz::rendering::Window& getRenderingWindow() { return m_renderingWindow; }
 
-    void draw(const std::vector<quartz::rendering::Model>& models);
+    void draw(
+        const quartz::scene::Camera& camera,
+        const std::vector<quartz::rendering::Model>& models
+    );
     void finish();
 
 private: // member functions

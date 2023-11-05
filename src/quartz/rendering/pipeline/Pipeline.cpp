@@ -1,6 +1,3 @@
-#include "glm/mat4x4.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
 #include <vulkan/vulkan.hpp>
 
 #include "util/file_system/FileSystem.hpp"
@@ -13,7 +10,7 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/mesh/Vertex.hpp"
 
-quartz::rendering::UniformBufferObject::UniformBufferObject(
+quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
     glm::mat4 model_,
     glm::mat4 view_,
     glm::mat4 projection_
@@ -66,7 +63,7 @@ quartz::rendering::Pipeline::createUniformBuffers(
         LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "Creating uniform buffer {}", i);
         buffers.emplace_back(
             renderingDevice,
-            sizeof(quartz::rendering::UniformBufferObject),
+            sizeof(quartz::rendering::CameraUniformBufferObject),
             vk::BufferUsageFlagBits::eUniformBuffer,
             (
                 vk::MemoryPropertyFlagBits::eHostVisible |
@@ -208,7 +205,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::rendering::UniformBufferObject)
+            sizeof(quartz::rendering::CameraUniformBufferObject)
         );
 
         vk::WriteDescriptorSet uniformBufferObjectDescriptorWriteSet(
@@ -743,46 +740,19 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 }
 
 void
-quartz::rendering::Pipeline::updateUniformBuffer(
-    const quartz::rendering::Window& renderingWindow
+quartz::rendering::Pipeline::updateCameraUniformBuffer(
+    const quartz::scene::Camera& camera,
+    UNUSED const quartz::rendering::Window& renderingWindow
 ) {
-    static std::chrono::high_resolution_clock::time_point startTime =
-        std::chrono::high_resolution_clock::now();
-
-    std::chrono::high_resolution_clock::time_point currentTime =
-        std::chrono::high_resolution_clock::now();
-
-    float executionDurationTimeCount =
-        std::chrono::duration<float, std::chrono::seconds::period>(
-            currentTime - startTime
-        ).count();
-
-    quartz::rendering::UniformBufferObject ubo;
-    ubo.model = glm::rotate(
-        glm::mat4(1.0f),
-        executionDurationTimeCount * glm::radians(90.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
+    quartz::rendering::CameraUniformBufferObject ubo(
+        camera.getModelMatrix(),
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix()
     );
-    ubo.view = glm::lookAt(
-        glm::vec3(2.0f, 2.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    );
-    ubo.projection = glm::perspective(
-        glm::radians(45.0f),
-    (
-            static_cast<float>(renderingWindow.getVulkanExtent().width) /
-            static_cast<float>(renderingWindow.getVulkanExtent().height)
-        ),
-        0.1f,
-        10.0f
-    );
-    // Because glm is meant for OpenGL where Y clip coordinate is inverted
-    ubo.projection[1][1] *= -1;
 
     memcpy(
         m_uniformBuffers[m_currentInFlightFrameIndex].getMappedLocalMemoryPtr(),
         &ubo,
-        sizeof(quartz::rendering::UniformBufferObject)
+        sizeof(quartz::rendering::CameraUniformBufferObject)
     );
 }

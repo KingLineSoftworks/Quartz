@@ -9,6 +9,7 @@
 #include "quartz/rendering/context/Context.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
+#include "quartz/scene/camera/Camera.hpp"
 
 namespace quartz {
     class Application;
@@ -48,6 +49,7 @@ private: // member variables
 
     quartz::rendering::Context m_renderingContext;
     std::shared_ptr<quartz::managers::InputManager> mp_inputManager;
+    quartz::scene::Camera m_camera;
     std::vector<quartz::rendering::Model> m_models;
 
     bool m_shouldQuit;
