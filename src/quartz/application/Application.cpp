@@ -60,8 +60,9 @@ quartz::Application::Application(
     mp_inputManager(quartz::managers::InputManager::getPtr(
         m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
     )),
-//    mp_inputManager(),
-    m_models()
+    m_models(),
+    m_shouldQuit(false),
+    m_isPaused(false)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -80,24 +81,39 @@ void quartz::Application::run() {
     m_renderingContext.loadScene(m_models);
 
     LOG_INFOthis("Beginning main loop");
-    while(!shouldQuit()) {
+    while(!m_shouldQuit) {
         // Capture input
-        mp_inputManager->collectInput();
+        processInput();
 
         // Simulate the game world
 
         // Draw the game world
-        m_renderingContext.draw(m_models);
+        draw();
     }
 
     LOG_INFOthis("Finishing");
     m_renderingContext.finish();
 }
 
-bool
-quartz::Application::shouldQuit() {
-    return
+void
+quartz::Application::processInput() {
+    mp_inputManager->collectInput();
+
+    m_shouldQuit =
         m_renderingContext.getRenderingWindow().shouldClose() ||
-        mp_inputManager->getKeypressed_q()
-    ;
+        mp_inputManager->getKeypressed_q();
+
+    if (mp_inputManager->getKeypressed_esc()) {
+        m_isPaused = !m_isPaused;
+
+        LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));
+
+        m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
+        mp_inputManager->setShouldCollectMouseInput(m_isPaused);
+    }
+}
+
+void
+quartz::Application::draw() {
+    m_renderingContext.draw(m_models);
 }

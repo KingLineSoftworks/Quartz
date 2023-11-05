@@ -46,6 +46,8 @@ public: // member functions
     bool shouldClose() const;
     bool getWasResized() const { return m_wasResized; }
 
+    void setShouldDisplayCursor(const bool shouldDisplayCursor);
+
 public: // static functions
     // The callback we give to glfw to use when it resizes the window
     static void glfwFramebufferSizeCallback(

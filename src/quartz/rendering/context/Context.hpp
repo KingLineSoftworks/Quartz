@@ -38,6 +38,8 @@ public: // member functions
     const quartz::rendering::Device& getRenderingDevice() const { return m_renderingDevice; }
     const quartz::rendering::Window& getRenderingWindow() const { return m_renderingWindow; }
 
+    quartz::rendering::Window& getRenderingWindow() { return m_renderingWindow; }
+
     void draw(const std::vector<quartz::rendering::Model>& models);
     void finish();
 

@@ -32,7 +32,8 @@ public: // member functions
     void run();
 
 private: // member functions
-    bool shouldQuit();
+    void processInput();
+    void draw();
 
 private: // static functions
     static std::vector<quartz::rendering::Model> loadModels(
@@ -48,4 +49,7 @@ private: // member variables
     quartz::rendering::Context m_renderingContext;
     std::shared_ptr<quartz::managers::InputManager> mp_inputManager;
     std::vector<quartz::rendering::Model> m_models;
+
+    bool m_shouldQuit;
+    bool m_isPaused;
 };

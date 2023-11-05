@@ -29,8 +29,8 @@ int main() {
     util::Logger::setLevels({
         {"GENERAL", util::Logger::Level::info},
         {"FILESYSTEM", util::Logger::Level::info},
-        {"APPLICATION", util::Logger::Level::info},
-        {"INPUTMAN", util::Logger::Level::trace},
+        {"APPLICATION", util::Logger::Level::debug},
+        {"INPUTMAN", util::Logger::Level::debug},
         {"BUFFER", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},
@@ -43,7 +43,7 @@ int main() {
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},
-        {"WINDOW", util::Logger::Level::info},
+        {"WINDOW", util::Logger::Level::debug},
     });
 
     if (shouldLogPreamble) {
