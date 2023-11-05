@@ -3,12 +3,12 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Instance.hpp"
-#include "quartz/rendering/context/Mesh.hpp"
-#include "quartz/rendering/context/Pipeline.hpp"
-#include "quartz/rendering/context/Swapchain.hpp"
-#include "quartz/rendering/context/Window.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/instance/Instance.hpp"
+#include "quartz/rendering/mesh/Mesh.hpp"
+#include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/swapchain/Swapchain.hpp"
+#include "quartz/rendering/window/Window.hpp"
 
 quartz::rendering::Context::Context(
     const std::string& applicationName,

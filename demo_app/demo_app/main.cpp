@@ -31,6 +31,7 @@ int main() {
         {"APPLICATION", util::Logger::Level::info},
         {"BUFFER", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
+        {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
         {"MESH", util::Logger::Level::info},
@@ -39,6 +40,7 @@ int main() {
         {"SWAPCHAIN", util::Logger::Level::info},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
+        {"VULKANUTIL", util::Logger::Level::info},
         {"WINDOW", util::Logger::Level::info},
     });
 

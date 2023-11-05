@@ -1,24 +1,21 @@
 #====================================================================
-# The Rendering Context library
+# The Rendering Swapchain library
 #====================================================================
 add_library(
-        QUARTZ_RENDERING_Context
+        QUARTZ_RENDERING_Swapchain
         SHARED
-        Context.cpp
+        Swapchain.cpp
 )
 
 target_compile_options(
-        QUARTZ_RENDERING_Context
+        QUARTZ_RENDERING_Swapchain
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_RENDERING_Context
+        QUARTZ_RENDERING_Swapchain
 
         PUBLIC
-        glfw
-        glm
-        tinyobjloader
         vulkan
 
         PUBLIC
@@ -28,11 +25,9 @@ target_link_libraries(
         PUBLIC
         QUARTZ_RENDERING_Buffer
         QUARTZ_RENDERING_Device
-        QUARTZ_RENDERING_Instance
-        QUARTZ_RENDERING_Mesh
+        QUARTZ_RENDERING_DepthBuffer
         QUARTZ_RENDERING_Model
         QUARTZ_RENDERING_Pipeline
-        QUARTZ_RENDERING_Swapchain
-        QUARTZ_RENDERING_Texture
         QUARTZ_RENDERING_Window
+        QUARTZ_RENDERING_VulkanUtil
 )

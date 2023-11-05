@@ -6,8 +6,8 @@
 #include "quartz/Loggers.hpp"
 
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/context/Model.hpp"
-#include "quartz/rendering/context/Texture.hpp"
+#include "quartz/rendering/model/Model.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
 
 namespace quartz {
     class Application;

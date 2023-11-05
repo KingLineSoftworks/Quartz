@@ -4,13 +4,13 @@
 #include <vector>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/context/Device.hpp"
-#include "quartz/rendering/context/Instance.hpp"
-#include "quartz/rendering/context/Model.hpp"
-#include "quartz/rendering/context/Pipeline.hpp"
-#include "quartz/rendering/context/Swapchain.hpp"
-#include "quartz/rendering/context/Texture.hpp"
-#include "quartz/rendering/context/Window.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/instance/Instance.hpp"
+#include "quartz/rendering/model/Model.hpp"
+#include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/swapchain/Swapchain.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
+#include "quartz/rendering/window/Window.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -39,8 +39,10 @@ public: // member functions
     const quartz::rendering::Window& getRenderingWindow() const { return m_renderingWindow; }
 
     void draw(const std::vector<quartz::rendering::Model>& models);
-    void recreateSwapchain();
     void finish();
+
+private: // member functions
+    void recreateSwapchain();
 
 private: // member variables
     quartz::rendering::Instance m_renderingInstance;
