@@ -22,6 +22,7 @@ int main() {
 
     REGISTER_LOGGER_GROUP(UTIL);
     REGISTER_LOGGER_GROUP(QUARTZ);
+    REGISTER_LOGGER_GROUP(QUARTZ_MANAGERS);
     REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
@@ -29,6 +30,7 @@ int main() {
         {"GENERAL", util::Logger::Level::info},
         {"FILESYSTEM", util::Logger::Level::info},
         {"APPLICATION", util::Logger::Level::info},
+        {"INPUTMAN", util::Logger::Level::trace},
         {"BUFFER", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},

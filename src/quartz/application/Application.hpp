@@ -5,6 +5,7 @@
 
 #include "quartz/Loggers.hpp"
 
+#include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/rendering/context/Context.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
@@ -30,6 +31,9 @@ public: // member functions
 
     void run();
 
+private: // member functions
+    bool shouldQuit();
+
 private: // static functions
     static std::vector<quartz::rendering::Model> loadModels(
         const quartz::rendering::Device& renderingDevice
@@ -42,6 +46,6 @@ private: // member variables
     const uint32_t m_patchVersion;
 
     quartz::rendering::Context m_renderingContext;
+    std::shared_ptr<quartz::managers::InputManager> mp_inputManager;
     std::vector<quartz::rendering::Model> m_models;
-
 };

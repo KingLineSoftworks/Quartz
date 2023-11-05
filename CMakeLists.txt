@@ -143,6 +143,7 @@ add_subdirectory("${UTIL_SOURCE_DIR}/logger")
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/managers/input_manager")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/buffer")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/context")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/device")

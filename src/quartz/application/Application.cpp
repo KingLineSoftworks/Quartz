@@ -57,6 +57,10 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
+    mp_inputManager(quartz::managers::InputManager::getPtr(
+        m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
+    )),
+//    mp_inputManager(),
     m_models()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -69,16 +73,16 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
-    LOG_TRACEthis("Loading scene");
+    LOG_INFOthis("Loading scene");
     m_models = quartz::Application::loadModels(
         m_renderingContext.getRenderingDevice()
     );
     m_renderingContext.loadScene(m_models);
 
-    LOG_TRACEthis("Beginning main loop");
-    while(!m_renderingContext.getRenderingWindow().shouldClose()) {
+    LOG_INFOthis("Beginning main loop");
+    while(!shouldQuit()) {
         // Capture input
-        glfwPollEvents();
+        mp_inputManager->collectInput();
 
         // Simulate the game world
 
@@ -86,6 +90,14 @@ void quartz::Application::run() {
         m_renderingContext.draw(m_models);
     }
 
-    LOG_TRACEthis("Finishing");
+    LOG_INFOthis("Finishing");
     m_renderingContext.finish();
+}
+
+bool
+quartz::Application::shouldQuit() {
+    return
+        m_renderingContext.getRenderingWindow().shouldClose() ||
+        mp_inputManager->getKeypressed_q()
+    ;
 }
