@@ -14,14 +14,14 @@
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
-std::vector<quartz::rendering::Model>
-quartz::Application::loadModels(
+std::vector<quartz::scene::Doodad>
+quartz::Application::loadDoodads(
     const quartz::rendering::Device& renderingDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "");
 
-    std::vector<quartz::rendering::Model> models;
-    models.emplace_back(
+    std::vector<quartz::scene::Doodad> doodads;
+    doodads.emplace_back(
         renderingDevice,
         util::FileSystem::getAbsoluteFilepathInProject(
             "viking_room.obj"
@@ -30,9 +30,9 @@ quartz::Application::loadModels(
             "viking_room.png"
         )
     );
-    LOG_TRACE(APPLICATION, "Loaded {} models", models.size());
+    LOG_TRACE(APPLICATION, "Loaded {} doodads", doodads.size());
 
-    return models;
+    return doodads;
 }
 
 quartz::Application::Application(
@@ -61,7 +61,7 @@ quartz::Application::Application(
         m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
     )),
     m_camera(),
-    m_models(),
+    m_doodads(),
     m_shouldQuit(false),
     m_isPaused(false)
 {
@@ -76,10 +76,10 @@ void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     LOG_INFOthis("Loading scene");
-    m_models = quartz::Application::loadModels(
+    m_doodads = quartz::Application::loadDoodads(
         m_renderingContext.getRenderingDevice()
     );
-    m_renderingContext.loadScene(m_models);
+    m_renderingContext.loadScene(m_doodads);
 
     std::chrono::high_resolution_clock::time_point startTime =
         std::chrono::high_resolution_clock::now();
@@ -94,13 +94,18 @@ void quartz::Application::run() {
         processInput();
 
         // Simulate the game world
+        const float executionDurationTimeCount =
+            std::chrono::duration<float, std::chrono::seconds::period>(
+                currentTime - startTime
+            ).count();
         m_camera.update(
             static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().width),
             static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height),
-            std::chrono::duration<float, std::chrono::seconds::period>(
-                currentTime - startTime
-            ).count()
+            executionDurationTimeCount
         );
+        for (quartz::scene::Doodad& doodad : m_doodads) {
+            doodad.update(executionDurationTimeCount);
+        }
 
         // Draw the game world
         draw();
@@ -130,5 +135,5 @@ quartz::Application::processInput() {
 
 void
 quartz::Application::draw() {
-    m_renderingContext.draw(m_camera, m_models);
+    m_renderingContext.draw(m_camera, m_doodads);
 }

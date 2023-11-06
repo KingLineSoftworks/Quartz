@@ -12,19 +12,20 @@
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
+#include "quartz/scene/doodad/Doodad.hpp"
 
 namespace quartz {
 namespace rendering {
-    struct CameraUniformBufferObject;
+    struct MVPUniformBufferObject;
     class Pipeline;
 }
 }
 
-struct quartz::rendering::CameraUniformBufferObject {
+struct quartz::rendering::MVPUniformBufferObject {
 public: // member functions
-    CameraUniformBufferObject() = default;
+    MVPUniformBufferObject() = default;
 
-    CameraUniformBufferObject(
+    MVPUniformBufferObject(
         glm::mat4 model_,
         glm::mat4 view_,
         glm::mat4 projection_
@@ -65,10 +66,8 @@ public: // member functions
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateCameraUniformBuffer(
-        const quartz::scene::Camera& camera,
-        const quartz::rendering::Window& renderingWindow
-    );
+    void updateMVPUniformBuffer(const quartz::scene::Camera& camera);
+    void updateModelUniformBuffer(const quartz::scene::Doodad& doodad);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions

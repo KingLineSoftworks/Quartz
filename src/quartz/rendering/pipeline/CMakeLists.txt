@@ -30,4 +30,5 @@ target_link_libraries(
         QUARTZ_RENDERING_Texture
         QUARTZ_RENDERING_Window
         QUARTZ_SCENE_Camera
+        QUARTZ_SCENE_Doodad
 )

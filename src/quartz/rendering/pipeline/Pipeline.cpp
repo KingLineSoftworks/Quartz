@@ -10,7 +10,7 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/mesh/Vertex.hpp"
 
-quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
+quartz::rendering::MVPUniformBufferObject::MVPUniformBufferObject(
     glm::mat4 model_,
     glm::mat4 view_,
     glm::mat4 projection_
@@ -63,7 +63,7 @@ quartz::rendering::Pipeline::createUniformBuffers(
         LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "Creating uniform buffer {}", i);
         buffers.emplace_back(
             renderingDevice,
-            sizeof(quartz::rendering::CameraUniformBufferObject),
+            sizeof(quartz::rendering::MVPUniformBufferObject),
             vk::BufferUsageFlagBits::eUniformBuffer,
             (
                 vk::MemoryPropertyFlagBits::eHostVisible |
@@ -205,7 +205,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::rendering::CameraUniformBufferObject)
+            sizeof(quartz::rendering::MVPUniformBufferObject)
         );
 
         vk::WriteDescriptorSet uniformBufferObjectDescriptorWriteSet(
@@ -740,11 +740,10 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 }
 
 void
-quartz::rendering::Pipeline::updateCameraUniformBuffer(
-    const quartz::scene::Camera& camera,
-    UNUSED const quartz::rendering::Window& renderingWindow
+quartz::rendering::Pipeline::updateMVPUniformBuffer(
+    const quartz::scene::Camera& camera
 ) {
-    quartz::rendering::CameraUniformBufferObject ubo(
+    quartz::rendering::MVPUniformBufferObject ubo(
         camera.getModelMatrix(),
         camera.getViewMatrix(),
         camera.getProjectionMatrix()
@@ -753,6 +752,13 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
     memcpy(
         m_uniformBuffers[m_currentInFlightFrameIndex].getMappedLocalMemoryPtr(),
         &ubo,
-        sizeof(quartz::rendering::CameraUniformBufferObject)
+        sizeof(quartz::rendering::MVPUniformBufferObject)
     );
+}
+
+void
+quartz::rendering::Pipeline::updateModelUniformBuffer(
+    UNUSED const quartz::scene::Doodad& doodad
+) {
+
 }

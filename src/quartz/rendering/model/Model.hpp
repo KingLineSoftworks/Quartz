@@ -18,7 +18,7 @@ class quartz::rendering::Model {
 public: // member functions
     Model(
         const quartz::rendering::Device& renderingDevice,
-        const std::string& objectFilePath,
+        const std::string& objectFilepath,
         const std::string& textureFilepath
     );
     Model(Model&& other);

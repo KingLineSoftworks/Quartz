@@ -12,6 +12,7 @@
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
+#include "quartz/scene/doodad/Doodad.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -32,7 +33,7 @@ public: // member functions
     );
     ~Context();
 
-    void loadScene(const std::vector<quartz::rendering::Model>& models);
+    void loadScene(const std::vector<quartz::scene::Doodad>& doodads);
 
     USE_LOGGER(CONTEXT);
 
@@ -43,7 +44,7 @@ public: // member functions
 
     void draw(
         const quartz::scene::Camera& camera,
-        const std::vector<quartz::rendering::Model>& models
+        const std::vector<quartz::scene::Doodad>& doodads
     );
     void finish();
 

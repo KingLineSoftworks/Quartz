@@ -92,7 +92,7 @@ quartz::managers::InputManager::getPtr(
     glfwSetInputMode(
         p_glfwWindow.get(),
         GLFW_CURSOR,
-        GLFW_CURSOR_DISABLED
+        GLFW_CURSOR_NORMAL
     );
 
     glfwSetCursorPosCallback(

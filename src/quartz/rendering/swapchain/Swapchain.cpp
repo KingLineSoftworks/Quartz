@@ -477,10 +477,9 @@ quartz::rendering::Swapchain::resetInFlightFence(
 }
 
 void
-quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
+quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::Pipeline& renderingPipeline,
-    const std::vector<quartz::rendering::Model>& models,
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
 ) {
@@ -564,24 +563,23 @@ quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
         0,
         scissor
     );
+}
 
+void
+quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
+    const quartz::rendering::Pipeline& renderingPipeline,
+    const quartz::rendering::Model& model,
+    const uint32_t inFlightFrameIndex
+) {
     uint32_t offset = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
-        *(models[0]
-            .getMesh()
-            .getStagedVertexBuffer()
-            .getVulkanLogicalBufferPtr()
-        ),
+        *(model.getMesh().getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
         offset
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(models[0]
-            .getMesh()
-            .getStagedIndexBuffer()
-            .getVulkanLogicalBufferPtr()
-        ),
+        *(model.getMesh().getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );
@@ -591,23 +589,24 @@ quartz::rendering::Swapchain::resetAndRecordDrawingCommandBuffer(
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
         0,
         1,
-        &(renderingPipeline
-            .getVulkanDescriptorSets()[inFlightFrameIndex]
-        ),
+        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
         0,
         nullptr
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        models[0].getMesh().getIndices().size(),
+        model.getMesh().getIndices().size(),
         1,
         0,
         0,
         0
     );
+}
 
-    // ----- finish up ----- //
-
+void
+quartz::rendering::Swapchain::endDrawingCommandBuffer(
+    const uint32_t inFlightFrameIndex
+) {
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->endRenderPass();
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->end();
