@@ -12,7 +12,8 @@ namespace scene {
 
 class quartz::scene::Camera {
 public: // member functions
-    Camera() = default;
+    Camera();
+    ~Camera();
 
     USE_LOGGER(CAMERA);
 
@@ -22,8 +23,7 @@ public: // member functions
 
     void update(
         const float windowWidth,
-        const float windowHeight,
-        const float executionDurationTimeCount
+        const float windowHeight
     );
 
 private: // static functions

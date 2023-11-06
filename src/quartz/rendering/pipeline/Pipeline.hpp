@@ -16,25 +16,36 @@
 
 namespace quartz {
 namespace rendering {
-    struct MVPUniformBufferObject;
+    struct CameraUniformBufferObject;
+    struct ModelUniformBufferObject;
     class Pipeline;
 }
 }
 
-struct quartz::rendering::MVPUniformBufferObject {
+struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
-    MVPUniformBufferObject() = default;
+    CameraUniformBufferObject() = default;
 
-    MVPUniformBufferObject(
-        glm::mat4 model_,
-        glm::mat4 view_,
-        glm::mat4 projection_
+    CameraUniformBufferObject(
+        const glm::mat4 viewMatrix_,
+        const glm::mat4 projectionMatrix_
     );
 
 public: // member variables
-    alignas(16) glm::mat4 model;
-    alignas(16) glm::mat4 view;
-    alignas(16) glm::mat4 projection;
+    alignas(16) glm::mat4 viewMatrix;
+    alignas(16) glm::mat4 projectionMatrix;
+};
+
+struct quartz::rendering::ModelUniformBufferObject {
+public: // member functions
+    ModelUniformBufferObject() = default;
+
+    ModelUniformBufferObject(
+        const glm::mat4 modelMatrix_
+    );
+
+public: // member variables
+    alignas(16) glm::mat4 modelMatrix;
 };
 
 class quartz::rendering::Pipeline {
@@ -66,7 +77,7 @@ public: // member functions
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateMVPUniformBuffer(const quartz::scene::Camera& camera);
+    void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateModelUniformBuffer(const quartz::scene::Doodad& doodad);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 

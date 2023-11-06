@@ -604,19 +604,14 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
 }
 
 void
-quartz::rendering::Swapchain::endDrawingCommandBuffer(
+quartz::rendering::Swapchain::endAndSubmitDrawingCommandBuffer(
+    const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
 ) {
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->endRenderPass();
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->end();
-}
 
-void
-quartz::rendering::Swapchain::submitDrawingCommandBuffer(
-    const quartz::rendering::Device& renderingDevice,
-    const uint32_t inFlightFrameIndex
-) {
     vk::PipelineStageFlags waitStageMask(
         vk::PipelineStageFlagBits::eColorAttachmentOutput
     );

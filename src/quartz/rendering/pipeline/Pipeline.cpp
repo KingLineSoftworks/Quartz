@@ -10,14 +10,18 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/mesh/Vertex.hpp"
 
-quartz::rendering::MVPUniformBufferObject::MVPUniformBufferObject(
-    glm::mat4 model_,
-    glm::mat4 view_,
-    glm::mat4 projection_
+quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
+    const glm::mat4 viewMatrix_,
+    const glm::mat4 projectionMatrix_
 ) :
-    model(model_),
-    view(view_),
-    projection(projection_)
+    viewMatrix(viewMatrix_),
+    projectionMatrix(projectionMatrix_)
+{}
+
+quartz::rendering::ModelUniformBufferObject::ModelUniformBufferObject(
+    const glm::mat4 modelMatrix_
+) :
+    modelMatrix(modelMatrix_)
 {}
 
 vk::UniqueShaderModule
@@ -63,7 +67,7 @@ quartz::rendering::Pipeline::createUniformBuffers(
         LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "Creating uniform buffer {}", i);
         buffers.emplace_back(
             renderingDevice,
-            sizeof(quartz::rendering::MVPUniformBufferObject),
+            sizeof(quartz::rendering::CameraUniformBufferObject),
             vk::BufferUsageFlagBits::eUniformBuffer,
             (
                 vk::MemoryPropertyFlagBits::eHostVisible |
@@ -205,7 +209,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::rendering::MVPUniformBufferObject)
+            sizeof(quartz::rendering::CameraUniformBufferObject)
         );
 
         vk::WriteDescriptorSet uniformBufferObjectDescriptorWriteSet(
@@ -740,19 +744,18 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 }
 
 void
-quartz::rendering::Pipeline::updateMVPUniformBuffer(
+quartz::rendering::Pipeline::updateCameraUniformBuffer(
     const quartz::scene::Camera& camera
 ) {
-    quartz::rendering::MVPUniformBufferObject ubo(
-        camera.getModelMatrix(),
+    quartz::rendering::CameraUniformBufferObject cameraUBO(
         camera.getViewMatrix(),
         camera.getProjectionMatrix()
     );
 
     memcpy(
         m_uniformBuffers[m_currentInFlightFrameIndex].getMappedLocalMemoryPtr(),
-        &ubo,
-        sizeof(quartz::rendering::MVPUniformBufferObject)
+        &cameraUBO,
+        sizeof(quartz::rendering::CameraUniformBufferObject)
     );
 }
 

@@ -60,10 +60,7 @@ public: // member functions
         const quartz::rendering::Model& model,
         const uint32_t inFlightFrameIndex
     );
-    void endDrawingCommandBuffer(
-        const uint32_t inFlightFrameIndex
-    );
-    void submitDrawingCommandBuffer(
+    void endAndSubmitDrawingCommandBuffer(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t inFlightFrameIndex
     );

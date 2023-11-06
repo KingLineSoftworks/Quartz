@@ -88,7 +88,7 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.updateMVPUniformBuffer(camera);
+    m_renderingPipeline.updateCameraUniformBuffer(camera);
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
@@ -102,7 +102,6 @@ quartz::rendering::Context::draw(
         availableSwapchainImageIndex
     );
 
-    // for each model
     for (const quartz::scene::Doodad& doodad : doodads) {
         m_renderingPipeline.updateModelUniformBuffer(doodad);
 
@@ -113,11 +112,7 @@ quartz::rendering::Context::draw(
         );
     }
 
-    m_renderingSwapchain.endDrawingCommandBuffer(
-        m_renderingPipeline.getCurrentInFlightFrameIndex()
-    );
-
-    m_renderingSwapchain.submitDrawingCommandBuffer(
+    m_renderingSwapchain.endAndSubmitDrawingCommandBuffer(
         m_renderingDevice,
         m_renderingPipeline.getCurrentInFlightFrameIndex()
     );

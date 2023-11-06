@@ -1,10 +1,13 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform UniformBufferObject {
-    mat4 model;
-    mat4 view;
-    mat4 projection;
-} ubo;
+layout(set = 0, binding = 0) uniform CameraUniformBufferObject {
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+} camera;
+
+layout(set = 0, binding = 1) uniform ModelUniformBufferObject {
+    mat4 modelMatrix;
+} model;
 
 layout(location = 0) in vec3 inWorldPosition;
 layout(location = 1) in vec3 inColor;
@@ -18,9 +21,9 @@ void main() {
     // ----- Set the position of the vertex in clip space ----- //
 
     gl_Position =
-        ubo.projection *
-        ubo.view *
-        ubo.model *
+        camera.projectionMatrix *
+        camera.viewMatrix *
+        model.modelMatrix *
         vec4(inWorldPosition, 1.0)
     ;
 
