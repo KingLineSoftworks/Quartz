@@ -64,7 +64,10 @@ quartz::rendering::Pipeline::createUniformBuffers(
     std::vector<quartz::rendering::LocallyMappedBuffer> buffers;
 
     for (uint32_t i = 0; i < numBuffers; ++i) {
-        LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "Creating uniform buffer {}", i);
+        LOG_SCOPE_CHANGE_TRACE(PIPELINE);
+        LOG_TRACE(PIPELINE, "Creating buffers {}", i);
+
+        LOG_TRACE(PIPELINE, "Creating camera buffer");
         buffers.emplace_back(
             renderingDevice,
             sizeof(quartz::rendering::CameraUniformBufferObject),
@@ -73,6 +76,17 @@ quartz::rendering::Pipeline::createUniformBuffers(
                 vk::MemoryPropertyFlagBits::eHostVisible |
                 vk::MemoryPropertyFlagBits::eHostCoherent
             )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating model buffer");
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::rendering::ModelUniformBufferObject),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )  
         );
     }
 
@@ -201,11 +215,19 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     }
 
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
+        LOG_SCOPE_CHANGE_TRACE(PIPELINE);
+
         if (!descriptorSets[i]) {
             LOG_CRITICAL(PIPELINE, "Failed to allocate vk::DescriptorSet {}", i);
             throw std::runtime_error("");
         }
+        LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
 
+        /**
+         * @todo Do this for both Camera and Model buffer for each in flight frame
+         * @todo Have some programmatic way of determining indices for Camera buffer and
+         * for Model buffer so we can easily determine what index they are for each frame
+         */
         vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
             *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
             0,

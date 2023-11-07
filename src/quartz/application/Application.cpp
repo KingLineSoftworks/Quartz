@@ -100,8 +100,7 @@ void quartz::Application::run() {
             ).count();
         m_camera.update(
             static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().width),
-            static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height),
-            executionDurationTimeCount
+            static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height)
         );
         for (quartz::scene::Doodad& doodad : m_doodads) {
             doodad.update(executionDurationTimeCount);

@@ -1,11 +1,11 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform CameraUniformBufferObject {
+layout(binding = 0) uniform CameraUniformBufferObject {
     mat4 viewMatrix;
     mat4 projectionMatrix;
 } camera;
 
-layout(set = 0, binding = 1) uniform ModelUniformBufferObject {
+layout(binding = 1) uniform ModelUniformBufferObject {
     mat4 modelMatrix;
 } model;
 
