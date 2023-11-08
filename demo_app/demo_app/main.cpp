@@ -35,7 +35,7 @@ int main() {
         {"FILESYSTEM", util::Logger::Level::info},
 
         // quartz
-        {"APPLICATION", util::Logger::Level::info},
+        {"APPLICATION", util::Logger::Level::trace},
 
         // rendering
         {"INPUTMAN", util::Logger::Level::trace},

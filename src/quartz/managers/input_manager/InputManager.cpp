@@ -12,14 +12,15 @@ quartz::managers::InputManager::InputManager(
 ) :
     mp_glfwWindow(p_glfwWindow),
     m_shouldCollectMouseInput(true),
-    m_keypressed_q(false),
-    m_keypressed_esc(false),
-    m_keypressed_w(false),
-    m_keypressed_a(false),
-    m_keypressed_s(false),
-    m_keypressed_d(false),
-    m_keypressed_space(false),
-    m_keypressed_shift(false),
+    m_keyDown_q(false),
+    m_keyDown_esc(false),
+    m_keyPressed_esc(false),
+    m_keyDown_w(false),
+    m_keyDown_a(false),
+    m_keyDown_s(false),
+    m_keyDown_d(false),
+    m_keyDown_space(false),
+    m_keyDown_shift(false),
     m_mouseUpdated(false),
     m_mousePosition_x(0.0f),
     m_mousePosition_y(0.0f),
@@ -43,15 +44,18 @@ quartz::managers::InputManager::collectInput() {
 
     glfwPollEvents();
 
-    m_keypressed_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
-    m_keypressed_esc = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_ESCAPE);
+    m_keyDown_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
 
-    m_keypressed_w = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_W);
-    m_keypressed_a = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_A);
-    m_keypressed_s = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_S);
-    m_keypressed_d = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_D);
-    m_keypressed_space = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_SPACE);
-    m_keypressed_shift = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_LEFT_SHIFT);
+    bool keyDown_esc = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_ESCAPE);
+    m_keyPressed_esc = keyDown_esc && !m_keyDown_esc;
+    m_keyDown_esc = keyDown_esc;
+
+    m_keyDown_w = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_W);
+    m_keyDown_a = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_A);
+    m_keyDown_s = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_S);
+    m_keyDown_d = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_D);
+    m_keyDown_space = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_SPACE);
+    m_keyDown_shift = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_LEFT_SHIFT);
 }
 
 void

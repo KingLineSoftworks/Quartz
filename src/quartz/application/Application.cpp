@@ -129,15 +129,15 @@ quartz::Application::processInput() {
 
     m_shouldQuit =
         m_renderingContext.getRenderingWindow().shouldClose() ||
-        mp_inputManager->getKeypressed_q();
+        mp_inputManager->getKeyDown_q();
 
-    if (mp_inputManager->getKeypressed_esc()) {
+    if (mp_inputManager->getKeyPressed_esc()) {
         m_isPaused = !m_isPaused;
 
         LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));
 
         m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
-        mp_inputManager->setShouldCollectMouseInput(m_isPaused);
+        mp_inputManager->setShouldCollectMouseInput(!m_isPaused);
     }
 }
 

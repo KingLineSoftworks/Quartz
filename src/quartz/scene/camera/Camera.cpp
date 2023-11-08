@@ -86,24 +86,24 @@ quartz::scene::Camera::update(
 
     const float movementSpeed = 1.0f * tickTimeDelta;
 
-    if (p_inputManager->getKeypressed_w()) {
+    if (p_inputManager->getKeyDown_w()) {
         m_worldPosition += movementSpeed * currentLookVector;
     }
-    if (p_inputManager->getKeypressed_s()) {
+    if (p_inputManager->getKeyDown_s()) {
         m_worldPosition -= movementSpeed * currentLookVector;
     }
 
-    if (p_inputManager->getKeypressed_d()) {
+    if (p_inputManager->getKeyDown_d()) {
         m_worldPosition += movementSpeed * currentRightVector;
     }
-    if (p_inputManager->getKeypressed_a()) {
+    if (p_inputManager->getKeyDown_a()) {
         m_worldPosition -= movementSpeed * currentRightVector;
     }
 
-    if (p_inputManager->getKeypressed_space()) {
+    if (p_inputManager->getKeyDown_space()) {
         m_worldPosition += movementSpeed * worldUpVector;
     }
-    if (p_inputManager->getKeypressed_shift()) {
+    if (p_inputManager->getKeyDown_shift()) {
         m_worldPosition -= movementSpeed * worldUpVector;
     }
 

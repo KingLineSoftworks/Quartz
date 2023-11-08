@@ -24,15 +24,16 @@ public: // member functions
 
     void collectInput();
 
-    bool getKeypressed_q() const { return m_keypressed_q; }
-    bool getKeypressed_esc() const { return m_keypressed_esc; }
+    bool getKeyDown_q() const { return m_keyDown_q; }
+    bool getKeyDown_esc() const { return m_keyDown_esc; }
+    bool getKeyPressed_esc() const { return m_keyPressed_esc; }
 
-    bool getKeypressed_w() const { return m_keypressed_w; }
-    bool getKeypressed_a() const { return m_keypressed_a; }
-    bool getKeypressed_s() const { return m_keypressed_s; }
-    bool getKeypressed_d() const { return m_keypressed_d; }
-    bool getKeypressed_space() const { return m_keypressed_space; }
-    bool getKeypressed_shift() const { return m_keypressed_shift; }
+    bool getKeyDown_w() const { return m_keyDown_w; }
+    bool getKeyDown_a() const { return m_keyDown_a; }
+    bool getKeyDown_s() const { return m_keyDown_s; }
+    bool getKeyDown_d() const { return m_keyDown_d; }
+    bool getKeyDown_space() const { return m_keyDown_space; }
+    bool getKeyDown_shift() const { return m_keyDown_shift; }
 
     float getMousePosition_x() const { return m_mousePosition_x; }
     float getMousePosition_y() const { return m_mousePosition_y; }
@@ -74,15 +75,16 @@ private: // member variables
 
     bool m_shouldCollectMouseInput;
 
-    bool m_keypressed_q;
-    bool m_keypressed_esc;
+    bool m_keyDown_q;
+    bool m_keyDown_esc;
+    bool m_keyPressed_esc;
 
-    bool m_keypressed_w;
-    bool m_keypressed_a;
-    bool m_keypressed_s;
-    bool m_keypressed_d;
-    bool m_keypressed_space;
-    bool m_keypressed_shift;
+    bool m_keyDown_w;
+    bool m_keyDown_a;
+    bool m_keyDown_s;
+    bool m_keyDown_d;
+    bool m_keyDown_space;
+    bool m_keyDown_shift;
 
     bool m_mouseUpdated;
     float m_mousePosition_x;
