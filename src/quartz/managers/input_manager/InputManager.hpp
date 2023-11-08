@@ -34,10 +34,10 @@ public: // member functions
     bool getKeypressed_space() const { return m_keypressed_space; }
     bool getKeypressed_shift() const { return m_keypressed_shift; }
 
-    float getCursorPosition_x() const { return m_cursorPosition_x; }
-    float getCursorPosition_y() const { return m_cursorPosition_y; }
-    float getCursorPositionOffset_x() const { return m_cursorPositionOffset_x; }
-    float getCursorPositionOffset_y() const { return m_cursorPositionOffset_y; }
+    float getMousePosition_x() const { return m_mousePosition_x; }
+    float getMousePosition_y() const { return m_mousePosition_y; }
+    float getMousePositionOffset_x() const { return m_mousePositionOffset_x; }
+    float getMousePositionOffset_y() const { return m_mousePositionOffset_y; }
 
     float getScrollOffset_x() const { return m_scrollOffset_x; }
     float getScrollOffset_y() const { return m_scrollOffset_y; }
@@ -50,10 +50,10 @@ private: // member functions
 public: // static functions
     static std::shared_ptr<InputManager> getPtr(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
-    static void cursorPositionInputCallback(
+    static void mousePositionInputCallback(
         GLFWwindow* p_glfwWindow,
-        double updatedCursorPosition_x,
-        double updatedCursorPosition_y
+        double updatedMousePosition_x,
+        double updatedMousePosition_y
     );
     static void scrollInputCallback(
         GLFWwindow* p_glfwWindow,
@@ -84,10 +84,10 @@ private: // member variables
     bool m_keypressed_space;
     bool m_keypressed_shift;
 
-    float m_cursorPosition_x;
-    float m_cursorPosition_y;
-    float m_cursorPositionOffset_x;
-    float m_cursorPositionOffset_y;
+    float m_mousePosition_x;
+    float m_mousePosition_y;
+    float m_mousePositionOffset_x;
+    float m_mousePositionOffset_y;
 
     float m_scrollOffset_x;
     float m_scrollOffset_y;

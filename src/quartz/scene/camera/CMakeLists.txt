@@ -20,4 +20,7 @@ target_link_libraries(
 
         PUBLIC
         UTIL_Logger
+
+        PUBLIC
+        QUARTZ_MANAGERS_InputManager
 )

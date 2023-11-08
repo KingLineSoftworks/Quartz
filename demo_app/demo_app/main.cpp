@@ -38,7 +38,7 @@ int main() {
         {"APPLICATION", util::Logger::Level::info},
 
         // rendering
-        {"INPUTMAN", util::Logger::Level::info},
+        {"INPUTMAN", util::Logger::Level::trace},
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
@@ -48,8 +48,8 @@ int main() {
         {"INSTANCE", util::Logger::Level::info},
         {"MESH", util::Logger::Level::info},
         {"MODEL", util::Logger::Level::info},
-        {"PIPELINE", util::Logger::Level::trace},
-        {"SWAPCHAIN", util::Logger::Level::trace},
+        {"PIPELINE", util::Logger::Level::info},
+        {"SWAPCHAIN", util::Logger::Level::info},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},

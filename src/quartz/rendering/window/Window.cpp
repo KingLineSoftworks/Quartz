@@ -1,4 +1,4 @@
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.hpp> // need vulkan first for glfwCreateWindowSurface
 
 #include <GLFW/glfw3.h>
 

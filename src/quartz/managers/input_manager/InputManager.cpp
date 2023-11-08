@@ -20,10 +20,10 @@ quartz::managers::InputManager::InputManager(
     m_keypressed_d(false),
     m_keypressed_space(false),
     m_keypressed_shift(false),
-    m_cursorPosition_x(0.0f),
-    m_cursorPosition_y(0.0f),
-    m_cursorPositionOffset_x(0.0f),
-    m_cursorPositionOffset_y(0.0f),
+    m_mousePosition_x(0.0f),
+    m_mousePosition_y(0.0f),
+    m_mousePositionOffset_x(0.0f),
+    m_mousePositionOffset_y(0.0f),
     m_scrollOffset_x(0.0f),
     m_scrollOffset_y(0.0f)
 {
@@ -34,23 +34,23 @@ quartz::managers::InputManager::InputManager(
 
 void
 quartz::managers::InputManager::collectInput() {
+    m_mousePositionOffset_x = 0.0f;
+    m_mousePositionOffset_y = 0.0f;
+
+    m_scrollOffset_x = 0.0f;
+    m_scrollOffset_y = 0.0f;
+
     glfwPollEvents();
 
     m_keypressed_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
     m_keypressed_esc = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_ESCAPE);
 
     m_keypressed_w = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_W);
-    m_keypressed_a = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_S);
-    m_keypressed_s = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_A);
+    m_keypressed_a = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_A);
+    m_keypressed_s = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_S);
     m_keypressed_d = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_D);
     m_keypressed_space = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_SPACE);
     m_keypressed_shift = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_LEFT_SHIFT);
-
-    m_cursorPositionOffset_x = 0.0f;
-    m_cursorPositionOffset_y = 0.0f;
-
-    m_scrollOffset_x = 0.0f;
-    m_scrollOffset_y = 0.0f;
 }
 
 void
@@ -92,12 +92,12 @@ quartz::managers::InputManager::getPtr(
     glfwSetInputMode(
         p_glfwWindow.get(),
         GLFW_CURSOR,
-        GLFW_CURSOR_NORMAL
+        GLFW_CURSOR_DISABLED
     );
 
     glfwSetCursorPosCallback(
         p_glfwWindow.get(),
-        quartz::managers::InputManager::cursorPositionInputCallback
+        quartz::managers::InputManager::mousePositionInputCallback
     );
 
     glfwSetScrollCallback(
@@ -109,10 +109,10 @@ quartz::managers::InputManager::getPtr(
 }
 
 void
-quartz::managers::InputManager::cursorPositionInputCallback(
+quartz::managers::InputManager::mousePositionInputCallback(
     GLFWwindow* p_glfwWindow,
-    double updatedCursorPosition_x,
-    double updatedCursorPosition_y
+    double updatedMousePosition_x,
+    double updatedMousePosition_y
 ) {
     std::shared_ptr<quartz::managers::InputManager> p_inputManager =
         quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
@@ -121,13 +121,13 @@ quartz::managers::InputManager::cursorPositionInputCallback(
         return;
     }
 
-    p_inputManager->m_cursorPositionOffset_x =
-        p_inputManager->m_cursorPosition_x - updatedCursorPosition_x;
-    p_inputManager->m_cursorPositionOffset_y =
-        p_inputManager->m_cursorPositionOffset_x - updatedCursorPosition_y;
+    p_inputManager->m_mousePositionOffset_x =
+        p_inputManager->m_mousePosition_x - updatedMousePosition_x;
+    p_inputManager->m_mousePositionOffset_y =
+        p_inputManager->m_mousePosition_y - updatedMousePosition_y;
 
-    p_inputManager->m_cursorPosition_x = updatedCursorPosition_x;
-    p_inputManager->m_cursorPosition_y = updatedCursorPosition_y;
+    p_inputManager->m_mousePosition_x = updatedMousePosition_x;
+    p_inputManager->m_mousePosition_y = updatedMousePosition_y;
 }
 
 void

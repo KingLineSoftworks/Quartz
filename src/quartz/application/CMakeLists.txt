@@ -16,6 +16,9 @@ target_link_libraries(
         QUARTZ_Application
 
         PUBLIC
+        glfw
+
+        PUBLIC
         UTIL_FileSystem
         UTIL_Logger
 

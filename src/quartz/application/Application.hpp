@@ -52,6 +52,8 @@ private: // member variables
     quartz::scene::Camera m_camera;
     std::vector<quartz::scene::Doodad> m_doodads;
 
+    const double m_targetTicksPerSecond;
+
     bool m_shouldQuit;
     bool m_isPaused;
 };

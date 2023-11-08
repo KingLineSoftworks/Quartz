@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include <vulkan/vulkan.hpp>
-
 #include <GLFW/glfw3.h>
+
+#include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/device/Device.hpp"

@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+#include <GLFW/glfw3.h>
+
 #include "util/file_system/FileSystem.hpp"
 
 #include "quartz/Loggers.hpp"
@@ -28,7 +30,8 @@ quartz::Application::loadDoodads(
         ),
         util::FileSystem::getAbsoluteFilepathInProject(
             "viking_room.png"
-        )
+        ),
+        glm::vec3{0.0f, 0.0f, 0.0f}
     );
     LOG_TRACE(APPLICATION, "Loaded {} doodads", doodads.size());
 
@@ -62,6 +65,7 @@ quartz::Application::Application(
     )),
     m_camera(),
     m_doodads(),
+    m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
     m_isPaused(false)
 {
@@ -75,35 +79,40 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
+    const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
+    double currentFrameTimeDelta = 0.0;
+    double previousFrameStartTime = 0.0f;
+    double currentFrameStartTime = glfwGetTime();
+    double frameTimeAccumulator = 0.0f;
+
     LOG_INFOthis("Loading scene");
     m_doodads = quartz::Application::loadDoodads(
         m_renderingContext.getRenderingDevice()
     );
     m_renderingContext.loadScene(m_doodads);
 
-    std::chrono::high_resolution_clock::time_point startTime =
-        std::chrono::high_resolution_clock::now();
-
-    std::chrono::high_resolution_clock::time_point currentTime;
-
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
-        currentTime = std::chrono::high_resolution_clock::now();
+        currentFrameStartTime = glfwGetTime();
+        currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
+        previousFrameStartTime = currentFrameStartTime;
+        frameTimeAccumulator += currentFrameTimeDelta;
+        while (frameTimeAccumulator >= targetTickTimeDelta) {
+            // Capture input
+            processInput();
 
-        // Capture input
-        processInput();
+            // Simulate the game world
+            m_camera.update(
+                static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().width),
+                static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height),
+                mp_inputManager,
+                targetTickTimeDelta
+            );
+            for (quartz::scene::Doodad& doodad : m_doodads) {
+                doodad.update(targetTickTimeDelta);
+            }
 
-        // Simulate the game world
-        const float executionDurationTimeCount =
-            std::chrono::duration<float, std::chrono::seconds::period>(
-                currentTime - startTime
-            ).count();
-        m_camera.update(
-            static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().width),
-            static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height)
-        );
-        for (quartz::scene::Doodad& doodad : m_doodads) {
-            doodad.update(executionDurationTimeCount);
+            frameTimeAccumulator -= targetTickTimeDelta;
         }
 
         // Draw the game world
