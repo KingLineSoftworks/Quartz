@@ -42,7 +42,7 @@ int main() {
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
-        {"CONTEXT", util::Logger::Level::trace},
+        {"CONTEXT", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
@@ -56,8 +56,8 @@ int main() {
         {"WINDOW", util::Logger::Level::info},
 
         // scene
-        {"CAMERA", util::Logger::Level::trace},
-        {"DOODAD", util::Logger::Level::trace},
+        {"CAMERA", util::Logger::Level::info},
+        {"DOODAD", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {
@@ -108,6 +108,7 @@ int main() {
     try {
         application.run();
     } catch (const std::exception& e) {
+        LOG_CRITICAL(GENERAL, "Caught exception");
         LOG_CRITICAL(GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }

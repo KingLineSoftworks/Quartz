@@ -27,6 +27,7 @@ public: // member functions
     USE_LOGGER(DOODAD);
 
     const quartz::rendering::Model& getModel() const { return m_model; }
+    const glm::mat4& getModelMatrix() const { return m_modelMatrix; }
 
     void update(const float executionDurationTimeCount);
 
