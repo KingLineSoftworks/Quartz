@@ -84,6 +84,7 @@ private: // member variables
     bool m_keypressed_space;
     bool m_keypressed_shift;
 
+    bool m_mouseUpdated;
     float m_mousePosition_x;
     float m_mousePosition_y;
     float m_mousePositionOffset_x;

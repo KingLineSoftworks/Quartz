@@ -20,6 +20,7 @@ quartz::managers::InputManager::InputManager(
     m_keypressed_d(false),
     m_keypressed_space(false),
     m_keypressed_shift(false),
+    m_mouseUpdated(false),
     m_mousePosition_x(0.0f),
     m_mousePosition_y(0.0f),
     m_mousePositionOffset_x(0.0f),
@@ -121,13 +122,16 @@ quartz::managers::InputManager::mousePositionInputCallback(
         return;
     }
 
-    p_inputManager->m_mousePositionOffset_x =
-        p_inputManager->m_mousePosition_x - updatedMousePosition_x;
-    p_inputManager->m_mousePositionOffset_y =
-        p_inputManager->m_mousePosition_y - updatedMousePosition_y;
+    if (p_inputManager->m_mouseUpdated) {
+        p_inputManager->m_mousePositionOffset_x =
+            p_inputManager->m_mousePosition_x - updatedMousePosition_x;
+        p_inputManager->m_mousePositionOffset_y =
+            p_inputManager->m_mousePosition_y - updatedMousePosition_y;
+    }
 
     p_inputManager->m_mousePosition_x = updatedMousePosition_x;
     p_inputManager->m_mousePosition_y = updatedMousePosition_y;
+    p_inputManager->m_mouseUpdated = true;
 }
 
 void
