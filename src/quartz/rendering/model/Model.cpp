@@ -77,7 +77,7 @@ quartz::rendering::Model::loadModel(
 
 quartz::rendering::Model::Model(
     const quartz::rendering::Device& renderingDevice,
-    UNUSED const std::string& objectFilePath,
+    UNUSED const std::string& objectFilepath,
     const std::string& textureFilepath
 ) :
     m_tinyobjAttribute(),
@@ -85,7 +85,7 @@ quartz::rendering::Model::Model(
     m_tinyobjMaterials(),
     m_loadedSuccessfully(
         quartz::rendering::Model::loadModel(
-            objectFilePath,
+            objectFilepath,
             m_tinyobjAttribute,
             m_tinyobjShapes,
             m_tinyobjMaterials

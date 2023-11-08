@@ -1,30 +1,27 @@
 #====================================================================
-# The Application library
+# The Scene Doodad library
 #====================================================================
 add_library(
-        QUARTZ_Application
+        QUARTZ_SCENE_Doodad
         SHARED
-        Application.cpp
+        Doodad.cpp
 )
 
 target_compile_options(
-        QUARTZ_Application
+        QUARTZ_SCENE_Doodad
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_Application
+        QUARTZ_SCENE_Doodad
 
         PUBLIC
-        glfw
+        glm
 
         PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
-        QUARTZ_MANAGERS_InputManager
-        QUARTZ_RENDERING_Context
-        QUARTZ_SCENE_Camera
-        QUARTZ_SCENE_Doodad
+        QUARTZ_RENDERING_Device
+        QUARTZ_RENDERING_Model
 )

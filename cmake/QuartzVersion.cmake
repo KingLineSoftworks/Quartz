@@ -11,4 +11,5 @@ endfunction()
 # -----=====***** the versions *****=====----- #
 
 #set_quartz_major_minor_patch_versions(0 0 0) # initialize project and get vulkan working
-set_quartz_major_minor_patch_versions(0 1 0) # load 3d models
+#set_quartz_major_minor_patch_versions(0 1 0) # load 3d models
+set_quartz_major_minor_patch_versions(0 1 1) # 3d camera movement

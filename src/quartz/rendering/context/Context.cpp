@@ -54,19 +54,20 @@ quartz::rendering::Context::~Context() {
 
 void
 quartz::rendering::Context::loadScene(
-    const std::vector<quartz::rendering::Model>& models
+    const std::vector<quartz::scene::Doodad>& doodads
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
-        models[0].getTexture()
+        doodads[0].getModel().getTexture()
     );
 }
 
 void
 quartz::rendering::Context::draw(
-    const std::vector<quartz::rendering::Model>& models
+    const quartz::scene::Camera& camera,
+    const std::vector<quartz::scene::Doodad>& doodads
 ) {
     m_renderingSwapchain.waitForInFlightFence(
         m_renderingDevice,
@@ -87,22 +88,31 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.updateUniformBuffer(m_renderingWindow);
+    m_renderingPipeline.updateCameraUniformBuffer(camera);
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
         m_renderingPipeline.getCurrentInFlightFrameIndex()
     );
 
-    m_renderingSwapchain.resetAndRecordDrawingCommandBuffer(
+    m_renderingSwapchain.resetAndBeginDrawingCommandBuffer(
         m_renderingWindow,
         m_renderingPipeline,
-        models,
         m_renderingPipeline.getCurrentInFlightFrameIndex(),
         availableSwapchainImageIndex
     );
 
-    m_renderingSwapchain.submitDrawingCommandBuffer(
+    for (const quartz::scene::Doodad& doodad : doodads) {
+        m_renderingPipeline.updateModelUniformBuffer(doodad);
+
+        m_renderingSwapchain.recordModelToDrawingCommandBuffer(
+            m_renderingPipeline,
+            doodad.getModel(),
+            m_renderingPipeline.getCurrentInFlightFrameIndex()
+        );
+    }
+
+    m_renderingSwapchain.endAndSubmitDrawingCommandBuffer(
         m_renderingDevice,
         m_renderingPipeline.getCurrentInFlightFrameIndex()
     );

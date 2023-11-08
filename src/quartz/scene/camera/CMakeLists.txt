@@ -1,30 +1,26 @@
 #====================================================================
-# The Application library
+# The Scene Camera library
 #====================================================================
 add_library(
-        QUARTZ_Application
+        QUARTZ_SCENE_Camera
         SHARED
-        Application.cpp
+        Camera.cpp
 )
 
 target_compile_options(
-        QUARTZ_Application
+        QUARTZ_SCENE_Camera
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_Application
+        QUARTZ_SCENE_Camera
 
         PUBLIC
-        glfw
+        glm
 
         PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
         QUARTZ_MANAGERS_InputManager
-        QUARTZ_RENDERING_Context
-        QUARTZ_SCENE_Camera
-        QUARTZ_SCENE_Doodad
 )

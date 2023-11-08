@@ -1,14 +1,14 @@
 #version 450
 
-layout(binding = 1) uniform sampler2D textureSampler;
+layout(binding = 2) uniform sampler2D textureSampler;
 
-layout(location = 0) in vec3 inFragmentColor;
-layout(location = 1) in vec2 inTextureCoordinate;
+layout(location = 0) in vec3 in_fragmentColor;
+layout(location = 1) in vec2 in_textureCoordinate;
 
-layout(location = 0) out vec4 outFragmentColor;
+layout(location = 0) out vec4 out_fragmentColor;
 
 void main() {
-    outFragmentColor = vec4(
-        inFragmentColor * texture(textureSampler, inTextureCoordinate).rgb, 1.0
+    out_fragmentColor = vec4(
+        in_fragmentColor * texture(textureSampler, in_textureCoordinate).rgb, 1.0
     );
 }

@@ -82,9 +82,13 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/glfw")
+add_compile_definitions(GLFW_INCLUDE_NONE)
 
 # glm
 add_subdirectory("${VENDOR_ROOT_DIR}/glm")
+add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
+add_compile_definitions(GLM_FORCE_RADIANS)
 
 # spdlog
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
@@ -143,6 +147,7 @@ add_subdirectory("${UTIL_SOURCE_DIR}/logger")
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/managers/input_manager")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/buffer")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/context")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/device")
@@ -155,6 +160,8 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/swapchain")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/texture")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/vulkan_util")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/camera")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/doodad")
 
 #====================================================================
 # The demo application

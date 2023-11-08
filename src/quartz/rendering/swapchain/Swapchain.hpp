@@ -49,14 +49,18 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const uint32_t inFlightFrameIndex
     );
-    void resetAndRecordDrawingCommandBuffer(
+    void resetAndBeginDrawingCommandBuffer(
         const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::Pipeline& renderingPipeline,
-        const std::vector<quartz::rendering::Model>& models,
         const uint32_t inFlightFrameIndex,
         const uint32_t availableSwapchainImageIndex
     );
-    void submitDrawingCommandBuffer(
+    void recordModelToDrawingCommandBuffer(
+        const quartz::rendering::Pipeline& renderingPipeline,
+        const quartz::rendering::Model& model,
+        const uint32_t inFlightFrameIndex
+    );
+    void endAndSubmitDrawingCommandBuffer(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t inFlightFrameIndex
     );

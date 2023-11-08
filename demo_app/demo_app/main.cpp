@@ -22,13 +22,25 @@ int main() {
 
     REGISTER_LOGGER_GROUP(UTIL);
     REGISTER_LOGGER_GROUP(QUARTZ);
+    REGISTER_LOGGER_GROUP(QUARTZ_MANAGERS);
     REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
+    REGISTER_LOGGER_GROUP(QUARTZ_SCENE);
     REGISTER_LOGGER_GROUP(DEMO_APP);
 
     util::Logger::setLevels({
+        // demo app
         {"GENERAL", util::Logger::Level::info},
+
+        // util
         {"FILESYSTEM", util::Logger::Level::info},
+
+        // quartz
         {"APPLICATION", util::Logger::Level::info},
+
+        // rendering
+        {"INPUTMAN", util::Logger::Level::info},
+
+        // rendering
         {"BUFFER", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},
@@ -42,6 +54,10 @@ int main() {
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},
         {"WINDOW", util::Logger::Level::info},
+
+        // scene
+        {"CAMERA", util::Logger::Level::info},
+        {"DOODAD", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {
@@ -92,6 +108,7 @@ int main() {
     try {
         application.run();
     } catch (const std::exception& e) {
+        LOG_CRITICAL(GENERAL, "Caught exception");
         LOG_CRITICAL(GENERAL, "{}", e.what());
         return EXIT_FAILURE;
     }

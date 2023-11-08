@@ -1,30 +1,23 @@
 #====================================================================
-# The Application library
+# The Managers InputManager library
 #====================================================================
 add_library(
-        QUARTZ_Application
+        QUARTZ_MANAGERS_InputManager
         SHARED
-        Application.cpp
+        InputManager.cpp
 )
 
 target_compile_options(
-        QUARTZ_Application
+        QUARTZ_MANAGERS_InputManager
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_Application
+        QUARTZ_MANAGERS_InputManager
 
         PUBLIC
         glfw
 
         PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
-
-        PUBLIC
-        QUARTZ_MANAGERS_InputManager
-        QUARTZ_RENDERING_Context
-        QUARTZ_SCENE_Camera
-        QUARTZ_SCENE_Doodad
 )

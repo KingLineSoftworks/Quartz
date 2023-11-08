@@ -1,6 +1,3 @@
-#include "glm/mat4x4.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
 #include <vulkan/vulkan.hpp>
 
 #include "util/file_system/FileSystem.hpp"
@@ -13,14 +10,18 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/mesh/Vertex.hpp"
 
-quartz::rendering::UniformBufferObject::UniformBufferObject(
-    glm::mat4 model_,
-    glm::mat4 view_,
-    glm::mat4 projection_
+quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
+    const glm::mat4 viewMatrix_,
+    const glm::mat4 projectionMatrix_
 ) :
-    model(model_),
-    view(view_),
-    projection(projection_)
+    viewMatrix(viewMatrix_),
+    projectionMatrix(projectionMatrix_)
+{}
+
+quartz::rendering::ModelUniformBufferObject::ModelUniformBufferObject(
+    const glm::mat4 modelMatrix_
+) :
+    modelMatrix(modelMatrix_)
 {}
 
 vk::UniqueShaderModule
@@ -63,15 +64,29 @@ quartz::rendering::Pipeline::createUniformBuffers(
     std::vector<quartz::rendering::LocallyMappedBuffer> buffers;
 
     for (uint32_t i = 0; i < numBuffers; ++i) {
-        LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "Creating uniform buffer {}", i);
+        LOG_SCOPE_CHANGE_TRACE(PIPELINE);
+        LOG_TRACE(PIPELINE, "Creating buffers for frame {}", i);
+
+        LOG_TRACE(PIPELINE, "Creating camera buffer {} at buffer index {}", i, buffers.size());
         buffers.emplace_back(
             renderingDevice,
-            sizeof(quartz::rendering::UniformBufferObject),
+            sizeof(quartz::rendering::CameraUniformBufferObject),
             vk::BufferUsageFlagBits::eUniformBuffer,
             (
                 vk::MemoryPropertyFlagBits::eHostVisible |
                 vk::MemoryPropertyFlagBits::eHostCoherent
             )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating model buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::rendering::ModelUniformBufferObject),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )  
         );
     }
 
@@ -84,7 +99,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
-    vk::DescriptorSetLayoutBinding uniformBufferLayoutBinding(
+    vk::DescriptorSetLayoutBinding cameraUniformBufferLayoutBinding(
         0,
         vk::DescriptorType::eUniformBuffer,
         1,
@@ -92,16 +107,25 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+    vk::DescriptorSetLayoutBinding modelUniformBufferLayoutBinding(
         1,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eVertex,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+        2,
         vk::DescriptorType::eCombinedImageSampler,
         1,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
 
-    std::array<vk::DescriptorSetLayoutBinding, 2> layoutBindings = {
-        uniformBufferLayoutBinding,
+    std::array<vk::DescriptorSetLayoutBinding, 3> layoutBindings = {
+        cameraUniformBufferLayoutBinding,
+        modelUniformBufferLayoutBinding,
         textureSamplerLayoutBinding
     };
 
@@ -132,7 +156,12 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} descriptor sets", numDescriptorSets);
 
-    vk::DescriptorPoolSize uniformBufferObjectPoolSize(
+    vk::DescriptorPoolSize cameraUniformBufferObjectPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+
+    vk::DescriptorPoolSize modelUniformBufferObjectPoolSize(
         vk::DescriptorType::eUniformBuffer,
         numDescriptorSets
     );
@@ -142,8 +171,9 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         numDescriptorSets
     );
 
-    std::array<vk::DescriptorPoolSize, 2> descriptorPoolSizes = {
-        uniformBufferObjectPoolSize,
+    std::array<vk::DescriptorPoolSize, 3> descriptorPoolSizes = {
+        cameraUniformBufferObjectPoolSize,
+        modelUniformBufferObjectPoolSize,
         textureSamplerPoolSize
     };
 
@@ -188,37 +218,71 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         descriptorSetLayouts.data()
     );
 
+    LOG_TRACE(
+        PIPELINE, "Attempting to allocate {} descriptor sets",
+        descriptorSetLayouts.size()
+    );
     std::vector<vk::DescriptorSet> descriptorSets =
         p_logicalDevice->allocateDescriptorSets(allocateInfo);
 
     if (descriptorSets.size() != descriptorSetLayouts.size()) {
         LOG_CRITICAL(
-            PIPELINE, "Created {} vk::DescriptorSet(s) instead of {}",
+            PIPELINE, "Allocated {} vk::DescriptorSet(s) instead of {}",
             descriptorSets.size(), descriptorSetLayouts.size()
         );
         throw std::runtime_error("");
     }
+    LOG_TRACE(
+        PIPELINE, "Successfully allocated {} vk::DescriptorSet(s)",
+        descriptorSets.size()
+    );
 
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
+        LOG_SCOPE_CHANGE_TRACE(PIPELINE);
+
         if (!descriptorSets[i]) {
             LOG_CRITICAL(PIPELINE, "Failed to allocate vk::DescriptorSet {}", i);
             throw std::runtime_error("");
         }
+        LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
 
-        vk::DescriptorBufferInfo uniformBufferObjectBufferInfo(
-            *(uniformBuffers[i].getVulkanLogicalBufferPtr()),
+        /**
+         * @todo Do this for both Camera and Model buffer for each in flight frame
+         * @todo Have some programmatic way of determining indices for Camera buffer and
+         * for Model buffer so we can easily determine what index they are for each frame
+         */
+
+        const uint32_t cameraIndex = i * 2;
+        vk::DescriptorBufferInfo cameraUBOBufferInfo(
+            *(uniformBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::rendering::UniformBufferObject)
+            sizeof(quartz::rendering::CameraUniformBufferObject)
         );
-
-        vk::WriteDescriptorSet uniformBufferObjectDescriptorWriteSet(
+        vk::WriteDescriptorSet cameraUBODescriptorWriteSet(
             descriptorSets[i],
             0,
             0,
             1,
             vk::DescriptorType::eUniformBuffer,
             {},
-            &uniformBufferObjectBufferInfo,
+            &cameraUBOBufferInfo,
+            {}
+        );
+
+        const uint32_t modelIndex = i * 2 + 1;
+        vk::DescriptorBufferInfo modelUBOBufferInfo(
+            *(uniformBuffers[modelIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::rendering::ModelUniformBufferObject)
+        );
+        vk::WriteDescriptorSet modelUBODescriptorWriteSet(
+            descriptorSets[i],
+            1,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &modelUBOBufferInfo,
             {}
         );
 
@@ -227,10 +291,9 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             *texture.getVulkanImageViewPtr(),
             vk::ImageLayout::eShaderReadOnlyOptimal
         );
-
         vk::WriteDescriptorSet textureDescriptorWriteSet(
             descriptorSets[i],
-            1,
+            2,
             0,
             1,
             vk::DescriptorType::eCombinedImageSampler,
@@ -239,8 +302,9 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        std::array<vk::WriteDescriptorSet, 2> writeDescriptorSets = {
-            uniformBufferObjectDescriptorWriteSet,
+        std::array<vk::WriteDescriptorSet, 3> writeDescriptorSets = {
+            cameraUBODescriptorWriteSet,
+            modelUBODescriptorWriteSet,
             textureDescriptorWriteSet
         };
 
@@ -743,46 +807,34 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 }
 
 void
-quartz::rendering::Pipeline::updateUniformBuffer(
-    const quartz::rendering::Window& renderingWindow
+quartz::rendering::Pipeline::updateCameraUniformBuffer(
+    const quartz::scene::Camera& camera
 ) {
-    static std::chrono::high_resolution_clock::time_point startTime =
-        std::chrono::high_resolution_clock::now();
-
-    std::chrono::high_resolution_clock::time_point currentTime =
-        std::chrono::high_resolution_clock::now();
-
-    float executionDurationTimeCount =
-        std::chrono::duration<float, std::chrono::seconds::period>(
-            currentTime - startTime
-        ).count();
-
-    quartz::rendering::UniformBufferObject ubo;
-    ubo.model = glm::rotate(
-        glm::mat4(1.0f),
-        executionDurationTimeCount * glm::radians(90.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
+    quartz::rendering::CameraUniformBufferObject cameraUBO(
+        camera.getViewMatrix(),
+        camera.getProjectionMatrix()
     );
-    ubo.view = glm::lookAt(
-        glm::vec3(2.0f, 2.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    );
-    ubo.projection = glm::perspective(
-        glm::radians(45.0f),
-    (
-            static_cast<float>(renderingWindow.getVulkanExtent().width) /
-            static_cast<float>(renderingWindow.getVulkanExtent().height)
-        ),
-        0.1f,
-        10.0f
-    );
-    // Because glm is meant for OpenGL where Y clip coordinate is inverted
-    ubo.projection[1][1] *= -1;
 
+    const uint32_t cameraIndex = m_currentInFlightFrameIndex * 2;
     memcpy(
-        m_uniformBuffers[m_currentInFlightFrameIndex].getMappedLocalMemoryPtr(),
-        &ubo,
-        sizeof(quartz::rendering::UniformBufferObject)
+        m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
+        &cameraUBO,
+        sizeof(quartz::rendering::CameraUniformBufferObject)
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateModelUniformBuffer(
+    const quartz::scene::Doodad& doodad
+) {
+    quartz::rendering::ModelUniformBufferObject modelUBO(
+        doodad.getModelMatrix()
+    );
+
+    const uint32_t modelIndex = m_currentInFlightFrameIndex * 2 + 1;
+    memcpy(
+        m_uniformBuffers[modelIndex].getMappedLocalMemoryPtr(),
+        &modelUBO,
+        sizeof(quartz::rendering::ModelUniformBufferObject)
     );
 }

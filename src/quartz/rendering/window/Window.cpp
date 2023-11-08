@@ -1,6 +1,6 @@
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.hpp> // need vulkan first for glfwCreateWindowSurface
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
@@ -424,8 +424,29 @@ quartz::rendering::Window::recreate(
     m_wasResized = false;
 }
 
-bool quartz::rendering::Window::shouldClose() const {
-    return static_cast<bool>(
+bool
+quartz::rendering::Window::shouldClose() const {
+    bool shouldClose = static_cast<bool>(
         glfwWindowShouldClose(mp_glfwWindow.get())
     );
+
+    if (shouldClose) {
+        LOG_INFOthis("Window should close");
+    }
+
+    return shouldClose;
 }
+
+void
+quartz::rendering::Window::setShouldDisplayCursor(
+    const bool shouldDisplayCursor
+) {
+    if (shouldDisplayCursor) {
+        LOG_TRACEthis("Displaying cursor");
+        glfwSetInputMode(mp_glfwWindow.get(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else {
+        LOG_TRACEthis("Hiding cursor");
+        glfwSetInputMode(mp_glfwWindow.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+}
+

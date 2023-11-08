@@ -53,3 +53,4 @@ build/
 # ----- 3d objects ----- #
 
 *.obj
+*.mtl

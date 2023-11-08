@@ -5,9 +5,11 @@
 
 #include "quartz/Loggers.hpp"
 
+#include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
+#include "quartz/scene/camera/Camera.hpp"
+#include "quartz/scene/doodad/Doodad.hpp"
 
 namespace quartz {
     class Application;
@@ -30,8 +32,12 @@ public: // member functions
 
     void run();
 
+private: // member functions
+    void processInput();
+    void draw();
+
 private: // static functions
-    static std::vector<quartz::rendering::Model> loadModels(
+    static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice
     );
 
@@ -42,6 +48,12 @@ private: // member variables
     const uint32_t m_patchVersion;
 
     quartz::rendering::Context m_renderingContext;
-    std::vector<quartz::rendering::Model> m_models;
+    std::shared_ptr<quartz::managers::InputManager> mp_inputManager;
+    quartz::scene::Camera m_camera;
+    std::vector<quartz::scene::Doodad> m_doodads;
 
+    const double m_targetTicksPerSecond;
+
+    bool m_shouldQuit;
+    bool m_isPaused;
 };
