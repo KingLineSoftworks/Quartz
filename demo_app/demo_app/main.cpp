@@ -35,10 +35,10 @@ int main() {
         {"FILESYSTEM", util::Logger::Level::info},
 
         // quartz
-        {"APPLICATION", util::Logger::Level::trace},
+        {"APPLICATION", util::Logger::Level::info},
 
         // rendering
-        {"INPUTMAN", util::Logger::Level::trace},
+        {"INPUTMAN", util::Logger::Level::info},
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
