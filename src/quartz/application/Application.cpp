@@ -131,7 +131,7 @@ quartz::Application::processInput() {
         m_renderingContext.getRenderingWindow().shouldClose() ||
         mp_inputManager->getKeyDown_q();
 
-    if (mp_inputManager->getKeyPressed_esc()) {
+    if (mp_inputManager->getKeyImpact_esc()) {
         m_isPaused = !m_isPaused;
 
         LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));

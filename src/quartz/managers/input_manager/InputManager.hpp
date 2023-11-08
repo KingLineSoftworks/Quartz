@@ -25,8 +25,9 @@ public: // member functions
     void collectInput();
 
     bool getKeyDown_q() const { return m_keyDown_q; }
+    bool getKeyImpact_q() const { return m_keyImpact_q; }
     bool getKeyDown_esc() const { return m_keyDown_esc; }
-    bool getKeyPressed_esc() const { return m_keyPressed_esc; }
+    bool getKeyImpact_esc() const { return m_keyImpact_esc; }
 
     bool getKeyDown_w() const { return m_keyDown_w; }
     bool getKeyDown_a() const { return m_keyDown_a; }
@@ -74,10 +75,12 @@ private: // member variables
     std::shared_ptr<GLFWwindow> mp_glfwWindow;
 
     bool m_shouldCollectMouseInput;
+    bool m_mousePositionInitialized;
 
     bool m_keyDown_q;
+    bool m_keyImpact_q;
     bool m_keyDown_esc;
-    bool m_keyPressed_esc;
+    bool m_keyImpact_esc;
 
     bool m_keyDown_w;
     bool m_keyDown_a;
@@ -86,7 +89,6 @@ private: // member variables
     bool m_keyDown_space;
     bool m_keyDown_shift;
 
-    bool m_mouseUpdated;
     float m_mousePosition_x;
     float m_mousePosition_y;
     float m_mousePositionOffset_x;

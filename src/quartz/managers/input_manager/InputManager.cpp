@@ -11,21 +11,27 @@ quartz::managers::InputManager::InputManager(
     const std::shared_ptr<GLFWwindow>& p_glfwWindow
 ) :
     mp_glfwWindow(p_glfwWindow),
+
     m_shouldCollectMouseInput(true),
+    m_mousePositionInitialized(false),
+
     m_keyDown_q(false),
+    m_keyImpact_q(false),
     m_keyDown_esc(false),
-    m_keyPressed_esc(false),
+    m_keyImpact_esc(false),
+
     m_keyDown_w(false),
     m_keyDown_a(false),
     m_keyDown_s(false),
     m_keyDown_d(false),
     m_keyDown_space(false),
     m_keyDown_shift(false),
-    m_mouseUpdated(false),
+
     m_mousePosition_x(0.0f),
     m_mousePosition_y(0.0f),
     m_mousePositionOffset_x(0.0f),
     m_mousePositionOffset_y(0.0f),
+
     m_scrollOffset_x(0.0f),
     m_scrollOffset_y(0.0f)
 {
@@ -44,10 +50,11 @@ quartz::managers::InputManager::collectInput() {
 
     glfwPollEvents();
 
-    m_keyDown_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
-
+    bool keyDown_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
+    m_keyDown_q = keyDown_q && !m_keyDown_q;
+    m_keyDown_q = keyDown_q;
     bool keyDown_esc = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_ESCAPE);
-    m_keyPressed_esc = keyDown_esc && !m_keyDown_esc;
+    m_keyImpact_esc = keyDown_esc && !m_keyDown_esc;
     m_keyDown_esc = keyDown_esc;
 
     m_keyDown_w = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_W);
@@ -61,6 +68,7 @@ quartz::managers::InputManager::collectInput() {
 void
 quartz::managers::InputManager::setShouldCollectMouseInput(const bool shouldCollect) {
     m_shouldCollectMouseInput = shouldCollect;
+    m_mousePositionInitialized = !shouldCollect;
 
     LOG_DEBUGthis("{} mouse input", (m_shouldCollectMouseInput ? "Enabling" : "Disabling"));
 }
@@ -126,7 +134,7 @@ quartz::managers::InputManager::mousePositionInputCallback(
         return;
     }
 
-    if (p_inputManager->m_mouseUpdated) {
+    if (p_inputManager->m_mousePositionInitialized) {
         p_inputManager->m_mousePositionOffset_x =
             p_inputManager->m_mousePosition_x - updatedMousePosition_x;
         p_inputManager->m_mousePositionOffset_y =
@@ -135,7 +143,7 @@ quartz::managers::InputManager::mousePositionInputCallback(
 
     p_inputManager->m_mousePosition_x = updatedMousePosition_x;
     p_inputManager->m_mousePosition_y = updatedMousePosition_y;
-    p_inputManager->m_mouseUpdated = true;
+    p_inputManager->m_mousePositionInitialized = true;
 }
 
 void
