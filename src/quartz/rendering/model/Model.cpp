@@ -1,7 +1,106 @@
+#include <string>
+
+#include <tiny_gltf.h>
+
 #define TINY0BJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
+
+#include "util/file_system/FileSystem.hpp"
 
 #include "quartz/rendering/model/Model.hpp"
+
+void
+quartz::rendering::Model::loadGLTFModel(
+    const quartz::rendering::Device& renderingDevice
+){
+    const std::string filepath = "/Users/keegankochis/Development/Quartz/vendor/tinygltf/models/Cube/Cube.gltf";
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "{}", filepath);
+
+    tinygltf::TinyGLTF gltfContext;
+    tinygltf::Model gltfModel;
+
+    std::string warningString;
+    std::string errorString;
+
+    const bool isBinaryFile =
+        util::FileSystem::getFileExtension(filepath) ==
+        "glb";
+
+    LOG_TRACE(MODEL, "Using {} gltf file at {}", isBinaryFile ? "binary" : "ascii", filepath);
+
+    const bool fileLoadedSuccessfully = isBinaryFile ?
+        gltfContext.LoadBinaryFromFile(
+            &gltfModel,
+            &errorString,
+            &warningString,
+            filepath.c_str()
+        ) :
+        gltfContext.LoadASCIIFromFile(
+            &gltfModel,
+            &errorString,
+            &warningString,
+            filepath.c_str()
+        );
+
+    if (!fileLoadedSuccessfully) {
+        LOG_CRITICAL(MODEL, "Failed to load model at {}", filepath);
+        LOG_CRITICAL(MODEL, "  - Warning : {}", warningString);
+        LOG_CRITICAL(MODEL, "  - Error   : {}", errorString);
+        throw std::runtime_error("");
+    }
+
+    if (!warningString.empty()) {
+        LOG_WARNING(
+            MODEL, "TinyGLTF::Load{}FromFile warning : {}",
+            isBinaryFile ? "Binary" : "ASCII", warningString
+        );
+    }
+
+    if (!errorString.empty()) {
+        LOG_ERROR(
+            MODEL, "TinyGLTF::Load{}FromFile error : {}",
+            isBinaryFile ? "Binary" : "ASCII", errorString
+        );
+    }
+
+    // ----- textures and their samplers ----- //
+
+    LOG_TRACE(MODEL, "Got {} texture samplers from gltf model", gltfModel.samplers.size());
+    LOG_TRACE(MODEL, "Got {} textures from gltf model", gltfModel.textures.size());
+
+    for (uint32_t i = 0; i < gltfModel.textures.size(); ++i) {
+        LOG_SCOPE_CHANGE_TRACE(MODEL);
+        const tinygltf::Texture& gltfTexture = gltfModel.textures[i];
+
+        LOG_TRACE(MODEL, "Creating texture {} with name \"{}\"", i, gltfTexture.name);
+
+        tinygltf::Sampler gltfSampler;
+        const int32_t samplerIndex = gltfTexture.sampler;
+        if (samplerIndex == -1) {
+            LOG_WARNING(MODEL, "No sampler specified. Using default one");
+            gltfSampler.minFilter = -1;
+            gltfSampler.magFilter = -1;
+            gltfSampler.wrapS = -1;
+            gltfSampler.wrapT = -1;
+            gltfSampler.wrapT = -1;
+        } else {
+            gltfSampler = gltfModel.samplers[samplerIndex];
+            LOG_TRACE(MODEL, "Using sampler {} with name \"{}\"", samplerIndex, gltfSampler.name);
+        }
+
+        const int32_t imageIndex = gltfTexture.source;
+        const tinygltf::Image& gltfImage = gltfModel.images[imageIndex];
+        LOG_TRACE(MODEL, "Using image {} with name \"{}\"", imageIndex, gltfImage.name);
+
+        UNUSED quartz::rendering::Texture texture(
+            renderingDevice,
+            gltfImage,
+            gltfSampler
+        );
+    }
+
+    // ---- materials ----- //
+}
 
 bool
 quartz::rendering::Model::loadModel(
@@ -65,12 +164,13 @@ quartz::rendering::Model::loadModel(
         totalShapeIndices += shape.mesh.indices.size();
     }
 
-    LOG_DEBUG(MODEL, "Loaded object at {}", filepath);
+    LOG_DEBUG(MODEL, "Loaded model at {}", filepath);
     LOG_DEBUG(MODEL, "  - {} attribute vertices", tinyobjAttribute.vertices.size());
     LOG_DEBUG(MODEL, "  - {} attribute normals", tinyobjAttribute.normals.size());
     LOG_DEBUG(MODEL, "  - {} attribute texture coordinates", tinyobjAttribute.texcoords.size());
     LOG_DEBUG(MODEL, "  - {} shapes", tinyobjShapes.size());
     LOG_DEBUG(MODEL, "    - {} total indices", totalShapeIndices);
+    LOG_DEBUG(MODEL, "  - {} materials", tinyobjMaterials.size());
 
     return true;
 }
@@ -99,6 +199,7 @@ quartz::rendering::Model::Model(
     m_texture(renderingDevice, textureFilepath)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
+    quartz::rendering::Model::loadGLTFModel(renderingDevice);
 }
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :

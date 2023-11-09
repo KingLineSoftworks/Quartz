@@ -23,16 +23,18 @@ quartz::Application::loadDoodads(
     LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "");
 
     std::vector<quartz::scene::Doodad> doodads;
+
     doodads.emplace_back(
         renderingDevice,
         util::FileSystem::getAbsoluteFilepathInProject(
-            "viking_room.obj"
+            "models/viking_room/viking_room.obj"
         ),
         util::FileSystem::getAbsoluteFilepathInProject(
-            "viking_room.png"
+            "models/viking_room/viking_room.png"
         ),
         glm::vec3{0.0f, 0.0f, 0.0f}
     );
+
     LOG_TRACE(APPLICATION, "Loaded {} doodads", doodads.size());
 
     return doodads;
@@ -82,7 +84,7 @@ void quartz::Application::run() {
     const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
     double currentFrameTimeDelta = 0.0;
     double previousFrameStartTime = 0.0f;
-    double currentFrameStartTime = glfwGetTime();
+    double currentFrameStartTime = 0.0f;
     double frameTimeAccumulator = 0.0f;
 
     LOG_INFOthis("Loading scene");

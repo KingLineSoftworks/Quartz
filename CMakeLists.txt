@@ -96,6 +96,9 @@ add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 # stb
 include_directories("${VENDOR_ROOT_DIR}/stb")
 
+# tinygltf
+add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
+
 # tinyobjloader
 add_subdirectory("${VENDOR_ROOT_DIR}/tinyobjloader")
 

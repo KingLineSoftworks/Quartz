@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"

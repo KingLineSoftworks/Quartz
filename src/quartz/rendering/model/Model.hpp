@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/mesh/Mesh.hpp"
@@ -30,6 +30,11 @@ public: // member functions
     const quartz::rendering::Texture& getTexture() const { return m_texture; }
 
 private: // static functions
+
+    static void loadGLTFModel(
+        const quartz::rendering::Device& renderingDevice
+    );
+
     static bool loadModel(
         const std::string& filepath,
         tinyobj::attrib_t& tinyobjAttribute,
