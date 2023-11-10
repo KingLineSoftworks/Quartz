@@ -2,9 +2,11 @@
 
 #include <vector>
 
-#include <vulkan/vulkan.hpp>
+#include <tiny_gltf.h>
 
 #include <tiny_obj_loader.h>
+
+#include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
@@ -23,6 +25,11 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const tinyobj::attrib_t& tinyobjAttribute,
         const std::vector<tinyobj::shape_t>& tinyobjShapes
+    );
+    Mesh(
+        const quartz::rendering::Device& renderingDevice,
+        const std::vector<quartz::rendering::Vertex>& vertices,
+        const std::vector<uint32_t>& indices
     );
     Mesh(Mesh&& other);
     ~Mesh();
