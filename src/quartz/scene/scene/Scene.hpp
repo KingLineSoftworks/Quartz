@@ -9,6 +9,8 @@
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "quartz/scene/light/AmbientLight.hpp"
+#include "quartz/scene/light/DirectionalLight.hpp"
 
 namespace quartz {
 namespace scene {
@@ -29,6 +31,8 @@ public: // member functions
     void load(
         const quartz::rendering::Device& renderingDevice,
         const quartz::scene::Camera& camera,
+        const quartz::scene::AmbientLight& ambientLight,
+        const quartz::scene::DirectionalLight& directionalLight,
         const std::vector<std::string>& filepaths
     );
 
@@ -47,4 +51,6 @@ private: // static functions
 private: // member variables
     quartz::scene::Camera m_camera;
     std::vector<quartz::scene::Doodad> m_doodads;
+    quartz::scene::AmbientLight m_ambientLight;
+    quartz::scene::DirectionalLight m_directionalLight;
 };

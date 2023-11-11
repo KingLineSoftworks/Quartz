@@ -46,16 +46,22 @@ void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
     const quartz::scene::Camera& camera,
+    const quartz::scene::AmbientLight& ambientLight,
+    const quartz::scene::DirectionalLight& directionalLight,
     const std::vector<std::string>& filepaths
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
 
-   m_camera = camera;
+    m_camera = camera;
 
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         filepaths
     );
+
+    m_ambientLight = ambientLight;
+
+    m_directionalLight = directionalLight;
 }
 
 void

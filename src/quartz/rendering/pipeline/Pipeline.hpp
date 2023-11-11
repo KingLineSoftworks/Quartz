@@ -25,7 +25,6 @@ namespace rendering {
 struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
-
     CameraUniformBufferObject(
         const glm::mat4 viewMatrix_,
         const glm::mat4 projectionMatrix_
@@ -39,7 +38,6 @@ public: // member variables
 struct quartz::rendering::ModelUniformBufferObject {
 public: // member functions
     ModelUniformBufferObject() = default;
-
     ModelUniformBufferObject(
         const glm::mat4 modelMatrix_
     );
