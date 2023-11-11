@@ -48,7 +48,7 @@ int main() {
         {"INSTANCE", util::Logger::Level::info},
         {"MESH", util::Logger::Level::trace},
         {"MODEL", util::Logger::Level::trace},
-        {"PIPELINE", util::Logger::Level::info},
+        {"PIPELINE", util::Logger::Level::trace},
         {"SWAPCHAIN", util::Logger::Level::info},
         {"TEXTURE", util::Logger::Level::trace},
         {"VULKAN", util::Logger::Level::info},

@@ -574,12 +574,12 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     uint32_t offset = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
-        *(model.getMesh().getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        *(model.getMeshes()[0].getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
         offset
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(model.getMesh().getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        *(model.getMeshes()[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );
@@ -595,7 +595,7 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     );
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        model.getMesh().getIndices().size(),
+        model.getMeshes()[0].getIndices().size(),
         1,
         0,
         0,

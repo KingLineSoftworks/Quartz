@@ -26,7 +26,9 @@ quartz::Application::loadDoodads(
 
     doodads.emplace_back(
         renderingDevice,
+//        "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
         "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+//        "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
         glm::vec3{0.0f, 0.0f, 0.0f}
     );
 

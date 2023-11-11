@@ -11,6 +11,8 @@ quartz::rendering::Vertex::getAttributeGLTFString(
     switch (type) {
         case quartz::rendering::Vertex::AttributeType::Position:
             return "POSITION";
+        case quartz::rendering::Vertex::AttributeType::Normal:
+            return "NORMAL";
         case quartz::rendering::Vertex::AttributeType::Color:
             return "COLOR_0";
         case quartz::rendering::Vertex::AttributeType::TextureCoordinate:
@@ -29,29 +31,35 @@ quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
     return vertexInputBindingDescription;
 }
 
-std::array<vk::VertexInputAttributeDescription, 3>
+std::array<vk::VertexInputAttributeDescription, 4>
 quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
     std::array<
         vk::VertexInputAttributeDescription,
-        3
+        4
     > vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription(
             0,
             0,
             vk::Format::eR32G32B32Sfloat,
-            offsetof(quartz::rendering::Vertex, worldPosition)
+            offsetof(quartz::rendering::Vertex, position)
         ),
         vk::VertexInputAttributeDescription(
             1,
             0,
             vk::Format::eR32G32B32Sfloat,
-            offsetof(quartz::rendering::Vertex, color)
+            offsetof(quartz::rendering::Vertex, normal)
         ),
         vk::VertexInputAttributeDescription(
             2,
             0,
+            vk::Format::eR32G32B32Sfloat,
+            offsetof(quartz::rendering::Vertex, color)
+        ),
+        vk::VertexInputAttributeDescription(
+            3,
+            0,
             vk::Format::eR32G32Sfloat,
-            offsetof(quartz::rendering::Vertex, textureCoordinate)
+            offsetof(quartz::rendering::Vertex, diffuseTextureCoordinate)
         )
     };
 
@@ -59,19 +67,22 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
 }
 
 quartz::rendering::Vertex::Vertex() :
-    worldPosition(0.0f, 0.0f, 0.0f),
+    position(0.0f, 0.0f, 0.0f),
+    normal(0.0f, 0.0f, 0.0f),
     color(1.0f, 1.0f, 1.0f),
-    textureCoordinate(0.0f, 0.0f)
+    diffuseTextureCoordinate(0.0f, 0.0f)
 {}
 
 quartz::rendering::Vertex::Vertex(
-    const glm::vec3& worldPosition_,
+    const glm::vec3& position_,
+    const glm::vec3& normal_,
     const glm::vec3& color_,
-    const glm::vec2& textureCoordinate_
+    const glm::vec2& diffuseTextureCoordinate_
 ) :
-    worldPosition(worldPosition_),
+    position(position_),
+    normal(normal_),
     color(color_),
-    textureCoordinate(textureCoordinate_)
+    diffuseTextureCoordinate(diffuseTextureCoordinate_)
 {}
 
 bool
@@ -79,15 +90,19 @@ quartz::rendering::Vertex::operator==(
     const quartz::rendering::Vertex& other
 ) const {
     return (
-        worldPosition.x == other.worldPosition.x &&
-        worldPosition.y == other.worldPosition.y &&
-        worldPosition.z == other.worldPosition.z &&
+        position.x == other.position.x &&
+        position.y == other.position.y &&
+        position.z == other.position.z &&
+
+        normal.x == other.normal.x &&
+        normal.y == other.normal.y &&
+        normal.z == other.normal.z &&
 
         color.x == other.color.x &&
         color.y == other.color.y &&
         color.z == other.color.z &&
 
-        textureCoordinate.x == other.textureCoordinate.x &&
-        textureCoordinate.y == other.textureCoordinate.y
+        diffuseTextureCoordinate.x == other.diffuseTextureCoordinate.x &&
+        diffuseTextureCoordinate.y == other.diffuseTextureCoordinate.y
     );
 }

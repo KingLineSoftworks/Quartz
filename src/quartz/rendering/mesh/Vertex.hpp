@@ -15,6 +15,7 @@ struct quartz::rendering::Vertex {
 public: // enums
     enum class AttributeType {
         Position,
+        Normal,
         Color,
         TextureCoordinate
     };
@@ -22,21 +23,23 @@ public: // enums
 public: // member functions
     Vertex();
     Vertex(
-        const glm::vec3& worldPosition_,
+        const glm::vec3& position_,
+        const glm::vec3& normal_,
         const glm::vec3& color_,
-        const glm::vec2& textureCoordinate_
+        const glm::vec2& diffuseTextureCoordinate_
     );
     bool operator==(const Vertex& other) const;
 
 public: // static functions
     static std::string getAttributeGLTFString(const quartz::rendering::Vertex::AttributeType type);
     static vk::VertexInputBindingDescription getVulkanVertexInputBindingDescription();
-    static std::array<vk::VertexInputAttributeDescription, 3> getVulkanVertexInputAttributeDescriptions();
+    static std::array<vk::VertexInputAttributeDescription, 4> getVulkanVertexInputAttributeDescriptions();
 
 public: // member variables
-    glm::vec3 worldPosition;
+    glm::vec3 position;
+    glm::vec3 normal;
     glm::vec3 color;
-    glm::vec2 textureCoordinate;
+    glm::vec2 diffuseTextureCoordinate;
 };
 
 template <> struct std::hash<quartz::rendering::Vertex> {
@@ -44,9 +47,10 @@ template <> struct std::hash<quartz::rendering::Vertex> {
         std::size_t seed = 0;
 
         std::vector<float> values = {
-            vertex.worldPosition.x, vertex.worldPosition.y, vertex.worldPosition.z,
+            vertex.position.x, vertex.position.y, vertex.position.z,
+            vertex.normal.x, vertex.normal.y, vertex.normal.z,
             vertex.color.x, vertex.color.y, vertex.color.z,
-            vertex.textureCoordinate.x, vertex.textureCoordinate.y
+            vertex.diffuseTextureCoordinate.x, vertex.diffuseTextureCoordinate.y
         };
 
         for (const float value : values) {

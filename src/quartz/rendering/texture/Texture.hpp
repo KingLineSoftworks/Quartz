@@ -16,6 +16,14 @@ namespace rendering {
 }
 
 class quartz::rendering::Texture {
+public: // enums
+    enum class Type {
+        Diffuse = 0,
+        Normal = 1,
+        Occlusion = 2,
+        Emissive = 3
+    };
+
 public: // member functions
     Texture(
         const quartz::rendering::Device& renderingDevice,

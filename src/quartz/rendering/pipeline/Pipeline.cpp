@@ -203,7 +203,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool,
-    const quartz::rendering::Texture& texture
+    const std::vector<quartz::rendering::Texture>& textures
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
 
@@ -252,6 +252,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
          * for Model buffer so we can easily determine what index they are for each frame
          */
 
+        LOG_TRACE(PIPELINE, "Allocating space for camera UBO");
         const uint32_t cameraIndex = i * 2;
         vk::DescriptorBufferInfo cameraUBOBufferInfo(
             *(uniformBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
@@ -269,6 +270,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
+        LOG_TRACE(PIPELINE, "Allocating space for modle UBO");
         const uint32_t modelIndex = i * 2 + 1;
         vk::DescriptorBufferInfo modelUBOBufferInfo(
             *(uniformBuffers[modelIndex].getVulkanLogicalBufferPtr()),
@@ -286,27 +288,61 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        vk::DescriptorImageInfo textureImageInfo(
-            *texture.getVulkanSamplerPtr(),
-            *texture.getVulkanImageViewPtr(),
-            vk::ImageLayout::eShaderReadOnlyOptimal
-        );
-        vk::WriteDescriptorSet textureDescriptorWriteSet(
-            descriptorSets[i],
-            2,
-            0,
-            1,
-            vk::DescriptorType::eCombinedImageSampler,
-            &textureImageInfo,
-            {},
-            {}
-        );
+        std::vector<vk::DescriptorImageInfo> textureImageInfos;
+        std::vector<vk::WriteDescriptorSet> textureDescriptorWriteSets;
 
-        std::array<vk::WriteDescriptorSet, 3> writeDescriptorSets = {
+        LOG_TRACE(PIPELINE, "Allocating space for {} textures", textures.size());
+        for (uint32_t j = 0; j < textures.size(); ++j) {
+            /// @todo ensure that multiple textures are created in correct order
+            switch (j) {
+                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Diffuse):
+                    LOG_TRACE(PIPELINE, "  - index {} is diffuse map", j);
+                    break;
+                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Normal):
+                    LOG_TRACE(PIPELINE, "  - index {} is normal map - skipping for now", j);
+                    continue;
+                    break;
+                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Occlusion):
+                    LOG_TRACE(PIPELINE, "  - index {} is occlusion map - skipping for now", j);
+                    continue;
+                    break;
+                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Emissive):
+                    LOG_TRACE(PIPELINE, "  - index {} is emission map - skipping for now", j);
+                    continue;
+                    break;
+                default:
+                    LOG_WARNING(PIPELINE, "  - Uhhhh mate ... why do we have {} textures ??????", j);
+                    LOG_WARNING(PIPELINE, "    o_O skipping this one for real");
+                    continue;
+                    break;
+            }
+
+            textureImageInfos.emplace_back(
+                *(textures[j].getVulkanSamplerPtr()),
+                *(textures[j].getVulkanImageViewPtr()),
+                vk::ImageLayout::eShaderReadOnlyOptimal
+            );
+            textureDescriptorWriteSets.emplace_back(vk::WriteDescriptorSet(
+                descriptorSets[i],
+                2 + j,
+                0,
+                1,
+                vk::DescriptorType::eCombinedImageSampler,
+                &(textureImageInfos[j]),
+                {},
+                {}
+            ));
+        }
+
+        std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
             cameraUBODescriptorWriteSet,
-            modelUBODescriptorWriteSet,
-            textureDescriptorWriteSet
+            modelUBODescriptorWriteSet
         };
+        writeDescriptorSets.insert(
+            writeDescriptorSets.end(),
+            textureDescriptorWriteSets.begin(),
+            textureDescriptorWriteSets.end()
+        );
 
         LOG_TRACE(
             PIPELINE, "  - updating descriptor sets with {} descriptor writes",
@@ -447,7 +483,7 @@ vk::UniquePipeline
 quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-    const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,
+    const std::array<vk::VertexInputAttributeDescription, 4> vertexInputAttributeDescriptions,
     const std::vector<vk::Viewport> viewports,
     const std::vector<vk::Rect2D> scissorRectangles,
     const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -789,7 +825,7 @@ quartz::rendering::Pipeline::recreate(
 void
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Texture& texture
+    const std::vector<quartz::rendering::Texture>& textures
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -802,7 +838,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             m_uniformBuffers,
             mp_vulkanDescriptorSetLayout,
             m_vulkanDescriptorPoolPtr,
-            texture
+            textures
         );
 }
 

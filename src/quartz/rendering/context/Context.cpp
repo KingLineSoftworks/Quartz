@@ -60,7 +60,7 @@ quartz::rendering::Context::loadScene(
 
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
-        doodads[0].getModel().getTexture()
+        doodads[0].getModel().getTextures()
     );
 }
 

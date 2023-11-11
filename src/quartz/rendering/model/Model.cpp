@@ -176,7 +176,11 @@ quartz::rendering::Model::populateVerticesWithAttribute(
     for (uint32_t j = 0; j < verticesToPopulate.size(); ++j) {
         switch (attributeType) {
             case quartz::rendering::Vertex::AttributeType::Position: {
-                verticesToPopulate[j].worldPosition = glm::make_vec3(&p_data[j * byteStride]);
+                verticesToPopulate[j].position = glm::make_vec3(&p_data[j * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::Normal: {
+                verticesToPopulate[j].normal = glm::make_vec3(&p_data[j * byteStride]);
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::Color: {
@@ -184,7 +188,7 @@ quartz::rendering::Model::populateVerticesWithAttribute(
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::TextureCoordinate: {
-                verticesToPopulate[j].textureCoordinate = glm::make_vec2(&p_data[j * byteStride]);
+                verticesToPopulate[j].diffuseTextureCoordinate = glm::make_vec2(&p_data[j * byteStride]);
                 break;
             }
         }
@@ -219,6 +223,13 @@ quartz::rendering::Model::loadMeshVertices(
                 gltfModel,
                 gltfPrimitive,
                 quartz::rendering::Vertex::AttributeType::Position
+            );
+
+            quartz::rendering::Model::populateVerticesWithAttribute(
+                primitiveVertices,
+                gltfModel,
+                gltfPrimitive,
+                quartz::rendering::Vertex::AttributeType::Normal
             );
 
             quartz::rendering::Model::populateVerticesWithAttribute(
@@ -429,26 +440,26 @@ quartz::rendering::Model::Model(
     const std::string& objectFilepath
 ) :
     m_gltfModel(quartz::rendering::Model::loadGLTFModel(objectFilepath)),
-    m_mesh(std::move(
+    m_meshes(
         quartz::rendering::Model::loadMeshes(
             renderingDevice,
             m_gltfModel
-        )[0]
-    )),
-    m_texture(std::move(
+        )
+    ),
+    m_textures(
         quartz::rendering::Model::loadTextures(
             renderingDevice,
             m_gltfModel
-        )[0]
-    ))
+        )
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
-    m_mesh(std::move(other.m_mesh)),
-    m_texture(std::move(other.m_texture))
+    m_meshes(std::move(other.m_meshes)),
+    m_textures(std::move(other.m_textures))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
