@@ -4,32 +4,18 @@
 
 #include "quartz/rendering/mesh/Vertex.hpp"
 
-quartz::rendering::Vertex::Vertex(
-    const glm::vec3& worldPosition_,
-    const glm::vec3& color_,
-    const glm::vec2& textureCoordinate_
-) :
-    worldPosition(worldPosition_),
-    color(color_),
-    textureCoordinate(textureCoordinate_)
-{}
-
-bool
-quartz::rendering::Vertex::operator==(
-    const quartz::rendering::Vertex& other
-) const {
-    return (
-        worldPosition.x == other.worldPosition.x &&
-        worldPosition.y == other.worldPosition.y &&
-        worldPosition.z == other.worldPosition.z &&
-
-        color.x == other.color.x &&
-        color.y == other.color.y &&
-        color.z == other.color.z &&
-
-        textureCoordinate.x == other.textureCoordinate.x &&
-        textureCoordinate.y == other.textureCoordinate.y
-    );
+std::string
+quartz::rendering::Vertex::getAttributeGLTFString(
+    const quartz::rendering::Vertex::AttributeType type
+) {
+    switch (type) {
+        case quartz::rendering::Vertex::AttributeType::Position:
+            return "POSITION";
+        case quartz::rendering::Vertex::AttributeType::Color:
+            return "COLOR_0";
+        case quartz::rendering::Vertex::AttributeType::TextureCoordinate:
+            return "TEXCOORD_0";
+    }
 }
 
 vk::VertexInputBindingDescription
@@ -70,4 +56,32 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
     };
 
     return vertexInputAttributeDescriptions;
+}
+
+quartz::rendering::Vertex::Vertex(
+    const glm::vec3& worldPosition_,
+    const glm::vec3& color_,
+    const glm::vec2& textureCoordinate_
+) :
+    worldPosition(worldPosition_),
+    color(color_),
+    textureCoordinate(textureCoordinate_)
+{}
+
+bool
+quartz::rendering::Vertex::operator==(
+    const quartz::rendering::Vertex& other
+) const {
+    return (
+        worldPosition.x == other.worldPosition.x &&
+        worldPosition.y == other.worldPosition.y &&
+        worldPosition.z == other.worldPosition.z &&
+
+        color.x == other.color.x &&
+        color.y == other.color.y &&
+        color.z == other.color.z &&
+
+        textureCoordinate.x == other.textureCoordinate.x &&
+        textureCoordinate.y == other.textureCoordinate.y
+    );
 }

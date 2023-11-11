@@ -12,6 +12,13 @@ namespace rendering {
 }
 
 struct quartz::rendering::Vertex {
+public: // enums
+    enum class AttributeType {
+        Position,
+        Color,
+        TextureCoordinate
+    };
+
 public: // member functions
     Vertex() = default;
     Vertex(
@@ -22,6 +29,7 @@ public: // member functions
     bool operator==(const Vertex& other) const;
 
 public: // static functions
+    static std::string getAttributeGLTFString(const quartz::rendering::Vertex::AttributeType type);
     static vk::VertexInputBindingDescription getVulkanVertexInputBindingDescription();
     static std::array<vk::VertexInputAttributeDescription, 3> getVulkanVertexInputAttributeDescriptions();
 
