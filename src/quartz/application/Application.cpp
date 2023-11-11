@@ -16,27 +16,6 @@
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
-std::vector<quartz::scene::Doodad>
-quartz::Application::loadDoodads(
-    const quartz::rendering::Device& renderingDevice
-) {
-    LOG_FUNCTION_SCOPE_TRACE(APPLICATION, "");
-
-    std::vector<quartz::scene::Doodad> doodads;
-
-    doodads.emplace_back(
-        renderingDevice,
-//        "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
-        "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-//        "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-        glm::vec3{0.0f, 0.0f, 0.0f}
-    );
-
-    LOG_TRACE(APPLICATION, "Loaded {} doodads", doodads.size());
-
-    return doodads;
-}
-
 quartz::Application::Application(
     const std::string& applicationName,
     const uint32_t applicationMajorVersion,
@@ -62,8 +41,7 @@ quartz::Application::Application(
     mp_inputManager(quartz::managers::InputManager::getPtr(
         m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
     )),
-    m_camera(),
-    m_doodads(),
+    m_scene(),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
     m_isPaused(false)
@@ -85,10 +63,26 @@ void quartz::Application::run() {
     double frameTimeAccumulator = 0.0f;
 
     LOG_INFOthis("Loading scene");
-    m_doodads = quartz::Application::loadDoodads(
-        m_renderingContext.getRenderingDevice()
+    m_scene.load(
+        m_renderingContext.getRenderingDevice(),
+        {
+            -45.0f,
+            135.0f,
+            0.0f,
+            60.0f,
+            {
+                3.0f,
+                3.0f,
+                -3.0f
+            }
+        },
+        {
+//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
+            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
+//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"
+        }
     );
-    m_renderingContext.loadScene(m_doodads);
+    m_renderingContext.loadScene(m_scene.getDoodads());
 
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
@@ -97,24 +91,17 @@ void quartz::Application::run() {
         previousFrameStartTime = currentFrameStartTime;
         frameTimeAccumulator += currentFrameTimeDelta;
         while (frameTimeAccumulator >= targetTickTimeDelta) {
-            // Capture input
             processInput();
 
-            // Simulate the game world
-            m_camera.update(
-                static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().width),
-                static_cast<float>(m_renderingContext.getRenderingWindow().getVulkanExtent().height),
+            m_scene.update(
+                m_renderingContext.getRenderingWindow(),
                 mp_inputManager,
                 targetTickTimeDelta
             );
-            for (quartz::scene::Doodad& doodad : m_doodads) {
-                doodad.update(targetTickTimeDelta);
-            }
 
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
-        // Draw the game world
         draw();
     }
 
@@ -142,5 +129,5 @@ quartz::Application::processInput() {
 
 void
 quartz::Application::draw() {
-    m_renderingContext.draw(m_camera, m_doodads);
+    m_renderingContext.draw(m_scene.getCamera(), m_scene.getDoodads());
 }

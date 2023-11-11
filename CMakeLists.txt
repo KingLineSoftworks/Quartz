@@ -162,6 +162,7 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/vulkan_util")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/camera")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/doodad")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/scene")
 
 #====================================================================
 # The demo application

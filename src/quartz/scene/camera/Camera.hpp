@@ -14,6 +14,14 @@ namespace scene {
 class quartz::scene::Camera {
 public: // member functions
     Camera();
+    Camera(
+        const double pitch,
+        const double yaw,
+        const double roll,
+        const double fovDegrees,
+        const glm::vec3& worldPosition
+    );
+    Camera& operator=(const Camera& other);
     ~Camera();
 
     USE_LOGGER(CAMERA);

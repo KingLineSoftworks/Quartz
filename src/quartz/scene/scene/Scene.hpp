@@ -1,0 +1,50 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+#include "quartz/managers/input_manager/InputManager.hpp"
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/window/Window.hpp"
+#include "quartz/scene/Loggers.hpp"
+#include "quartz/scene/camera/Camera.hpp"
+#include "quartz/scene/doodad/Doodad.hpp"
+
+namespace quartz {
+namespace scene {
+    class Scene;
+}
+}
+
+class quartz::scene::Scene {
+public: // member functions
+    Scene();
+    ~Scene();
+
+    USE_LOGGER(SCENE);
+
+    const quartz::scene::Camera& getCamera() const { return m_camera; }
+    const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
+
+    void load(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::scene::Camera& camera,
+        const std::vector<std::string>& filepaths
+    );
+
+    void update(
+        const quartz::rendering::Window& renderingWindow,
+        const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
+        const double tickTimeDelta
+    );
+
+private: // static functions
+    static std::vector<quartz::scene::Doodad> loadDoodads(
+        const quartz::rendering::Device& renderingDevice,
+        const std::vector<std::string>& filepaths
+    );
+
+private: // member variables
+    quartz::scene::Camera m_camera;
+    std::vector<quartz::scene::Doodad> m_doodads;
+};
