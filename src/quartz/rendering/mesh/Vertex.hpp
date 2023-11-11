@@ -20,7 +20,7 @@ public: // enums
     };
 
 public: // member functions
-    Vertex() = default;
+    Vertex();
     Vertex(
         const glm::vec3& worldPosition_,
         const glm::vec3& color_,

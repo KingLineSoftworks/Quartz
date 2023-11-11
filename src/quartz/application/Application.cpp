@@ -26,13 +26,7 @@ quartz::Application::loadDoodads(
 
     doodads.emplace_back(
         renderingDevice,
-//        util::FileSystem::getAbsoluteFilepathInProject(
-//            "models/viking_room/viking_room.obj"
-//        ),
         "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-        util::FileSystem::getAbsoluteFilepathInProject(
-            "models/viking_room/viking_room.png"
-        ),
         glm::vec3{0.0f, 0.0f, 0.0f}
     );
 

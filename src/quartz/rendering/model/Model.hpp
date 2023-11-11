@@ -3,7 +3,7 @@
 #include <queue>
 #include <vector>
 
-#include <tiny_obj_loader.h>
+#include <tiny_gltf.h>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/mesh/Mesh.hpp"
@@ -19,8 +19,7 @@ class quartz::rendering::Model {
 public: // member functions
     Model(
         const quartz::rendering::Device& renderingDevice,
-        const std::string& objectFilepath,
-        const std::string& textureFilepath
+        const std::string& objectFilepath
     );
     Model(Model&& other);
     ~Model();
@@ -68,23 +67,7 @@ private: // static functions
         const tinygltf::Model& gltfModel
     );
 
-    static void loadGLTFModelFull(
-        const quartz::rendering::Device& renderingDevice
-    );
-
-    static bool loadModel(
-        const std::string& filepath,
-        tinyobj::attrib_t& tinyobjAttribute,
-        std::vector<tinyobj::shape_t>& tinyobjShapes,
-        std::vector<tinyobj::material_t>& tinyobjMaterials
-    );
-
 private: // member variables
-//    tinyobj::attrib_t m_tinyobjAttribute;
-//    std::vector<tinyobj::shape_t> m_tinyobjShapes;
-//    std::vector<tinyobj::material_t> m_tinyobjMaterials;
-//    bool m_loadedSuccessfully;
-
     const tinygltf::Model m_gltfModel;
 
     quartz::rendering::Mesh m_mesh;

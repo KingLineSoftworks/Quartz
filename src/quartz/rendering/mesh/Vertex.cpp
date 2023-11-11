@@ -58,6 +58,12 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
     return vertexInputAttributeDescriptions;
 }
 
+quartz::rendering::Vertex::Vertex() :
+    worldPosition(0.0f, 0.0f, 0.0f),
+    color(1.0f, 1.0f, 1.0f),
+    textureCoordinate(0.0f, 0.0f)
+{}
+
 quartz::rendering::Vertex::Vertex(
     const glm::vec3& worldPosition_,
     const glm::vec3& color_,
