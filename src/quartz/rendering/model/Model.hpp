@@ -53,7 +53,10 @@ private: // static functions
         const tinygltf::Mesh& gltfMesh
     );
 
-    static std::vector<uint32_t> loadMeshIndices();
+    static std::vector<uint32_t> loadMeshIndices(
+        const tinygltf::Model& gltfModel,
+        const tinygltf::Mesh& gltfMesh
+    );
 
     static std::vector<quartz::rendering::Mesh> loadMeshes(
         const quartz::rendering::Device& renderingDevice,

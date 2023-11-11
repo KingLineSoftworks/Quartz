@@ -251,9 +251,80 @@ quartz::rendering::Model::loadMeshVertices(
 }
 
 std::vector<uint32_t>
-quartz::rendering::Model::loadMeshIndices() {
+quartz::rendering::Model::loadMeshIndices(
+    const tinygltf::Model& gltfModel,
+    const tinygltf::Mesh& gltfMesh
+) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-    return {};
+
+    std::vector<uint32_t> meshIndices;
+
+    LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
+    for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
+        LOG_TRACE(MODEL, "Primitive {}", i);
+
+        const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
+
+        if (gltfPrimitive.indices <= -1) {
+            LOG_TRACE(MODEL, "Primitive does not contain any indices");
+            continue;
+        }
+
+        const uint32_t indexCount = gltfModel.accessors[gltfPrimitive.indices].count;
+        std::vector<uint32_t> primitiveIndices(indexCount);
+
+        const tinygltf::Accessor& indexAccessor = gltfModel.accessors[
+            gltfPrimitive.indices > -1 ?
+                gltfPrimitive.indices :
+                0
+        ];
+
+        const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexAccessor.bufferView];
+        const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferView.buffer];
+
+        switch (indexAccessor.componentType) {
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+                LOG_TRACE(MODEL, "  - using indices of type uint32_t");
+                const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(&(
+                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
+                ));
+                for (uint32_t j = 0; j < indexAccessor.count; ++j) {
+                    primitiveIndices[j] = p_indices[j];
+                }
+                break;
+            }
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+                LOG_TRACE(MODEL, "  - using indices of type uint16_t");
+                const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(&(
+                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
+                ));
+                for (uint16_t j = 0; j < indexAccessor.count; ++j) {
+                    primitiveIndices[j] = p_indices[j];
+                }
+                break;
+            }
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+                LOG_TRACE(MODEL, "  - using indices of type uint8_t");
+                const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(&(
+                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
+                ));
+                for (uint8_t j = 0; j < indexAccessor.count; ++j) {
+                    primitiveIndices[j] = p_indices[j];
+                }
+                break;
+            }
+        }
+
+        LOG_TRACE(MODEL, "Primitive loaded {} indices", primitiveIndices.size());
+        meshIndices.insert(
+            meshIndices.end(),
+            primitiveIndices.begin(),
+            primitiveIndices.end()
+        );
+        LOG_TRACE(MODEL, "Mesh now contains {} indices", meshIndices.size());
+    }
+
+    return meshIndices;
 }
 
 std::vector<quartz::rendering::Mesh>
@@ -270,8 +341,6 @@ quartz::rendering::Model::loadMeshes(
             gltfModel,
             gltfScene
         );
-
-    uint32_t totalIndexCount = 0;
 
     std::vector<quartz::rendering::Mesh> meshes;
 
@@ -296,66 +365,17 @@ quartz::rendering::Model::loadMeshes(
                 gltfMesh
             );
 
-        LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
-        for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
-            LOG_TRACE(MODEL, "Primitive {}", i);
-
-            const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
-
-            if (gltfPrimitive.indices <= -1) {
-                LOG_TRACE(MODEL, "  - no indices. Not considering for total count");
-                continue;
-            }
-
-            const uint32_t indexCount = gltfModel.accessors[gltfPrimitive.indices].count;
-            std::vector<uint32_t> indices(indexCount);
-
-            LOG_TRACE(
-                MODEL, "  - {} indices, bumping total index count from {} to {}",
-                indexCount, totalIndexCount, totalIndexCount + indexCount
+        const std::vector<uint32_t> indices =
+            quartz::rendering::Model::loadMeshIndices(
+                gltfModel,
+                gltfMesh
             );
-            totalIndexCount += indexCount;
 
-            const tinygltf::Accessor& indexAccessor = gltfModel.accessors[
-                gltfPrimitive.indices > -1 ?
-                gltfPrimitive.indices :
-                0
-            ];
-            const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexAccessor.bufferView];
-            const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferView.buffer];
-
-            switch (indexAccessor.componentType) {
-                case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
-                    LOG_TRACE(MODEL, "Using indices of type uint32_t");
-                    break;
-                }
-                case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
-                    LOG_TRACE(MODEL, "Using indices of type uint16_t");
-                    const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(&(
-                        indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                    ));
-                    for (uint16_t j = 0; j < indexAccessor.count; ++j) {
-                        indices[j] = p_indices[j];
-                    }
-                    break;
-                }
-                case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-                    LOG_TRACE(MODEL, "Using indices of type uint8_t");
-                    break;
-                }
-            }
-
-            LOG_TRACE(MODEL, "Loaded {} indices", indices.size());
-            for (uint32_t j = 0; j < indices.size(); j++) {
-                LOG_TRACE(MODEL, "  - {} : {}", j, indices[j]);
-            }
-
-            meshes.emplace_back(quartz::rendering::Mesh(
-                renderingDevice,
-                vertices,
-                indices
-            ));
-        }
+        meshes.emplace_back(quartz::rendering::Mesh(
+            renderingDevice,
+            vertices,
+            indices
+        ));
     }
 
     return meshes;
