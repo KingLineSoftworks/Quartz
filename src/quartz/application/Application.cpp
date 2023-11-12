@@ -103,7 +103,7 @@ void quartz::Application::run() {
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
-        draw();
+        m_renderingContext.draw(m_scene);
     }
 
     LOG_INFOthis("Finishing");
@@ -126,9 +126,4 @@ quartz::Application::processInput() {
         m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
         mp_inputManager->setShouldCollectMouseInput(!m_isPaused);
     }
-}
-
-void
-quartz::Application::draw() {
-    m_renderingContext.draw(m_scene.getCamera(), m_scene.getDoodads());
 }

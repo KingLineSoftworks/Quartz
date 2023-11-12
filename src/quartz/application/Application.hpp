@@ -34,7 +34,6 @@ public: // member functions
 
 private: // member functions
     void processInput();
-    void draw();
 
 private: // static functions
 

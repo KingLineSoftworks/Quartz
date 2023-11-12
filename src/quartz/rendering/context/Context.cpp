@@ -66,8 +66,7 @@ quartz::rendering::Context::loadScene(
 
 void
 quartz::rendering::Context::draw(
-    const quartz::scene::Camera& camera,
-    const std::vector<quartz::scene::Doodad>& doodads
+    const quartz::scene::Scene& scene
 ) {
     m_renderingSwapchain.waitForInFlightFence(
         m_renderingDevice,
@@ -88,7 +87,7 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.updateCameraUniformBuffer(camera);
+    m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
@@ -102,7 +101,7 @@ quartz::rendering::Context::draw(
         availableSwapchainImageIndex
     );
 
-    for (const quartz::scene::Doodad& doodad : doodads) {
+    for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
         m_renderingPipeline.updateModelUniformBuffer(doodad);
 
         m_renderingSwapchain.recordModelToDrawingCommandBuffer(
