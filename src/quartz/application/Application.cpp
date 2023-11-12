@@ -72,10 +72,10 @@ void quartz::Application::run() {
             60.0f,
             { 3.0f, 3.0f, -3.0f }
         },
-        {{ 0.2f, 0.2f, 0.2f }},
+        {{ 0.05f, 0.05f, 0.05f }},
         {
             { 0.65f, 0.65f, 0.65f },
-            { -2.0f, -2.0f, -2.0f }
+            { -3.0f, -2.0f, 1.0f }
         },
         {
 //            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
