@@ -88,6 +88,28 @@ quartz::rendering::Pipeline::createUniformBuffers(
                 vk::MemoryPropertyFlagBits::eHostCoherent
             )  
         );
+
+        LOG_TRACE(PIPELINE, "Creating ambient light buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::scene::AmbientLight),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating directional light buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::scene::DirectionalLight),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
     }
 
     return buffers;
@@ -115,17 +137,35 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+    vk::DescriptorSetLayoutBinding ambientLightLayoutBinding(
         2,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding directionalLightLayoutBinding(
+        3,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+        4,
         vk::DescriptorType::eCombinedImageSampler,
         1,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
 
-    std::array<vk::DescriptorSetLayoutBinding, 3> layoutBindings = {
+    std::array<vk::DescriptorSetLayoutBinding, 5> layoutBindings = {
         cameraUniformBufferLayoutBinding,
         modelUniformBufferLayoutBinding,
+        ambientLightLayoutBinding,
+        directionalLightLayoutBinding,
         textureSamplerLayoutBinding
     };
 
@@ -166,14 +206,26 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         numDescriptorSets
     );
 
+    vk::DescriptorPoolSize ambientLightPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+
+    vk::DescriptorPoolSize directionalLightPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+
     vk::DescriptorPoolSize textureSamplerPoolSize(
         vk::DescriptorType::eCombinedImageSampler,
         numDescriptorSets
     );
 
-    std::array<vk::DescriptorPoolSize, 3> descriptorPoolSizes = {
+    std::array<vk::DescriptorPoolSize, 5> descriptorPoolSizes = {
         cameraUniformBufferObjectPoolSize,
         modelUniformBufferObjectPoolSize,
+        ambientLightPoolSize,
+        directionalLightPoolSize,
         textureSamplerPoolSize
     };
 
@@ -237,6 +289,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         descriptorSets.size()
     );
 
+    const uint32_t numDifferentUniformBuffers = 4;
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         LOG_SCOPE_CHANGE_TRACE(PIPELINE);
 
@@ -247,13 +300,13 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
 
         /**
-         * @todo Do this for both Camera and Model buffer for each in flight frame
-         * @todo Have some programmatic way of determining indices for Camera buffer and
-         * for Model buffer so we can easily determine what index they are for each frame
+         * @todo Have some programmatic way of determining indices for all of the
+         * different buffer types we are using so we can easily determine what
+         * index they are for each frame
          */
 
-        LOG_TRACE(PIPELINE, "Allocating space for camera UBO");
-        const uint32_t cameraIndex = i * 2;
+        const uint32_t cameraIndex = i * numDifferentUniformBuffers;
+        LOG_TRACE(PIPELINE, "Allocating space for camera UBO using buffer at index {}", cameraIndex);
         vk::DescriptorBufferInfo cameraUBOBufferInfo(
             *(uniformBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
             0,
@@ -270,8 +323,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        LOG_TRACE(PIPELINE, "Allocating space for modle UBO");
-        const uint32_t modelIndex = i * 2 + 1;
+        const uint32_t modelIndex = i * numDifferentUniformBuffers + 1;
+        LOG_TRACE(PIPELINE, "Allocating space for model UBO using buffer at index {}", modelIndex);
         vk::DescriptorBufferInfo modelUBOBufferInfo(
             *(uniformBuffers[modelIndex].getVulkanLogicalBufferPtr()),
             0,
@@ -288,10 +341,45 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        std::vector<vk::DescriptorImageInfo> textureImageInfos;
-        std::vector<vk::WriteDescriptorSet> textureDescriptorWriteSets;
+        const uint32_t ambientLightIndex = i * numDifferentUniformBuffers + 2;
+        LOG_TRACE(PIPELINE, "Allocating space for ambient light using buffer at index {}", ambientLightIndex);
+        vk::DescriptorBufferInfo ambientLightBufferInfo(
+            *(uniformBuffers[ambientLightIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::scene::AmbientLight)
+        );
+        vk::WriteDescriptorSet ambientLightDescriptorWriteSet(
+            descriptorSets[i],
+            2,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &ambientLightBufferInfo,
+            {}
+        );
+
+        const uint32_t directionalLightIndex = i * numDifferentUniformBuffers + 3;
+        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        vk::DescriptorBufferInfo directionalLightInfo(
+            *(uniformBuffers[directionalLightIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::scene::DirectionalLight)
+        );
+        vk::WriteDescriptorSet directionalLightWriteDescriptorSet(
+            descriptorSets[i],
+            3,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &directionalLightInfo,
+            {}
+        );
 
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", textures.size());
+        std::vector<vk::DescriptorImageInfo> textureImageInfos;
+        std::vector<vk::WriteDescriptorSet> textureDescriptorWriteSets;
         for (uint32_t j = 0; j < textures.size(); ++j) {
             /// @todo ensure that multiple textures are created in correct order
             switch (j) {
@@ -324,7 +412,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             );
             textureDescriptorWriteSets.emplace_back(vk::WriteDescriptorSet(
                 descriptorSets[i],
-                2 + j,
+                4 + j,
                 0,
                 1,
                 vk::DescriptorType::eCombinedImageSampler,
@@ -336,7 +424,9 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
             cameraUBODescriptorWriteSet,
-            modelUBODescriptorWriteSet
+            modelUBODescriptorWriteSet,
+            ambientLightDescriptorWriteSet,
+            directionalLightWriteDescriptorSet
         };
         writeDescriptorSets.insert(
             writeDescriptorSets.end(),
@@ -851,7 +941,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
         camera.getProjectionMatrix()
     );
 
-    const uint32_t cameraIndex = m_currentInFlightFrameIndex * 2;
+    const uint32_t cameraIndex = m_currentInFlightFrameIndex * 4;
     memcpy(
         m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
@@ -867,10 +957,34 @@ quartz::rendering::Pipeline::updateModelUniformBuffer(
         doodad.getModelMatrix()
     );
 
-    const uint32_t modelIndex = m_currentInFlightFrameIndex * 2 + 1;
+    const uint32_t modelIndex = m_currentInFlightFrameIndex * 4 + 1;
     memcpy(
         m_uniformBuffers[modelIndex].getMappedLocalMemoryPtr(),
         &modelUBO,
         sizeof(quartz::rendering::ModelUniformBufferObject)
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
+    const quartz::scene::AmbientLight& ambientLight
+) {
+    const uint32_t ambientLightIndex = m_currentInFlightFrameIndex * 4 + 2;
+    memcpy(
+        m_uniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
+        &ambientLight,
+        sizeof(quartz::scene::AmbientLight)
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
+    const quartz::scene::DirectionalLight& directionalLight
+) {
+    const uint32_t directionalLightIndex = m_currentInFlightFrameIndex * 4 + 3;
+    memcpy(
+        m_uniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
+        &directionalLight,
+        sizeof(quartz::scene::DirectionalLight)
     );
 }

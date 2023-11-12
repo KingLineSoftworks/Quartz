@@ -27,6 +27,8 @@ public: // member functions
 
     const quartz::scene::Camera& getCamera() const { return m_camera; }
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
+    const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
+    const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
 
     void load(
         const quartz::rendering::Device& renderingDevice,

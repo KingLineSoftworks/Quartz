@@ -13,6 +13,8 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "quartz/scene/light/AmbientLight.hpp"
+#include "quartz/scene/light/DirectionalLight.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -77,6 +79,8 @@ public: // member functions
 
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateModelUniformBuffer(const quartz::scene::Doodad& doodad);
+    void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
+    void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions

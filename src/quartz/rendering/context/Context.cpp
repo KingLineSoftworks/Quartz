@@ -88,6 +88,8 @@ quartz::rendering::Context::draw(
     }
 
     m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
+    m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight());
+    m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight());
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
