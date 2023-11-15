@@ -44,7 +44,7 @@ int main() {
         {"BUFFER", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},
-        {"DEVICE", util::Logger::Level::info},
+        {"DEVICE", util::Logger::Level::trace},
         {"INSTANCE", util::Logger::Level::info},
         {"MESH", util::Logger::Level::trace},
         {"MODEL", util::Logger::Level::trace},

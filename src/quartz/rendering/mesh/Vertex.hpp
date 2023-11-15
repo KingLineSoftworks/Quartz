@@ -17,7 +17,7 @@ public: // enums
         Position,
         Normal,
         Color,
-        TextureCoordinate
+        BaseColorTextureCoordinate
     };
 
 public: // member functions
@@ -26,7 +26,7 @@ public: // member functions
         const glm::vec3& position_,
         const glm::vec3& normal_,
         const glm::vec3& color_,
-        const glm::vec2& diffuseTextureCoordinate_
+        const glm::vec2& baseColorTextureCoordinate_
     );
     bool operator==(const Vertex& other) const;
 
@@ -39,7 +39,7 @@ public: // member variables
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec3 color;
-    glm::vec2 diffuseTextureCoordinate;
+    glm::vec2 baseColorTextureCoordinate;
 };
 
 template <> struct std::hash<quartz::rendering::Vertex> {
@@ -50,7 +50,7 @@ template <> struct std::hash<quartz::rendering::Vertex> {
             vertex.position.x, vertex.position.y, vertex.position.z,
             vertex.normal.x, vertex.normal.y, vertex.normal.z,
             vertex.color.x, vertex.color.y, vertex.color.z,
-            vertex.diffuseTextureCoordinate.x, vertex.diffuseTextureCoordinate.y
+            vertex.baseColorTextureCoordinate.x, vertex.baseColorTextureCoordinate.y
         };
 
         for (const float value : values) {

@@ -15,7 +15,7 @@ quartz::rendering::Vertex::getAttributeGLTFString(
             return "NORMAL";
         case quartz::rendering::Vertex::AttributeType::Color:
             return "COLOR_0";
-        case quartz::rendering::Vertex::AttributeType::TextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
             return "TEXCOORD_0";
     }
 }
@@ -59,7 +59,7 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
             3,
             0,
             vk::Format::eR32G32Sfloat,
-            offsetof(quartz::rendering::Vertex, diffuseTextureCoordinate)
+            offsetof(quartz::rendering::Vertex, baseColorTextureCoordinate)
         )
     };
 
@@ -70,19 +70,19 @@ quartz::rendering::Vertex::Vertex() :
     position(0.0f, 0.0f, 0.0f),
     normal(0.0f, 0.0f, 0.0f),
     color(1.0f, 1.0f, 1.0f),
-    diffuseTextureCoordinate(0.0f, 0.0f)
+    baseColorTextureCoordinate(-1.0f, -1.0f)
 {}
 
 quartz::rendering::Vertex::Vertex(
     const glm::vec3& position_,
     const glm::vec3& normal_,
     const glm::vec3& color_,
-    const glm::vec2& diffuseTextureCoordinate_
+    const glm::vec2& baseColorTextureCoordinate_
 ) :
     position(position_),
     normal(normal_),
     color(color_),
-    diffuseTextureCoordinate(diffuseTextureCoordinate_)
+    baseColorTextureCoordinate(baseColorTextureCoordinate_)
 {}
 
 bool
@@ -102,7 +102,7 @@ quartz::rendering::Vertex::operator==(
         color.y == other.color.y &&
         color.z == other.color.z &&
 
-        diffuseTextureCoordinate.x == other.diffuseTextureCoordinate.x &&
-        diffuseTextureCoordinate.y == other.diffuseTextureCoordinate.y
+        baseColorTextureCoordinate.x == other.baseColorTextureCoordinate.x &&
+        baseColorTextureCoordinate.y == other.baseColorTextureCoordinate.y
     );
 }

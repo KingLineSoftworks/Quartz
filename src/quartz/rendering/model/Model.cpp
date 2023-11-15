@@ -145,9 +145,16 @@ quartz::rendering::Model::populateVerticesWithAttribute(
     if (gltfPrimitive.attributes.find(attributeString) == gltfPrimitive.attributes.end()) {
         LOG_TRACE(MODEL, "Primitive does not contain a {} attribute", attributeString);
 
-        if (attributeType == quartz::rendering::Vertex::AttributeType::Position) {
-            LOG_CRITICAL(MODEL, "Primitive does not have a position attribute");
-            throw std::runtime_error("");
+        switch (attributeType) {
+            case quartz::rendering::Vertex::AttributeType::Position:
+            case quartz::rendering::Vertex::AttributeType::Normal:
+                LOG_CRITICAL(MODEL, "Primitive must contain a {} attribute", attributeString);
+                throw std::runtime_error("");
+            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+                LOG_CRITICAL(MODEL, "Using default base color texture");
+                break;
+            default:
+                break;
         }
 
         return;
@@ -163,7 +170,7 @@ quartz::rendering::Model::populateVerticesWithAttribute(
     ));
 
     uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
-    if (attributeType == quartz::rendering::Vertex::AttributeType::TextureCoordinate) {
+    if (attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate) {
         LOG_TRACE(MODEL, "{} attribute uses vector2");
         tinygltfVecType = TINYGLTF_TYPE_VEC2;
     }
@@ -187,8 +194,8 @@ quartz::rendering::Model::populateVerticesWithAttribute(
                 verticesToPopulate[j].color = glm::make_vec3(&p_data[j * byteStride]);
                 break;
             }
-            case quartz::rendering::Vertex::AttributeType::TextureCoordinate: {
-                verticesToPopulate[j].diffuseTextureCoordinate = glm::make_vec2(&p_data[j * byteStride]);
+            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate: {
+                verticesToPopulate[j].baseColorTextureCoordinate = glm::make_vec2(&p_data[j * byteStride]);
                 break;
             }
         }
@@ -218,33 +225,49 @@ quartz::rendering::Model::loadMeshVertices(
             const uint32_t vertexCount = gltfModel.accessors[gltfPrimitive.attributes.find("POSITION")->second].count;
             std::vector<quartz::rendering::Vertex> primitiveVertices(vertexCount);
 
-            quartz::rendering::Model::populateVerticesWithAttribute(
-                primitiveVertices,
-                gltfModel,
-                gltfPrimitive,
-                quartz::rendering::Vertex::AttributeType::Position
-            );
+            std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
+                quartz::rendering::Vertex::AttributeType::Position,
+                quartz::rendering::Vertex::AttributeType::Normal,
+                quartz::rendering::Vertex::AttributeType::Color,
+                quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
+            };
 
-            quartz::rendering::Model::populateVerticesWithAttribute(
-                primitiveVertices,
-                gltfModel,
-                gltfPrimitive,
-                quartz::rendering::Vertex::AttributeType::Normal
-            );
+            for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
+                quartz::rendering::Model::populateVerticesWithAttribute(
+                    primitiveVertices,
+                    gltfModel,
+                    gltfPrimitive,
+                    attributeType
+                );
+            }
 
-            quartz::rendering::Model::populateVerticesWithAttribute(
-                primitiveVertices,
-                gltfModel,
-                gltfPrimitive,
-                quartz::rendering::Vertex::AttributeType::Color
-            );
-
-            quartz::rendering::Model::populateVerticesWithAttribute(
-                primitiveVertices,
-                gltfModel,
-                gltfPrimitive,
-                quartz::rendering::Vertex::AttributeType::TextureCoordinate
-            );
+//            quartz::rendering::Model::populateVerticesWithAttribute(
+//                primitiveVertices,
+//                gltfModel,
+//                gltfPrimitive,
+//                quartz::rendering::Vertex::AttributeType::Position
+//            );
+//
+//            quartz::rendering::Model::populateVerticesWithAttribute(
+//                primitiveVertices,
+//                gltfModel,
+//                gltfPrimitive,
+//                quartz::rendering::Vertex::AttributeType::Normal
+//            );
+//
+//            quartz::rendering::Model::populateVerticesWithAttribute(
+//                primitiveVertices,
+//                gltfModel,
+//                gltfPrimitive,
+//                quartz::rendering::Vertex::AttributeType::Color
+//            );
+//
+//            quartz::rendering::Model::populateVerticesWithAttribute(
+//                primitiveVertices,
+//                gltfModel,
+//                gltfPrimitive,
+//                quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate
+//            );
 
             LOG_TRACE(MODEL, "Primitive loaded {} vertices", primitiveVertices.size());
             meshVertices.insert(

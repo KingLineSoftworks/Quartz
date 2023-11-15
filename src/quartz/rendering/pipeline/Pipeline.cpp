@@ -161,7 +161,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    std::array<vk::DescriptorSetLayoutBinding, 5> layoutBindings = {
+    std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {
         cameraUniformBufferLayoutBinding,
         modelUniformBufferLayoutBinding,
         ambientLightLayoutBinding,
@@ -221,7 +221,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         numDescriptorSets
     );
 
-    std::array<vk::DescriptorPoolSize, 5> descriptorPoolSizes = {
+    std::vector<vk::DescriptorPoolSize> descriptorPoolSizes = {
         cameraUniformBufferObjectPoolSize,
         modelUniformBufferObjectPoolSize,
         ambientLightPoolSize,

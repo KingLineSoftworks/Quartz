@@ -16,13 +16,13 @@ layout(binding = 1) uniform ModelUniformBufferObject {
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec3 in_color;
-layout(location = 3) in vec2 in_diffuseTextureCoordinate;
+layout(location = 3) in vec2 in_baseColorTextureCoordinate;
 
 // -----==== Outputs to fragment shader =====----- //
 
 layout(location = 0) out vec3 out_fragmentNormal;
 layout(location = 1) out vec3 out_fragmentColor;
-layout(location = 2) out vec2 out_diffuseTextureCoordinate;
+layout(location = 2) out vec2 out_baseColorTextureCoordinate;
 
 // -----==== Logic =====----- //
 
@@ -40,6 +40,6 @@ void main() {
 
     out_fragmentNormal = in_normal;
     out_fragmentColor = in_color;
-    out_diffuseTextureCoordinate = in_diffuseTextureCoordinate;
+    out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
 
 }

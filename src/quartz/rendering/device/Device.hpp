@@ -30,12 +30,15 @@ private: // static functions
     static vk::PhysicalDevice getBestPhysicalDevice(
         const vk::UniqueInstance& p_instance
     );
+
     static uint32_t getGraphicsQueueFamilyIndex(
         const vk::PhysicalDevice& physicalDevice
     );
+
     static std::vector<const char*> getEnabledPhysicalDeviceExtensionNames(
         const vk::PhysicalDevice& physicalDevice
     );
+
     static vk::UniqueDevice createVulkanLogicalDevicePtr(
         const vk::PhysicalDevice& physicalDevice,
         const uint32_t graphicsQueueFamilyIndex,

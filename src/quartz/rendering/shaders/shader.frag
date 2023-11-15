@@ -15,13 +15,13 @@ layout(binding = 3) uniform DirectionalLight {
 
 // ... object level things ... //
 
-layout(binding = 4) uniform sampler2D textureSampler;
+layout(binding = 4) uniform sampler2D baseColorTextureSampler;
 
 // -----==== Input from vertex shader =====----- //
 
 layout(location = 0) in vec3 in_fragmentNormal;
 layout(location = 1) in vec3 in_fragmentColor;
-layout(location = 2) in vec2 in_diffuseTextureCoordinate;
+layout(location = 2) in vec2 in_baseColorTextureCoordinate;
 
 // -----==== Output =====----- //
 
@@ -29,15 +29,31 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // -----==== Logic =====----- //
 
-void main() {
-    vec3 fragmentDiffuseColor = vec3(
+vec3 getFragmentBaseColor(
+    in vec3 fragmentColor,
+    in sampler2D baseColorTexture,
+    in vec2 baseColorTextureCoordinate
+) {
+    if (baseColorTextureCoordinate.x < 0.0) {
+        return fragmentColor;
+    }
+
+    return vec3(
         in_fragmentColor *
-        texture(textureSampler, in_diffuseTextureCoordinate).rgb
+        texture(baseColorTextureSampler, baseColorTextureCoordinate).rgb
+    );
+}
+
+void main() {
+    vec3 fragmentBaseColor = getFragmentBaseColor(
+        in_fragmentColor,
+        baseColorTextureSampler,
+        in_baseColorTextureCoordinate
     );
 
     // ... ambient light ... //
 
-    vec3 ambientLightContribution = ambientLight.color * fragmentDiffuseColor;
+    vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor;
 
     // ... directional light ... //
 
@@ -50,7 +66,7 @@ void main() {
 
     vec3 directionalLightContribution =
         directionalLight.color *
-        (directionalLightImpact * fragmentDiffuseColor);
+        (directionalLightImpact * fragmentBaseColor);
 
     // ... put it all together ... //
 
