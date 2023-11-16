@@ -274,7 +274,7 @@ quartz::rendering::Texture::Texture(
 
 quartz::rendering::Texture::Texture(
     const quartz::rendering::Device& renderingDevice,
-    UNUSED const tinygltf::Image& gltfImage,
+    const tinygltf::Image& gltfImage,
     const tinygltf::Sampler& gltfSampler
 ) :
     m_stagedImageBuffer(quartz::rendering::Texture::createImageBufferFromGLTFImage(

@@ -78,8 +78,8 @@ void quartz::Application::run() {
             { -3.0f, -2.0f, 1.0f }
         },
         {
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
+//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
+            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
 //            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"
         }
     );

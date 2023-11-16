@@ -571,6 +571,15 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     const quartz::rendering::Model& model,
     const uint32_t inFlightFrameIndex
 ) {
+    int32_t pushConstantValue = -1;
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+        *renderingPipeline.getVulkanPipelineLayoutPtr(),
+        vk::ShaderStageFlagBits::eFragment,
+        0,
+        sizeof(int32_t),
+        reinterpret_cast<void*>(&pushConstantValue)
+    );
+
     uint32_t offset = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,

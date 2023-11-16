@@ -15,7 +15,12 @@ layout(binding = 3) uniform DirectionalLight {
 
 // ... object level things ... //
 
-layout(binding = 4) uniform sampler2D baseColorTextureSampler;
+layout(binding = 4) uniform sampler baseColorTextureSampler;
+layout(binding = 5) uniform texture2D baseColorTextures[8];
+
+layout(push_constant) uniform perObjectPushConstant {
+    int baseColorTextureID;
+} pushConstant;
 
 // -----==== Input from vertex shader =====----- //
 
@@ -29,27 +34,18 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // -----==== Logic =====----- //
 
-vec3 getFragmentBaseColor(
-    in vec3 fragmentColor,
-    in sampler2D baseColorTexture,
-    in vec2 baseColorTextureCoordinate
-) {
-    if (baseColorTextureCoordinate.x < 0.0) {
-        return fragmentColor;
-    }
-
-    return vec3(
-        in_fragmentColor *
-        texture(baseColorTextureSampler, baseColorTextureCoordinate).rgb
-    );
-}
-
 void main() {
-    vec3 fragmentBaseColor = getFragmentBaseColor(
-        in_fragmentColor,
-        baseColorTextureSampler,
-        in_baseColorTextureCoordinate
-    );
+    vec3 fragmentBaseColor = in_fragmentColor;
+
+    if (pushConstant.baseColorTextureID >= 0) {
+        fragmentBaseColor = texture(
+            sampler2D(
+                baseColorTextures[pushConstant.baseColorTextureID],
+                baseColorTextureSampler
+            ),
+            in_baseColorTextureCoordinate
+        ).rgb;
+    }
 
     // ... ambient light ... //
 

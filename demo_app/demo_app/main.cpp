@@ -42,16 +42,16 @@ int main() {
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
-        {"CONTEXT", util::Logger::Level::info},
+        {"CONTEXT", util::Logger::Level::trace},
         {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::trace},
         {"INSTANCE", util::Logger::Level::info},
         {"MESH", util::Logger::Level::trace},
         {"MODEL", util::Logger::Level::trace},
         {"PIPELINE", util::Logger::Level::trace},
-        {"SWAPCHAIN", util::Logger::Level::info},
+        {"SWAPCHAIN", util::Logger::Level::trace},
         {"TEXTURE", util::Logger::Level::trace},
-        {"VULKAN", util::Logger::Level::info},
+        {"VULKAN", util::Logger::Level::trace},
         {"VULKANUTIL", util::Logger::Level::info},
         {"WINDOW", util::Logger::Level::info},
 

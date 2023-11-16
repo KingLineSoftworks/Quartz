@@ -67,6 +67,13 @@ private: // static functions
     );
 
 private: // member variables
+
+    /**
+     * @todo We probably only want to have one sampler for each type of texture. It seems
+     *   to be the case that all base color textures will have the same type of sampler,
+     *   likewise with all normal textures, etc ...
+     */
+
     quartz::rendering::StagedImageBuffer m_stagedImageBuffer;
     vk::UniqueImageView mp_vulkanImageView;
     vk::UniqueSampler mp_vulkanSampler;

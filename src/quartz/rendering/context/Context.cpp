@@ -79,10 +79,7 @@ quartz::rendering::Context::draw(
             m_renderingPipeline.getCurrentInFlightFrameIndex()
         );
 
-    if (
-        m_renderingSwapchain.getShouldRecreate() ||
-        m_renderingWindow.getWasResized()
-    ) {
+    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
         recreateSwapchain();
         return;
     }
@@ -124,10 +121,7 @@ quartz::rendering::Context::draw(
         availableSwapchainImageIndex
     );
 
-    if (
-        m_renderingSwapchain.getShouldRecreate() ||
-        m_renderingWindow.getWasResized()
-    ) {
+    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
         recreateSwapchain();
         return;
     }
