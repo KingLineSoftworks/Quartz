@@ -6,6 +6,7 @@
 #include <tiny_gltf.h>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/mesh/Mesh.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 
@@ -67,9 +68,15 @@ private: // static functions
         const tinygltf::Model& gltfModel
     );
 
+    static quartz::rendering::Material loadMaterial(
+        const quartz::rendering::Device& renderingDevice,
+        const tinygltf::Model& gltfModel
+    );
+
 private: // member variables
     const tinygltf::Model m_gltfModel;
 
     std::vector<quartz::rendering::Mesh> m_meshes;
     std::vector<quartz::rendering::Texture> m_textures;
+    quartz::rendering::Material m_material;
 };

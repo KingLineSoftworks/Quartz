@@ -571,7 +571,8 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     const quartz::rendering::Model& model,
     const uint32_t inFlightFrameIndex
 ) {
-    int32_t pushConstantValue = -1;
+    /// @todo 2023/11/17 Get the texture index from the model
+    int32_t pushConstantValue = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
         vk::ShaderStageFlagBits::eFragment,

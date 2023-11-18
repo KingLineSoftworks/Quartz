@@ -151,6 +151,7 @@ quartz::rendering::Model::populateVerticesWithAttribute(
                 LOG_CRITICAL(MODEL, "Primitive must contain a {} attribute", attributeString);
                 throw std::runtime_error("");
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+                /// @todo Create default base color texture
                 LOG_CRITICAL(MODEL, "Using default base color texture");
                 break;
             default:
@@ -240,34 +241,6 @@ quartz::rendering::Model::loadMeshVertices(
                     attributeType
                 );
             }
-
-//            quartz::rendering::Model::populateVerticesWithAttribute(
-//                primitiveVertices,
-//                gltfModel,
-//                gltfPrimitive,
-//                quartz::rendering::Vertex::AttributeType::Position
-//            );
-//
-//            quartz::rendering::Model::populateVerticesWithAttribute(
-//                primitiveVertices,
-//                gltfModel,
-//                gltfPrimitive,
-//                quartz::rendering::Vertex::AttributeType::Normal
-//            );
-//
-//            quartz::rendering::Model::populateVerticesWithAttribute(
-//                primitiveVertices,
-//                gltfModel,
-//                gltfPrimitive,
-//                quartz::rendering::Vertex::AttributeType::Color
-//            );
-//
-//            quartz::rendering::Model::populateVerticesWithAttribute(
-//                primitiveVertices,
-//                gltfModel,
-//                gltfPrimitive,
-//                quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate
-//            );
 
             LOG_TRACE(MODEL, "Primitive loaded {} vertices", primitiveVertices.size());
             meshVertices.insert(
@@ -412,6 +385,10 @@ quartz::rendering::Model::loadMeshes(
     return meshes;
 }
 
+/**
+ * @todo 2023/11/17 This should return a vector of uint32_ts representing the master
+ *   indices of each texture we loaded
+ */
 std::vector<quartz::rendering::Texture>
 quartz::rendering::Model::loadTextures(
     const quartz::rendering::Device& renderingDevice,
@@ -429,6 +406,7 @@ quartz::rendering::Model::loadTextures(
         const tinygltf::Texture& gltfTexture = gltfModel.textures[i];
 
         LOG_TRACE(MODEL, "Creating texture {} with name \"{}\"", i, gltfTexture.name);
+        LOG_TRACE(MODEL, "Texture is of type {}");
 
         tinygltf::Sampler gltfSampler;
         const int32_t samplerIndex = gltfTexture.sampler;
@@ -448,6 +426,15 @@ quartz::rendering::Model::loadTextures(
         const tinygltf::Image& gltfImage = gltfModel.images[imageIndex];
         LOG_TRACE(MODEL, "Using image {} with name \"{}\"", imageIndex, gltfImage.name);
 
+        /**
+         * @todo 2023/11/17 instead of emplacing a texture, we should use a static function within
+         *   the texture class to create a texture, put it into a list, and get the index into that
+         *   list, then emplace the index we just got
+         *
+         * @todo 2023/11/17 We might be able to determine the type of texture we are creating based
+         *   on the information in gltfImage and in gltfSampler. We might not be able to store all of
+         *   these textures in 1 master list due to their differences in structure.
+         */
         textures.emplace_back(quartz::rendering::Texture(
             renderingDevice,
             gltfImage,
@@ -456,6 +443,38 @@ quartz::rendering::Model::loadTextures(
     }
 
     return textures;
+}
+
+quartz::rendering::Material
+quartz::rendering::Model::loadMaterial(
+    const quartz::rendering::Device& renderingDevice,
+    const tinygltf::Model& gltfModel
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
+
+    std::vector<quartz::rendering::Texture> textures =
+        quartz::rendering::Model::loadTextures(
+            renderingDevice,
+            gltfModel
+        );
+
+    int32_t baseColorLocalIndex = -1;
+    int32_t normalLocalIndex = -1;
+    int32_t emissionLocalIndex = -1;
+    int32_t metallicRoughnessLocalIndex = -1;
+
+    /**
+     * @todo 2023/11/17 Load the gltf material, and determine the master indices
+     *   of each of the texture types, based on the indices we get when we load
+     *   the textures
+     */
+
+    return {
+        baseColorLocalIndex,
+        normalLocalIndex,
+        emissionLocalIndex,
+        metallicRoughnessLocalIndex
+    };
 }
 
 quartz::rendering::Model::Model(
@@ -474,7 +493,8 @@ quartz::rendering::Model::Model(
             renderingDevice,
             m_gltfModel
         )
-    )
+    ),
+    m_material()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -482,7 +502,8 @@ quartz::rendering::Model::Model(
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
     m_meshes(std::move(other.m_meshes)),
-    m_textures(std::move(other.m_textures))
+    m_textures(std::move(other.m_textures)),
+    m_material(std::move(other.m_material))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

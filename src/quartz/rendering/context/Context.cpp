@@ -58,6 +58,11 @@ quartz::rendering::Context::loadScene(
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
+    /**
+     * @todo 2023/11/17 This textures list should be coming from the Texture static
+     *   function, not from the individual doodads. The doodads will be giving their
+     *   master texture indices to the fragment shader via the push constant or something
+     */
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
         doodads[0].getModel().getTextures()

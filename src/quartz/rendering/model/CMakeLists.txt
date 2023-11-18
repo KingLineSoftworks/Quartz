@@ -24,6 +24,7 @@ target_link_libraries(
         UTIL_Logger
 
         PUBLIC
+        QUARTZ_RENDERING_Material
         QUARTZ_RENDERING_Mesh
         QUARTZ_RENDERING_Texture
 )

@@ -1,0 +1,20 @@
+#====================================================================
+# The Rendering Material library
+#====================================================================
+add_library(
+        QUARTZ_RENDERING_Material
+        SHARED
+        Material.cpp
+)
+
+target_compile_options(
+        QUARTZ_RENDERING_Material
+        PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+)
+
+target_link_libraries(
+        QUARTZ_RENDERING_Material
+
+        PUBLIC
+        UTIL_Logger
+)

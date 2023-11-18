@@ -1,5 +1,6 @@
 #include <vulkan/vulkan.hpp>
 
+#include "util/macros.hpp"
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 
@@ -154,7 +155,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     );
 
     /**
-     * @todo Do we need the same number of samplers as we do textures? I'm
+     * @todo 2023/11/14 Do we need the same number of samplers as we do textures? I'm
      *   not entirely convinced that we can reuse the same sampler for every
      *   texture. What if the gltf sampler information is different? Then what
      *   happens if we're using the incorrect sampler?
@@ -170,7 +171,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
         5,
         vk::DescriptorType::eSampledImage,
-        8,
+        QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
@@ -243,7 +244,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
 
     vk::DescriptorPoolSize baseColorTexturesPoolSize(
         vk::DescriptorType::eSampledImage,
-        numDescriptorSets * 8
+        numDescriptorSets * QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES
     );
     LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {}", baseColorTexturesPoolSize.descriptorCount);
 
@@ -329,7 +330,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
 
         /**
-         * @todo Have some programmatic way of determining indices for all of the
+         * @todo 2023/11/11 Have some programmatic way of determining indices for all of the
          *   different buffer types we are using so we can easily determine what
          *   index they are for each frame
          */
@@ -426,8 +427,13 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", textures.size());
         std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
         for (uint32_t j = 0; j < textures.size(); ++j) {
-            /// @todo ensure that multiple textures are created in correct order
             switch (j) {
+                /**
+                 * @todo 2023/11/17 We can get rid of this switch statement as it isn't really
+                 *   relevant. We won't be able to tell what type of texture a given texture is
+                 *   based purely on its index because we will be using 1 master texture list to
+                 *   store all textures
+                 */
                 case static_cast<uint32_t>(quartz::rendering::Texture::Type::Diffuse):
                     LOG_TRACE(PIPELINE, "  - index {} is diffuse map", j);
                     break;
@@ -450,7 +456,11 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
                     break;
             }
 
-            for (uint32_t k = 0; k < 8; ++k) {
+            /**
+             * @todo 2023/11/17 Fill unfilled texture spaces with the default texture at index 0
+             *   of the master texture list
+             */
+            for (uint32_t k = 0; k < QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES; ++k) {
                 baseColorTextureImageInfos.emplace_back(
                     nullptr,
                     *(textures[j].getVulkanImageViewPtr()),
@@ -462,7 +472,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             descriptorSets[i],
             5,
             0,
-            8,
+            QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
             vk::DescriptorType::eSampledImage,
             baseColorTextureImageInfos.data(),
             {},
@@ -592,6 +602,11 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
+    /**
+     * @todo 2023/11/17 This should probably represent a material (all of the texture
+     *   indices and all of the color values and whatnot). This will probably require
+     *   some restructuring and aligning of the all the variables in the material class
+     */
     vk::PushConstantRange pushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
         0,
