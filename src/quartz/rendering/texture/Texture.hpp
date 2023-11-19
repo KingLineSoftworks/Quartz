@@ -18,10 +18,10 @@ namespace rendering {
 class quartz::rendering::Texture {
 public: // enums
     enum class Type {
-        Diffuse = 0,
+        BaseColor = 0,
         Normal = 1,
-        Occlusion = 2,
-        Emissive = 3
+        Emission = 2,
+        MetallicRoughness = 3
     };
 
 public: // static functions
@@ -47,12 +47,6 @@ public: // static functions
     static const std::vector<std::shared_ptr<quartz::rendering::Texture>>& getMasterList() { return quartz::rendering::Texture::masterList; }
 
 public: // member functions
-
-    /**
-     * @todo 2023/11/17 Make these constructors private so we can only construct
-     *   them within the "create" static function that is used to put a texture into
-     *   the master list
-     */
 
     Texture(
         const quartz::rendering::Device& renderingDevice,

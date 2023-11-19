@@ -456,12 +456,6 @@ quartz::rendering::Model::loadMaterial(
     int32_t emissionLocalIndex = -1;
     int32_t metallicRoughnessLocalIndex = -1;
 
-    /**
-     * @todo 2023/11/17 Load the gltf material, and determine the master indices
-     *   of each of the texture types, based on the indices we get when we load
-     *   the textures
-     */
-
     LOG_TRACE(TEXTURE, "Processing {} materials", gltfModel.materials.size());
     for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
         LOG_SCOPE_CHANGE_TRACE(TEXTURE);

@@ -154,12 +154,6 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    /**
-     * @todo 2023/11/14 Do we need the same number of samplers as we do textures? I'm
-     *   not entirely convinced that we can reuse the same sampler for every
-     *   texture. What if the gltf sampler information is different? Then what
-     *   happens if we're using the incorrect sampler?
-     */
     vk::DescriptorSetLayoutBinding baseColorTextureSamplerLayoutBinding(
         4,
         vk::DescriptorType::eSampler,
