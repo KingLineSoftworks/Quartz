@@ -83,7 +83,7 @@ void quartz::Application::run() {
             "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"
         }
     );
-    m_renderingContext.loadScene(m_scene.getDoodads());
+    m_renderingContext.loadScene();
 
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {

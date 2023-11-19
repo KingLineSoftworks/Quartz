@@ -38,6 +38,7 @@ public: // static functions
     static uint32_t getMetallicRoughnessDefaultIndex() { return quartz::rendering::Texture::metallicRoughnessDefaultIndex; }
 
     static std::weak_ptr<Texture> getTexture(const uint32_t index) { return quartz::rendering::Texture::masterList[index]; }
+    static const std::vector<std::shared_ptr<quartz::rendering::Texture>>& getMasterList() { return quartz::rendering::Texture::masterList; }
 
 public: // member functions
 

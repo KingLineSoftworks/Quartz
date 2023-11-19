@@ -65,7 +65,7 @@ public: // member functions
 
     void allocateVulkanDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
-        const std::vector<quartz::rendering::Texture>& textures
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
     USE_LOGGER(PIPELINE);
@@ -109,7 +109,7 @@ private: // static functions
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
-        const std::vector<quartz::rendering::Texture>& textures
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
     static vk::UniqueRenderPass createVulkanRenderPassPtr(

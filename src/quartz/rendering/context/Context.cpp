@@ -53,9 +53,7 @@ quartz::rendering::Context::~Context() {
 }
 
 void
-quartz::rendering::Context::loadScene(
-    const std::vector<quartz::scene::Doodad>& doodads
-) {
+quartz::rendering::Context::loadScene() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     /**
@@ -65,7 +63,7 @@ quartz::rendering::Context::loadScene(
      */
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
-        doodads[0].getModel().getTextures()
+        quartz::rendering::Texture::getMasterList()
     );
 }
 

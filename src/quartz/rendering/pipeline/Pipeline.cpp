@@ -291,7 +291,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool,
-    const std::vector<quartz::rendering::Texture>& textures
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
 
@@ -409,7 +409,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         LOG_TRACE(PIPELINE, "Allocating space for base color texture sampler");
         vk::DescriptorImageInfo baseColorTextureSamplerImageInfo(
-            *(textures[0].getVulkanSamplerPtr()),
+            *(texturePtrs[0]->getVulkanSamplerPtr()),
             {},
             {}
         );
@@ -424,50 +424,27 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        LOG_TRACE(PIPELINE, "Allocating space for {} textures", textures.size());
+        LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
         std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
-        for (uint32_t j = 0; j < textures.size(); ++j) {
-            switch (j) {
-                /**
-                 * @todo 2023/11/17 We can get rid of this switch statement as it isn't really
-                 *   relevant. We won't be able to tell what type of texture a given texture is
-                 *   based purely on its index because we will be using 1 master texture list to
-                 *   store all textures
-                 */
-                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Diffuse):
-                    LOG_TRACE(PIPELINE, "  - index {} is diffuse map", j);
-                    break;
-                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Normal):
-                    LOG_TRACE(PIPELINE, "  - index {} is normal map - skipping for now", j);
-                    continue;
-                    break;
-                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Occlusion):
-                    LOG_TRACE(PIPELINE, "  - index {} is occlusion map - skipping for now", j);
-                    continue;
-                    break;
-                case static_cast<uint32_t>(quartz::rendering::Texture::Type::Emissive):
-                    LOG_TRACE(PIPELINE, "  - index {} is emission map - skipping for now", j);
-                    continue;
-                    break;
-                default:
-                    LOG_WARNING(PIPELINE, "  - Uhhhh mate ... why do we have {} textures ??????", j);
-                    LOG_WARNING(PIPELINE, "    o_O skipping this one for real");
-                    continue;
-                    break;
-            }
-
-            /**
-             * @todo 2023/11/17 Fill unfilled texture spaces with the default texture at index 0
-             *   of the master texture list
-             */
-            for (uint32_t k = 0; k < QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES; ++k) {
-                baseColorTextureImageInfos.emplace_back(
-                    nullptr,
-                    *(textures[j].getVulkanImageViewPtr()),
-                    vk::ImageLayout::eShaderReadOnlyOptimal
-                );
-            }
+        for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
+            baseColorTextureImageInfos.emplace_back(
+                nullptr,
+                *(texturePtrs[j]->getVulkanImageViewPtr()),
+                vk::ImageLayout::eShaderReadOnlyOptimal
+            );
         }
+
+        uint32_t remainingTextureSpaces =
+            QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES - baseColorTextureImageInfos.size();
+        LOG_TRACE(PIPELINE, "Filling remaining {} textures with texture 0", remainingTextureSpaces);
+        for (uint32_t j = 0; j < remainingTextureSpaces; ++j) {
+            baseColorTextureImageInfos.emplace_back(
+                nullptr,
+                *(texturePtrs[0]->getVulkanImageViewPtr()),
+                vk::ImageLayout::eShaderReadOnlyOptimal
+            );
+        }
+
         vk::WriteDescriptorSet baseColorTexturesDescriptorWriteSet(
             descriptorSets[i],
             5,
@@ -978,7 +955,7 @@ quartz::rendering::Pipeline::recreate(
 void
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const quartz::rendering::Device& renderingDevice,
-    const std::vector<quartz::rendering::Texture>& textures
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -991,7 +968,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             m_uniformBuffers,
             mp_vulkanDescriptorSetLayout,
             m_vulkanDescriptorPoolPtr,
-            textures
+            texturePtrs
         );
 }
 

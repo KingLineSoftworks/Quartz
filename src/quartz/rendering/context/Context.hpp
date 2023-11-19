@@ -34,14 +34,14 @@ public: // member functions
     );
     ~Context();
 
-    void loadScene(const std::vector<quartz::scene::Doodad>& doodads);
-
     USE_LOGGER(CONTEXT);
 
     const quartz::rendering::Device& getRenderingDevice() const { return m_renderingDevice; }
     const quartz::rendering::Window& getRenderingWindow() const { return m_renderingWindow; }
 
     quartz::rendering::Window& getRenderingWindow() { return m_renderingWindow; }
+
+    void loadScene();
 
     void draw(const quartz::scene::Scene& scene);
     void finish();
