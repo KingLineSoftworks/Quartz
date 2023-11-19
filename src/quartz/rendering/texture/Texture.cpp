@@ -43,9 +43,16 @@ quartz::rendering::Texture::createTexture(
     quartz::rendering::Texture::masterList.push_back(p_texture);
 
     uint32_t insertedIndex = quartz::rendering::Texture::masterList.size() - 1;
-    LOG_TRACE(TEXTURE, "Texture was inserted into master list at {}", insertedIndex);
+    LOG_TRACE(TEXTURE, "Texture was inserted into master list at index {}", insertedIndex);
 
     return insertedIndex;
+}
+
+void
+quartz::rendering::Texture::cleanUpAllTextures() {
+    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
+
+    quartz::rendering::Texture::masterList.clear();
 }
 
 void
@@ -54,10 +61,15 @@ quartz::rendering::Texture::initializeMasterList(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
+    if (!quartz::rendering::Texture::masterList.empty()) {
+        LOG_TRACE(TEXTURE, "Master list is already initialized. Not doing anything");
+        return;
+    }
+
     quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES);
 
     LOG_TRACE(TEXTURE, "Creating base color default texture");
-    const std::vector<uint32_t> pixels = { 0xFF00FFFF };
+    const std::vector<uint8_t> pixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault =
         std::make_shared<quartz::rendering::Texture>(
             renderingDevice,
@@ -323,7 +335,7 @@ quartz::rendering::Texture::Texture(
         channelCount,
         imageWidth * imageHeight * channelCount,
         vk::ImageUsageFlagBits::eSampled,
-        vk::Format::eR8G8B8A8Srgb,
+        vk::Format::eR8G8B8A8Unorm,
         vk::ImageTiling::eOptimal,
         p_pixels
     ),

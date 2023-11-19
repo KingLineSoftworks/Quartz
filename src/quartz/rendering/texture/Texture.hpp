@@ -32,6 +32,12 @@ public: // static functions
         const tinygltf::Sampler& gltfSampler
     );
 
+    static void initializeMasterList(
+        const quartz::rendering::Device& renderingDevice
+    );
+
+    static void cleanUpAllTextures();
+
     static uint32_t getBaseColorDefaultIndex() { return quartz::rendering::Texture::baseColorDefaultIndex; }
     static uint32_t getNormalDefaultIndex() { return quartz::rendering::Texture::normalDefaultIndex; }
     static uint32_t getEmissionDefaultIndex() { return quartz::rendering::Texture::emissionDefaultIndex; }
@@ -73,9 +79,6 @@ public: // member functions
     const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanSampler; }
 
 private: // static functions
-    static void initializeMasterList(
-        const quartz::rendering::Device& renderingDevice
-    );
 
     static quartz::rendering::StagedImageBuffer createImageBufferFromFilepath(
         const quartz::rendering::Device& renderingDevice,

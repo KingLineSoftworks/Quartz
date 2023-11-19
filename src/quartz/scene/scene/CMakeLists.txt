@@ -21,6 +21,7 @@ target_link_libraries(
         PUBLIC
         QUARTZ_MANAGERS_InputManager
         QUARTZ_RENDERING_Device
+        QUARTZ_RENDERING_Texture
         QUARTZ_RENDERING_Window
         QUARTZ_SCENE_Camera
         QUARTZ_SCENE_Doodad

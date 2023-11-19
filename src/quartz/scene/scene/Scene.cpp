@@ -3,6 +3,7 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
@@ -40,6 +41,8 @@ quartz::scene::Scene::Scene() :
 
 quartz::scene::Scene::~Scene() {
     LOG_FUNCTION_CALL_TRACEthis("");
+    LOG_TRACEthis("Cleaning up all textures");
+    quartz::rendering::Texture::cleanUpAllTextures();
 }
 
 void

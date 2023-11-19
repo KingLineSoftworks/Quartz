@@ -70,7 +70,7 @@ quartz::rendering::Vertex::Vertex() :
     position(0.0f, 0.0f, 0.0f),
     normal(0.0f, 0.0f, 0.0f),
     color(1.0f, 1.0f, 1.0f),
-    baseColorTextureCoordinate(-1.0f, -1.0f)
+    baseColorTextureCoordinate(0.0f, 0.0f)
 {}
 
 quartz::rendering::Vertex::Vertex(

@@ -587,7 +587,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     vk::PushConstantRange pushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
         0,
-        sizeof(int32_t)
+        sizeof(uint32_t)
     );
 
     vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(

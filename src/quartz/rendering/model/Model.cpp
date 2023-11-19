@@ -151,8 +151,7 @@ quartz::rendering::Model::populateVerticesWithAttribute(
                 LOG_CRITICAL(MODEL, "Primitive must contain a {} attribute", attributeString);
                 throw std::runtime_error("");
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
-                /// @todo 2023/11/17 Create default base color texture
-                LOG_CRITICAL(MODEL, "Using default base color texture");
+                LOG_TRACE(MODEL, "Using default base color texture");
                 break;
             default:
                 break;
@@ -172,7 +171,7 @@ quartz::rendering::Model::populateVerticesWithAttribute(
 
     uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
     if (attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate) {
-        LOG_TRACE(MODEL, "{} attribute uses vector2");
+        LOG_TRACE(MODEL, "{} attribute uses vector2", attributeString);
         tinygltfVecType = TINYGLTF_TYPE_VEC2;
     }
 
@@ -385,11 +384,7 @@ quartz::rendering::Model::loadMeshes(
     return meshes;
 }
 
-/**
- * @todo 2023/11/17 This should return a vector of uint32_ts representing the master
- *   indices of each texture we loaded
- */
-std::vector<quartz::rendering::Texture>
+std::vector<uint32_t>
 quartz::rendering::Model::loadTextures(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel
@@ -399,19 +394,20 @@ quartz::rendering::Model::loadTextures(
     LOG_TRACE(MODEL, "Got {} texture samplers from gltf model", gltfModel.samplers.size());
     LOG_TRACE(MODEL, "Got {} textures from gltf model", gltfModel.textures.size());
 
-    std::vector<quartz::rendering::Texture> textures;
+    quartz::rendering::Texture::initializeMasterList(renderingDevice);
+
+    std::vector<uint32_t> masterIndices;
 
     for (uint32_t i = 0; i < gltfModel.textures.size(); ++i) {
         LOG_SCOPE_CHANGE_TRACE(MODEL);
         const tinygltf::Texture& gltfTexture = gltfModel.textures[i];
 
         LOG_TRACE(MODEL, "Creating texture {} with name \"{}\"", i, gltfTexture.name);
-        LOG_TRACE(MODEL, "Texture is of type {}");
 
         tinygltf::Sampler gltfSampler;
         const int32_t samplerIndex = gltfTexture.sampler;
         if (samplerIndex == -1) {
-            LOG_WARNING(MODEL, "No sampler specified. Using default one");
+            LOG_WARNING(MODEL, "No gltf sampler specified. Using default one");
             gltfSampler.minFilter = -1;
             gltfSampler.magFilter = -1;
             gltfSampler.wrapS = -1;
@@ -419,30 +415,27 @@ quartz::rendering::Model::loadTextures(
             gltfSampler.wrapT = -1;
         } else {
             gltfSampler = gltfModel.samplers[samplerIndex];
-            LOG_TRACE(MODEL, "Using sampler {} with name \"{}\"", samplerIndex, gltfSampler.name);
+            LOG_TRACE(MODEL, "Using gltf sampler {} with name \"{}\"", samplerIndex, gltfSampler.name);
         }
 
         const int32_t imageIndex = gltfTexture.source;
         const tinygltf::Image& gltfImage = gltfModel.images[imageIndex];
-        LOG_TRACE(MODEL, "Using image {} with name \"{}\"", imageIndex, gltfImage.name);
+        LOG_TRACE(MODEL, "Using gltf image {} with name \"{}\"", imageIndex, gltfImage.name);
 
         /**
-         * @todo 2023/11/17 instead of emplacing a texture, we should use a static function within
-         *   the texture class to create a texture, put it into a list, and get the index into that
-         *   list, then emplace the index we just got
-         *
          * @todo 2023/11/17 We might be able to determine the type of texture we are creating based
          *   on the information in gltfImage and in gltfSampler. We might not be able to store all of
          *   these textures in 1 master list due to their differences in structure.
          */
-        textures.emplace_back(quartz::rendering::Texture(
+
+        masterIndices.emplace_back(quartz::rendering::Texture::createTexture(
             renderingDevice,
             gltfImage,
             gltfSampler
         ));
     }
 
-    return textures;
+    return masterIndices;
 }
 
 quartz::rendering::Material
@@ -452,7 +445,7 @@ quartz::rendering::Model::loadMaterial(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
-    std::vector<quartz::rendering::Texture> textures =
+    std::vector<uint32_t> masterIndices =
         quartz::rendering::Model::loadTextures(
             renderingDevice,
             gltfModel
@@ -469,11 +462,84 @@ quartz::rendering::Model::loadMaterial(
      *   the textures
      */
 
+    LOG_TRACE(TEXTURE, "Processing {} materials", gltfModel.materials.size());
+    for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
+        LOG_SCOPE_CHANGE_TRACE(TEXTURE);
+        LOG_TRACE(TEXTURE, "Processing material {}", i);
+
+        const tinygltf::Material& gltfMaterial = gltfModel.materials[i];
+
+        LOG_TRACE(TEXTURE, "Looking for base color texture");
+        std::map<std::string, tinygltf::Parameter>::const_iterator baseColorIterator =
+            gltfMaterial.values.find("baseColorTexture");
+        if (baseColorIterator != gltfMaterial.values.end()) {
+            baseColorLocalIndex = baseColorIterator->second.TextureIndex();
+            LOG_TRACE(TEXTURE, "Found base color texture local index {}", baseColorLocalIndex);
+        }
+
+        LOG_TRACE(TEXTURE, "Looking for normal texture");
+        std::map<std::string, tinygltf::Parameter>::const_iterator normalIterator =
+            gltfMaterial.values.find("normalTexture");
+        if (normalIterator != gltfMaterial.values.end()) {
+            normalLocalIndex = normalIterator->second.TextureIndex();
+            LOG_TRACE(TEXTURE, "Found normal texture local index {}", normalLocalIndex);
+        }
+
+        LOG_TRACE(TEXTURE, "Looking for emission texture");
+        std::map<std::string, tinygltf::Parameter>::const_iterator emissionIterator =
+            gltfMaterial.values.find("emissiveTexture");
+        if (emissionIterator != gltfMaterial.values.end()) {
+            emissionLocalIndex = emissionIterator->second.TextureIndex();
+            LOG_TRACE(TEXTURE, "Found emission texture local index {}", emissionLocalIndex);
+        }
+
+        LOG_TRACE(TEXTURE, "Looking for metallic roughness texture");
+        std::map<std::string, tinygltf::Parameter>::const_iterator metallicRoughnessIterator =
+            gltfMaterial.values.find("metallicRoughnessTexture");
+        if (metallicRoughnessIterator != gltfMaterial.values.end()) {
+            metallicRoughnessLocalIndex = metallicRoughnessIterator->second.TextureIndex();
+            LOG_TRACE(TEXTURE, "Found metallic roughness texture local index {}", metallicRoughnessLocalIndex);
+        }
+    }
+
+    const uint32_t baseColorMasterIndex = masterIndices.empty() ?
+        quartz::rendering::Texture::getBaseColorDefaultIndex() :
+        masterIndices[
+            baseColorLocalIndex >= 0 ?
+                baseColorLocalIndex :
+                0
+        ];
+    const uint32_t normalMasterIndex = masterIndices.empty() ?
+        quartz::rendering::Texture::getNormalDefaultIndex() :
+        masterIndices[
+            normalLocalIndex >= 0 ?
+                normalLocalIndex :
+                0
+        ];
+    const uint32_t emissionMasterIndex = masterIndices.empty() ?
+        quartz::rendering::Texture::getEmissionDefaultIndex() :
+        masterIndices[
+            emissionLocalIndex >= 0 ?
+                emissionLocalIndex :
+                0
+        ];
+    const uint32_t metallicRoughnessMasterIndex = masterIndices.empty() ?
+        quartz::rendering::Texture::getMetallicRoughnessDefaultIndex() :
+        masterIndices[
+            metallicRoughnessLocalIndex >= 0 ?
+                metallicRoughnessLocalIndex :
+                0
+        ];
+    LOG_TRACE(TEXTURE, "base color         texture master index = {}", baseColorMasterIndex);
+    LOG_TRACE(TEXTURE, "normal             texture master index = {}", normalMasterIndex);
+    LOG_TRACE(TEXTURE, "emission           texture master index = {}", emissionMasterIndex);
+    LOG_TRACE(TEXTURE, "metallic roughness texture master index = {}", metallicRoughnessMasterIndex);
+
     return {
-        baseColorLocalIndex,
-        normalLocalIndex,
-        emissionLocalIndex,
-        metallicRoughnessLocalIndex
+        baseColorMasterIndex,
+        normalMasterIndex,
+        emissionMasterIndex,
+        metallicRoughnessMasterIndex
     };
 }
 
@@ -488,13 +554,12 @@ quartz::rendering::Model::Model(
             m_gltfModel
         )
     ),
-    m_textures(
-        quartz::rendering::Model::loadTextures(
+    m_material(
+        quartz::rendering::Model::loadMaterial(
             renderingDevice,
             m_gltfModel
         )
-    ),
-    m_material()
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -502,7 +567,6 @@ quartz::rendering::Model::Model(
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
     m_meshes(std::move(other.m_meshes)),
-    m_textures(std::move(other.m_textures)),
     m_material(std::move(other.m_material))
 {
     LOG_FUNCTION_CALL_TRACEthis("");

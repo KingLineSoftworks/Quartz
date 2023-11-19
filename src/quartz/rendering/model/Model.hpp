@@ -28,7 +28,7 @@ public: // member functions
     USE_LOGGER(MODEL);
 
     const std::vector<quartz::rendering::Mesh>& getMeshes() const { return m_meshes; }
-    const std::vector<quartz::rendering::Texture>& getTextures() const { return m_textures; }
+    const quartz::rendering::Material& getMaterial() const { return m_material; }
 
 private: // static functions
 
@@ -63,7 +63,7 @@ private: // static functions
         const tinygltf::Model& gltfModel
     );
 
-    static std::vector<quartz::rendering::Texture> loadTextures(
+    static std::vector<uint32_t> loadTextures(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
@@ -77,6 +77,5 @@ private: // member variables
     const tinygltf::Model m_gltfModel;
 
     std::vector<quartz::rendering::Mesh> m_meshes;
-    std::vector<quartz::rendering::Texture> m_textures;
     quartz::rendering::Material m_material;
 };

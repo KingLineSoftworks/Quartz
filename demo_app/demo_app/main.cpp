@@ -46,7 +46,7 @@ int main() {
         {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
-        {"MATERIAL", util::Logger::Level::info},
+        {"MATERIAL", util::Logger::Level::trace},
         {"MESH", util::Logger::Level::info},
         {"MODEL", util::Logger::Level::trace},
         {"PIPELINE", util::Logger::Level::info},
