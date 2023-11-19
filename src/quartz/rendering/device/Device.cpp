@@ -35,15 +35,11 @@ quartz::rendering::Device::getBestPhysicalDevice(
 
         vk::PhysicalDeviceFeatures supportedFeatures =
             physicalDevice.getFeatures();
-        /// @todo check for supportedFeatures.depthBounds
+        /// @todo 2023/11/01 check for supportedFeatures.depthBounds
         if (!supportedFeatures.samplerAnisotropy) {
             LOG_TRACE(DEVICE, "    - Sampler anisotropy not supported. Next");
             continue;
         }
-        // if (!supportedFeatures.shaderSampledImageArrayDynamicIndexing) {
-        //     LOG_TRACE(DEVICE, "    - Sampled image array dynamic indexing not supported. Next");
-        //     continue;
-        // }
 
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties =
             physicalDevice.getQueueFamilyProperties();
@@ -204,8 +200,7 @@ quartz::rendering::Device::createVulkanLogicalDevicePtr(
 
     vk::PhysicalDeviceFeatures requestedPhysicalDeviceFeatures;
     requestedPhysicalDeviceFeatures.samplerAnisotropy = true;
-    // requestedPhysicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing = true;
-    /// @todo enable requestedPhysicalDeviceFeatures.depthBounds
+    /// @todo 2023/11/01 enable requestedPhysicalDeviceFeatures.depthBounds
 
     vk::DeviceCreateInfo logicalDeviceCreateInfo(
         {},

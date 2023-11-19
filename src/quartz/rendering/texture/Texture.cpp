@@ -14,6 +14,71 @@
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
+uint32_t quartz::rendering::Texture::baseColorDefaultIndex = 0;
+uint32_t quartz::rendering::Texture::normalDefaultIndex = 0;
+uint32_t quartz::rendering::Texture::emissionDefaultIndex = 0;
+uint32_t quartz::rendering::Texture::metallicRoughnessDefaultIndex = 0;
+std::vector<std::shared_ptr<quartz::rendering::Texture>> quartz::rendering::Texture::masterList;
+
+uint32_t
+quartz::rendering::Texture::createTexture(
+    const quartz::rendering::Device& renderingDevice,
+    UNUSED const tinygltf::Image& gltfImage,
+    UNUSED const tinygltf::Sampler& gltfSampler
+) {
+    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
+
+    if (quartz::rendering::Texture::masterList.empty()) {
+        LOG_TRACE(TEXTURE, "Master list is empty, initializing");
+        quartz::rendering::Texture::initializeMasterList(renderingDevice);
+    }
+
+    std::shared_ptr<quartz::rendering::Texture> p_texture =
+        std::make_shared<quartz::rendering::Texture>(
+            renderingDevice,
+            gltfImage,
+            gltfSampler
+        );
+
+    quartz::rendering::Texture::masterList.push_back(p_texture);
+
+    uint32_t insertedIndex = quartz::rendering::Texture::masterList.size() - 1;
+    LOG_TRACE(TEXTURE, "Texture was inserted into master list at {}", insertedIndex);
+
+    return insertedIndex;
+}
+
+void
+quartz::rendering::Texture::initializeMasterList(
+    const quartz::rendering::Device& renderingDevice
+) {
+    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
+
+    quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES);
+
+    LOG_TRACE(TEXTURE, "Creating base color default texture");
+    const std::vector<uint32_t> pixels = { 0xFF00FFFF };
+    std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault =
+        std::make_shared<quartz::rendering::Texture>(
+            renderingDevice,
+            1,
+            1,
+            4,
+            reinterpret_cast<const void*>(pixels.data())
+        );
+    quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
+    quartz::rendering::Texture::baseColorDefaultIndex =
+        quartz::rendering::Texture::masterList.size() - 1;
+    LOG_TRACE(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
+
+    /**
+     * @todo 2023/11/19 Create default textures for each of
+     *   normal
+     *   emission
+     *   metallicRoughness
+     */
+}
+
 quartz::rendering::StagedImageBuffer
 quartz::rendering::Texture::createImageBufferFromFilepath(
     const quartz::rendering::Device& renderingDevice,
@@ -88,7 +153,7 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
     );
 
     if (textureChannelCount == 3) {
-        /// @todo Check if we actually need to convert based on device support
+        /// @todo 2023/11/01 Check if we actually need to convert based on device support
         LOG_DEBUG(TEXTURE, "Converting image data from 3 channels (RGB) to 4 channels (RGBA)");
         LOG_DEBUG(TEXTURE, "  - We are assuming the current device doesn't support RGB only");
 
@@ -142,7 +207,6 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
         static_cast<uint32_t>(textureChannelCount),
         textureSizeBytes,
         vk::ImageUsageFlagBits::eSampled,
-//        vk::Format::eR8G8B8A8Srgb,
         vk::Format::eR8G8B8A8Unorm,
         vk::ImageTiling::eOptimal,
         p_texturePixels
@@ -243,6 +307,43 @@ quartz::rendering::Texture::createVulkanSamplerPtr(
     }
 
     return p_sampler;
+}
+
+quartz::rendering::Texture::Texture(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t imageWidth,
+    const uint32_t imageHeight,
+    const uint32_t channelCount,
+    const void* p_pixels
+) :
+    m_stagedImageBuffer(
+        renderingDevice,
+        imageWidth,
+        imageHeight,
+        channelCount,
+        imageWidth * imageHeight * channelCount,
+        vk::ImageUsageFlagBits::eSampled,
+        vk::Format::eR8G8B8A8Srgb,
+        vk::ImageTiling::eOptimal,
+        p_pixels
+    ),
+    mp_vulkanImageView(quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        *(m_stagedImageBuffer.getVulkanImagePtr()),
+        m_stagedImageBuffer.getVulkanFormat(),
+        {},
+        vk::ImageAspectFlagBits::eColor
+    )),
+    mp_vulkanSampler(quartz::rendering::Texture::createVulkanSamplerPtr(
+        renderingDevice,
+        vk::Filter::eLinear,
+        vk::Filter::eLinear,
+        vk::SamplerAddressMode::eRepeat,
+        vk::SamplerAddressMode::eRepeat,
+        vk::SamplerAddressMode::eRepeat
+    ))
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 quartz::rendering::Texture::Texture(

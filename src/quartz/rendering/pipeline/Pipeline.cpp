@@ -744,7 +744,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
         true,
         true,
         vk::CompareOp::eLess,
-        false, /// @todo enable with phys dev features
+        false, /// @todo 2023/11/01 enable with phys dev features
         false,
         {},
         {},

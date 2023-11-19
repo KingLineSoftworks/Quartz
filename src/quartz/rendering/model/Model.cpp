@@ -151,7 +151,7 @@ quartz::rendering::Model::populateVerticesWithAttribute(
                 LOG_CRITICAL(MODEL, "Primitive must contain a {} attribute", attributeString);
                 throw std::runtime_error("");
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
-                /// @todo Create default base color texture
+                /// @todo 2023/11/17 Create default base color texture
                 LOG_CRITICAL(MODEL, "Using default base color texture");
                 break;
             default:

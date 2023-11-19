@@ -26,28 +26,18 @@ public: // enums
 
 public: // static functions
 
-    /**
-     * @todo 2023/11/17 Make a "create" function that constructs a texture and inserts
-     *   it into the list if it hasn't already been inserted. Return the index at which
-     *   the texture was inserted
-     *
-     * @todo 2023/11/17 When the list is instantiated we should reserve enough space for
-     *   QUARTZ_MAX_NUM_TEXTURES
-     *
-     * @todo 2023/11/17 If the list is currently empty then we should construct a default
-     *   texture for each of the texture types to put at the beginning of the list
-     */
+    static uint32_t createTexture(
+        const quartz::rendering::Device& renderingDevice,
+        const tinygltf::Image& gltfImage,
+        const tinygltf::Sampler& gltfSampler
+    );
 
-    /**
-     * @todo 2023/11/17 Make getter functionality to get the default of each of the texture
-     *   types based on the private static variables we construct when the master list is initialized
-     *   for the first time
-     */
+    static uint32_t getBaseColorDefaultIndex() { return quartz::rendering::Texture::baseColorDefaultIndex; }
+    static uint32_t getNormalDefaultIndex() { return quartz::rendering::Texture::normalDefaultIndex; }
+    static uint32_t getEmissionDefaultIndex() { return quartz::rendering::Texture::emissionDefaultIndex; }
+    static uint32_t getMetallicRoughnessDefaultIndex() { return quartz::rendering::Texture::metallicRoughnessDefaultIndex; }
 
-    /**
-     * @todo 2023/11/17 Make getter functionality that gets a std::shared_ptr to a texture
-     *   from the master list when given an index
-     */
+    static std::weak_ptr<Texture> getTexture(const uint32_t index) { return quartz::rendering::Texture::masterList[index]; }
 
 public: // member functions
 
@@ -57,6 +47,13 @@ public: // member functions
      *   the master list
      */
 
+    Texture(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t imageWidth,
+        const uint32_t imageHeight,
+        const uint32_t channelCount,
+        const void* p_pixels
+    );
     Texture(
         const quartz::rendering::Device& renderingDevice,
         const std::string& filepath
@@ -75,6 +72,10 @@ public: // member functions
     const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanSampler; }
 
 private: // static functions
+    static void initializeMasterList(
+        const quartz::rendering::Device& renderingDevice
+    );
+
     static quartz::rendering::StagedImageBuffer createImageBufferFromFilepath(
         const quartz::rendering::Device& renderingDevice,
         const std::string& filepath
@@ -100,20 +101,17 @@ private: // static functions
 
 private: // static variables
 
-    /**
-     * @todo 2023/11/17 Create a variable representing the index of each of the default textures
-     *   so after the list is created we can retrieve these externally with an accessor function
-     */
+    static uint32_t baseColorDefaultIndex;
+    static uint32_t normalDefaultIndex;
+    static uint32_t emissionDefaultIndex;
+    static uint32_t metallicRoughnessDefaultIndex;
 
-    /**
-     * @todo 2023/11/17 Create a master list of std::shared_ptr to textures that we maintain
-     *   and that other things can access based on index
-     */
+    static std::vector<std::shared_ptr<Texture>> masterList;
 
 private: // member variables
 
     /**
-     * @todo We probably only want to have one sampler for each type of texture. It seems
+     * @todo 2023/11/10 We probably only want to have one sampler for each type of texture. It seems
      *   to be the case that all base color textures will have the same type of sampler,
      *   likewise with all normal textures, etc ...
      */
