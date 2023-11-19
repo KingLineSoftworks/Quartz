@@ -18,7 +18,6 @@ target_link_libraries(
         PUBLIC
         glfw
         glm
-        tinyobjloader
         vulkan
 
         PUBLIC
@@ -37,4 +36,6 @@ target_link_libraries(
         QUARTZ_RENDERING_Window
         QUARTZ_SCENE_Camera
         QUARTZ_SCENE_Doodad
+        QUARTZ_SCENE_Light
+        QUARTZ_SCENE_Scene
 )

@@ -1,29 +1,20 @@
 #====================================================================
-# The Application library
+# The Rendering Material library
 #====================================================================
 add_library(
-        QUARTZ_Application
+        QUARTZ_RENDERING_Material
         SHARED
-        Application.cpp
+        Material.cpp
 )
 
 target_compile_options(
-        QUARTZ_Application
+        QUARTZ_RENDERING_Material
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_Application
+        QUARTZ_RENDERING_Material
 
         PUBLIC
-        glfw
-
-        PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
-
-        PUBLIC
-        QUARTZ_MANAGERS_InputManager
-        QUARTZ_RENDERING_Context
-        QUARTZ_SCENE_Scene
 )

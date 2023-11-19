@@ -13,6 +13,8 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "quartz/scene/light/AmbientLight.hpp"
+#include "quartz/scene/light/DirectionalLight.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -25,7 +27,6 @@ namespace rendering {
 struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
-
     CameraUniformBufferObject(
         const glm::mat4 viewMatrix_,
         const glm::mat4 projectionMatrix_
@@ -39,7 +40,6 @@ public: // member variables
 struct quartz::rendering::ModelUniformBufferObject {
 public: // member functions
     ModelUniformBufferObject() = default;
-
     ModelUniformBufferObject(
         const glm::mat4 modelMatrix_
     );
@@ -65,7 +65,7 @@ public: // member functions
 
     void allocateVulkanDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Texture& texture
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
     USE_LOGGER(PIPELINE);
@@ -79,6 +79,8 @@ public: // member functions
 
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateModelUniformBuffer(const quartz::scene::Doodad& doodad);
+    void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
+    void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions
@@ -86,38 +88,45 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
+
     static std::vector<quartz::rendering::LocallyMappedBuffer> createUniformBuffers(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t numBuffers
     );
+
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice
     );
+
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t numDescriptorSets
     );
+
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
-        const quartz::rendering::Texture& texture
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
+
     static vk::UniqueRenderPass createVulkanRenderPassPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const vk::Format& depthFormat
     );
+
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
     );
+
     static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-        const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,
+        const std::array<vk::VertexInputAttributeDescription, 4> vertexInputAttributeDescriptions,
         const std::vector<vk::Viewport> viewports,
         const std::vector<vk::Rect2D> scissorRectangles,
         const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -132,7 +141,7 @@ private: // member variables
     const uint32_t m_maxNumFramesInFlight;
     uint32_t m_currentInFlightFrameIndex;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
-    std::array<vk::VertexInputAttributeDescription, 3> m_vulkanVertexInputAttributeDescriptions;
+    std::array<vk::VertexInputAttributeDescription, 4> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
     std::vector<vk::Rect2D> m_vulkanScissorRectangles;
     std::vector<vk::PipelineColorBlendAttachmentState> m_vulkanColorBlendAttachmentStates;

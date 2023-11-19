@@ -8,13 +8,11 @@
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     const std::string& objectFilepath,
-    const std::string& textureFilepath,
     const glm::vec3& worldPosition
 ) :
     m_model(
         renderingDevice,
-        objectFilepath,
-        textureFilepath
+        objectFilepath
     ),
     m_worldPosition(worldPosition),
     m_modelMatrix()

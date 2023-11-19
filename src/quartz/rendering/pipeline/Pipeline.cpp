@@ -1,5 +1,6 @@
 #include <vulkan/vulkan.hpp>
 
+#include "util/macros.hpp"
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 
@@ -88,6 +89,28 @@ quartz::rendering::Pipeline::createUniformBuffers(
                 vk::MemoryPropertyFlagBits::eHostCoherent
             )  
         );
+
+        LOG_TRACE(PIPELINE, "Creating ambient light buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::scene::AmbientLight),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating directional light buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::scene::DirectionalLight),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
     }
 
     return buffers;
@@ -115,18 +138,45 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+    vk::DescriptorSetLayoutBinding ambientLightLayoutBinding(
         2,
-        vk::DescriptorType::eCombinedImageSampler,
+        vk::DescriptorType::eUniformBuffer,
         1,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
 
-    std::array<vk::DescriptorSetLayoutBinding, 3> layoutBindings = {
+    vk::DescriptorSetLayoutBinding directionalLightLayoutBinding(
+        3,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding baseColorTextureSamplerLayoutBinding(
+        4,
+        vk::DescriptorType::eSampler,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
+        5,
+        vk::DescriptorType::eSampledImage,
+        QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {
         cameraUniformBufferLayoutBinding,
         modelUniformBufferLayoutBinding,
-        textureSamplerLayoutBinding
+        ambientLightLayoutBinding,
+        directionalLightLayoutBinding,
+        baseColorTextureSamplerLayoutBinding,
+        baseColorTexturesLayoutBinding
     };
 
     LOG_TRACE(PIPELINE, "Using {} layout bindings", layoutBindings.size());
@@ -160,28 +210,60 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         vk::DescriptorType::eUniformBuffer,
         numDescriptorSets
     );
+    LOG_TRACE(PIPELINE, "Allowing camera ubo of type uniform buffer with count {}", cameraUniformBufferObjectPoolSize.descriptorCount);
 
     vk::DescriptorPoolSize modelUniformBufferObjectPoolSize(
         vk::DescriptorType::eUniformBuffer,
         numDescriptorSets
     );
+    LOG_TRACE(PIPELINE, "Allowing model ubo of type uniform buffer with count {}", modelUniformBufferObjectPoolSize.descriptorCount);
 
-    vk::DescriptorPoolSize textureSamplerPoolSize(
-        vk::DescriptorType::eCombinedImageSampler,
+    vk::DescriptorPoolSize ambientLightPoolSize(
+        vk::DescriptorType::eUniformBuffer,
         numDescriptorSets
     );
+    LOG_TRACE(PIPELINE, "Allowing ambient light of type uniform buffer with count {}", ambientLightPoolSize.descriptorCount);
 
-    std::array<vk::DescriptorPoolSize, 3> descriptorPoolSizes = {
+    vk::DescriptorPoolSize directionalLightPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing directional light of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
+
+    vk::DescriptorPoolSize baseColorTextureSamplerPoolSize(
+        vk::DescriptorType::eSampler,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", baseColorTextureSamplerPoolSize.descriptorCount);
+
+    vk::DescriptorPoolSize baseColorTexturesPoolSize(
+        vk::DescriptorType::eSampledImage,
+        numDescriptorSets * QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES
+    );
+    LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {}", baseColorTexturesPoolSize.descriptorCount);
+
+    std::vector<vk::DescriptorPoolSize> descriptorPoolSizes = {
         cameraUniformBufferObjectPoolSize,
         modelUniformBufferObjectPoolSize,
-        textureSamplerPoolSize
+        ambientLightPoolSize,
+        directionalLightPoolSize,
+        baseColorTextureSamplerPoolSize,
+        baseColorTexturesPoolSize
     };
 
     LOG_TRACE(PIPELINE, "Using {} pool sizes", descriptorPoolSizes.size());
+    LOG_TRACE(PIPELINE, "Using maximum of {} sets", numDescriptorSets);
 
     vk::DescriptorPoolCreateInfo poolCreateInfo(
         {},
+        /**
+         * @brief how many descriptor sets in total can be allocated from this pool
+         */
         numDescriptorSets,
+        /**
+         * @brief the descriptors that will be allocated (not in a single descriptor set,
+         *   but in total) from this pool
+         */
         descriptorPoolSizes
     );
 
@@ -203,7 +285,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool,
-    const quartz::rendering::Texture& texture
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
 
@@ -214,14 +296,11 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
     vk::DescriptorSetAllocateInfo allocateInfo(
         *p_descriptorPool,
-        maxNumFramesInFlight,
+        descriptorSetLayouts.size(),
         descriptorSetLayouts.data()
     );
 
-    LOG_TRACE(
-        PIPELINE, "Attempting to allocate {} descriptor sets",
-        descriptorSetLayouts.size()
-    );
+    LOG_TRACE(PIPELINE, "Attempting to allocate {} descriptor sets", descriptorSetLayouts.size());
     std::vector<vk::DescriptorSet> descriptorSets =
         p_logicalDevice->allocateDescriptorSets(allocateInfo);
 
@@ -232,11 +311,9 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         );
         throw std::runtime_error("");
     }
-    LOG_TRACE(
-        PIPELINE, "Successfully allocated {} vk::DescriptorSet(s)",
-        descriptorSets.size()
-    );
+    LOG_TRACE(PIPELINE, "Successfully allocated {} vk::DescriptorSet(s)", descriptorSets.size());
 
+    const uint32_t numDifferentUniformBuffers = 4;
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         LOG_SCOPE_CHANGE_TRACE(PIPELINE);
 
@@ -247,12 +324,13 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
 
         /**
-         * @todo Do this for both Camera and Model buffer for each in flight frame
-         * @todo Have some programmatic way of determining indices for Camera buffer and
-         * for Model buffer so we can easily determine what index they are for each frame
+         * @todo 2023/11/11 Have some programmatic way of determining indices for all of the
+         *   different buffer types we are using so we can easily determine what
+         *   index they are for each frame
          */
 
-        const uint32_t cameraIndex = i * 2;
+        const uint32_t cameraIndex = i * numDifferentUniformBuffers;
+        LOG_TRACE(PIPELINE, "Allocating space for camera UBO using buffer at index {}", cameraIndex);
         vk::DescriptorBufferInfo cameraUBOBufferInfo(
             *(uniformBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
             0,
@@ -269,7 +347,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        const uint32_t modelIndex = i * 2 + 1;
+        const uint32_t modelIndex = i * numDifferentUniformBuffers + 1;
+        LOG_TRACE(PIPELINE, "Allocating space for model UBO using buffer at index {}", modelIndex);
         vk::DescriptorBufferInfo modelUBOBufferInfo(
             *(uniformBuffers[modelIndex].getVulkanLogicalBufferPtr()),
             0,
@@ -286,26 +365,98 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        vk::DescriptorImageInfo textureImageInfo(
-            *texture.getVulkanSamplerPtr(),
-            *texture.getVulkanImageViewPtr(),
-            vk::ImageLayout::eShaderReadOnlyOptimal
+        const uint32_t ambientLightIndex = i * numDifferentUniformBuffers + 2;
+        LOG_TRACE(PIPELINE, "Allocating space for ambient light using buffer at index {}", ambientLightIndex);
+        vk::DescriptorBufferInfo ambientLightBufferInfo(
+            *(uniformBuffers[ambientLightIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::scene::AmbientLight)
         );
-        vk::WriteDescriptorSet textureDescriptorWriteSet(
+        vk::WriteDescriptorSet ambientLightDescriptorWriteSet(
             descriptorSets[i],
             2,
             0,
             1,
-            vk::DescriptorType::eCombinedImageSampler,
-            &textureImageInfo,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &ambientLightBufferInfo,
+            {}
+        );
+
+        const uint32_t directionalLightIndex = i * numDifferentUniformBuffers + 3;
+        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        vk::DescriptorBufferInfo directionalLightInfo(
+            *(uniformBuffers[directionalLightIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::scene::DirectionalLight)
+        );
+        vk::WriteDescriptorSet directionalLightWriteDescriptorSet(
+            descriptorSets[i],
+            3,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &directionalLightInfo,
+            {}
+        );
+
+        LOG_TRACE(PIPELINE, "Allocating space for base color texture sampler");
+        vk::DescriptorImageInfo baseColorTextureSamplerImageInfo(
+            *(texturePtrs[0]->getVulkanSamplerPtr()),
+            {},
+            {}
+        );
+        vk::WriteDescriptorSet baseColorTextureSamplerWriteDescriptorSet(
+            descriptorSets[i],
+            4,
+            0,
+            1,
+            vk::DescriptorType::eSampler,
+            &baseColorTextureSamplerImageInfo,
             {},
             {}
         );
 
-        std::array<vk::WriteDescriptorSet, 3> writeDescriptorSets = {
+        LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
+        std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
+        for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
+            baseColorTextureImageInfos.emplace_back(
+                nullptr,
+                *(texturePtrs[j]->getVulkanImageViewPtr()),
+                vk::ImageLayout::eShaderReadOnlyOptimal
+            );
+        }
+
+        uint32_t remainingTextureSpaces =
+            QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES - baseColorTextureImageInfos.size();
+        LOG_TRACE(PIPELINE, "Filling remaining {} textures with texture 0", remainingTextureSpaces);
+        for (uint32_t j = 0; j < remainingTextureSpaces; ++j) {
+            baseColorTextureImageInfos.emplace_back(
+                nullptr,
+                *(texturePtrs[0]->getVulkanImageViewPtr()),
+                vk::ImageLayout::eShaderReadOnlyOptimal
+            );
+        }
+
+        vk::WriteDescriptorSet baseColorTexturesDescriptorWriteSet(
+            descriptorSets[i],
+            5,
+            0,
+            QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
+            vk::DescriptorType::eSampledImage,
+            baseColorTextureImageInfos.data(),
+            {},
+            {}
+        );
+
+        std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
             cameraUBODescriptorWriteSet,
             modelUBODescriptorWriteSet,
-            textureDescriptorWriteSet
+            ambientLightDescriptorWriteSet,
+            directionalLightWriteDescriptorSet,
+            baseColorTextureSamplerWriteDescriptorSet,
+            baseColorTexturesDescriptorWriteSet
         };
 
         LOG_TRACE(
@@ -422,12 +573,21 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
+    /**
+     * @todo 2023/11/17 This should probably represent a material (all of the texture
+     *   indices and all of the color values and whatnot). This will probably require
+     *   some restructuring and aligning of the all the variables in the material class
+     */
+    vk::PushConstantRange pushConstantRange(
+        vk::ShaderStageFlagBits::eFragment,
+        0,
+        sizeof(uint32_t)
+    );
+
     vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
         {},
-        1,
-        &(*p_descriptorSetLayout),
-        0,
-        nullptr
+        *p_descriptorSetLayout,
+        pushConstantRange
     );
 
     vk::UniquePipelineLayout p_pipelineLayout =
@@ -447,7 +607,7 @@ vk::UniquePipeline
 quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-    const std::array<vk::VertexInputAttributeDescription, 3> vertexInputAttributeDescriptions,
+    const std::array<vk::VertexInputAttributeDescription, 4> vertexInputAttributeDescriptions,
     const std::vector<vk::Viewport> viewports,
     const std::vector<vk::Rect2D> scissorRectangles,
     const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -555,7 +715,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
         true,
         true,
         vk::CompareOp::eLess,
-        false, /// @todo enable with phys dev features
+        false, /// @todo 2023/11/01 enable with phys dev features
         false,
         {},
         {},
@@ -789,7 +949,7 @@ quartz::rendering::Pipeline::recreate(
 void
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Texture& texture
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -802,7 +962,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             m_uniformBuffers,
             mp_vulkanDescriptorSetLayout,
             m_vulkanDescriptorPoolPtr,
-            texture
+            texturePtrs
         );
 }
 
@@ -815,7 +975,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
         camera.getProjectionMatrix()
     );
 
-    const uint32_t cameraIndex = m_currentInFlightFrameIndex * 2;
+    const uint32_t cameraIndex = m_currentInFlightFrameIndex * 4;
     memcpy(
         m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
@@ -831,10 +991,34 @@ quartz::rendering::Pipeline::updateModelUniformBuffer(
         doodad.getModelMatrix()
     );
 
-    const uint32_t modelIndex = m_currentInFlightFrameIndex * 2 + 1;
+    const uint32_t modelIndex = m_currentInFlightFrameIndex * 4 + 1;
     memcpy(
         m_uniformBuffers[modelIndex].getMappedLocalMemoryPtr(),
         &modelUBO,
         sizeof(quartz::rendering::ModelUniformBufferObject)
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
+    const quartz::scene::AmbientLight& ambientLight
+) {
+    const uint32_t ambientLightIndex = m_currentInFlightFrameIndex * 4 + 2;
+    memcpy(
+        m_uniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
+        &ambientLight,
+        sizeof(quartz::scene::AmbientLight)
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
+    const quartz::scene::DirectionalLight& directionalLight
+) {
+    const uint32_t directionalLightIndex = m_currentInFlightFrameIndex * 4 + 3;
+    memcpy(
+        m_uniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
+        &directionalLight,
+        sizeof(quartz::scene::DirectionalLight)
     );
 }

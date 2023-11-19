@@ -92,7 +92,7 @@ void util::Logger::registerLogger(const std::string& loggerName, const util::Log
 #endif
 
     /**
-     * @todo Use the DEBUG, TEST, RELEASE macros to clamp the logging levels to
+     * @todo 2023/10/20 Use the DEBUG, TEST, RELEASE macros to clamp the logging levels to
      * a certain minimum value?
      */
 
@@ -264,8 +264,6 @@ void util::Logger::init() {
 /**
  * @brief A function allowing us to ensure that we have been initialized prior to attempting
  * to log anything. If we are in release mode we do nothing to save clock cycles
- * 
- * @todo Should we be doing this? Should we use c++'s assert instead?
  */
 void util::Logger::assertInitialized() {
 #if !defined QUARTZ_RELEASE

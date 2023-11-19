@@ -20,7 +20,6 @@ public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         const std::string& objectFilepath,
-        const std::string& textureFilepath,
         const glm::vec3& worldPosition
     );
     Doodad(Doodad&& other);

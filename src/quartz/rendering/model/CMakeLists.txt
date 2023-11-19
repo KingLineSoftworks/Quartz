@@ -16,13 +16,15 @@ target_link_libraries(
         QUARTZ_RENDERING_Model
 
         PUBLIC
-        tinyobjloader
+        tinygltf
         vulkan
 
         PUBLIC
+        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
+        QUARTZ_RENDERING_Material
         QUARTZ_RENDERING_Mesh
         QUARTZ_RENDERING_Texture
 )

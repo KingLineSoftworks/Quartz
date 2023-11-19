@@ -4,19 +4,57 @@
 #include "quartz/scene/camera/Camera.hpp"
 
 quartz::scene::Camera::Camera() :
-    m_pitch(-45.0f),
-    m_yaw(135.0f),
+    m_pitch(0.0f),
+    m_yaw(0.0f),
     m_roll(0.0f),
     m_fovDegrees(60.0f),
     m_worldPosition(
-        3.0f,
-        3.0f,
-        -3.0f
+        0.0f,
+        0.0f,
+        0.0f
     ),
     m_viewMatrix(),
     m_projectionMatrix()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::scene::Camera::Camera(
+    const double pitch,
+    const double yaw,
+    const double roll,
+    const double fovDegrees,
+    const glm::vec3& worldPosition
+) :
+    m_pitch(pitch),
+    m_yaw(yaw),
+    m_roll(roll),
+    m_fovDegrees(fovDegrees),
+    m_worldPosition(worldPosition),
+    m_viewMatrix(),
+    m_projectionMatrix()
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::scene::Camera&
+quartz::scene::Camera::operator=(
+    const quartz::scene::Camera& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    m_pitch = other.m_pitch;
+    m_yaw = other.m_yaw;
+    m_roll = other.m_roll;
+    m_fovDegrees = other.m_fovDegrees;
+    m_worldPosition = other.m_worldPosition;
+    m_viewMatrix = other.m_viewMatrix;
+
+    return *this;
 }
 
 quartz::scene::Camera::~Camera() {

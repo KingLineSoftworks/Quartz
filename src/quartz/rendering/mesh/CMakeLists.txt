@@ -18,7 +18,7 @@ target_link_libraries(
 
         PUBLIC
         glm
-        tinyobjloader
+        tinygltf
         vulkan
 
         PUBLIC

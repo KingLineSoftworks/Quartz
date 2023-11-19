@@ -35,11 +35,11 @@ quartz::rendering::Device::getBestPhysicalDevice(
 
         vk::PhysicalDeviceFeatures supportedFeatures =
             physicalDevice.getFeatures();
+        /// @todo 2023/11/01 check for supportedFeatures.depthBounds
         if (!supportedFeatures.samplerAnisotropy) {
             LOG_TRACE(DEVICE, "    - Sampler anisotropy not supported. Next");
             continue;
         }
-        /// @todo check for supportedFeatures.depthBounds
 
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties =
             physicalDevice.getQueueFamilyProperties();
@@ -137,27 +137,18 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
         availablePhysicalDeviceExtensionProperties.size()
     );
 
-    for (
-        const vk::ExtensionProperties& extensionProperties :
-        availablePhysicalDeviceExtensionProperties
-    ) {
+    for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
         LOG_TRACE(
             DEVICE, "  - {} [ version {} ]",
             extensionProperties.extensionName, extensionProperties.specVersion
         );
 
-        if (
-            extensionProperties.extensionName ==
-            std::string("VK_KHR_portability_subset")
-        ) {
+        if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
             LOG_TRACE(DEVICE, "    - portability subset extension found");
             requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
         }
 
-        if (
-            extensionProperties.extensionName ==
-            std::string(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
-        ) {
+        if (extensionProperties.extensionName == std::string(VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
             LOG_TRACE(DEVICE, "    - swapchain extension found");
             swapchainExtensionFound = true;
         }
@@ -209,7 +200,7 @@ quartz::rendering::Device::createVulkanLogicalDevicePtr(
 
     vk::PhysicalDeviceFeatures requestedPhysicalDeviceFeatures;
     requestedPhysicalDeviceFeatures.samplerAnisotropy = true;
-    /// @todo enable requestedPhysicalDeviceFeatures.depthBounds
+    /// @todo 2023/11/01 enable requestedPhysicalDeviceFeatures.depthBounds
 
     vk::DeviceCreateInfo logicalDeviceCreateInfo(
         {},

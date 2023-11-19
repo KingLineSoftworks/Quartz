@@ -96,8 +96,8 @@ add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 # stb
 include_directories("${VENDOR_ROOT_DIR}/stb")
 
-# tinyobjloader
-add_subdirectory("${VENDOR_ROOT_DIR}/tinyobjloader")
+# tinygltf
+add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 
 # vulkan
 set(
@@ -129,6 +129,7 @@ add_compile_definitions(
     QUARTZ_MAJOR_VERSION=${QUARTZ_MAJOR_VERSION}
     QUARTZ_MINOR_VERSION=${QUARTZ_MINOR_VERSION}
     QUARTZ_PATCH_VERSION=${QUARTZ_PATCH_VERSION}
+    QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES=8
 )
 
 #====================================================================
@@ -153,6 +154,7 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/context")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/device")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/depth_buffer")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/instance")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/material")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/mesh")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/model")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/pipeline")
@@ -162,6 +164,8 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/vulkan_util")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/window")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/camera")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/doodad")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/light")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/scene")
 
 #====================================================================
 # The demo application

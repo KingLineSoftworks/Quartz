@@ -53,21 +53,18 @@ quartz::rendering::Context::~Context() {
 }
 
 void
-quartz::rendering::Context::loadScene(
-    const std::vector<quartz::scene::Doodad>& doodads
-) {
+quartz::rendering::Context::loadScene() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-
+    
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
-        doodads[0].getModel().getTexture()
+        quartz::rendering::Texture::getMasterList()
     );
 }
 
 void
 quartz::rendering::Context::draw(
-    const quartz::scene::Camera& camera,
-    const std::vector<quartz::scene::Doodad>& doodads
+    const quartz::scene::Scene& scene
 ) {
     m_renderingSwapchain.waitForInFlightFence(
         m_renderingDevice,
@@ -80,15 +77,14 @@ quartz::rendering::Context::draw(
             m_renderingPipeline.getCurrentInFlightFrameIndex()
         );
 
-    if (
-        m_renderingSwapchain.getShouldRecreate() ||
-        m_renderingWindow.getWasResized()
-    ) {
+    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
         recreateSwapchain();
         return;
     }
 
-    m_renderingPipeline.updateCameraUniformBuffer(camera);
+    m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
+    m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight());
+    m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight());
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
@@ -102,7 +98,7 @@ quartz::rendering::Context::draw(
         availableSwapchainImageIndex
     );
 
-    for (const quartz::scene::Doodad& doodad : doodads) {
+    for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
         m_renderingPipeline.updateModelUniformBuffer(doodad);
 
         m_renderingSwapchain.recordModelToDrawingCommandBuffer(
@@ -123,10 +119,7 @@ quartz::rendering::Context::draw(
         availableSwapchainImageIndex
     );
 
-    if (
-        m_renderingSwapchain.getShouldRecreate() ||
-        m_renderingWindow.getWasResized()
-    ) {
+    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
         recreateSwapchain();
         return;
     }

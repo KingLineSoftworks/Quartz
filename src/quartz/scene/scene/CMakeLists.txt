@@ -1,29 +1,29 @@
 #====================================================================
-# The Application library
+# The Scene Scene library
 #====================================================================
 add_library(
-        QUARTZ_Application
+        QUARTZ_SCENE_Scene
         SHARED
-        Application.cpp
+        Scene.cpp
 )
 
 target_compile_options(
-        QUARTZ_Application
+        QUARTZ_SCENE_Scene
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_Application
+        QUARTZ_SCENE_Scene
 
         PUBLIC
-        glfw
-
-        PUBLIC
-        UTIL_FileSystem
         UTIL_Logger
 
         PUBLIC
         QUARTZ_MANAGERS_InputManager
-        QUARTZ_RENDERING_Context
-        QUARTZ_SCENE_Scene
+        QUARTZ_RENDERING_Device
+        QUARTZ_RENDERING_Texture
+        QUARTZ_RENDERING_Window
+        QUARTZ_SCENE_Camera
+        QUARTZ_SCENE_Doodad
+        QUARTZ_SCENE_Light
 )
