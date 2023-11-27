@@ -1,9 +1,11 @@
 #include "quartz/rendering/mesh/Primitive.hpp"
 
 quartz::rendering::Primitive::Primitive(
-    const std::vector<uint32_t>& indices
+    const uint32_t startIndex,
+    const uint32_t indexCount
 ) :
-    m_indices(indices)
+    m_startIndex(startIndex),
+    m_indexCount(indexCount)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -11,7 +13,8 @@ quartz::rendering::Primitive::Primitive(
 quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Primitive& other
 ) :
-    m_indices(other.m_indices)
+    m_startIndex(other.m_startIndex),
+    m_indexCount(other.m_indexCount)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -19,7 +22,8 @@ quartz::rendering::Primitive::Primitive(
 quartz::rendering::Primitive::Primitive(
     quartz::rendering::Primitive&& other
 ) :
-    m_indices(other.m_indices)
+    m_startIndex(other.m_startIndex),
+    m_indexCount(other.m_indexCount)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

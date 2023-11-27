@@ -49,4 +49,9 @@ quartz::scene::Doodad::update(
 //        executionDurationTimeCount * glm::radians(90.0f) * 0.0f,
 //        glm::vec3(0.0f, 0.0f, 1.0f)
 //    );
+
+    m_modelMatrix = glm::scale(
+        m_modelMatrix,
+        glm::vec3(1.0f, 1.0f, 1.0f)
+    );
 }

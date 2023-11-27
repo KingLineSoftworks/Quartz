@@ -12,7 +12,8 @@ namespace rendering {
 class quartz::rendering::Primitive {
 public: // member functions
     Primitive(
-        const std::vector<uint32_t>& indices
+        const uint32_t startIndex,
+        const uint32_t indexCount
     );
     Primitive(const Primitive& other);
     Primitive(Primitive&& other);
@@ -20,7 +21,8 @@ public: // member functions
 
     USE_LOGGER(MESH);
 
-    const std::vector<uint32_t> getIndices() const { return m_indices; }
+    uint32_t getStartIndex() const { return m_startIndex; }
+    uint32_t getIndexCount() const { return m_indexCount; }
 
 private: // static functions
 
@@ -36,5 +38,6 @@ private: // member variables
      *   should be contained within the model itself
      */
 
-    std::vector<uint32_t> m_indices;
+    uint32_t m_startIndex;
+    uint32_t m_indexCount;
 };

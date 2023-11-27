@@ -585,20 +585,21 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
      *   then the correct vertex buffers
      */
 
-    uint32_t offset = 0;
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
-        0,
-        *(model.getMeshes()[0].getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
-        offset
-    );
+    for (const quartz::rendering::Mesh& mesh : model.getMeshes()) {
 
-    /**
-     * @todo 2023/11/26 For each primitive, bind the index buffer with the correct offset
-     */
+        uint32_t offset = 0;
+        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+            0,
+            *(mesh.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+            offset
+        );
 
-//    for (const quartz::rendering::Primitive& primitive : model.getMeshes()[0].getPrimitives()) {
+        /**
+         * @todo 2023/11/26 For each primitive, bind the index buffer with the correct offset
+         */
+
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-            *(model.getMeshes()[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+            *(mesh.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
             0,
             vk::IndexType::eUint32
         );
@@ -613,19 +614,17 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
             nullptr
         );
 
-        /**
-         * @todo 2023/11/26 Index count should be determined by primitive.endIndex - primitive.startIndex
-         *   because primitives won't have their index list, but instead a view into the meshes indices
-         */
-
-        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-            model.getMeshes()[0].getPrimitives()[0].getIndices().size(),
-            1,
-            0,
-            0,
-            0
-        );
-//    }
+//        for (const quartz::rendering::Primitive& primitive : model.getMeshes()[0].getPrimitives()) {
+            const quartz::rendering::Primitive& primitive = mesh.getPrimitives()[0];
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+                primitive.getIndexCount(),
+                1,
+                primitive.getStartIndex(),
+                0,
+                0
+            );
+//        }
+    }
 }
 
 void

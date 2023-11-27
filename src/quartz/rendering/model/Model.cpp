@@ -341,25 +341,25 @@ quartz::rendering::Model::loadMeshIndices(
 
         switch (indexAccessor.componentType) {
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
-                LOG_TRACE(MODEL, "  - using indices of type uint32_t");
+                LOG_TRACE(MODEL, "  - using {} indices of type uint32_t", indexCount);
                 const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(desiredIndexDataStartAddress);
-                for (uint32_t j = 0; j < indexAccessor.count; ++j) {
+                for (uint32_t j = 0; j < indexCount; ++j) {
                     primitiveIndices[j] = p_indices[j];
                 }
                 break;
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
-                LOG_TRACE(MODEL, "  - using indices of type uint16_t");
+                LOG_TRACE(MODEL, "  - using {} indices of type uint16_t", indexCount);
                 const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(desiredIndexDataStartAddress);
-                for (uint16_t j = 0; j < indexAccessor.count; ++j) {
+                for (uint16_t j = 0; j < indexCount; ++j) {
                     primitiveIndices[j] = p_indices[j];
                 }
                 break;
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-                LOG_TRACE(MODEL, "  - using indices of type uint8_t");
+                LOG_TRACE(MODEL, "  - using {} indices of type uint8_t", indexCount);
                 const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(desiredIndexDataStartAddress);
-                for (uint8_t j = 0; j < indexAccessor.count; ++j) {
+                for (uint8_t j = 0; j < indexCount; ++j) {
                     primitiveIndices[j] = p_indices[j];
                 }
                 break;
@@ -371,7 +371,10 @@ quartz::rendering::Model::loadMeshIndices(
         LOG_TRACE(MODEL, "Inserting {} indices into mesh index list", primitiveIndices.size());
         LOG_TRACE(MODEL, "Primitive cares about indices [ {} , {} ]", startIndex, endIndex);
 
-        primitives.emplace_back(primitiveIndices);
+        primitives.emplace_back(
+            startIndex,
+            primitiveIndices.size()
+        );
 
         meshIndices.insert(
             meshIndices.end(),
@@ -394,6 +397,8 @@ quartz::rendering::Model::loadMeshPrimitives(
 
     std::vector<quartz::rendering::Primitive> primitives;
 
+    uint32_t rollingStartIndex = 0;
+
     LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
     for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
         LOG_TRACE(MODEL, "Primitive {}", i);
@@ -409,48 +414,12 @@ quartz::rendering::Model::loadMeshPrimitives(
         const tinygltf::Accessor& indexAccessor = gltfModel.accessors[indexAccessorIndex];
         const uint32_t indexCount = indexAccessor.count;
 
-        const uint32_t indexBufferViewIndex = indexAccessor.bufferView;
-        const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexBufferViewIndex];
+        primitives.emplace_back(
+            rollingStartIndex,
+            indexCount
+        );
 
-        const uint32_t indexBufferIndex = indexBufferView.buffer;
-        const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferIndex];
-
-        const uint32_t indexAccessorByteOffset = indexAccessor.byteOffset;
-        const uint32_t indexBufferViewByteOffset = indexBufferView.byteOffset;
-        const std::vector<uint8_t>& indexBufferData = indexBuffer.data;
-        const uint8_t* indexBufferDataStartAddress = indexBufferData.data();
-        const uint8_t* desiredIndexDataStartAddress = indexBufferDataStartAddress + indexAccessorByteOffset + indexBufferViewByteOffset;
-
-        std::vector<uint32_t> primitiveIndices(indexCount);
-
-        switch (indexAccessor.componentType) {
-            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
-                LOG_TRACE(MODEL, "  - using indices of type uint32_t");
-                const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(desiredIndexDataStartAddress);
-                for (uint32_t j = 0; j < indexAccessor.count; ++j) {
-                    primitiveIndices[j] = p_indices[j];
-                }
-                break;
-            }
-            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
-                LOG_TRACE(MODEL, "  - using indices of type uint16_t");
-                const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(desiredIndexDataStartAddress);
-                for (uint16_t j = 0; j < indexAccessor.count; ++j) {
-                    primitiveIndices[j] = p_indices[j];
-                }
-                break;
-            }
-            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-                LOG_TRACE(MODEL, "  - using indices of type uint8_t");
-                const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(desiredIndexDataStartAddress);
-                for (uint8_t j = 0; j < indexAccessor.count; ++j) {
-                    primitiveIndices[j] = p_indices[j];
-                }
-                break;
-            }
-        }
-
-        primitives.emplace_back(primitiveIndices);
+        rollingStartIndex += indexCount;
     }
 
     return primitives;
