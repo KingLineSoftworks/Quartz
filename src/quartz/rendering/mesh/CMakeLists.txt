@@ -5,6 +5,7 @@ add_library(
         QUARTZ_RENDERING_Mesh
         SHARED
         Mesh.cpp
+        Primitive.cpp
         Vertex.cpp
 )
 

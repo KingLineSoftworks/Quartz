@@ -162,12 +162,37 @@ quartz::rendering::Model::populateVerticesWithAttribute(
 
     LOG_TRACE(MODEL, "Loading {} attribute", attributeString);
 
-    const tinygltf::Accessor& accessor = gltfModel.accessors[gltfPrimitive.attributes.find(attributeString)->second];
-    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
+    const uint32_t accessorIndex = gltfPrimitive.attributes.find(attributeString)->second;
+    LOG_TRACE(MODEL, "Using accessor at index {}", accessorIndex);
+    const tinygltf::Accessor& accessor = gltfModel.accessors[accessorIndex];
 
-    const float* p_data = reinterpret_cast<const float*>(&(
-        gltfModel.buffers[bufferView.buffer].data[accessor.byteOffset + bufferView.byteOffset]
-    ));
+    const uint32_t bufferViewIndex = accessor.bufferView;
+    LOG_TRACE(MODEL, "Using buffer view at index {}", bufferViewIndex);
+    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[bufferViewIndex];
+
+    const uint32_t bufferIndex = bufferView.buffer;
+    LOG_TRACE(MODEL, "Using buffer at index {}", bufferIndex);
+    const tinygltf::Buffer& buffer = gltfModel.buffers[bufferIndex];
+
+    const uint32_t accessorByteOffset = accessor.byteOffset;
+    const uint32_t bufferViewByteOffset = bufferView.byteOffset;
+    const std::vector<uint8_t>& bufferData = buffer.data;
+    const uint8_t* bufferDataStartAddress = bufferData.data();
+    const uint8_t* desiredDataStartAddress = bufferDataStartAddress + accessorByteOffset + bufferViewByteOffset;
+    LOG_TRACE(MODEL, "Accessor uses byte offset of {}", accessorByteOffset);
+    LOG_TRACE(MODEL, "Buffer view uses byte offset of {}", bufferViewByteOffset);
+    LOG_TRACE(MODEL, "Using total byte offset of {}", accessorByteOffset + bufferViewByteOffset);
+    LOG_TRACE(MODEL, "Buffer data starting at {}", reinterpret_cast<const void*>(bufferDataStartAddress));
+    LOG_TRACE(MODEL, "Using data starting at {}", reinterpret_cast<const void*>(desiredDataStartAddress));
+    LOG_TRACE(
+        MODEL, "{} + {} = {} SHOULD EQUAL {}",
+        reinterpret_cast<const void*>(bufferDataStartAddress),
+        accessorByteOffset + bufferViewByteOffset,
+        reinterpret_cast<const void*>(bufferDataStartAddress + accessorByteOffset + bufferViewByteOffset),
+        reinterpret_cast<const void*>(desiredDataStartAddress)
+    );
+
+    const float* p_data = reinterpret_cast<const float*>(desiredDataStartAddress);
 
     uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
     if (attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate) {
@@ -179,27 +204,39 @@ quartz::rendering::Model::populateVerticesWithAttribute(
         accessor.ByteStride(bufferView) ?
             accessor.ByteStride(bufferView) / sizeof (float) :
             tinygltf::GetNumComponentsInType(tinygltfVecType);
+    LOG_TRACE(MODEL, "Using a byte stride of {}", byteStride);
 
-    for (uint32_t j = 0; j < verticesToPopulate.size(); ++j) {
+    for (uint32_t i = 0; i < verticesToPopulate.size(); ++i) {
         switch (attributeType) {
             case quartz::rendering::Vertex::AttributeType::Position: {
-                verticesToPopulate[j].position = glm::make_vec3(&p_data[j * byteStride]);
+                verticesToPopulate[i].position = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::Normal: {
-                verticesToPopulate[j].normal = glm::make_vec3(&p_data[j * byteStride]);
+                verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::Color: {
-                verticesToPopulate[j].color = glm::make_vec3(&p_data[j * byteStride]);
+                verticesToPopulate[i].color = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate: {
-                verticesToPopulate[j].baseColorTextureCoordinate = glm::make_vec2(&p_data[j * byteStride]);
+                verticesToPopulate[i].baseColorTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
                 break;
             }
         }
     }
+}
+
+std::vector<quartz::rendering::Vertex>
+quartz::rendering::Model::loadModelVertices(
+    UNUSED const tinygltf::Model& gltfModel
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
+
+    std::vector<quartz::rendering::Vertex> vertices;
+
+    return vertices;
 }
 
 std::vector<quartz::rendering::Vertex>
@@ -209,49 +246,59 @@ quartz::rendering::Model::loadMeshVertices(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
-        std::vector<quartz::rendering::Vertex> meshVertices;
+    std::vector<quartz::rendering::Vertex> meshVertices;
 
-        LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
-        for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
-            LOG_TRACE(MODEL, "Primitive {}", i);
+    LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
+    for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
+        LOG_TRACE(MODEL, "Primitive {}", i);
 
-            const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
+        const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
 
-            if (gltfPrimitive.attributes.find("POSITION") == gltfPrimitive.attributes.end()) {
-                LOG_CRITICAL(MODEL, "Primitive {} does not contain a position attribute", i);
-                throw std::runtime_error("");
-            }
-
-            const uint32_t vertexCount = gltfModel.accessors[gltfPrimitive.attributes.find("POSITION")->second].count;
-            std::vector<quartz::rendering::Vertex> primitiveVertices(vertexCount);
-
-            std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
-                quartz::rendering::Vertex::AttributeType::Position,
-                quartz::rendering::Vertex::AttributeType::Normal,
-                quartz::rendering::Vertex::AttributeType::Color,
-                quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
-            };
-
-            for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
-                quartz::rendering::Model::populateVerticesWithAttribute(
-                    primitiveVertices,
-                    gltfModel,
-                    gltfPrimitive,
-                    attributeType
-                );
-            }
-
-            LOG_TRACE(MODEL, "Primitive loaded {} vertices", primitiveVertices.size());
-            meshVertices.insert(
-                meshVertices.end(),
-                primitiveVertices.begin(),
-                primitiveVertices.end()
-            );
-            LOG_TRACE(MODEL, "Mesh now contains {} vertices", meshVertices.size());
+        if (gltfPrimitive.attributes.find("POSITION") == gltfPrimitive.attributes.end()) {
+            LOG_CRITICAL(MODEL, "Primitive {} does not contain a position attribute", i);
+            continue;
         }
+
+        const uint32_t accessorIndex = gltfPrimitive.attributes.find("POSITION")->second;
+        const uint32_t vertexCount = gltfModel.accessors[accessorIndex].count;
+        std::vector<quartz::rendering::Vertex> primitiveVertices(vertexCount);
+
+        std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
+            quartz::rendering::Vertex::AttributeType::Position,
+            quartz::rendering::Vertex::AttributeType::Normal,
+            quartz::rendering::Vertex::AttributeType::Color,
+            quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
+        };
+
+        for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
+            quartz::rendering::Model::populateVerticesWithAttribute(
+                primitiveVertices,
+                gltfModel,
+                gltfPrimitive,
+                attributeType
+            );
+        }
+
+        LOG_TRACE(MODEL, "Primitive loaded {} vertices", primitiveVertices.size());
+        meshVertices.insert(
+            meshVertices.end(),
+            primitiveVertices.begin(),
+            primitiveVertices.end()
+        );
+        LOG_TRACE(MODEL, "Mesh now contains {} vertices", meshVertices.size());
+    }
 
     return meshVertices;
 }
+
+/**
+ * @todo 2023/11/26 Create list of primitives so we can give it to the mesh. The
+ *   primitives need to know their indices, and their indices need to be referencing
+ *   the vertices that the mesh is containing. It is probably fine if we copy the
+ *   indices into the primitive instead of maintaining a view of the mesh "master
+ *   index buffer" for now. We can reconstruct the "master indices" list in the mesh
+ *   from all of the primitives it gets
+ */
 
 std::vector<uint32_t>
 quartz::rendering::Model::loadMeshIndices(
@@ -261,6 +308,7 @@ quartz::rendering::Model::loadMeshIndices(
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
     std::vector<uint32_t> meshIndices;
+    std::vector<quartz::rendering::Primitive> primitives;
 
     LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
     for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
@@ -273,24 +321,28 @@ quartz::rendering::Model::loadMeshIndices(
             continue;
         }
 
-        const uint32_t indexCount = gltfModel.accessors[gltfPrimitive.indices].count;
+        const uint32_t indexAccessorIndex = gltfPrimitive.indices; // will always be >= 0
+        const tinygltf::Accessor& indexAccessor = gltfModel.accessors[indexAccessorIndex];
+        const uint32_t indexCount = indexAccessor.count;
+
+        const uint32_t indexBufferViewIndex = indexAccessor.bufferView;
+        const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexBufferViewIndex];
+
+        const uint32_t indexBufferIndex = indexBufferView.buffer;
+        const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferIndex];
+
+        const uint32_t indexAccessorByteOffset = indexAccessor.byteOffset;
+        const uint32_t indexBufferViewByteOffset = indexBufferView.byteOffset;
+        const std::vector<uint8_t>& indexBufferData = indexBuffer.data;
+        const uint8_t* indexBufferDataStartAddress = indexBufferData.data();
+        const uint8_t* desiredIndexDataStartAddress = indexBufferDataStartAddress + indexAccessorByteOffset + indexBufferViewByteOffset;
+
         std::vector<uint32_t> primitiveIndices(indexCount);
-
-        const tinygltf::Accessor& indexAccessor = gltfModel.accessors[
-            gltfPrimitive.indices > -1 ?
-                gltfPrimitive.indices :
-                0
-        ];
-
-        const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexAccessor.bufferView];
-        const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferView.buffer];
 
         switch (indexAccessor.componentType) {
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
                 LOG_TRACE(MODEL, "  - using indices of type uint32_t");
-                const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(&(
-                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                ));
+                const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(desiredIndexDataStartAddress);
                 for (uint32_t j = 0; j < indexAccessor.count; ++j) {
                     primitiveIndices[j] = p_indices[j];
                 }
@@ -298,9 +350,7 @@ quartz::rendering::Model::loadMeshIndices(
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
                 LOG_TRACE(MODEL, "  - using indices of type uint16_t");
-                const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(&(
-                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                ));
+                const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(desiredIndexDataStartAddress);
                 for (uint16_t j = 0; j < indexAccessor.count; ++j) {
                     primitiveIndices[j] = p_indices[j];
                 }
@@ -308,9 +358,7 @@ quartz::rendering::Model::loadMeshIndices(
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
                 LOG_TRACE(MODEL, "  - using indices of type uint8_t");
-                const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(&(
-                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                ));
+                const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(desiredIndexDataStartAddress);
                 for (uint8_t j = 0; j < indexAccessor.count; ++j) {
                     primitiveIndices[j] = p_indices[j];
                 }
@@ -318,16 +366,94 @@ quartz::rendering::Model::loadMeshIndices(
             }
         }
 
-        LOG_TRACE(MODEL, "Primitive loaded {} indices", primitiveIndices.size());
+        const uint32_t startIndex = meshIndices.size();
+        const uint32_t endIndex = startIndex + primitiveIndices.size();
+        LOG_TRACE(MODEL, "Inserting {} indices into mesh index list", primitiveIndices.size());
+        LOG_TRACE(MODEL, "Primitive cares about indices [ {} , {} ]", startIndex, endIndex);
+
+        primitives.emplace_back(primitiveIndices);
+
         meshIndices.insert(
             meshIndices.end(),
             primitiveIndices.begin(),
             primitiveIndices.end()
         );
+
         LOG_TRACE(MODEL, "Mesh now contains {} indices", meshIndices.size());
     }
 
     return meshIndices;
+}
+
+std::vector<quartz::rendering::Primitive>
+quartz::rendering::Model::loadMeshPrimitives(
+    const tinygltf::Model& gltfModel,
+    const tinygltf::Mesh& gltfMesh
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
+
+    std::vector<quartz::rendering::Primitive> primitives;
+
+    LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
+    for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
+        LOG_TRACE(MODEL, "Primitive {}", i);
+
+        const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
+
+        if (gltfPrimitive.indices <= -1) {
+            LOG_TRACE(MODEL, "Primitive does not contain any indices");
+            continue;
+        }
+
+        const uint32_t indexAccessorIndex = gltfPrimitive.indices; // will always be >= 0
+        const tinygltf::Accessor& indexAccessor = gltfModel.accessors[indexAccessorIndex];
+        const uint32_t indexCount = indexAccessor.count;
+
+        const uint32_t indexBufferViewIndex = indexAccessor.bufferView;
+        const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexBufferViewIndex];
+
+        const uint32_t indexBufferIndex = indexBufferView.buffer;
+        const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferIndex];
+
+        const uint32_t indexAccessorByteOffset = indexAccessor.byteOffset;
+        const uint32_t indexBufferViewByteOffset = indexBufferView.byteOffset;
+        const std::vector<uint8_t>& indexBufferData = indexBuffer.data;
+        const uint8_t* indexBufferDataStartAddress = indexBufferData.data();
+        const uint8_t* desiredIndexDataStartAddress = indexBufferDataStartAddress + indexAccessorByteOffset + indexBufferViewByteOffset;
+
+        std::vector<uint32_t> primitiveIndices(indexCount);
+
+        switch (indexAccessor.componentType) {
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+                LOG_TRACE(MODEL, "  - using indices of type uint32_t");
+                const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(desiredIndexDataStartAddress);
+                for (uint32_t j = 0; j < indexAccessor.count; ++j) {
+                    primitiveIndices[j] = p_indices[j];
+                }
+                break;
+            }
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+                LOG_TRACE(MODEL, "  - using indices of type uint16_t");
+                const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(desiredIndexDataStartAddress);
+                for (uint16_t j = 0; j < indexAccessor.count; ++j) {
+                    primitiveIndices[j] = p_indices[j];
+                }
+                break;
+            }
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+                LOG_TRACE(MODEL, "  - using indices of type uint8_t");
+                const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(desiredIndexDataStartAddress);
+                for (uint8_t j = 0; j < indexAccessor.count; ++j) {
+                    primitiveIndices[j] = p_indices[j];
+                }
+                break;
+            }
+        }
+
+        primitives.emplace_back(primitiveIndices);
+    }
+
+    return primitives;
 }
 
 std::vector<quartz::rendering::Mesh>
@@ -374,10 +500,17 @@ quartz::rendering::Model::loadMeshes(
                 gltfMesh
             );
 
+        const std::vector<quartz::rendering::Primitive> primitives =
+            quartz::rendering::Model::loadMeshPrimitives(
+                gltfModel,
+                gltfMesh
+            );
+
         meshes.emplace_back(quartz::rendering::Mesh(
             renderingDevice,
             vertices,
-            indices
+            indices,
+            primitives
         ));
     }
 
@@ -542,6 +675,8 @@ quartz::rendering::Model::Model(
     const std::string& objectFilepath
 ) :
     m_gltfModel(quartz::rendering::Model::loadGLTFModel(objectFilepath)),
+    m_vertices(),
+    m_indices(),
     m_meshes(
         quartz::rendering::Model::loadMeshes(
             renderingDevice,
@@ -560,6 +695,8 @@ quartz::rendering::Model::Model(
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
+    m_vertices(other.m_vertices),
+    m_indices(other.m_indices),
     m_meshes(std::move(other.m_meshes)),
     m_material(std::move(other.m_material))
 {

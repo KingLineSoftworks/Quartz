@@ -580,6 +580,11 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         reinterpret_cast<void*>(&pushConstantValue)
     );
 
+    /**
+     * @todo 2023/11/26 For each mesh in the model, bind the correct vertex buffer,
+     *   then the correct vertex buffers
+     */
+
     uint32_t offset = 0;
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
@@ -587,29 +592,40 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         offset
     );
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(model.getMeshes()[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
-        0,
-        vk::IndexType::eUint32
-    );
+    /**
+     * @todo 2023/11/26 For each primitive, bind the index buffer with the correct offset
+     */
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics,
-        *renderingPipeline.getVulkanPipelineLayoutPtr(),
-        0,
-        1,
-        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
-        0,
-        nullptr
-    );
+//    for (const quartz::rendering::Primitive& primitive : model.getMeshes()[0].getPrimitives()) {
+        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+            *(model.getMeshes()[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+            0,
+            vk::IndexType::eUint32
+        );
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        model.getMeshes()[0].getIndices().size(),
-        1,
-        0,
-        0,
-        0
-    );
+        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+            vk::PipelineBindPoint::eGraphics,
+            *renderingPipeline.getVulkanPipelineLayoutPtr(),
+            0,
+            1,
+            &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+            0,
+            nullptr
+        );
+
+        /**
+         * @todo 2023/11/26 Index count should be determined by primitive.endIndex - primitive.startIndex
+         *   because primitives won't have their index list, but instead a view into the meshes indices
+         */
+
+        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+            model.getMeshes()[0].getPrimitives()[0].getIndices().size(),
+            1,
+            0,
+            0,
+            0
+        );
+//    }
 }
 
 void
