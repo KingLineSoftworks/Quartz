@@ -68,6 +68,27 @@ quartz::rendering::Model::loadGLTFModel(
     return gltfModel;
 }
 
+std::vector<quartz::rendering::Scene>
+quartz::rendering::Model::loadScenes(const tinygltf::Model& gltfModel) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
+
+    std::vector<quartz::rendering::Scene> scenes;
+    scenes.reserve(gltfModel.scenes.size());
+
+    for (uint32_t i = 0; i < gltfModel.scenes.size(); ++i) {
+        LOG_TRACE(MODEL, "Loading scene {}", i);
+
+        const tinygltf::Scene& gltfScene = gltfModel.scenes[i];
+
+        scenes.emplace_back(
+            gltfModel,
+            gltfScene
+        );
+    }
+
+    return scenes;
+}
+
 const tinygltf::Scene&
 quartz::rendering::Model::loadDefaultScene(
     const tinygltf::Model& gltfModel
@@ -644,8 +665,12 @@ quartz::rendering::Model::Model(
     const std::string& objectFilepath
 ) :
     m_gltfModel(quartz::rendering::Model::loadGLTFModel(objectFilepath)),
-    m_vertices(),
-    m_indices(),
+    m_defaultSceneIndex(
+        m_gltfModel.defaultScene <= -1 ?
+            0 :
+            m_gltfModel.defaultScene
+    ),
+    m_scenes(quartz::rendering::Model::loadScenes(m_gltfModel)),
     m_meshes(
         quartz::rendering::Model::loadMeshes(
             renderingDevice,
@@ -664,8 +689,7 @@ quartz::rendering::Model::Model(
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
-    m_vertices(other.m_vertices),
-    m_indices(other.m_indices),
+    m_scenes(std::move(other.m_scenes)),
     m_meshes(std::move(other.m_meshes)),
     m_material(std::move(other.m_material))
 {

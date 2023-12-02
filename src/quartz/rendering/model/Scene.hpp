@@ -1,0 +1,37 @@
+#pragma once
+
+#include <memory>
+#include <vector>
+
+#include <tiny_gltf.h>
+
+#include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/model/Node.hpp"
+
+namespace quartz {
+namespace rendering {
+    class Scene;
+}
+}
+
+class quartz::rendering::Scene {
+public: // member functions
+    Scene(
+        const tinygltf::Model& gltfModel,
+        const tinygltf::Scene& gltfScene
+    );
+    Scene(const Scene& other);
+    Scene(Scene&& other);
+    ~Scene();
+
+    USE_LOGGER(MODEL_SCENE);
+
+private: // static functions
+    static std::vector<std::shared_ptr<quartz::rendering::Node>> loadRootNodePtrs(
+        const tinygltf::Model& gltfModel,
+        const tinygltf::Scene& gltfScene
+    );
+
+private: // member variables
+    std::vector<std::shared_ptr<quartz::rendering::Node>> m_rootNodePtrs;
+};

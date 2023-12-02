@@ -5,6 +5,8 @@ add_library(
         QUARTZ_RENDERING_Model
         SHARED
         Model.cpp
+        Node.cpp
+        Scene.cpp
 )
 
 target_compile_options(
@@ -16,6 +18,7 @@ target_link_libraries(
         QUARTZ_RENDERING_Model
 
         PUBLIC
+        glm
         tinygltf
         vulkan
 

@@ -44,10 +44,6 @@ public: // member functions
 
 private: // static functions
 
-//    static std::vector<uint32_t> loadIndicesFromPrimitives(
-//        const std::vector<quartz::rendering::Primitive>& primitives
-//    );
-
 private: // member variables
 
     /**
