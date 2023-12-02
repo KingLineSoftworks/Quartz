@@ -45,6 +45,7 @@ public: // member functions
     float getScrollOffset_y() const { return m_scrollOffset_y; }
 
     void setShouldCollectMouseInput(const bool shouldCollect);
+    void setShouldCollectKeyInput(const bool shouldCollect);
 
 private: // member functions
     InputManager(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
@@ -76,6 +77,8 @@ private: // member variables
 
     bool m_shouldCollectMouseInput;
     bool m_mousePositionInitialized;
+
+    bool m_shouldCollectKeyInput;
 
     bool m_keyDown_q;
     bool m_keyImpact_q;

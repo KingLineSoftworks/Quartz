@@ -127,5 +127,6 @@ quartz::Application::processInput() {
 
         m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
         mp_inputManager->setShouldCollectMouseInput(!m_isPaused);
+        mp_inputManager->setShouldCollectKeyInput(!m_isPaused);
     }
 }

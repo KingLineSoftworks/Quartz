@@ -15,6 +15,8 @@ quartz::managers::InputManager::InputManager(
     m_shouldCollectMouseInput(true),
     m_mousePositionInitialized(false),
 
+    m_shouldCollectKeyInput(true),
+
     m_keyDown_q(false),
     m_keyImpact_q(false),
     m_keyDown_esc(false),
@@ -57,6 +59,10 @@ quartz::managers::InputManager::collectInput() {
     m_keyImpact_esc = keyDown_esc && !m_keyDown_esc;
     m_keyDown_esc = keyDown_esc;
 
+    if (!m_shouldCollectKeyInput) {
+        return;
+    }
+
     m_keyDown_w = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_W);
     m_keyDown_a = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_A);
     m_keyDown_s = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_S);
@@ -71,6 +77,13 @@ quartz::managers::InputManager::setShouldCollectMouseInput(const bool shouldColl
     m_mousePositionInitialized = !shouldCollect;
 
     LOG_DEBUGthis("{} mouse input", (m_shouldCollectMouseInput ? "Enabling" : "Disabling"));
+}
+
+void
+quartz::managers::InputManager::setShouldCollectKeyInput(const bool shouldCollect) {
+    m_shouldCollectKeyInput = shouldCollect;
+
+    LOG_DEBUGthis("{} mouse input", (m_shouldCollectKeyInput ? "Enabling" : "Disabling"));
 }
 
 std::shared_ptr<quartz::managers::InputManager>

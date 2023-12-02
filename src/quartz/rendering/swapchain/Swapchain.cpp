@@ -571,6 +571,16 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     const quartz::rendering::Model& model,
     const uint32_t inFlightFrameIndex
 ) {
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *renderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        nullptr
+    );
+
     uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -580,13 +590,7 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         reinterpret_cast<void*>(&pushConstantValue)
     );
 
-    /**
-     * @todo 2023/11/26 For each mesh in the model, bind the correct vertex buffer,
-     *   then the correct vertex buffers
-     */
-
     for (const quartz::rendering::Mesh& mesh : model.getMeshes()) {
-
         uint32_t offset = 0;
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
             0,
@@ -594,28 +598,14 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
             offset
         );
 
-        /**
-         * @todo 2023/11/26 For each primitive, bind the index buffer with the correct offset
-         */
-
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
             *(mesh.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
             0,
             vk::IndexType::eUint32
         );
 
-        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
-            vk::PipelineBindPoint::eGraphics,
-            *renderingPipeline.getVulkanPipelineLayoutPtr(),
-            0,
-            1,
-            &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
-            0,
-            nullptr
-        );
-
-//        for (const quartz::rendering::Primitive& primitive : model.getMeshes()[0].getPrimitives()) {
-            const quartz::rendering::Primitive& primitive = mesh.getPrimitives()[0];
+//            const quartz::rendering::Primitive& primitive = mesh.getPrimitives()[0];
+        for (const quartz::rendering::Primitive& primitive : mesh.getPrimitives()) {
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
                 primitive.getIndexCount(),
                 1,
@@ -623,7 +613,7 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
                 0,
                 0
             );
-//        }
+        }
     }
 }
 
