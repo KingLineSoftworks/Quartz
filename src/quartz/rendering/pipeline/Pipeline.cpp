@@ -9,7 +9,7 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/window/Window.hpp"
-#include "quartz/rendering/mesh/Vertex.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
 
 quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
     const glm::mat4 viewMatrix_,

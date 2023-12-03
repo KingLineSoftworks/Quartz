@@ -33,7 +33,7 @@ public: // member functions
     const Node* getParentPtr() const { return mp_parent; }
     const std::vector<std::shared_ptr<Node>>& getChildrenNodePtrs() const { return m_childrenPtrs; }
     const glm::mat4& getTransformationMatrix() const { return m_transformationMatrix; }
-    const std::shared_ptr<quartz::rendering::NewMesh>& getMeshPtr() const { return mp_mesh; }
+    const std::shared_ptr<quartz::rendering::Mesh>& getMeshPtr() const { return mp_mesh; }
 
 private: // static functions
     std::vector<std::shared_ptr<quartz::rendering::Node>> loadChildrenNodePtrs(
@@ -46,7 +46,7 @@ private: // static functions
         const tinygltf::Node& gltfNode
     );
 
-    std::shared_ptr<quartz::rendering::NewMesh> loadMeshPtr(
+    std::shared_ptr<quartz::rendering::Mesh> loadMeshPtr(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Node& gltfNode
@@ -61,5 +61,5 @@ private: // member variables
 
     glm::mat4 m_transformationMatrix;
 
-    std::shared_ptr<quartz::rendering::NewMesh> mp_mesh;
+    std::shared_ptr<quartz::rendering::Mesh> mp_mesh;
 };

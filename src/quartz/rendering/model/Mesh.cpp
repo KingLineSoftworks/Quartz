@@ -5,15 +5,15 @@
 #include "quartz/rendering/model/Mesh.hpp"
 #include "quartz/rendering/model/Primitive.hpp"
 
-std::vector<quartz::rendering::NewPrimitive>
-quartz::rendering::NewMesh::loadPrimitives(
+std::vector<quartz::rendering::Primitive>
+quartz::rendering::Mesh::loadPrimitives(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Mesh& gltfMesh
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_MESH, "");
 
-    std::vector<quartz::rendering::NewPrimitive> primitives;
+    std::vector<quartz::rendering::Primitive> primitives;
     primitives.reserve(gltfMesh.primitives.size());
 
     LOG_TRACE(MODEL_MESH, "Considering {} primitives", gltfMesh.primitives.size());
@@ -35,13 +35,13 @@ quartz::rendering::NewMesh::loadPrimitives(
     return primitives;
 }
 
-quartz::rendering::NewMesh::NewMesh(
+quartz::rendering::Mesh::Mesh(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Mesh& gltfMesh
 ) :
     m_primitives(
-        quartz::rendering::NewMesh::loadPrimitives(
+        quartz::rendering::Mesh::loadPrimitives(
             renderingDevice,
             gltfModel,
             gltfMesh
@@ -51,14 +51,14 @@ quartz::rendering::NewMesh::NewMesh(
     LOG_FUNCTION_SCOPE_TRACEthis("");
 }
 
-quartz::rendering::NewMesh::NewMesh(
-    quartz::rendering::NewMesh&& other
+quartz::rendering::Mesh::Mesh(
+    quartz::rendering::Mesh&& other
 ) :
     m_primitives(std::move(other.m_primitives))
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 }
 
-quartz::rendering::NewMesh::~NewMesh() {
+quartz::rendering::Mesh::~Mesh() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 }

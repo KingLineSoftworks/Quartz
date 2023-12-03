@@ -8,11 +8,11 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/mesh/Vertex.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
 #include "quartz/rendering/model/Primitive.hpp"
 
 void
-quartz::rendering::NewPrimitive::populateVerticesWithAttribute(
+quartz::rendering::Primitive::populateVerticesWithAttribute(
     std::vector<quartz::rendering::Vertex>& verticesToPopulate,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
@@ -108,7 +108,7 @@ quartz::rendering::NewPrimitive::populateVerticesWithAttribute(
 }
 
 quartz::rendering::StagedBuffer
-quartz::rendering::NewPrimitive::createStagedVertexBuffer(
+quartz::rendering::Primitive::createStagedVertexBuffer(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive
@@ -128,7 +128,7 @@ quartz::rendering::NewPrimitive::createStagedVertexBuffer(
     };
 
     for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
-        quartz::rendering::NewPrimitive::populateVerticesWithAttribute(
+        quartz::rendering::Primitive::populateVerticesWithAttribute(
             vertices,
             gltfModel,
             gltfPrimitive,
@@ -149,7 +149,7 @@ quartz::rendering::NewPrimitive::createStagedVertexBuffer(
 }
 
 quartz::rendering::StagedBuffer
-quartz::rendering::NewPrimitive::createStagedIndexBuffer(
+quartz::rendering::Primitive::createStagedIndexBuffer(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive
@@ -213,21 +213,21 @@ quartz::rendering::NewPrimitive::createStagedIndexBuffer(
     return stagedIndexBuffer;
 }
 
-quartz::rendering::NewPrimitive::NewPrimitive(
+quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive
 ) :
     m_indexCount(gltfModel.accessors[gltfPrimitive.indices].count),
     m_stagedVertexBuffer(
-        quartz::rendering::NewPrimitive::createStagedVertexBuffer(
+        quartz::rendering::Primitive::createStagedVertexBuffer(
             renderingDevice,
             gltfModel,
             gltfPrimitive
         )
     ),
     m_stagedIndexBuffer(
-        quartz::rendering::NewPrimitive::createStagedIndexBuffer(
+        quartz::rendering::Primitive::createStagedIndexBuffer(
             renderingDevice,
             gltfModel,
             gltfPrimitive
@@ -237,8 +237,8 @@ quartz::rendering::NewPrimitive::NewPrimitive(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::NewPrimitive::NewPrimitive(
-    quartz::rendering::NewPrimitive&& other
+quartz::rendering::Primitive::Primitive(
+    quartz::rendering::Primitive&& other
 ) :
     m_indexCount(other.m_indexCount),
     m_stagedVertexBuffer(std::move(other.m_stagedVertexBuffer)),
@@ -247,6 +247,6 @@ quartz::rendering::NewPrimitive::NewPrimitive(
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::NewPrimitive::~NewPrimitive() {
+quartz::rendering::Primitive::~Primitive() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

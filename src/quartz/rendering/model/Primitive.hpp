@@ -5,23 +5,23 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/mesh/Vertex.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
 
 namespace quartz {
 namespace rendering {
-    class NewPrimitive;
+    class Primitive;
 }
 }
 
-class quartz::rendering::NewPrimitive {
+class quartz::rendering::Primitive {
 public: // member functions
-    NewPrimitive(
+    Primitive(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Primitive& gltfPrimitive
     );
-    NewPrimitive(NewPrimitive&& other);
-    ~NewPrimitive();
+    Primitive(Primitive&& other);
+    ~Primitive();
 
     USE_LOGGER(MODEL_PRIMITIVE);
 

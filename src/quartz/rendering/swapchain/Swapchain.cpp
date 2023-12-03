@@ -620,7 +620,7 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
          *   matrix. We need to consider our parents transformation and take the product with that
          */
 
-        for (const quartz::rendering::NewPrimitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+        for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
                 0,

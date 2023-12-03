@@ -9,6 +9,7 @@ add_library(
         Node.cpp
         Primitive.cpp
         Scene.cpp
+        Vertex.cpp
 )
 
 target_compile_options(
@@ -30,7 +31,7 @@ target_link_libraries(
 
         PUBLIC
         QUARTZ_RENDERING_Buffer
+        QUARTZ_RENDERING_Device
         QUARTZ_RENDERING_Material
-        QUARTZ_RENDERING_Mesh
         QUARTZ_RENDERING_Texture
 )

@@ -9,31 +9,31 @@
 
 namespace quartz {
 namespace rendering {
-    class NewMesh;
+    class Mesh;
 }
 }
 
-class quartz::rendering::NewMesh {
+class quartz::rendering::Mesh {
 public: // member functions
-    NewMesh(
+    Mesh(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Mesh& gltfMesh
     );
-    NewMesh(NewMesh&& other);
-    ~NewMesh();
+    Mesh(Mesh&& other);
+    ~Mesh();
 
     USE_LOGGER(MODEL_MESH);
 
-    const std::vector<quartz::rendering::NewPrimitive>& getPrimitives() const { return m_primitives; }
+    const std::vector<quartz::rendering::Primitive>& getPrimitives() const { return m_primitives; }
 
 private: // static functions
-    std::vector<quartz::rendering::NewPrimitive> loadPrimitives(
+    std::vector<quartz::rendering::Primitive> loadPrimitives(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Mesh& gltfMesh
     );
 
 private: // member variables
-    std::vector<quartz::rendering::NewPrimitive> m_primitives;
+    std::vector<quartz::rendering::Primitive> m_primitives;
 };

@@ -7,7 +7,6 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/material/Material.hpp"
-#include "quartz/rendering/mesh/Mesh.hpp"
 #include "quartz/rendering/model/Scene.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 

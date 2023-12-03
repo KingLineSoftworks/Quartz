@@ -47,7 +47,6 @@ int main() {
         {"DEVICE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
         {"MATERIAL", util::Logger::Level::info},
-        {"MESH", util::Logger::Level::trace},
         {"MODEL", util::Logger::Level::trace},
         {"MODEL_MESH", util::Logger::Level::trace},
         {"MODEL_PRIMITIVE", util::Logger::Level::trace},

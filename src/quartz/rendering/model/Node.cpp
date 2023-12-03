@@ -87,7 +87,7 @@ quartz::rendering::Node::loadTransformationMatrix(
     return transformationMatrix;
 }
 
-std::shared_ptr<quartz::rendering::NewMesh>
+std::shared_ptr<quartz::rendering::Mesh>
 quartz::rendering::Node::loadMeshPtr(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
@@ -105,7 +105,7 @@ quartz::rendering::Node::loadMeshPtr(
     LOG_TRACE(MODEL_NODE, "Using mesh at index {}", meshIndex);
     const tinygltf::Mesh& gltfMesh = gltfModel.meshes[meshIndex];
 
-    return std::make_shared<quartz::rendering::NewMesh>(
+    return std::make_shared<quartz::rendering::Mesh>(
         renderingDevice,
         gltfModel,
         gltfMesh
