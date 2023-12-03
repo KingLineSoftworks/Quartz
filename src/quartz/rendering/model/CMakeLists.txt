@@ -4,8 +4,10 @@
 add_library(
         QUARTZ_RENDERING_Model
         SHARED
+        Mesh.cpp
         Model.cpp
         Node.cpp
+        Primitive.cpp
         Scene.cpp
 )
 
@@ -27,6 +29,7 @@ target_link_libraries(
         UTIL_Logger
 
         PUBLIC
+        QUARTZ_RENDERING_Buffer
         QUARTZ_RENDERING_Material
         QUARTZ_RENDERING_Mesh
         QUARTZ_RENDERING_Texture

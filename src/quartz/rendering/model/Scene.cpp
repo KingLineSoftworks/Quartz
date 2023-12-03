@@ -7,6 +7,7 @@
 
 std::vector<std::shared_ptr<quartz::rendering::Node>>
 quartz::rendering::Scene::loadRootNodePtrs(
+    const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Scene& gltfScene
 ) {
@@ -20,6 +21,7 @@ quartz::rendering::Scene::loadRootNodePtrs(
         const tinygltf::Node gltfNode = gltfModel.nodes[currentNodeIndex];
 
         rootNodePtrs.emplace_back(std::make_shared<quartz::rendering::Node>(
+            renderingDevice,
             gltfModel,
             gltfNode,
             nullptr
@@ -30,11 +32,13 @@ quartz::rendering::Scene::loadRootNodePtrs(
 }
 
 quartz::rendering::Scene::Scene(
+    const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Scene& gltfScene
 ) :
     m_rootNodePtrs(
         quartz::rendering::Scene::loadRootNodePtrs(
+            renderingDevice,
             gltfModel,
             gltfScene
         )
@@ -44,17 +48,9 @@ quartz::rendering::Scene::Scene(
 }
 
 quartz::rendering::Scene::Scene(
-    UNUSED const quartz::rendering::Scene& other
+    quartz::rendering::Scene&& other
 ) :
-    m_rootNodePtrs()
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
-
-quartz::rendering::Scene::Scene(
-    UNUSED quartz::rendering::Scene&& other
-) :
-    m_rootNodePtrs()
+    m_rootNodePtrs(other.m_rootNodePtrs)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

@@ -17,17 +17,20 @@ namespace rendering {
 class quartz::rendering::Scene {
 public: // member functions
     Scene(
+        const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Scene& gltfScene
     );
-    Scene(const Scene& other);
     Scene(Scene&& other);
     ~Scene();
 
     USE_LOGGER(MODEL_SCENE);
 
+    const std::vector<std::shared_ptr<quartz::rendering::Node>>& getRootNodePtrs() const { return m_rootNodePtrs; }
+
 private: // static functions
     static std::vector<std::shared_ptr<quartz::rendering::Node>> loadRootNodePtrs(
+        const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Scene& gltfScene
     );

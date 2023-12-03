@@ -98,6 +98,17 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryPt
     return p_logicalBufferPhysicalMemory;
 }
 
+quartz::rendering::StagedBuffer::StagedBuffer() :
+    m_sizeBytes(),
+    m_usageFlags(),
+    mp_vulkanLogicalStagingBuffer(),
+    mp_vulkanPhysicalDeviceStagingMemory(),
+    mp_vulkanLogicalBuffer(),
+    mp_vulkanPhysicalDeviceMemory()
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
 quartz::rendering::StagedBuffer::StagedBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t sizeBytes,

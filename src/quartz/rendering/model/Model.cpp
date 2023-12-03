@@ -69,7 +69,10 @@ quartz::rendering::Model::loadGLTFModel(
 }
 
 std::vector<quartz::rendering::Scene>
-quartz::rendering::Model::loadScenes(const tinygltf::Model& gltfModel) {
+quartz::rendering::Model::loadScenes(
+    const quartz::rendering::Device& renderingDevice,
+    const tinygltf::Model& gltfModel
+) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
     std::vector<quartz::rendering::Scene> scenes;
@@ -81,6 +84,7 @@ quartz::rendering::Model::loadScenes(const tinygltf::Model& gltfModel) {
         const tinygltf::Scene& gltfScene = gltfModel.scenes[i];
 
         scenes.emplace_back(
+            renderingDevice,
             gltfModel,
             gltfScene
         );
@@ -670,13 +674,22 @@ quartz::rendering::Model::Model(
             0 :
             m_gltfModel.defaultScene
     ),
-    m_scenes(quartz::rendering::Model::loadScenes(m_gltfModel)),
+    m_scenes(
+        quartz::rendering::Model::loadScenes(
+            renderingDevice,
+            m_gltfModel
+        )
+    ),
+# if false
     m_meshes(
         quartz::rendering::Model::loadMeshes(
             renderingDevice,
             m_gltfModel
         )
     ),
+#else
+    m_meshes(),
+#endif
     m_material(
         quartz::rendering::Model::loadMaterial(
             renderingDevice,

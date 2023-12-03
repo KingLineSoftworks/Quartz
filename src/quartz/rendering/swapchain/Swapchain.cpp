@@ -571,6 +571,7 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     const quartz::rendering::Model& model,
     const uint32_t inFlightFrameIndex
 ) {
+#if false
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -615,6 +616,65 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
             );
         }
     }
+#else
+    LOG_CRITICALthis("Binding descriptor sets");
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *renderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        nullptr
+    );
+
+    LOG_CRITICALthis("Getting base color texture master index");
+    uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+        *renderingPipeline.getVulkanPipelineLayoutPtr(),
+        vk::ShaderStageFlagBits::eFragment,
+        0,
+        sizeof(uint32_t),
+        reinterpret_cast<void*>(&pushConstantValue)
+    );
+
+    // get a list of all nodes
+    UNUSED std::vector<std::shared_ptr<quartz::rendering::Node>> allNodes;
+
+    LOG_CRITICALthis("Getting root node");
+    const std::shared_ptr<quartz::rendering::Node>& p_node = model.getDefaultScene().getRootNodePtrs()[0];
+//    for (const std::shared_ptr<quartz::rendering::Node>& p_node : model.getDefaultScene().getRootNodePtrs()) {
+        if (!p_node->getMeshPtr()) {
+            LOG_CRITICALthis("No mesh pointer present");
+//            continue;
+        }
+
+    LOG_CRITICALthis("Getting primitive");
+        const quartz::rendering::NewPrimitive& primitive = p_node->getMeshPtr()->getPrimitives()[0];
+//        for (const quartz::rendering::NewPrimitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+            uint32_t offset = 0;
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+                0,
+                *(primitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+                offset
+            );
+
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+                *(primitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+                0,
+                vk::IndexType::eUint32
+            );
+
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+                primitive.getIndexCount(),
+                1,
+                0,
+                0,
+                0
+            );
+//        }
+//    }
+#endif
 }
 
 void

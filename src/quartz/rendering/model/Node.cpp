@@ -8,10 +8,12 @@
 
 #include <tiny_gltf.h>
 
+#include "quartz/rendering/model/Mesh.hpp"
 #include "quartz/rendering/model/Node.hpp"
 
 std::vector<std::shared_ptr<quartz::rendering::Node>>
 quartz::rendering::Node::loadChildrenNodePtrs(
+    const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Node& gltfNode
 ) {
@@ -25,6 +27,7 @@ quartz::rendering::Node::loadChildrenNodePtrs(
         const tinygltf::Node currentGltfNode = gltfModel.nodes[currentNodeIndex];
 
         childrenNodePtrs.emplace_back(std::make_shared<quartz::rendering::Node>(
+            renderingDevice,
             gltfModel,
             currentGltfNode,
             nullptr
@@ -81,7 +84,33 @@ quartz::rendering::Node::loadTransformationMatrix(
     return transformationMatrix;
 }
 
+std::shared_ptr<quartz::rendering::NewMesh>
+quartz::rendering::Node::loadMeshPtr(
+    const quartz::rendering::Device& renderingDevice,
+    const tinygltf::Model& gltfModel,
+    const tinygltf::Node& gltfNode
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
+
+    const int32_t meshIndex = gltfNode.mesh;
+
+    if (meshIndex <= -1) {
+        LOG_TRACE(MODEL_NODE, "Node does not contain a mesh ({})", meshIndex);
+        return nullptr;
+    }
+
+    LOG_TRACE(MODEL_NODE, "Using mesh at index {}", meshIndex);
+    const tinygltf::Mesh& gltfMesh = gltfModel.meshes[meshIndex];
+
+    return std::make_shared<quartz::rendering::NewMesh>(
+        renderingDevice,
+        gltfModel,
+        gltfMesh
+    );
+}
+
 quartz::rendering::Node::Node(
+    const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Node& gltfNode,
     const quartz::rendering::Node* p_parent
@@ -89,12 +118,20 @@ quartz::rendering::Node::Node(
     mp_parent(p_parent),
     m_childrenPtrs(
         quartz::rendering::Node::loadChildrenNodePtrs(
+            renderingDevice,
             gltfModel,
             gltfNode
         )
     ),
     m_transformationMatrix(
         quartz::rendering::Node::loadTransformationMatrix(
+            gltfNode
+        )
+    ),
+    mp_mesh(
+        quartz::rendering::Node::loadMeshPtr(
+            renderingDevice,
+            gltfModel,
             gltfNode
         )
     )
@@ -107,21 +144,12 @@ quartz::rendering::Node::Node(
 }
 
 quartz::rendering::Node::Node(
-    const Node& other
-) :
-    mp_parent(other.mp_parent),
-    m_childrenPtrs(other.m_childrenPtrs),
-    m_transformationMatrix(other.m_transformationMatrix)
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
-
-quartz::rendering::Node::Node(
     Node&& other
 ) :
     mp_parent(std::move(other.mp_parent)),
     m_childrenPtrs(std::move(other.m_childrenPtrs)),
-    m_transformationMatrix(std::move(other.m_transformationMatrix))
+    m_transformationMatrix(std::move(other.m_transformationMatrix)),
+    mp_mesh(std::move(other.mp_mesh))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
