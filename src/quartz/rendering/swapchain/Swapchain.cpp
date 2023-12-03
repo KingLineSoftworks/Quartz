@@ -572,7 +572,6 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
     const quartz::rendering::Model& model,
     const uint32_t inFlightFrameIndex
 ) {
-#if false
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -583,50 +582,10 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         nullptr
     );
 
-    uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-        *renderingPipeline.getVulkanPipelineLayoutPtr(),
-        vk::ShaderStageFlagBits::eFragment,
-        0,
-        sizeof(uint32_t),
-        reinterpret_cast<void*>(&pushConstantValue)
-    );
-
-    for (const quartz::rendering::Mesh& mesh : model.getMeshes()) {
-        uint32_t offset = 0;
-        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
-            0,
-            *(mesh.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
-            offset
-        );
-
-        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-            *(mesh.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
-            0,
-            vk::IndexType::eUint32
-        );
-
-//            const quartz::rendering::Primitive& primitive = mesh.getPrimitives()[0];
-        for (const quartz::rendering::Primitive& primitive : mesh.getPrimitives()) {
-            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-                primitive.getIndexCount(),
-                1,
-                primitive.getStartIndex(),
-                0,
-                0
-            );
-        }
-    }
-#else
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics,
-        *renderingPipeline.getVulkanPipelineLayoutPtr(),
-        0,
-        1,
-        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
-        0,
-        nullptr
-    );
+    /**
+     * @todo 2023/12/3 Store the material in the mesh and update the push constants for
+     *   what textures and material properties we should be using based on the mesh's material
+     */
 
     uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
@@ -656,6 +615,11 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
             continue;
         }
 
+        /**
+         * @todo 2023/12/3 Update the model matrix based on the current nodes local transformation
+         *   matrix. We need to consider our parents transformation and take the product with that
+         */
+
         for (const quartz::rendering::NewPrimitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
@@ -679,7 +643,6 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
             );
         }
     }
-#endif
 }
 
 void

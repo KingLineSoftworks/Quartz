@@ -96,7 +96,6 @@ public: // member functions
     USE_LOGGER(MODEL);
 
     const quartz::rendering::Scene& getDefaultScene() const { return m_scenes[m_defaultSceneIndex]; }
-    const std::vector<quartz::rendering::Mesh>& getMeshes() const { return m_meshes; }
     const quartz::rendering::Material& getMaterial() const { return m_material; }
 
 private: // static functions
@@ -104,52 +103,6 @@ private: // static functions
     static tinygltf::Model loadGLTFModel(const std::string& filepath);
 
     static std::vector<quartz::rendering::Scene> loadScenes(
-        const quartz::rendering::Device& renderingDevice,
-        const tinygltf::Model& gltfModel
-    );
-
-    /**
-     * @todo 2023/12/2 Deprecate all of these functions following the incorrect paradigm
-     */
-
-    static const tinygltf::Scene& loadDefaultScene(const tinygltf::Model& gltfModel);
-
-    static std::queue<const tinygltf::Node*> loadNodePtrQueue(
-        const tinygltf::Model& gltfModel,
-        const tinygltf::Scene& gltfScene
-    );
-
-    static void populateVerticesWithAttribute(
-        std::vector<quartz::rendering::Vertex>& verticesToPopulate,
-        const tinygltf::Model& gltfModel,
-        const tinygltf::Primitive& gltfPrimitive,
-        const quartz::rendering::Vertex::AttributeType attributeType
-    );
-
-    static std::vector<quartz::rendering::Vertex> loadModelVertices(
-        const tinygltf::Model& gltfModel
-    );
-
-    static std::vector<uint32_t> loadModelIndices(
-        const tinygltf::Model& gltfModel
-    );
-
-    static std::vector<quartz::rendering::Vertex> loadMeshVertices(
-        const tinygltf::Model& gltfModel,
-        const tinygltf::Mesh& gltfMesh
-    );
-
-    static std::vector<uint32_t> loadMeshIndices(
-        const tinygltf::Model& gltfModel,
-        const tinygltf::Mesh& gltfMesh
-    );
-
-    static std::vector<quartz::rendering::Primitive> loadMeshPrimitives(
-        const tinygltf::Model& gltfModel,
-        const tinygltf::Mesh& gltfMesh
-    );
-
-    static std::vector<quartz::rendering::Mesh> loadMeshes(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
@@ -167,14 +120,8 @@ private: // static functions
 private: // member variables
     const tinygltf::Model m_gltfModel;
 
-    /**
-     * @todo 2023/12/2 Load the buffers and store them here
-     */
-
     uint32_t m_defaultSceneIndex;
     std::vector<quartz::rendering::Scene> m_scenes;
-
-    std::vector<quartz::rendering::Mesh> m_meshes;
 
     /**
      * @todo 2023/11/21 Should contain a vector of shared pointers to materials
