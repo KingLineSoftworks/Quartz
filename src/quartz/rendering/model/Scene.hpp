@@ -27,6 +27,7 @@ public: // member functions
     USE_LOGGER(MODEL_SCENE);
 
     const std::vector<std::shared_ptr<quartz::rendering::Node>>& getRootNodePtrs() const { return m_rootNodePtrs; }
+    std::vector<std::shared_ptr<quartz::rendering::Node>> getAllNodePtrs() const;
 
 private: // static functions
     static std::vector<std::shared_ptr<quartz::rendering::Node>> loadRootNodePtrs(

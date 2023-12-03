@@ -1,4 +1,5 @@
 #include <set>
+#include <queue>
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
@@ -617,7 +618,6 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         }
     }
 #else
-    LOG_CRITICALthis("Binding descriptor sets");
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -628,7 +628,6 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         nullptr
     );
 
-    LOG_CRITICALthis("Getting base color texture master index");
     uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -638,20 +637,26 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         reinterpret_cast<void*>(&pushConstantValue)
     );
 
-    // get a list of all nodes
-    UNUSED std::vector<std::shared_ptr<quartz::rendering::Node>> allNodes;
+    std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
+        std::deque(
+            model.getDefaultScene().getRootNodePtrs().begin(),
+            model.getDefaultScene().getRootNodePtrs().end()
+        )
+    );
 
-    LOG_CRITICALthis("Getting root node");
-    const std::shared_ptr<quartz::rendering::Node>& p_node = model.getDefaultScene().getRootNodePtrs()[0];
-//    for (const std::shared_ptr<quartz::rendering::Node>& p_node : model.getDefaultScene().getRootNodePtrs()) {
-        if (!p_node->getMeshPtr()) {
-            LOG_CRITICALthis("No mesh pointer present");
-//            continue;
+    while (!nodeQueue.empty()) {
+        const std::shared_ptr<quartz::rendering::Node>& p_node = nodeQueue.front();
+        nodeQueue.pop();
+
+        for (const std::shared_ptr<quartz::rendering::Node>& p_child : p_node->getChildrenNodePtrs()) {
+            nodeQueue.push(p_child);
         }
 
-    LOG_CRITICALthis("Getting primitive");
-        const quartz::rendering::NewPrimitive& primitive = p_node->getMeshPtr()->getPrimitives()[0];
-//        for (const quartz::rendering::NewPrimitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+        if (!p_node->getMeshPtr()) {
+            continue;
+        }
+
+        for (const quartz::rendering::NewPrimitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
                 0,
@@ -672,8 +677,8 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
                 0,
                 0
             );
-//        }
-//    }
+        }
+    }
 #endif
 }
 

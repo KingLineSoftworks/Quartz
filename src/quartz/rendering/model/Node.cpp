@@ -22,9 +22,12 @@ quartz::rendering::Node::loadChildrenNodePtrs(
     std::vector<std::shared_ptr<quartz::rendering::Node>> childrenNodePtrs;
     childrenNodePtrs.reserve(gltfNode.children.size());
 
+    LOG_TRACE(MODEL_SCENE, "Loading {} child nodes", gltfNode.children.size());
+
     for (uint32_t i = 0; i < gltfNode.children.size(); ++i) {
         const uint32_t currentNodeIndex = gltfNode.children[i];
         const tinygltf::Node currentGltfNode = gltfModel.nodes[currentNodeIndex];
+        LOG_TRACE(MODEL_SCENE, "Node's {}th child node is at index {}", i, currentNodeIndex);
 
         childrenNodePtrs.emplace_back(std::make_shared<quartz::rendering::Node>(
             renderingDevice,
