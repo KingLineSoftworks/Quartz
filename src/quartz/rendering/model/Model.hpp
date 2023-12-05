@@ -107,6 +107,11 @@ private: // static functions
         const int32_t localIndex,
         const quartz::rendering::Texture::Type textureType
     );
+    static uint32_t getTextureMasterIndex(
+        const tinygltf::Material& gltfMaterial,
+        const std::vector<uint32_t>& masterIndices,
+        const quartz::rendering::Texture::Type textureType
+    );
     static std::vector<quartz::rendering::Material> loadMaterials(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel

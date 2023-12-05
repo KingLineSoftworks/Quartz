@@ -231,7 +231,7 @@ quartz::rendering::Primitive::getMaterial(
 
     materialIndex += 1;
     LOG_TRACE(MODEL_PRIMITIVE, "Actually using material {}", materialIndex);
-    LOG_TRACE(MODEL_PRIMITIVE, "to account for default material at index 0");
+    LOG_TRACE(MODEL_PRIMITIVE, "  (to account for default material at index 0)");
 
     return materials[materialIndex];
 }

@@ -23,8 +23,8 @@ std::vector<std::shared_ptr<quartz::rendering::Texture>> quartz::rendering::Text
 uint32_t
 quartz::rendering::Texture::createTexture(
     const quartz::rendering::Device& renderingDevice,
-    UNUSED const tinygltf::Image& gltfImage,
-    UNUSED const tinygltf::Sampler& gltfSampler
+    const tinygltf::Image& gltfImage,
+    const tinygltf::Sampler& gltfSampler
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
@@ -46,13 +46,6 @@ quartz::rendering::Texture::createTexture(
     LOG_TRACE(TEXTURE, "Texture was inserted into master list at index {}", insertedIndex);
 
     return insertedIndex;
-}
-
-void
-quartz::rendering::Texture::cleanUpAllTextures() {
-    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
-
-    quartz::rendering::Texture::masterList.clear();
 }
 
 void
@@ -89,6 +82,29 @@ quartz::rendering::Texture::initializeMasterList(
      *   emission
      *   metallicRoughness
      */
+}
+
+void
+quartz::rendering::Texture::cleanUpAllTextures() {
+    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
+
+    quartz::rendering::Texture::masterList.clear();
+}
+
+std::string
+quartz::rendering::Texture::getTextureTypeGLTFString(
+    const quartz::rendering::Texture::Type type
+) {
+    switch(type) {
+        case quartz::rendering::Texture::Type::BaseColor:
+            return "baseColorTexture";
+        case quartz::rendering::Texture::Type::Normal:
+            return "normalTexture";
+        case quartz::rendering::Texture::Type::Emission:
+            return "emissiveTexture";
+        case quartz::rendering::Texture::Type::MetallicRoughness:
+            return "metallicRoughnessTexture";
+    }
 }
 
 quartz::rendering::StagedImageBuffer
