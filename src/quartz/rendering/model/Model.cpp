@@ -66,31 +66,6 @@ quartz::rendering::Model::loadGLTFModel(
     return gltfModel;
 }
 
-std::vector<quartz::rendering::Scene>
-quartz::rendering::Model::loadScenes(
-    const quartz::rendering::Device& renderingDevice,
-    const tinygltf::Model& gltfModel
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-
-    std::vector<quartz::rendering::Scene> scenes;
-    scenes.reserve(gltfModel.scenes.size());
-
-    for (uint32_t i = 0; i < gltfModel.scenes.size(); ++i) {
-        LOG_TRACE(MODEL, "Loading scene {}", i);
-
-        const tinygltf::Scene& gltfScene = gltfModel.scenes[i];
-
-        scenes.emplace_back(
-            renderingDevice,
-            gltfModel,
-            gltfScene
-        );
-    }
-
-    return scenes;
-}
-
 std::vector<uint32_t>
 quartz::rendering::Model::loadTextures(
     const quartz::rendering::Device& renderingDevice,
@@ -145,8 +120,34 @@ quartz::rendering::Model::loadTextures(
     return masterIndices;
 }
 
-quartz::rendering::Material
-quartz::rendering::Model::loadMaterial(
+uint32_t
+quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+    const std::vector<uint32_t>& masterIndices,
+    const int32_t localIndex,
+    const quartz::rendering::Texture::Type textureType
+) {
+    if (masterIndices.empty()) {
+        switch (textureType) {
+            case quartz::rendering::Texture::Type::BaseColor:
+                return quartz::rendering::Texture::getBaseColorDefaultIndex();
+            case quartz::rendering::Texture::Type::Normal:
+                return quartz::rendering::Texture::getNormalDefaultIndex();
+            case quartz::rendering::Texture::Type::Emission:
+                return quartz::rendering::Texture::getEmissionDefaultIndex();
+            case quartz::rendering::Texture::Type::MetallicRoughness:
+                return quartz::rendering::Texture::getMetallicRoughnessDefaultIndex();
+        }
+    }
+
+    if (localIndex < 0) {
+        return masterIndices[0];
+    }
+
+    return masterIndices[localIndex];
+}
+
+std::vector<quartz::rendering::Material>
+quartz::rendering::Model::loadMaterials(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel
 ) {
@@ -163,85 +164,113 @@ quartz::rendering::Model::loadMaterial(
     int32_t emissionLocalIndex = -1;
     int32_t metallicRoughnessLocalIndex = -1;
 
-    LOG_TRACE(TEXTURE, "Processing {} materials", gltfModel.materials.size());
+    std::vector<quartz::rendering::Material> materials = {
+        {} // a default material
+    };
+
+    LOG_TRACE(MODEL, "Processing {} materials", gltfModel.materials.size());
     for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
-        LOG_SCOPE_CHANGE_TRACE(TEXTURE);
-        LOG_TRACE(TEXTURE, "Processing material {}", i);
+        LOG_SCOPE_CHANGE_TRACE(MODEL);
+        LOG_TRACE(MODEL, "Processing material {}", i);
 
         const tinygltf::Material& gltfMaterial = gltfModel.materials[i];
 
-        LOG_TRACE(TEXTURE, "Looking for base color texture");
+        LOG_TRACE(MODEL, "Looking for base color texture");
         std::map<std::string, tinygltf::Parameter>::const_iterator baseColorIterator =
             gltfMaterial.values.find("baseColorTexture");
         if (baseColorIterator != gltfMaterial.values.end()) {
             baseColorLocalIndex = baseColorIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found base color texture local index {}", baseColorLocalIndex);
+            LOG_TRACE(MODEL, "Found base color texture local index {}", baseColorLocalIndex);
         }
+        const uint32_t baseColorMasterIndex =
+            quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+                masterIndices,
+                baseColorLocalIndex,
+                quartz::rendering::Texture::Type::BaseColor
+            );
+        LOG_TRACE(MODEL, "base color         texture master index = {}", baseColorMasterIndex);
 
-        LOG_TRACE(TEXTURE, "Looking for normal texture");
+        LOG_TRACE(MODEL, "Looking for normal texture");
         std::map<std::string, tinygltf::Parameter>::const_iterator normalIterator =
             gltfMaterial.values.find("normalTexture");
         if (normalIterator != gltfMaterial.values.end()) {
             normalLocalIndex = normalIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found normal texture local index {}", normalLocalIndex);
+            LOG_TRACE(MODEL, "Found normal texture local index {}", normalLocalIndex);
         }
+        const uint32_t normalMasterIndex =
+            quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+                masterIndices,
+                normalLocalIndex,
+                quartz::rendering::Texture::Type::Normal
+            );
+        LOG_TRACE(MODEL, "normal             texture master index = {}", normalMasterIndex);
 
-        LOG_TRACE(TEXTURE, "Looking for emission texture");
+        LOG_TRACE(MODEL, "Looking for emission texture");
         std::map<std::string, tinygltf::Parameter>::const_iterator emissionIterator =
             gltfMaterial.values.find("emissiveTexture");
         if (emissionIterator != gltfMaterial.values.end()) {
             emissionLocalIndex = emissionIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found emission texture local index {}", emissionLocalIndex);
+            LOG_TRACE(MODEL, "Found emission texture local index {}", emissionLocalIndex);
         }
+        const uint32_t emissionMasterIndex =
+            quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+                masterIndices,
+                emissionLocalIndex,
+                quartz::rendering::Texture::Type::Emission
+            );
+        LOG_TRACE(MODEL, "emission           texture master index = {}", emissionMasterIndex);
 
-        LOG_TRACE(TEXTURE, "Looking for metallic roughness texture");
+        LOG_TRACE(MODEL, "Looking for metallic roughness texture");
         std::map<std::string, tinygltf::Parameter>::const_iterator metallicRoughnessIterator =
             gltfMaterial.values.find("metallicRoughnessTexture");
         if (metallicRoughnessIterator != gltfMaterial.values.end()) {
             metallicRoughnessLocalIndex = metallicRoughnessIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found metallic roughness texture local index {}", metallicRoughnessLocalIndex);
+            LOG_TRACE(MODEL, "Found metallic roughness texture local index {}", metallicRoughnessLocalIndex);
         }
+        const uint32_t metallicRoughnessMasterIndex =
+            quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+                masterIndices,
+                metallicRoughnessLocalIndex,
+                quartz::rendering::Texture::Type::MetallicRoughness
+            );
+        LOG_TRACE(MODEL, "metallic roughness texture master index = {}", metallicRoughnessMasterIndex);
+
+        materials.emplace_back(
+            baseColorMasterIndex,
+            normalMasterIndex,
+            emissionMasterIndex,
+            metallicRoughnessMasterIndex
+        );
     }
 
-    const uint32_t baseColorMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getBaseColorDefaultIndex() :
-        masterIndices[
-            baseColorLocalIndex >= 0 ?
-                baseColorLocalIndex :
-                0
-        ];
-    const uint32_t normalMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getNormalDefaultIndex() :
-        masterIndices[
-            normalLocalIndex >= 0 ?
-                normalLocalIndex :
-                0
-        ];
-    const uint32_t emissionMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getEmissionDefaultIndex() :
-        masterIndices[
-            emissionLocalIndex >= 0 ?
-                emissionLocalIndex :
-                0
-        ];
-    const uint32_t metallicRoughnessMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getMetallicRoughnessDefaultIndex() :
-        masterIndices[
-            metallicRoughnessLocalIndex >= 0 ?
-                metallicRoughnessLocalIndex :
-                0
-        ];
-    LOG_TRACE(TEXTURE, "base color         texture master index = {}", baseColorMasterIndex);
-    LOG_TRACE(TEXTURE, "normal             texture master index = {}", normalMasterIndex);
-    LOG_TRACE(TEXTURE, "emission           texture master index = {}", emissionMasterIndex);
-    LOG_TRACE(TEXTURE, "metallic roughness texture master index = {}", metallicRoughnessMasterIndex);
+    return materials;
+}
 
-    return {
-        baseColorMasterIndex,
-        normalMasterIndex,
-        emissionMasterIndex,
-        metallicRoughnessMasterIndex
-    };
+std::vector<quartz::rendering::Scene>
+quartz::rendering::Model::loadScenes(
+    const quartz::rendering::Device& renderingDevice,
+    const tinygltf::Model& gltfModel,
+    const std::vector<quartz::rendering::Material>& materials
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
+
+    std::vector<quartz::rendering::Scene> scenes;
+    scenes.reserve(gltfModel.scenes.size());
+
+    for (uint32_t i = 0; i < gltfModel.scenes.size(); ++i) {
+        LOG_TRACE(MODEL, "Loading scene {}", i);
+
+        const tinygltf::Scene& gltfScene = gltfModel.scenes[i];
+
+        scenes.emplace_back(
+            renderingDevice,
+            gltfModel,
+            gltfScene,
+            materials
+        );
+    }
+
+    return scenes;
 }
 
 quartz::rendering::Model::Model(
@@ -249,6 +278,12 @@ quartz::rendering::Model::Model(
     const std::string& objectFilepath
 ) :
     m_gltfModel(quartz::rendering::Model::loadGLTFModel(objectFilepath)),
+    m_materials(
+        quartz::rendering::Model::loadMaterials(
+            renderingDevice,
+            m_gltfModel
+        )
+    ),
     m_defaultSceneIndex(
         m_gltfModel.defaultScene <= -1 ?
             0 :
@@ -257,13 +292,8 @@ quartz::rendering::Model::Model(
     m_scenes(
         quartz::rendering::Model::loadScenes(
             renderingDevice,
-            m_gltfModel
-        )
-    ),
-    m_material(
-        quartz::rendering::Model::loadMaterial(
-            renderingDevice,
-            m_gltfModel
+            m_gltfModel,
+            m_materials
         )
     )
 {
@@ -272,8 +302,9 @@ quartz::rendering::Model::Model(
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
-    m_scenes(std::move(other.m_scenes)),
-    m_material(std::move(other.m_material))
+    m_materials(std::move(other.m_materials)),
+    m_defaultSceneIndex(other.m_defaultSceneIndex),
+    m_scenes(std::move(other.m_scenes))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

@@ -8,6 +8,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/model/Vertex.hpp"
 #include "quartz/rendering/model/Primitive.hpp"
 
@@ -213,10 +214,33 @@ quartz::rendering::Primitive::createStagedIndexBuffer(
     return stagedIndexBuffer;
 }
 
+const quartz::rendering::Material&
+quartz::rendering::Primitive::getMaterial(
+    const tinygltf::Primitive& gltfPrimitive,
+    const std::vector<quartz::rendering::Material>& materials
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
+
+    int32_t materialIndex = gltfPrimitive.material;
+    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material {}", materialIndex);
+
+    if (materialIndex < 0) {
+        LOG_TRACE(MODEL_PRIMITIVE, "Actually using material 0 (default)");
+        return materials[0];
+    }
+
+    materialIndex += 1;
+    LOG_TRACE(MODEL_PRIMITIVE, "Actually using material {}", materialIndex);
+    LOG_TRACE(MODEL_PRIMITIVE, "to account for default material at index 0");
+
+    return materials[materialIndex];
+}
+
 quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
-    const tinygltf::Primitive& gltfPrimitive
+    const tinygltf::Primitive& gltfPrimitive,
+    const std::vector<quartz::rendering::Material>& materials
 ) :
     m_indexCount(gltfModel.accessors[gltfPrimitive.indices].count),
     m_stagedVertexBuffer(
@@ -232,6 +256,12 @@ quartz::rendering::Primitive::Primitive(
             gltfModel,
             gltfPrimitive
         )
+    ),
+    m_material(
+        quartz::rendering::Primitive::getMaterial(
+            gltfPrimitive,
+            materials
+        )
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -242,7 +272,8 @@ quartz::rendering::Primitive::Primitive(
 ) :
     m_indexCount(other.m_indexCount),
     m_stagedVertexBuffer(std::move(other.m_stagedVertexBuffer)),
-    m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer))
+    m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer)),
+    m_material(other.m_material)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

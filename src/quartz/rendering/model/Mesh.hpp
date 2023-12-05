@@ -18,7 +18,8 @@ public: // member functions
     Mesh(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Mesh& gltfMesh
+        const tinygltf::Mesh& gltfMesh,
+        const std::vector<quartz::rendering::Material>& materials
     );
     Mesh(Mesh&& other);
     ~Mesh();
@@ -31,7 +32,8 @@ private: // static functions
     std::vector<quartz::rendering::Primitive> loadPrimitives(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Mesh& gltfMesh
+        const tinygltf::Mesh& gltfMesh,
+        const std::vector<quartz::rendering::Material>& materials
     );
 
 private: // member variables

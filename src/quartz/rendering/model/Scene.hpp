@@ -19,7 +19,8 @@ public: // member functions
     Scene(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Scene& gltfScene
+        const tinygltf::Scene& gltfScene,
+        const std::vector<quartz::rendering::Material>& materials
     );
     Scene(Scene&& other);
     ~Scene();
@@ -33,7 +34,8 @@ private: // static functions
     static std::vector<std::shared_ptr<quartz::rendering::Node>> loadRootNodePtrs(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Scene& gltfScene
+        const tinygltf::Scene& gltfScene,
+        const std::vector<quartz::rendering::Material>& materials
     );
 
 private: // member variables

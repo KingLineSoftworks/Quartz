@@ -983,6 +983,12 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
     );
 }
 
+/**
+ * @todo 2023/12/3 We need some way of doing this at the same time that we are writing commands
+ *   to the command buffer so we can have our nodes update the model matrices? Is this the
+ *   best place to do this? Should w be using push constants for that?
+ */
+
 void
 quartz::rendering::Pipeline::updateModelUniformBuffer(
     const quartz::scene::Doodad& doodad

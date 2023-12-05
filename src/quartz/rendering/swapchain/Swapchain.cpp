@@ -582,20 +582,6 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         nullptr
     );
 
-    /**
-     * @todo 2023/12/3 Store the material in the mesh and update the push constants for
-     *   what textures and material properties we should be using based on the mesh's material
-     */
-
-    uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-        *renderingPipeline.getVulkanPipelineLayoutPtr(),
-        vk::ShaderStageFlagBits::eFragment,
-        0,
-        sizeof(uint32_t),
-        reinterpret_cast<void*>(&pushConstantValue)
-    );
-
     std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
         std::deque(
             model.getDefaultScene().getRootNodePtrs().begin(),
@@ -621,6 +607,15 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
          */
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+            uint32_t pushConstantValue = primitive.getMaterial().getBaseColorTextureMasterIndex();
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+                *renderingPipeline.getVulkanPipelineLayoutPtr(),
+                vk::ShaderStageFlagBits::eFragment,
+                0,
+                sizeof(uint32_t),
+                reinterpret_cast<void*>(&pushConstantValue)
+            );
+
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
                 0,

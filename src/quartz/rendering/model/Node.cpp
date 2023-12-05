@@ -15,7 +15,8 @@ std::vector<std::shared_ptr<quartz::rendering::Node>>
 quartz::rendering::Node::loadChildrenNodePtrs(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
-    const tinygltf::Node& gltfNode
+    const tinygltf::Node& gltfNode,
+    const std::vector<quartz::rendering::Material>& materials
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
 
@@ -33,7 +34,8 @@ quartz::rendering::Node::loadChildrenNodePtrs(
             renderingDevice,
             gltfModel,
             currentGltfNode,
-            nullptr
+            nullptr,
+            materials
         ));
     }
 
@@ -91,7 +93,8 @@ std::shared_ptr<quartz::rendering::Mesh>
 quartz::rendering::Node::loadMeshPtr(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
-    const tinygltf::Node& gltfNode
+    const tinygltf::Node& gltfNode,
+    const std::vector<quartz::rendering::Material>& materials
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
 
@@ -108,7 +111,8 @@ quartz::rendering::Node::loadMeshPtr(
     return std::make_shared<quartz::rendering::Mesh>(
         renderingDevice,
         gltfModel,
-        gltfMesh
+        gltfMesh,
+        materials
     );
 }
 
@@ -116,14 +120,16 @@ quartz::rendering::Node::Node(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Node& gltfNode,
-    const quartz::rendering::Node* p_parent
+    const quartz::rendering::Node* p_parent,
+    const std::vector<quartz::rendering::Material>& materials
 ) :
     mp_parent(p_parent),
     m_childrenPtrs(
         quartz::rendering::Node::loadChildrenNodePtrs(
             renderingDevice,
             gltfModel,
-            gltfNode
+            gltfNode,
+            materials
         )
     ),
     m_transformationMatrix(
@@ -135,7 +141,8 @@ quartz::rendering::Node::Node(
         quartz::rendering::Node::loadMeshPtr(
             renderingDevice,
             gltfModel,
-            gltfNode
+            gltfNode,
+            materials
         )
     )
 {

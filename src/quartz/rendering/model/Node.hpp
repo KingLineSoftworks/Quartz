@@ -23,7 +23,8 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Node& gltfNode,
-        const Node* p_parent
+        const Node* p_parent,
+        const std::vector<quartz::rendering::Material>& materials
     );
     Node(Node&& other);
     ~Node();
@@ -39,7 +40,8 @@ private: // static functions
     std::vector<std::shared_ptr<quartz::rendering::Node>> loadChildrenNodePtrs(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Node& gltfNode
+        const tinygltf::Node& gltfNode,
+        const std::vector<quartz::rendering::Material>& materials
     );
 
     glm::mat4 loadTransformationMatrix(
@@ -49,7 +51,8 @@ private: // static functions
     std::shared_ptr<quartz::rendering::Mesh> loadMeshPtr(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Node& gltfNode
+        const tinygltf::Node& gltfNode,
+        const std::vector<quartz::rendering::Material>& materials
     );
 
 private: // member functions

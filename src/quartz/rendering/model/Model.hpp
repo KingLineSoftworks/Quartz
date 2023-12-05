@@ -95,41 +95,33 @@ public: // member functions
     USE_LOGGER(MODEL);
 
     const quartz::rendering::Scene& getDefaultScene() const { return m_scenes[m_defaultSceneIndex]; }
-    const quartz::rendering::Material& getMaterial() const { return m_material; }
 
 private: // static functions
-
     static tinygltf::Model loadGLTFModel(const std::string& filepath);
-
-    static std::vector<quartz::rendering::Scene> loadScenes(
-        const quartz::rendering::Device& renderingDevice,
-        const tinygltf::Model& gltfModel
-    );
-
     static std::vector<uint32_t> loadTextures(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
-
-    static quartz::rendering::Material loadMaterial(
+    static uint32_t getMasterTextureIndexFromLocalIndex(
+        const std::vector<uint32_t>& masterIndices,
+        const int32_t localIndex,
+        const quartz::rendering::Texture::Type textureType
+    );
+    static std::vector<quartz::rendering::Material> loadMaterials(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
+    );
+    static std::vector<quartz::rendering::Scene> loadScenes(
+        const quartz::rendering::Device& renderingDevice,
+        const tinygltf::Model& gltfModel,
+        const std::vector<quartz::rendering::Material>& materials
     );
 
 private: // member variables
     const tinygltf::Model m_gltfModel;
 
+    std::vector<quartz::rendering::Material> m_materials;
+
     uint32_t m_defaultSceneIndex;
     std::vector<quartz::rendering::Scene> m_scenes;
-
-    /**
-     * @todo 2023/11/21 Should contain a vector of shared pointers to materials
-     *   so it can give weak pointers to the meshes and indices so they know
-     *   which materials they should be using.
-     *
-     * @todo 2023/11/21 The materials should be loaded before the meshes (and consequently
-     *   before the primitives) so we can give weak pointers to them
-     */
-
-    quartz::rendering::Material m_material;
 };
