@@ -79,6 +79,11 @@ quartz::rendering::Pipeline::createUniformBuffers(
             )
         );
 
+        /**
+         * @todo 2023/12/08 Make this uniform buffer dynamic so we can have multiple model
+         *   matrices and index into them.
+         */
+
         LOG_TRACE(PIPELINE, "Creating model buffer {} at buffer index {}", i, buffers.size());
         buffers.emplace_back(
             renderingDevice,
@@ -129,6 +134,11 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         vk::ShaderStageFlagBits::eVertex,
         {}
     );
+
+    /**
+     * @todo 2023/12/80 Make the model matrix uniform buffer dynamic so we can
+     *   have multiple model matrices and index into them.
+     */
 
     vk::DescriptorSetLayoutBinding modelUniformBufferLayoutBinding(
         1,
@@ -211,6 +221,11 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         numDescriptorSets
     );
     LOG_TRACE(PIPELINE, "Allowing camera ubo of type uniform buffer with count {}", cameraUniformBufferObjectPoolSize.descriptorCount);
+
+    /**
+     * @todo 2023/12/08 Calculate this size correctly, taking into account the fact that
+     *   it is a dynamic uniform buffer.
+     */
 
     vk::DescriptorPoolSize modelUniformBufferObjectPoolSize(
         vk::DescriptorType::eUniformBuffer,
@@ -346,6 +361,10 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             &cameraUBOBufferInfo,
             {}
         );
+
+        /**
+         * @todo 2023/12/08 This model matrix ubo needs to account for its dynamicism
+         */
 
         const uint32_t modelIndex = i * numDifferentUniformBuffers + 1;
         LOG_TRACE(PIPELINE, "Allocating space for model UBO using buffer at index {}", modelIndex);
@@ -574,20 +593,40 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     /**
+     * @todo 2023/12/08 We need to make another push constant to allow us to send an index
+     *   to the vertex shader for which model matrix we should be using from the dynamic
+     *   model matrix uniform buffer.
+     * @todo 2023/12/08 Perhaps we should just make the push constant large enough for the
+     *   entire model matrix? Is there a performance hit if we send the model matrix as a
+     *   push constant instead of indexing into a uniform buffer?
+     */
+
+    vk::PushConstantRange vertexPushConstantRange(
+        vk::ShaderStageFlagBits::eVertex,
+        0,
+        sizeof(glm::mat4)
+    );
+
+    /**
      * @todo 2023/11/17 This should probably represent a material (all of the texture
      *   indices and all of the color values and whatnot). This will probably require
      *   some restructuring and aligning of the all the variables in the material class
      */
-    vk::PushConstantRange pushConstantRange(
+    vk::PushConstantRange fragmentPushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
-        0,
+        sizeof(glm::mat4),
         sizeof(uint32_t)
     );
+
+    std::vector<vk::PushConstantRange> pushConstantRanges = {
+        vertexPushConstantRange,
+        fragmentPushConstantRange
+    };
 
     vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
         {},
         *p_descriptorSetLayout,
-        pushConstantRange
+        pushConstantRanges
     );
 
     vk::UniquePipelineLayout p_pipelineLayout =
@@ -996,6 +1035,13 @@ quartz::rendering::Pipeline::updateModelUniformBuffer(
     quartz::rendering::ModelUniformBufferObject modelUBO(
         doodad.getModelMatrix()
     );
+
+    /**
+     * @todo 2023/12/08 Iterate over every node in the doodad's model, calculate
+     *   its transformation matrix in conjunction with the doodad's, and update
+     *   the model matrix in the uniform buffer according to the dynamic offset
+     *   of the node determined by its id
+     */
 
     const uint32_t modelIndex = m_currentInFlightFrameIndex * 4 + 1;
     memcpy(

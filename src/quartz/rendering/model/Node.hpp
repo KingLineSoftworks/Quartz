@@ -33,8 +33,10 @@ public: // member functions
 
     const Node* getParentPtr() const { return mp_parent; }
     const std::vector<std::shared_ptr<Node>>& getChildrenNodePtrs() const { return m_childrenPtrs; }
-    const glm::mat4& getTransformationMatrix() const { return m_transformationMatrix; }
+    const glm::mat4& getLocalTransformationMatrix() const { return m_localTransformationMatrix; }
     const std::shared_ptr<quartz::rendering::Mesh>& getMeshPtr() const { return mp_mesh; }
+
+    glm::mat4 getTransformationMatrix() const;
 
 private: // static functions
     std::vector<std::shared_ptr<quartz::rendering::Node>> loadChildrenNodePtrs(
@@ -44,7 +46,7 @@ private: // static functions
         const std::vector<quartz::rendering::Material>& materials
     );
 
-    glm::mat4 loadTransformationMatrix(
+    glm::mat4 loadLocalTransformationMatrix(
         const tinygltf::Node& gltfNode
     );
 
@@ -59,10 +61,20 @@ private: // member functions
     void setParentPtr(const Node* p_parent) { mp_parent = p_parent; }
 
 private: // member variables
+
+    /**
+     * @todo 2023/12/08 Track a private static variable which tells us how many nodes
+     *   (with meshes) in total have been created so we can give each node (with a
+     *   mesh) a unique identifier. This will allow it to put its transformation
+     *   matrix into the dynamic uniform buffer at the correct index. We only need to
+     *   track the number of nodes with meshes because if a node doesn't have a mesh
+     *   then we won't be rendering it, so we don't care about putting its model
+     *   matrix into the dynamic uniform buffer.
+     */
+
     const Node* mp_parent;
     std::vector<std::shared_ptr<Node>> m_childrenPtrs;
-
-    glm::mat4 m_transformationMatrix;
+    glm::mat4 m_localTransformationMatrix;
 
     std::shared_ptr<quartz::rendering::Mesh> mp_mesh;
 };

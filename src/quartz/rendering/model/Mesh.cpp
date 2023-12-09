@@ -52,7 +52,7 @@ quartz::rendering::Mesh::Mesh(
         )
     )
 {
-    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 quartz::rendering::Mesh::Mesh(
@@ -60,9 +60,9 @@ quartz::rendering::Mesh::Mesh(
 ) :
     m_primitives(std::move(other.m_primitives))
 {
-    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 quartz::rendering::Mesh::~Mesh() {
-    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_FUNCTION_CALL_TRACEthis("");
 }

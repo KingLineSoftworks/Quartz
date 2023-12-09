@@ -2,6 +2,8 @@
 
 // -----==== Uniforms from the CPU =====----- //
 
+// ... world level things ... //
+
 layout(binding = 0) uniform CameraUniformBufferObject {
     mat4 viewMatrix;
     mat4 projectionMatrix;
@@ -10,6 +12,12 @@ layout(binding = 0) uniform CameraUniformBufferObject {
 layout(binding = 1) uniform ModelUniformBufferObject {
     mat4 modelMatrix;
 } model;
+
+// ... mesh level things ... //
+
+layout(push_constant) uniform perObjectVertexPushConstant {
+    mat4 modelMatrix;
+} pushConstant;
 
 // -----==== Inputs =====----- //
 
@@ -30,10 +38,15 @@ void main() {
 
     // ----- Set the position of the vertex in clip space ----- //
 
+//    gl_Position =
+//        camera.projectionMatrix *
+//        camera.viewMatrix *
+//        model.modelMatrix *
+//        vec4(in_position, 1.0);
     gl_Position =
         camera.projectionMatrix *
         camera.viewMatrix *
-        model.modelMatrix *
+        pushConstant.modelMatrix *
         vec4(in_position, 1.0);
 
     // ----- set output for fragment shader to use as input ----- //

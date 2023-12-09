@@ -567,9 +567,9 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
 }
 
 void
-quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
+quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
     const quartz::rendering::Pipeline& renderingPipeline,
-    const quartz::rendering::Model& model,
+    const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
@@ -584,8 +584,8 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
 
     std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
         std::deque(
-            model.getDefaultScene().getRootNodePtrs().begin(),
-            model.getDefaultScene().getRootNodePtrs().end()
+            doodad.getModel().getDefaultScene().getRootNodePtrs().begin(),
+            doodad.getModel().getDefaultScene().getRootNodePtrs().end()
         )
     );
 
@@ -605,16 +605,33 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
          * @todo 2023/12/3 Update the model matrix based on the current nodes local transformation
          *   matrix. We need to consider our parents transformation and take the product with that
          */
+        glm::mat4 currentTransformationMatrix = doodad.getModelMatrix() * p_node->getTransformationMatrix();
+        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+            *renderingPipeline.getVulkanPipelineLayoutPtr(),
+            vk::ShaderStageFlagBits::eVertex,
+            0,
+            sizeof(glm::mat4),
+            reinterpret_cast<void*>(&currentTransformationMatrix)
+        );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
             uint32_t pushConstantValue = primitive.getMaterial().getBaseColorTextureMasterIndex();
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,
-                0,
+                sizeof(glm::mat4),
                 sizeof(uint32_t),
                 reinterpret_cast<void*>(&pushConstantValue)
             );
+
+            /**
+             * @todo 2023/12/08 Push to another push constant that tells the vertex shader which
+             *   model matrix it should be using to calculate the vertex position. This push
+             *   constant will be used as an index into the dynamic model matrix uniform buffer.
+             *   The push constant will be populated with the unique identifier of the current node
+             *   so we know to use its model matrix.
+             * @todo 2023/12/08 Push to another push constant the entire model matrix we need?
+             */
 
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(

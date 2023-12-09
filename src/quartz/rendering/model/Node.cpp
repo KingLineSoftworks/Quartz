@@ -43,7 +43,7 @@ quartz::rendering::Node::loadChildrenNodePtrs(
 }
 
 glm::mat4
-quartz::rendering::Node::loadTransformationMatrix(
+quartz::rendering::Node::loadLocalTransformationMatrix(
     const tinygltf::Node& gltfNode
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
@@ -132,8 +132,8 @@ quartz::rendering::Node::Node(
             materials
         )
     ),
-    m_transformationMatrix(
-        quartz::rendering::Node::loadTransformationMatrix(
+    m_localTransformationMatrix(
+        quartz::rendering::Node::loadLocalTransformationMatrix(
             gltfNode
         )
     ),
@@ -158,7 +158,7 @@ quartz::rendering::Node::Node(
 ) :
     mp_parent(std::move(other.mp_parent)),
     m_childrenPtrs(std::move(other.m_childrenPtrs)),
-    m_transformationMatrix(std::move(other.m_transformationMatrix)),
+    m_localTransformationMatrix(std::move(other.m_localTransformationMatrix)),
     mp_mesh(std::move(other.mp_mesh))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -166,4 +166,23 @@ quartz::rendering::Node::Node(
 
 quartz::rendering::Node::~Node() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+/**
+ * @todo 2023/12/07 We should store the overarching transformation matrix as a member
+ *   variable as well as the local transformation matrix. We don't want to be computing
+ *   this matrix every time we want to use it.
+ *   Instead we should calculate the initial transformation matrix upon construction,
+ *   then whenever we update our local transformation matrix we should update the
+ *   transformation matrix as well.
+ */
+glm::mat4
+quartz::rendering::Node::getTransformationMatrix() const {
+    glm::mat4 transformationMatrix = m_localTransformationMatrix;
+
+    if (mp_parent) {
+        transformationMatrix = mp_parent->getTransformationMatrix() * m_localTransformationMatrix;
+    }
+
+    return transformationMatrix;
 }

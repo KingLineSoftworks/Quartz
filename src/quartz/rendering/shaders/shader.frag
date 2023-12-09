@@ -18,8 +18,8 @@ layout(binding = 3) uniform DirectionalLight {
 layout(binding = 4) uniform sampler baseColorTextureSampler;
 layout(binding = 5) uniform texture2D baseColorTextures[8];
 
-layout(push_constant) uniform perObjectPushConstant {
-    uint baseColorTextureID;
+layout(push_constant) uniform perObjectFragmentPushConstant {
+    layout(offset = 64 )uint baseColorTextureID;
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
