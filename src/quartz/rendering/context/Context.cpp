@@ -98,8 +98,6 @@ quartz::rendering::Context::draw(
     );
 
     for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
-        m_renderingPipeline.updateModelUniformBuffer(doodad);
-
         m_renderingSwapchain.recordDoodadToDrawingCommandBuffer(
             m_renderingPipeline,
             doodad,

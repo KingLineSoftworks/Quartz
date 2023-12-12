@@ -601,11 +601,7 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
             continue;
         }
 
-        /**
-         * @todo 2023/12/3 Update the model matrix based on the current nodes local transformation
-         *   matrix. We need to consider our parents transformation and take the product with that
-         */
-        glm::mat4 currentTransformationMatrix = doodad.getModelMatrix() * p_node->getTransformationMatrix();
+        glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
             *renderingPipeline.getVulkanPipelineLayoutPtr(),
             vk::ShaderStageFlagBits::eVertex,
@@ -623,15 +619,6 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 sizeof(uint32_t),
                 reinterpret_cast<void*>(&pushConstantValue)
             );
-
-            /**
-             * @todo 2023/12/08 Push to another push constant that tells the vertex shader which
-             *   model matrix it should be using to calculate the vertex position. This push
-             *   constant will be used as an index into the dynamic model matrix uniform buffer.
-             *   The push constant will be populated with the unique identifier of the current node
-             *   so we know to use its model matrix.
-             * @todo 2023/12/08 Push to another push constant the entire model matrix we need?
-             */
 
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(

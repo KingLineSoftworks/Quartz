@@ -8,14 +8,14 @@
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     const std::string& objectFilepath,
-    const glm::vec3& worldPosition
+    const quartz::scene::Transform& transform
 ) :
     m_model(
         renderingDevice,
         objectFilepath
     ),
-    m_worldPosition(worldPosition),
-    m_modelMatrix()
+    m_transform(transform),
+    m_transformationMatrix()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -24,7 +24,7 @@ quartz::scene::Doodad::Doodad(
     quartz::scene::Doodad&& other
 ) :
     m_model(std::move(other.m_model)),
-    m_modelMatrix(other.m_modelMatrix)
+    m_transformationMatrix(other.m_transformationMatrix)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -37,21 +37,21 @@ void
 quartz::scene::Doodad::update(
     UNUSED const double tickTimeDelta
 ) {
-    m_modelMatrix = glm::mat4(1.0f);
+    m_transformationMatrix = glm::mat4(1.0f);
 
-    m_modelMatrix = glm::translate(
-        m_modelMatrix,
-        m_worldPosition
+    m_transformationMatrix = glm::translate(
+        m_transformationMatrix,
+        m_transform.position
     );
 
-    m_modelMatrix = glm::rotate(
-        m_modelMatrix,
-        glm::radians(180.0f),
-        glm::vec3(1.0f, 0.0f, 0.0f)
+    m_transformationMatrix = glm::rotate(
+        m_transformationMatrix,
+        glm::radians(m_transform.rotationAmountDegrees),
+        m_transform.rotationAxis
     );
 
-    m_modelMatrix = glm::scale(
-        m_modelMatrix,
-        glm::vec3(1.0f, 1.0f, 1.0f)
+    m_transformationMatrix = glm::scale(
+        m_transformationMatrix,
+        m_transform.scale
     );
 }

@@ -79,9 +79,26 @@ void quartz::Application::run() {
         {
 //            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
 //            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"
 //            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf"
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf"
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+                {
+                    {-5.0f, 0.0f, 0.0f},
+                    180.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {20.0f, 20.0f, 20.0f}
+                }
+            }
+            ,
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+                {
+                    {5.0f, 0.0f, 0.0f},
+                    180.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {1.0f, 1.0f, 1.0f}
+                },
+            }
         }
     );
     m_renderingContext.loadScene();

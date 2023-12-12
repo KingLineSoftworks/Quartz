@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
@@ -12,17 +14,26 @@
 std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
-    const std::vector<std::string>& filepaths
+    const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
 
     std::vector<quartz::scene::Doodad> doodads;
 
-    for (const std::string& filepath : filepaths) {
+    for (const std::pair<std::string, quartz::scene::Transform>& doodadInformation : doodadInformations) {
+        const std::string& filepath = doodadInformation.first;
+        const quartz::scene::Transform& transform = doodadInformation.second;
+
+        LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
+        LOG_TRACE(SCENE, "  position         = {}", glm::to_string(transform.position));
+        LOG_TRACE(SCENE, "  rotation degrees = {}", transform.rotationAmountDegrees);
+        LOG_TRACE(SCENE, "  rotation axis    = {}", glm::to_string(transform.rotationAxis));
+        LOG_TRACE(SCENE, "  scale            = {}", glm::to_string(transform.scale));
+
         doodads.emplace_back(
             renderingDevice,
             filepath,
-            glm::vec3{0.0f, 0.0f, 0.0f}
+            transform
         );
     }
 
@@ -51,7 +62,7 @@ quartz::scene::Scene::load(
     const quartz::scene::Camera& camera,
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
-    const std::vector<std::string>& filepaths
+    const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -59,7 +70,7 @@ quartz::scene::Scene::load(
 
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
-        filepaths
+        doodadInformations
     );
 
     m_ambientLight = ambientLight;

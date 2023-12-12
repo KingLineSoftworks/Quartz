@@ -9,10 +9,6 @@ layout(binding = 0) uniform CameraUniformBufferObject {
     mat4 projectionMatrix;
 } camera;
 
-layout(binding = 1) uniform ModelUniformBufferObject {
-    mat4 modelMatrix;
-} model;
-
 // ... mesh level things ... //
 
 layout(push_constant) uniform perObjectVertexPushConstant {

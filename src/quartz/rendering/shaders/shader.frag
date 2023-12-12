@@ -4,22 +4,22 @@
 
 // ... world level things ... //
 
-layout(binding = 2) uniform AmbientLight {
+layout(binding = 1) uniform AmbientLight {
     vec3 color;
 } ambientLight;
 
-layout(binding = 3) uniform DirectionalLight {
+layout(binding = 2) uniform DirectionalLight {
     vec3 color;
     vec3 direction;
 } directionalLight;
 
 // ... object level things ... //
 
-layout(binding = 4) uniform sampler baseColorTextureSampler;
-layout(binding = 5) uniform texture2D baseColorTextures[8];
+layout(binding = 3) uniform sampler baseColorTextureSampler;
+layout(binding = 4) uniform texture2D baseColorTextures[8];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
-    layout(offset = 64 )uint baseColorTextureID;
+    layout(offset = 64)uint baseColorTextureID;
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
