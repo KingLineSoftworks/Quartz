@@ -94,12 +94,7 @@ quartz::scene::Scene::update(
         tickTimeDelta
     );
 
-    uint32_t doodadIndex = 0;
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        LOG_TRACEthis("");
-        LOG_TRACEthis("");
-        LOG_TRACEthis("doodad {}", doodadIndex++);
-        LOG_TRACEthis("");
         doodad.update(tickTimeDelta);
     }
 }

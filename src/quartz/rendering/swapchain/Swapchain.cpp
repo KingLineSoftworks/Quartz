@@ -604,29 +604,7 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
             continue;
         }
 
-        LOG_SCOPE_CHANGE_TRACEthis();
-
-        LOG_TRACEthis("Doodad transformation matrix:");
-        LOG_TRACEthis("{}", glm::to_string(doodad.getTransformationMatrix()[0]));
-        LOG_TRACEthis("{}", glm::to_string(doodad.getTransformationMatrix()[1]));
-        LOG_TRACEthis("{}", glm::to_string(doodad.getTransformationMatrix()[2]));
-        LOG_TRACEthis("{}", glm::to_string(doodad.getTransformationMatrix()[3]));
-
-        LOG_TRACEthis("");
-        LOG_TRACEthis("Node transformation matrix:");
-        LOG_TRACEthis("{}", glm::to_string(p_node->getTransformationMatrix()[0]));
-        LOG_TRACEthis("{}", glm::to_string(p_node->getTransformationMatrix()[1]));
-        LOG_TRACEthis("{}", glm::to_string(p_node->getTransformationMatrix()[2]));
-        LOG_TRACEthis("{}", glm::to_string(p_node->getTransformationMatrix()[3]));
-
         glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
-        LOG_TRACEthis("");
-        LOG_TRACEthis("Total transformation matrix:");
-        LOG_TRACEthis("{}", glm::to_string(currentTransformationMatrix[0]));
-        LOG_TRACEthis("{}", glm::to_string(currentTransformationMatrix[1]));
-        LOG_TRACEthis("{}", glm::to_string(currentTransformationMatrix[2]));
-        LOG_TRACEthis("{}", glm::to_string(currentTransformationMatrix[3]));
-
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
             *renderingPipeline.getVulkanPipelineLayoutPtr(),
             vk::ShaderStageFlagBits::eVertex,
@@ -635,11 +613,8 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
             reinterpret_cast<void*>(&currentTransformationMatrix)
         );
 
-        LOG_TRACEthis("");
-        LOG_TRACEthis("Drawing {} primitives", p_node->getMeshPtr()->getPrimitives().size());
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
             uint32_t baseColorTextureIndex = primitive.getMaterial().getBaseColorTextureMasterIndex();
-            LOG_TRACEthis("Using push constant value of {} for base color texture index", baseColorTextureIndex);
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,
@@ -648,7 +623,6 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 reinterpret_cast<void*>(&baseColorTextureIndex)
             );
 
-            LOG_TRACEthis("Binding vertex buffer at {}", static_cast<void*>(*(primitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr())));
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
                 0,
@@ -656,14 +630,12 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 offset
             );
 
-            LOG_TRACEthis("Binding index buffer at {}", static_cast<void*>(*(primitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr())));
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
                 *(primitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
                 0,
                 vk::IndexType::eUint32
             );
 
-            LOG_TRACEthis("Drawing {} indices", primitive.getIndexCount());
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
                 primitive.getIndexCount(),
                 1,

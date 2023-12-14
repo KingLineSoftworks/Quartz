@@ -70,8 +70,6 @@ void quartz::Application::run() {
      */
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf"
 
             // =============================================
             // boxes
@@ -112,6 +110,8 @@ void quartz::Application::run() {
             // others
             // =============================================
 
+            // first row
+
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
                 {
@@ -125,7 +125,7 @@ void quartz::Application::run() {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
                 {
                     {-5.0f, 0.0f, 0.0f},
-                    180.0f,
+                    0.0f,
                     {1.0f, 0.0f, 0.0f},
                     {20.0f, 20.0f, 20.0f}
                 }
@@ -134,35 +134,43 @@ void quartz::Application::run() {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
                 {
                     {5.0f, 0.0f, 0.0f},
-                    180.0f,
+                    0.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
+
+            // second row
+
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
+                {
+                    {0.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {0.005f, 0.005f, 0.005f}
+                },
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+                {
+                    {-5.0f, 0.0f, 5.0f},
+                    0.0f,
                     {1.0f, 0.0f, 0.0f},
                     {1.0f, 1.0f, 1.0f}
                 }
             },
         };
 
-//    for (uint32_t i = 0; i < 32; ++i) {
-//        std::pair<std::string, quartz::scene::Transform> pair = {
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-//            {
-//                { 2.0f * i, 0.0f, 0.0f },
-//                0.0f,
-//                { 1.0f, 0.0f, 0.0f },
-//                { 1.0f, 1.0f, 1.0f }
-//            }
-//        };
-//        doodadInformations.push_back(std::move(pair));
-//    }
-
     LOG_INFOthis("Loading scene");
     m_scene.load(
         m_renderingContext.getRenderingDevice(),
         {
-            -45.0f,
-            135.0f,
+            -45.0f, // rotation around x axis (up down)
+            90.0f, // rotation around y axis (left right)
             0.0f,
-            60.0f,
-            { 3.0f, 3.0f, -3.0f }
+            75.0f,
+            { 0.0f, 3.0f, -6.0f }
         },
         {{ 0.05f, 0.05f, 0.05f }},
         {
@@ -175,19 +183,11 @@ void quartz::Application::run() {
 
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
-        LOG_TRACEthis("");
-        LOG_TRACEthis("");
-        LOG_TRACEthis("");
-        LOG_TRACEthis("");
-        LOG_TRACEthis("");
-        LOG_TRACEthis("");
-        LOG_TRACEthis("=========================================================================================================");
-        LOG_TRACEthis("=========================================================================================================");
-//        currentFrameStartTime = glfwGetTime();
-//        currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
-//        previousFrameStartTime = currentFrameStartTime;
-//        frameTimeAccumulator += currentFrameTimeDelta;
-//        while (frameTimeAccumulator >= targetTickTimeDelta) {
+        currentFrameStartTime = glfwGetTime();
+        currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
+        previousFrameStartTime = currentFrameStartTime;
+        frameTimeAccumulator += currentFrameTimeDelta;
+        while (frameTimeAccumulator >= targetTickTimeDelta) {
             processInput();
 
             m_scene.update(
@@ -195,9 +195,9 @@ void quartz::Application::run() {
                 mp_inputManager,
                 targetTickTimeDelta
             );
-//
-//            frameTimeAccumulator -= targetTickTimeDelta;
-//        }
+
+            frameTimeAccumulator -= targetTickTimeDelta;
+        }
 
         m_renderingContext.draw(m_scene);
     }
