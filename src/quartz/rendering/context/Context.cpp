@@ -97,7 +97,12 @@ quartz::rendering::Context::draw(
         availableSwapchainImageIndex
     );
 
+    uint32_t doodadIndex = 0;
     for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("doodad {}", doodadIndex++);
+        LOG_TRACEthis("");
         m_renderingSwapchain.recordDoodadToDrawingCommandBuffer(
             m_renderingPipeline,
             doodad,

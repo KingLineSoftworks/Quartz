@@ -62,6 +62,7 @@ int main() {
         // scene
         {"CAMERA", util::Logger::Level::trace},
         {"DOODAD", util::Logger::Level::trace},
+        {"SCENE", util::Logger::Level::trace},
     });
 
     if (shouldLogPreamble) {

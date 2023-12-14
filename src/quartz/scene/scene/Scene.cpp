@@ -37,7 +37,6 @@ quartz::scene::Scene::loadDoodads(
         );
     }
 
-
     LOG_TRACE(SCENE, "Loaded {} doodads", doodads.size());
 
     return doodads;
@@ -67,15 +66,19 @@ quartz::scene::Scene::load(
    LOG_FUNCTION_SCOPE_TRACEthis("");
 
     m_camera = camera;
+    LOG_TRACEthis("Loaded camera at position {}", glm::to_string(m_camera.getWorldPosition()));
 
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         doodadInformations
     );
+    LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
 
     m_ambientLight = ambientLight;
+    LOG_TRACEthis("Loaded ambient light with color {}", glm::to_string(m_ambientLight.color));
 
     m_directionalLight = directionalLight;
+    LOG_TRACEthis("Loaded direction light with color {} and direction", glm::to_string(m_directionalLight.color), glm::to_string(m_directionalLight.direction));
 }
 
 void
@@ -91,7 +94,12 @@ quartz::scene::Scene::update(
         tickTimeDelta
     );
 
+    uint32_t doodadIndex = 0;
     for (quartz::scene::Doodad& doodad : m_doodads) {
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("doodad {}", doodadIndex++);
+        LOG_TRACEthis("");
         doodad.update(tickTimeDelta);
     }
 }

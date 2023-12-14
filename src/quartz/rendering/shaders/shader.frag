@@ -16,7 +16,7 @@ layout(binding = 2) uniform DirectionalLight {
 // ... object level things ... //
 
 layout(binding = 3) uniform sampler baseColorTextureSampler;
-layout(binding = 4) uniform texture2D baseColorTextures[8];
+layout(binding = 4) uniform texture2D baseColorTextures[100];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
     layout(offset = 64)uint baseColorTextureID;

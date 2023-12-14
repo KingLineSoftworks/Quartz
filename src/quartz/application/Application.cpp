@@ -56,10 +56,103 @@ void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
-    double currentFrameTimeDelta = 0.0;
-    double previousFrameStartTime = 0.0f;
-    double currentFrameStartTime = 0.0f;
-    double frameTimeAccumulator = 0.0f;
+    UNUSED double currentFrameTimeDelta = 0.0;
+    UNUSED double previousFrameStartTime = 0.0f;
+    UNUSED double currentFrameStartTime = 0.0f;
+    UNUSED double frameTimeAccumulator = 0.0f;
+
+    /**
+     * @todo 2023/12/12 FIX COORDINATE SYSTEM.
+     *   WE ARE CURRENTLY USING SOME SORT OF COORDINATE SYSTEM (I FORGOT WHICH).
+     *   BUT IT IS CLEARLY NOT THE SAME AS THE COORDINATE SYSTEM THAT GLTF USES.
+     *   ALL GLTF MODELS ARE LOADING IN UPSIDE DOWN AND WHEN WE USE THE BOOM BOX WITH AXES
+     *   WE CAN CLEARLY SEE THAT OUR COORDINATE SYSTEM IS INCORRECT.
+     */
+
+    std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
+//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
+//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf"
+
+            // =============================================
+            // boxes
+            // =============================================
+//
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
+//                {
+//                    {-3.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//
+//            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
+//                {
+//                    {0.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//
+//            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
+//                {
+//                    {3.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//
+//            },
+
+            // =============================================
+            // others
+            // =============================================
+
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+                {
+                    {0.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {100.0f, 100.0f, 100.0f}
+                },
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+                {
+                    {-5.0f, 0.0f, 0.0f},
+                    180.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {20.0f, 20.0f, 20.0f}
+                }
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+                {
+                    {5.0f, 0.0f, 0.0f},
+                    180.0f,
+                    {1.0f, 0.0f, 0.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
+        };
+
+//    for (uint32_t i = 0; i < 32; ++i) {
+//        std::pair<std::string, quartz::scene::Transform> pair = {
+//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+//            {
+//                { 2.0f * i, 0.0f, 0.0f },
+//                0.0f,
+//                { 1.0f, 0.0f, 0.0f },
+//                { 1.0f, 1.0f, 1.0f }
+//            }
+//        };
+//        doodadInformations.push_back(std::move(pair));
+//    }
 
     LOG_INFOthis("Loading scene");
     m_scene.load(
@@ -76,40 +169,25 @@ void quartz::Application::run() {
             { 0.65f, 0.65f, 0.65f },
             { -3.0f, -2.0f, 1.0f }
         },
-        {
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf"
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-                {
-                    {-5.0f, 0.0f, 0.0f},
-                    180.0f,
-                    {1.0f, 0.0f, 0.0f},
-                    {20.0f, 20.0f, 20.0f}
-                }
-            }
-            ,
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-                {
-                    {5.0f, 0.0f, 0.0f},
-                    180.0f,
-                    {1.0f, 0.0f, 0.0f},
-                    {1.0f, 1.0f, 1.0f}
-                },
-            }
-        }
+        doodadInformations
     );
     m_renderingContext.loadScene();
 
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
-        currentFrameStartTime = glfwGetTime();
-        currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
-        previousFrameStartTime = currentFrameStartTime;
-        frameTimeAccumulator += currentFrameTimeDelta;
-        while (frameTimeAccumulator >= targetTickTimeDelta) {
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("");
+        LOG_TRACEthis("=========================================================================================================");
+        LOG_TRACEthis("=========================================================================================================");
+//        currentFrameStartTime = glfwGetTime();
+//        currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
+//        previousFrameStartTime = currentFrameStartTime;
+//        frameTimeAccumulator += currentFrameTimeDelta;
+//        while (frameTimeAccumulator >= targetTickTimeDelta) {
             processInput();
 
             m_scene.update(
@@ -117,9 +195,9 @@ void quartz::Application::run() {
                 mp_inputManager,
                 targetTickTimeDelta
             );
-
-            frameTimeAccumulator -= targetTickTimeDelta;
-        }
+//
+//            frameTimeAccumulator -= targetTickTimeDelta;
+//        }
 
         m_renderingContext.draw(m_scene);
     }
