@@ -29,40 +29,40 @@ int main() {
 
     util::Logger::setLevels({
         // demo app
-        {"GENERAL", util::Logger::Level::trace},
+        {"GENERAL", util::Logger::Level::info},
 
         // util
-        {"FILESYSTEM", util::Logger::Level::trace},
+        {"FILESYSTEM", util::Logger::Level::info},
 
         // quartz
-        {"APPLICATION", util::Logger::Level::trace},
+        {"APPLICATION", util::Logger::Level::info},
 
         // rendering
-        {"INPUTMAN", util::Logger::Level::trace},
+        {"INPUTMAN", util::Logger::Level::info},
 
         // rendering
-        {"BUFFER", util::Logger::Level::trace},
-        {"CONTEXT", util::Logger::Level::trace},
-        {"DEPTHBUFFER", util::Logger::Level::trace},
-        {"DEVICE", util::Logger::Level::trace},
-        {"INSTANCE", util::Logger::Level::trace},
-        {"MATERIAL", util::Logger::Level::trace},
-        {"MODEL", util::Logger::Level::trace},
-        {"MODEL_MESH", util::Logger::Level::trace},
-        {"MODEL_PRIMITIVE", util::Logger::Level::trace},
-        {"MODEL_NODE", util::Logger::Level::trace},
-        {"MODEL_SCENE", util::Logger::Level::trace},
-        {"PIPELINE", util::Logger::Level::trace},
-        {"SWAPCHAIN", util::Logger::Level::trace},
-        {"TEXTURE", util::Logger::Level::trace},
-        {"VULKAN", util::Logger::Level::trace},
-        {"VULKANUTIL", util::Logger::Level::trace},
-        {"WINDOW", util::Logger::Level::trace},
+        {"BUFFER", util::Logger::Level::info},
+        {"CONTEXT", util::Logger::Level::info},
+        {"DEPTHBUFFER", util::Logger::Level::info},
+        {"DEVICE", util::Logger::Level::info},
+        {"INSTANCE", util::Logger::Level::info},
+        {"MATERIAL", util::Logger::Level::info},
+        {"MODEL", util::Logger::Level::info},
+        {"MODEL_MESH", util::Logger::Level::info},
+        {"MODEL_PRIMITIVE", util::Logger::Level::info},
+        {"MODEL_NODE", util::Logger::Level::info},
+        {"MODEL_SCENE", util::Logger::Level::info},
+        {"PIPELINE", util::Logger::Level::info},
+        {"SWAPCHAIN", util::Logger::Level::info},
+        {"TEXTURE", util::Logger::Level::info},
+        {"VULKAN", util::Logger::Level::info},
+        {"VULKANUTIL", util::Logger::Level::info},
+        {"WINDOW", util::Logger::Level::info},
 
         // scene
-        {"CAMERA", util::Logger::Level::trace},
-        {"DOODAD", util::Logger::Level::trace},
-        {"SCENE", util::Logger::Level::trace},
+        {"CAMERA", util::Logger::Level::info},
+        {"DOODAD", util::Logger::Level::info},
+        {"SCENE", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {

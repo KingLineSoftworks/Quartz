@@ -85,26 +85,6 @@ void quartz::Application::run() {
 //                }
 //
 //            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
-//                {
-//                    {0.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {1.0f, 0.0f, 0.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//
-//            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
-//                {
-//                    {3.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {1.0f, 0.0f, 0.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//
-//            },
 
             // =============================================
             // others
@@ -121,45 +101,45 @@ void quartz::Application::run() {
                     {100.0f, 100.0f, 100.0f}
                 },
             },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-                {
-                    {-5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {1.0f, 0.0f, 0.0f},
-                    {20.0f, 20.0f, 20.0f}
-                }
-            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-                {
-                    {5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {1.0f, 0.0f, 0.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
-
-            // second row
-
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
-                {
-                    {0.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {1.0f, 0.0f, 0.0f},
-                    {0.005f, 0.005f, 0.005f}
-                },
-            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-                {
-                    {-5.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {1.0f, 0.0f, 0.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+//                {
+//                    {-5.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {20.0f, 20.0f, 20.0f}
+//                }
+//            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+//                {
+//                    {5.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//            },
+//
+//            // second row
+//
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
+//                {
+//                    {0.0f, 0.0f, 5.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {0.005f, 0.005f, 0.005f}
+//                },
+//            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+//                {
+//                    {-5.0f, 0.0f, 5.0f},
+//                    0.0f,
+//                    {1.0f, 0.0f, 0.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//            },
         };
 
     LOG_INFOthis("Loading scene");
