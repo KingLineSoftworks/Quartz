@@ -34,20 +34,22 @@ void main() {
 
     // ----- Set the position of the vertex in clip space ----- //
 
-//    gl_Position =
-//        camera.projectionMatrix *
-//        camera.viewMatrix *
-//        model.modelMatrix *
-//        vec4(in_position, 1.0);
     gl_Position =
         camera.projectionMatrix *
         camera.viewMatrix *
         pushConstant.modelMatrix *
         vec4(in_position, 1.0);
 
+    // ----- Set the normal of the vertex ----- //
+
+    out_fragmentNormal = normalize(
+        vec3(
+            pushConstant.modelMatrix * vec4(in_normal, 0.0)
+        )
+    );
+
     // ----- set output for fragment shader to use as input ----- //
 
-    out_fragmentNormal = in_normal;
     out_fragmentColor = in_color;
     out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
 
