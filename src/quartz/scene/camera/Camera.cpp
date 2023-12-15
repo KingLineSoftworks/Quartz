@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -72,10 +74,8 @@ quartz::scene::Camera::update(
 
     const float mouseSensitivity = 0.1f;
 
-    const float calibratedMousePositionOffset_x =
-        p_inputManager->getMousePositionOffset_x() * mouseSensitivity;
-    const float calibratedMousePositionOffset_y =
-        p_inputManager->getMousePositionOffset_y() * mouseSensitivity;
+    const float calibratedMousePositionOffset_x = p_inputManager->getMousePositionOffset_x() * mouseSensitivity;
+    const float calibratedMousePositionOffset_y = p_inputManager->getMousePositionOffset_y() * mouseSensitivity;
 
     m_pitch += calibratedMousePositionOffset_y;
     if (m_pitch > 89.5f) {
@@ -122,7 +122,7 @@ quartz::scene::Camera::update(
 
     // ----- update position ----- //
 
-    const float movementSpeed = 1.0f * tickTimeDelta;
+    const float movementSpeed = 2.0f * tickTimeDelta;
 
     if (p_inputManager->getKeyDown_w()) {
         m_worldPosition += movementSpeed * currentLookVector;

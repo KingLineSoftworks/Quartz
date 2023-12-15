@@ -1,6 +1,8 @@
 #include <stdexcept>
 #include <cstdlib>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/Loggers.hpp"
@@ -53,14 +55,14 @@ int main() {
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},
-        {"SWAPCHAIN", util::Logger::Level::info},
+        {"SWAPCHAIN", util::Logger::Level::trace},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},
         {"WINDOW", util::Logger::Level::info},
 
         // scene
-        {"CAMERA", util::Logger::Level::info},
+        {"CAMERA", util::Logger::Level::trace},
         {"DOODAD", util::Logger::Level::info},
         {"SCENE", util::Logger::Level::info},
     });

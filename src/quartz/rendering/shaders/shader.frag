@@ -42,7 +42,6 @@ void main() {
         ),
         in_baseColorTextureCoordinate
     ).rgb;
-//    vec3 fragmentBaseColor = in_fragmentColor;
 
     // ... ambient light ... //
 

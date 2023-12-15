@@ -47,24 +47,10 @@ quartz::scene::Doodad::update(
     LOG_FUNCTION_SCOPE_TRACEthis("");
     m_transformationMatrix = glm::mat4(1.0f);
 
-//    LOG_TRACEthis("initial transformation matrix:");
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[0]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[1]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[2]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[3]));
-
     m_transformationMatrix = glm::translate(
         m_transformationMatrix,
         m_transform.position
     );
-
-//    LOG_TRACEthis("");
-//    LOG_TRACEthis("translated transformation matrix:");
-//    LOG_TRACEthis("using {}", glm::to_string(m_transform.position));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[0]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[1]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[2]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[3]));
 
     m_transformationMatrix = glm::rotate(
         m_transformationMatrix,
@@ -72,24 +58,8 @@ quartz::scene::Doodad::update(
         m_transform.rotationAxis
     );
 
-//    LOG_TRACEthis("");
-//    LOG_TRACEthis("rotated transformation matrix:");
-//    LOG_TRACEthis("using {} around {}", m_transform.rotationAmountDegrees, glm::to_string(m_transform.rotationAxis));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[0]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[1]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[2]));
-//    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[3]));
-
     m_transformationMatrix = glm::scale(
         m_transformationMatrix,
         m_transform.scale
     );
-
-//    LOG_TRACEthis("");
-    LOG_TRACEthis("scaled transformation matrix:");
-    LOG_TRACEthis("using {}", glm::to_string(m_transform.scale));
-    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[0]));
-    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[1]));
-    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[2]));
-    LOG_TRACEthis("{}", glm::to_string(m_transformationMatrix[3]));
 }
