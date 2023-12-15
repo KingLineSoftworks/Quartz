@@ -96,6 +96,10 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
                 verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
+            case quartz::rendering::Vertex::AttributeType::Tangent: {
+                verticesToPopulate[i].tangent = glm::make_vec3(&p_data[i * byteStride]);
+                break;
+            }
             case quartz::rendering::Vertex::AttributeType::Color: {
                 verticesToPopulate[i].color = glm::make_vec3(&p_data[i * byteStride]);
                 break;
@@ -124,6 +128,7 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
     std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
         quartz::rendering::Vertex::AttributeType::Position,
         quartz::rendering::Vertex::AttributeType::Normal,
+        quartz::rendering::Vertex::AttributeType::Tangent,
         quartz::rendering::Vertex::AttributeType::Color,
         quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
     };

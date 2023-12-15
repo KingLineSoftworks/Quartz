@@ -13,6 +13,8 @@ quartz::rendering::Vertex::getAttributeGLTFString(
             return "POSITION";
         case quartz::rendering::Vertex::AttributeType::Normal:
             return "NORMAL";
+        case quartz::rendering::Vertex::AttributeType::Tangent:
+            return "TANGENT";
         case quartz::rendering::Vertex::AttributeType::Color:
             return "COLOR_0";
         case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
@@ -31,12 +33,9 @@ quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
     return vertexInputBindingDescription;
 }
 
-std::array<vk::VertexInputAttributeDescription, 4>
+std::vector<vk::VertexInputAttributeDescription>
 quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
-    std::array<
-        vk::VertexInputAttributeDescription,
-        4
-    > vertexInputAttributeDescriptions = {
+    std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription(
             0,
             0,
@@ -53,10 +52,16 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
             2,
             0,
             vk::Format::eR32G32B32Sfloat,
-            offsetof(quartz::rendering::Vertex, color)
+            offsetof(quartz::rendering::Vertex, tangent)
         ),
         vk::VertexInputAttributeDescription(
             3,
+            0,
+            vk::Format::eR32G32B32Sfloat,
+            offsetof(quartz::rendering::Vertex, color)
+        ),
+        vk::VertexInputAttributeDescription(
+            4,
             0,
             vk::Format::eR32G32Sfloat,
             offsetof(quartz::rendering::Vertex, baseColorTextureCoordinate)
@@ -68,7 +73,8 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
 
 quartz::rendering::Vertex::Vertex() :
     position(0.0f, 0.0f, 0.0f),
-    normal(0.0f, 0.0f, 0.0f),
+    normal(1.0f, 0.0f, 0.0f),
+    tangent(0.0f, 0.0f, 1.0f),
     color(1.0f, 1.0f, 1.0f),
     baseColorTextureCoordinate(0.0f, 0.0f)
 {}
@@ -76,11 +82,13 @@ quartz::rendering::Vertex::Vertex() :
 quartz::rendering::Vertex::Vertex(
     const glm::vec3& position_,
     const glm::vec3& normal_,
+    const glm::vec3& tangent_,
     const glm::vec3& color_,
     const glm::vec2& baseColorTextureCoordinate_
 ) :
     position(position_),
     normal(normal_),
+    tangent(tangent_),
     color(color_),
     baseColorTextureCoordinate(baseColorTextureCoordinate_)
 {}
@@ -97,6 +105,10 @@ quartz::rendering::Vertex::operator==(
         normal.x == other.normal.x &&
         normal.y == other.normal.y &&
         normal.z == other.normal.z &&
+
+        tangent.x == other.tangent.x &&
+        tangent.y == other.tangent.y &&
+        tangent.z == other.tangent.z &&
 
         color.x == other.color.x &&
         color.y == other.color.y &&

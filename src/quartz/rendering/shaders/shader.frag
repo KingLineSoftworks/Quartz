@@ -24,9 +24,9 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 
 // -----==== Input from vertex shader =====----- //
 
-layout(location = 0) in vec3 in_fragmentNormal;
-layout(location = 1) in vec3 in_fragmentColor;
-layout(location = 2) in vec2 in_baseColorTextureCoordinate;
+layout(location = 0) in mat3 in_fragmentTBN;
+layout(location = 3) in vec3 in_fragmentColor;
+layout(location = 4) in vec2 in_baseColorTextureCoordinate;
 
 // -----==== Output =====----- //
 
@@ -52,7 +52,7 @@ void main() {
     vec3 fragmentToLightDirection = normalize(-directionalLight.direction);
 
     float directionalLightImpact = max(
-        dot(in_fragmentNormal, fragmentToLightDirection),
+        dot(in_fragmentTBN[2], fragmentToLightDirection),
         0.0
     );
 
