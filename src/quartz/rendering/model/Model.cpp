@@ -2,13 +2,11 @@
 #include <queue>
 
 #include <glm/vec3.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <tiny_gltf.h>
 
 #include "util/file_system/FileSystem.hpp"
 
-#include "quartz/rendering/mesh/Vertex.hpp"
 #include "quartz/rendering/model/Model.hpp"
 
 tinygltf::Model
@@ -68,322 +66,6 @@ quartz::rendering::Model::loadGLTFModel(
     return gltfModel;
 }
 
-const tinygltf::Scene&
-quartz::rendering::Model::loadDefaultScene(
-    const tinygltf::Model& gltfModel
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-
-    int32_t defaultSceneIndex = gltfModel.defaultScene;
-
-    LOG_TRACE(MODEL, "Default scene index is {}", defaultSceneIndex);
-    if (defaultSceneIndex <= -1) {
-        LOG_TRACE(MODEL, "Default scene index is less than -1");
-        LOG_TRACE(MODEL, "Using default scene index of 0 instead");
-        defaultSceneIndex = 0;
-    }
-
-    const tinygltf::Scene& gltfScene = gltfModel.scenes[defaultSceneIndex];
-
-    return gltfScene;
-}
-
-std::queue<const tinygltf::Node*>
-quartz::rendering::Model::loadNodePtrQueue(
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Scene& gltfScene
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-
-    std::queue<const tinygltf::Node*> workingQueue;
-    std::queue<const tinygltf::Node*> masterQueue;
-
-    LOG_TRACE(MODEL, "Initializing queue of nodes from default scene");
-
-    for (uint32_t i = 0; i < gltfScene.nodes.size(); ++i) {
-        const uint32_t currentNodeIndex = gltfScene.nodes[i];
-        const tinygltf::Node* p_currentNode = &gltfModel.nodes[currentNodeIndex];
-
-        workingQueue.push(p_currentNode);
-        masterQueue.push(p_currentNode);
-    }
-
-    LOG_TRACE(MODEL, "Using {} root nodes", workingQueue.size());
-
-    while (!workingQueue.empty()) {
-        LOG_SCOPE_CHANGE_TRACE(MODEL);
-
-        const tinygltf::Node* p_gltfNode = workingQueue.front();
-        workingQueue.pop();
-        LOG_TRACE(MODEL, "Got node at {}", static_cast<const void*>(p_gltfNode));
-
-        LOG_TRACE(MODEL, "Adding {} more nodes to the queue", p_gltfNode->children.size());
-
-        for (uint32_t i = 0; i < p_gltfNode->children.size(); ++i) {
-            const uint32_t currentNodeIndex = p_gltfNode->children[i];
-            const tinygltf::Node* p_currentNode = &gltfModel.nodes[currentNodeIndex];
-
-            workingQueue.push(p_currentNode);
-            masterQueue.push(p_currentNode);
-        }
-    }
-
-    return masterQueue;
-}
-
-void
-quartz::rendering::Model::populateVerticesWithAttribute(
-    std::vector<quartz::rendering::Vertex>& verticesToPopulate,
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Primitive& gltfPrimitive,
-    const quartz::rendering::Vertex::AttributeType attributeType
-) {
-    const std::string attributeString =
-        quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "{}", attributeString);
-
-    if (gltfPrimitive.attributes.find(attributeString) == gltfPrimitive.attributes.end()) {
-        LOG_TRACE(MODEL, "Primitive does not contain a {} attribute", attributeString);
-
-        switch (attributeType) {
-            case quartz::rendering::Vertex::AttributeType::Position:
-            case quartz::rendering::Vertex::AttributeType::Normal:
-                LOG_CRITICAL(MODEL, "Primitive must contain a {} attribute", attributeString);
-                throw std::runtime_error("");
-            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
-                LOG_TRACE(MODEL, "Using default base color texture");
-                break;
-            default:
-                break;
-        }
-
-        return;
-    }
-
-    LOG_TRACE(MODEL, "Loading {} attribute", attributeString);
-
-    const tinygltf::Accessor& accessor = gltfModel.accessors[gltfPrimitive.attributes.find(attributeString)->second];
-    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
-
-    const float* p_data = reinterpret_cast<const float*>(&(
-        gltfModel.buffers[bufferView.buffer].data[accessor.byteOffset + bufferView.byteOffset]
-    ));
-
-    uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
-    if (attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate) {
-        LOG_TRACE(MODEL, "{} attribute uses vector2", attributeString);
-        tinygltfVecType = TINYGLTF_TYPE_VEC2;
-    }
-
-    const int32_t byteStride =
-        accessor.ByteStride(bufferView) ?
-            accessor.ByteStride(bufferView) / sizeof (float) :
-            tinygltf::GetNumComponentsInType(tinygltfVecType);
-
-    for (uint32_t j = 0; j < verticesToPopulate.size(); ++j) {
-        switch (attributeType) {
-            case quartz::rendering::Vertex::AttributeType::Position: {
-                verticesToPopulate[j].position = glm::make_vec3(&p_data[j * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::Normal: {
-                verticesToPopulate[j].normal = glm::make_vec3(&p_data[j * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::Color: {
-                verticesToPopulate[j].color = glm::make_vec3(&p_data[j * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate: {
-                verticesToPopulate[j].baseColorTextureCoordinate = glm::make_vec2(&p_data[j * byteStride]);
-                break;
-            }
-        }
-    }
-}
-
-std::vector<quartz::rendering::Vertex>
-quartz::rendering::Model::loadMeshVertices(
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Mesh& gltfMesh
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-
-        std::vector<quartz::rendering::Vertex> meshVertices;
-
-        LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
-        for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
-            LOG_TRACE(MODEL, "Primitive {}", i);
-
-            const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
-
-            if (gltfPrimitive.attributes.find("POSITION") == gltfPrimitive.attributes.end()) {
-                LOG_CRITICAL(MODEL, "Primitive {} does not contain a position attribute", i);
-                throw std::runtime_error("");
-            }
-
-            const uint32_t vertexCount = gltfModel.accessors[gltfPrimitive.attributes.find("POSITION")->second].count;
-            std::vector<quartz::rendering::Vertex> primitiveVertices(vertexCount);
-
-            std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
-                quartz::rendering::Vertex::AttributeType::Position,
-                quartz::rendering::Vertex::AttributeType::Normal,
-                quartz::rendering::Vertex::AttributeType::Color,
-                quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
-            };
-
-            for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
-                quartz::rendering::Model::populateVerticesWithAttribute(
-                    primitiveVertices,
-                    gltfModel,
-                    gltfPrimitive,
-                    attributeType
-                );
-            }
-
-            LOG_TRACE(MODEL, "Primitive loaded {} vertices", primitiveVertices.size());
-            meshVertices.insert(
-                meshVertices.end(),
-                primitiveVertices.begin(),
-                primitiveVertices.end()
-            );
-            LOG_TRACE(MODEL, "Mesh now contains {} vertices", meshVertices.size());
-        }
-
-    return meshVertices;
-}
-
-std::vector<uint32_t>
-quartz::rendering::Model::loadMeshIndices(
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Mesh& gltfMesh
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-
-    std::vector<uint32_t> meshIndices;
-
-    LOG_TRACE(MODEL, "Considering {} primitives", gltfMesh.primitives.size());
-    for (uint32_t i = 0; i < gltfMesh.primitives.size(); ++i) {
-        LOG_TRACE(MODEL, "Primitive {}", i);
-
-        const tinygltf::Primitive& gltfPrimitive = gltfMesh.primitives[i];
-
-        if (gltfPrimitive.indices <= -1) {
-            LOG_TRACE(MODEL, "Primitive does not contain any indices");
-            continue;
-        }
-
-        const uint32_t indexCount = gltfModel.accessors[gltfPrimitive.indices].count;
-        std::vector<uint32_t> primitiveIndices(indexCount);
-
-        const tinygltf::Accessor& indexAccessor = gltfModel.accessors[
-            gltfPrimitive.indices > -1 ?
-                gltfPrimitive.indices :
-                0
-        ];
-
-        const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexAccessor.bufferView];
-        const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferView.buffer];
-
-        switch (indexAccessor.componentType) {
-            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
-                LOG_TRACE(MODEL, "  - using indices of type uint32_t");
-                const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(&(
-                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                ));
-                for (uint32_t j = 0; j < indexAccessor.count; ++j) {
-                    primitiveIndices[j] = p_indices[j];
-                }
-                break;
-            }
-            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
-                LOG_TRACE(MODEL, "  - using indices of type uint16_t");
-                const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(&(
-                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                ));
-                for (uint16_t j = 0; j < indexAccessor.count; ++j) {
-                    primitiveIndices[j] = p_indices[j];
-                }
-                break;
-            }
-            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-                LOG_TRACE(MODEL, "  - using indices of type uint8_t");
-                const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(&(
-                    indexBuffer.data[indexAccessor.byteOffset + indexBufferView.byteOffset]
-                ));
-                for (uint8_t j = 0; j < indexAccessor.count; ++j) {
-                    primitiveIndices[j] = p_indices[j];
-                }
-                break;
-            }
-        }
-
-        LOG_TRACE(MODEL, "Primitive loaded {} indices", primitiveIndices.size());
-        meshIndices.insert(
-            meshIndices.end(),
-            primitiveIndices.begin(),
-            primitiveIndices.end()
-        );
-        LOG_TRACE(MODEL, "Mesh now contains {} indices", meshIndices.size());
-    }
-
-    return meshIndices;
-}
-
-std::vector<quartz::rendering::Mesh>
-quartz::rendering::Model::loadMeshes(
-    const quartz::rendering::Device& renderingDevice,
-    const tinygltf::Model& gltfModel
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
-
-    const tinygltf::Scene& gltfScene = quartz::rendering::Model::loadDefaultScene(gltfModel);
-
-    std::queue<const tinygltf::Node*> gltfNodePtrs =
-        quartz::rendering::Model::loadNodePtrQueue(
-            gltfModel,
-            gltfScene
-        );
-
-    std::vector<quartz::rendering::Mesh> meshes;
-
-    LOG_TRACE(MODEL, "Loading vertex and index information");
-    while (!gltfNodePtrs.empty()) {
-        LOG_SCOPE_CHANGE_TRACE(MODEL);
-
-        const tinygltf::Node* p_gltfNode = gltfNodePtrs.front();
-        gltfNodePtrs.pop();
-
-        if (p_gltfNode->mesh <= -1) {
-            LOG_TRACE(MODEL, "Not considering this node for mesh information");
-            continue;
-        }
-
-        LOG_TRACE(MODEL, "Using mesh {}", p_gltfNode->mesh);
-        const tinygltf::Mesh& gltfMesh = gltfModel.meshes[p_gltfNode->mesh];
-
-        const std::vector<quartz::rendering::Vertex> vertices =
-            quartz::rendering::Model::loadMeshVertices(
-                gltfModel,
-                gltfMesh
-            );
-
-        const std::vector<uint32_t> indices =
-            quartz::rendering::Model::loadMeshIndices(
-                gltfModel,
-                gltfMesh
-            );
-
-        meshes.emplace_back(quartz::rendering::Mesh(
-            renderingDevice,
-            vertices,
-            indices
-        ));
-    }
-
-    return meshes;
-}
-
 std::vector<uint32_t>
 quartz::rendering::Model::loadTextures(
     const quartz::rendering::Device& renderingDevice,
@@ -438,8 +120,67 @@ quartz::rendering::Model::loadTextures(
     return masterIndices;
 }
 
-quartz::rendering::Material
-quartz::rendering::Model::loadMaterial(
+uint32_t
+quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+    const std::vector<uint32_t>& masterIndices,
+    const int32_t localIndex,
+    const quartz::rendering::Texture::Type textureType
+) {
+    if (masterIndices.empty()) {
+        switch (textureType) {
+            case quartz::rendering::Texture::Type::BaseColor:
+                return quartz::rendering::Texture::getBaseColorDefaultIndex();
+            case quartz::rendering::Texture::Type::Normal:
+                return quartz::rendering::Texture::getNormalDefaultIndex();
+            case quartz::rendering::Texture::Type::Emission:
+                return quartz::rendering::Texture::getEmissionDefaultIndex();
+            case quartz::rendering::Texture::Type::MetallicRoughness:
+                return quartz::rendering::Texture::getMetallicRoughnessDefaultIndex();
+        }
+    }
+
+    if (localIndex < 0) {
+        return masterIndices[0];
+    }
+
+    return masterIndices[localIndex];
+}
+
+uint32_t
+quartz::rendering::Model::getTextureMasterIndex(
+    const tinygltf::Material& gltfMaterial,
+    const std::vector<uint32_t>& masterIndices,
+    const quartz::rendering::Texture::Type textureType
+) {
+    const std::string textureTypeString =
+        quartz::rendering::Texture::getTextureTypeGLTFString(textureType);
+
+    LOG_TRACE(MODEL, "Looking for {}", textureTypeString);
+
+    int32_t localIndex = -1;
+
+    std::map<std::string, tinygltf::Parameter>::const_iterator iterator =
+        gltfMaterial.values.find(textureTypeString);
+
+    if (iterator != gltfMaterial.values.end()) {
+        localIndex = iterator->second.TextureIndex();
+        LOG_TRACE(MODEL, "  Found base color texture local index {}", localIndex);
+    }
+
+    const uint32_t masterIndex =
+        quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+            masterIndices,
+            localIndex,
+            textureType
+        );
+
+    LOG_TRACE(MODEL, "  {} master index = {}", textureTypeString, masterIndex);
+
+    return masterIndex;
+}
+
+std::vector<quartz::rendering::Material>
+quartz::rendering::Model::loadMaterials(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel
 ) {
@@ -451,90 +192,74 @@ quartz::rendering::Model::loadMaterial(
             gltfModel
         );
 
-    int32_t baseColorLocalIndex = -1;
-    int32_t normalLocalIndex = -1;
-    int32_t emissionLocalIndex = -1;
-    int32_t metallicRoughnessLocalIndex = -1;
+    std::vector<quartz::rendering::Material> materials = {
+        {} // a default material
+    };
 
-    LOG_TRACE(TEXTURE, "Processing {} materials", gltfModel.materials.size());
+    LOG_TRACE(MODEL, "Processing {} materials", gltfModel.materials.size());
     for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
-        LOG_SCOPE_CHANGE_TRACE(TEXTURE);
-        LOG_TRACE(TEXTURE, "Processing material {}", i);
+        LOG_SCOPE_CHANGE_TRACE(MODEL);
+        LOG_TRACE(MODEL, "Processing material {}", i);
 
         const tinygltf::Material& gltfMaterial = gltfModel.materials[i];
 
-        LOG_TRACE(TEXTURE, "Looking for base color texture");
-        std::map<std::string, tinygltf::Parameter>::const_iterator baseColorIterator =
-            gltfMaterial.values.find("baseColorTexture");
-        if (baseColorIterator != gltfMaterial.values.end()) {
-            baseColorLocalIndex = baseColorIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found base color texture local index {}", baseColorLocalIndex);
-        }
+        const uint32_t baseColorMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
+            gltfMaterial,
+            masterIndices,
+            quartz::rendering::Texture::Type::BaseColor
+        );
+        const uint32_t normalMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
+            gltfMaterial,
+            masterIndices,
+            quartz::rendering::Texture::Type::Normal
+        );
+        const uint32_t emissionMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
+            gltfMaterial,
+            masterIndices,
+            quartz::rendering::Texture::Type::Emission
+        );
+        const uint32_t metallicRoughnessMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
+            gltfMaterial,
+            masterIndices,
+            quartz::rendering::Texture::Type::MetallicRoughness
+        );
 
-        LOG_TRACE(TEXTURE, "Looking for normal texture");
-        std::map<std::string, tinygltf::Parameter>::const_iterator normalIterator =
-            gltfMaterial.values.find("normalTexture");
-        if (normalIterator != gltfMaterial.values.end()) {
-            normalLocalIndex = normalIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found normal texture local index {}", normalLocalIndex);
-        }
-
-        LOG_TRACE(TEXTURE, "Looking for emission texture");
-        std::map<std::string, tinygltf::Parameter>::const_iterator emissionIterator =
-            gltfMaterial.values.find("emissiveTexture");
-        if (emissionIterator != gltfMaterial.values.end()) {
-            emissionLocalIndex = emissionIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found emission texture local index {}", emissionLocalIndex);
-        }
-
-        LOG_TRACE(TEXTURE, "Looking for metallic roughness texture");
-        std::map<std::string, tinygltf::Parameter>::const_iterator metallicRoughnessIterator =
-            gltfMaterial.values.find("metallicRoughnessTexture");
-        if (metallicRoughnessIterator != gltfMaterial.values.end()) {
-            metallicRoughnessLocalIndex = metallicRoughnessIterator->second.TextureIndex();
-            LOG_TRACE(TEXTURE, "Found metallic roughness texture local index {}", metallicRoughnessLocalIndex);
-        }
+        materials.emplace_back(
+            baseColorMasterIndex,
+            normalMasterIndex,
+            emissionMasterIndex,
+            metallicRoughnessMasterIndex
+        );
     }
 
-    const uint32_t baseColorMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getBaseColorDefaultIndex() :
-        masterIndices[
-            baseColorLocalIndex >= 0 ?
-                baseColorLocalIndex :
-                0
-        ];
-    const uint32_t normalMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getNormalDefaultIndex() :
-        masterIndices[
-            normalLocalIndex >= 0 ?
-                normalLocalIndex :
-                0
-        ];
-    const uint32_t emissionMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getEmissionDefaultIndex() :
-        masterIndices[
-            emissionLocalIndex >= 0 ?
-                emissionLocalIndex :
-                0
-        ];
-    const uint32_t metallicRoughnessMasterIndex = masterIndices.empty() ?
-        quartz::rendering::Texture::getMetallicRoughnessDefaultIndex() :
-        masterIndices[
-            metallicRoughnessLocalIndex >= 0 ?
-                metallicRoughnessLocalIndex :
-                0
-        ];
-    LOG_TRACE(TEXTURE, "base color         texture master index = {}", baseColorMasterIndex);
-    LOG_TRACE(TEXTURE, "normal             texture master index = {}", normalMasterIndex);
-    LOG_TRACE(TEXTURE, "emission           texture master index = {}", emissionMasterIndex);
-    LOG_TRACE(TEXTURE, "metallic roughness texture master index = {}", metallicRoughnessMasterIndex);
+    return materials;
+}
 
-    return {
-        baseColorMasterIndex,
-        normalMasterIndex,
-        emissionMasterIndex,
-        metallicRoughnessMasterIndex
-    };
+std::vector<quartz::rendering::Scene>
+quartz::rendering::Model::loadScenes(
+    const quartz::rendering::Device& renderingDevice,
+    const tinygltf::Model& gltfModel,
+    const std::vector<quartz::rendering::Material>& materials
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
+
+    std::vector<quartz::rendering::Scene> scenes;
+    scenes.reserve(gltfModel.scenes.size());
+
+    for (uint32_t i = 0; i < gltfModel.scenes.size(); ++i) {
+        LOG_TRACE(MODEL, "Loading scene {}", i);
+
+        const tinygltf::Scene& gltfScene = gltfModel.scenes[i];
+
+        scenes.emplace_back(
+            renderingDevice,
+            gltfModel,
+            gltfScene,
+            materials
+        );
+    }
+
+    return scenes;
 }
 
 quartz::rendering::Model::Model(
@@ -542,16 +267,22 @@ quartz::rendering::Model::Model(
     const std::string& objectFilepath
 ) :
     m_gltfModel(quartz::rendering::Model::loadGLTFModel(objectFilepath)),
-    m_meshes(
-        quartz::rendering::Model::loadMeshes(
+    m_materials(
+        quartz::rendering::Model::loadMaterials(
             renderingDevice,
             m_gltfModel
         )
     ),
-    m_material(
-        quartz::rendering::Model::loadMaterial(
+    m_defaultSceneIndex(
+        m_gltfModel.defaultScene <= -1 ?
+            0 :
+            m_gltfModel.defaultScene
+    ),
+    m_scenes(
+        quartz::rendering::Model::loadScenes(
             renderingDevice,
-            m_gltfModel
+            m_gltfModel,
+            m_materials
         )
     )
 {
@@ -560,8 +291,9 @@ quartz::rendering::Model::Model(
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
-    m_meshes(std::move(other.m_meshes)),
-    m_material(std::move(other.m_material))
+    m_materials(std::move(other.m_materials)),
+    m_defaultSceneIndex(other.m_defaultSceneIndex),
+    m_scenes(std::move(other.m_scenes))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

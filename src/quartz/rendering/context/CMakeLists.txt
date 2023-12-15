@@ -28,7 +28,6 @@ target_link_libraries(
         QUARTZ_RENDERING_Buffer
         QUARTZ_RENDERING_Device
         QUARTZ_RENDERING_Instance
-        QUARTZ_RENDERING_Mesh
         QUARTZ_RENDERING_Model
         QUARTZ_RENDERING_Pipeline
         QUARTZ_RENDERING_Swapchain

@@ -11,7 +11,6 @@
 
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/instance/Instance.hpp"
-#include "quartz/rendering/mesh/Mesh.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -57,31 +56,107 @@ void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
     const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
-    double currentFrameTimeDelta = 0.0;
-    double previousFrameStartTime = 0.0f;
-    double currentFrameStartTime = 0.0f;
-    double frameTimeAccumulator = 0.0f;
+    UNUSED double currentFrameTimeDelta = 0.0;
+    UNUSED double previousFrameStartTime = 0.0f;
+    UNUSED double currentFrameStartTime = 0.0f;
+    UNUSED double frameTimeAccumulator = 0.0f;
+
+    /**
+     * @todo 2023/12/12 FIX COORDINATE SYSTEM.
+     *   WE ARE CURRENTLY USING SOME SORT OF COORDINATE SYSTEM (I FORGOT WHICH).
+     *   BUT IT IS CLEARLY NOT THE SAME AS THE COORDINATE SYSTEM THAT GLTF USES.
+     *   ALL GLTF MODELS ARE LOADING IN UPSIDE DOWN AND WHEN WE USE THE BOOM BOX WITH AXES
+     *   WE CAN CLEARLY SEE THAT OUR COORDINATE SYSTEM IS INCORRECT.
+     */
+
+    std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
+
+            // =============================================
+            // boxes
+            // =============================================
+
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
+                {
+                    {-3.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
+
+            // =============================================
+            // others
+            // =============================================
+
+            // first row
+
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+                {
+                    {0.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {100.0f, 100.0f, 100.0f}
+                },
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+                {
+                    {-5.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {20.0f, 20.0f, 20.0f}
+                }
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+                {
+                    {5.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
+
+            // second row
+
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
+                {
+                    {0.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {0.005f, 0.005f, 0.005f}
+                },
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+                {
+                    {-5.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
+        };
 
     LOG_INFOthis("Loading scene");
     m_scene.load(
         m_renderingContext.getRenderingDevice(),
         {
-            -45.0f,
-            135.0f,
+            0.0f, // rotation around x axis (up down)
+            0.0f, // rotation around y axis (left right)
             0.0f,
-            60.0f,
-            { 3.0f, 3.0f, -3.0f }
+            75.0f,
+            { -5.0f, 0.0f, 0.0f }
         },
         {{ 0.05f, 0.05f, 0.05f }},
         {
             { 0.65f, 0.65f, 0.65f },
-            { -3.0f, -2.0f, 1.0f }
+            { 3.0f, -2.0f, 1.0f }
         },
-        {
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf"
-//            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf"
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"
-        }
+        doodadInformations
     );
     m_renderingContext.loadScene();
 
@@ -125,5 +200,6 @@ quartz::Application::processInput() {
 
         m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
         mp_inputManager->setShouldCollectMouseInput(!m_isPaused);
+        mp_inputManager->setShouldCollectKeyInput(!m_isPaused);
     }
 }

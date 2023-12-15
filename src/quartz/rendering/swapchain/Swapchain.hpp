@@ -10,6 +10,7 @@
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/window/Window.hpp"
+#include "quartz/scene/doodad/Doodad.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -55,9 +56,9 @@ public: // member functions
         const uint32_t inFlightFrameIndex,
         const uint32_t availableSwapchainImageIndex
     );
-    void recordModelToDrawingCommandBuffer(
+    void recordDoodadToDrawingCommandBuffer(
         const quartz::rendering::Pipeline& renderingPipeline,
-        const quartz::rendering::Model& model,
+        const quartz::scene::Doodad& doodad,
         const uint32_t inFlightFrameIndex
     );
     void endAndSubmitDrawingCommandBuffer(

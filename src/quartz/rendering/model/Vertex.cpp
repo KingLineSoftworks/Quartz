@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include "quartz/rendering/mesh/Vertex.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
 
 std::string
 quartz::rendering::Vertex::getAttributeGLTFString(

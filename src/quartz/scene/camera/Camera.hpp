@@ -26,6 +26,7 @@ public: // member functions
 
     USE_LOGGER(CAMERA);
 
+    const glm::vec3& getWorldPosition() const { return m_worldPosition; }
     const glm::mat4& getViewMatrix() const { return m_viewMatrix; }
     const glm::mat4& getProjectionMatrix() const { return m_projectionMatrix; }
 

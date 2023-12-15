@@ -1,6 +1,8 @@
 #include <stdexcept>
 #include <cstdlib>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/Loggers.hpp"
@@ -46,19 +48,23 @@ int main() {
         {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
-        {"MATERIAL", util::Logger::Level::trace},
-        {"MESH", util::Logger::Level::info},
-        {"MODEL", util::Logger::Level::trace},
+        {"MATERIAL", util::Logger::Level::info},
+        {"MODEL", util::Logger::Level::info},
+        {"MODEL_MESH", util::Logger::Level::info},
+        {"MODEL_PRIMITIVE", util::Logger::Level::info},
+        {"MODEL_NODE", util::Logger::Level::info},
+        {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},
-        {"SWAPCHAIN", util::Logger::Level::info},
-        {"TEXTURE", util::Logger::Level::trace},
+        {"SWAPCHAIN", util::Logger::Level::trace},
+        {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},
         {"WINDOW", util::Logger::Level::info},
 
         // scene
-        {"CAMERA", util::Logger::Level::info},
+        {"CAMERA", util::Logger::Level::trace},
         {"DOODAD", util::Logger::Level::info},
+        {"SCENE", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {

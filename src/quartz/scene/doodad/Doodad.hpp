@@ -8,6 +8,7 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
+#include "quartz/scene/doodad/Transform.hpp"
 
 namespace quartz {
 namespace scene {
@@ -20,7 +21,7 @@ public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         const std::string& objectFilepath,
-        const glm::vec3& worldPosition
+        const quartz::scene::Transform& transform
     );
     Doodad(Doodad&& other);
     ~Doodad();
@@ -28,7 +29,7 @@ public: // member functions
     USE_LOGGER(DOODAD);
 
     const quartz::rendering::Model& getModel() const { return m_model; }
-    const glm::mat4& getModelMatrix() const { return m_modelMatrix; }
+    const glm::mat4& getTransformationMatrix() const { return m_transformationMatrix; }
 
     void update(const double tickTimeDelta);
 
@@ -37,7 +38,7 @@ private: // static functions
 private: // member variables
     quartz::rendering::Model m_model;
 
-    glm::vec3 m_worldPosition;
+    quartz::scene::Transform m_transform;
 
-    glm::mat4 m_modelMatrix;
+    glm::mat4 m_transformationMatrix;
 };

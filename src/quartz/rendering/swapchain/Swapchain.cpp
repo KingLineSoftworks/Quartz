@@ -1,5 +1,9 @@
 #include <set>
+#include <queue>
 #include <vector>
+
+#include <glm/mat4x4.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <vulkan/vulkan.hpp>
 
@@ -566,33 +570,11 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
 }
 
 void
-quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
+quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
     const quartz::rendering::Pipeline& renderingPipeline,
-    const quartz::rendering::Model& model,
+    const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
-    uint32_t pushConstantValue = model.getMaterial().getBaseColorTextureMasterIndex();
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-        *renderingPipeline.getVulkanPipelineLayoutPtr(),
-        vk::ShaderStageFlagBits::eFragment,
-        0,
-        sizeof(uint32_t),
-        reinterpret_cast<void*>(&pushConstantValue)
-    );
-
-    uint32_t offset = 0;
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
-        0,
-        *(model.getMeshes()[0].getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
-        offset
-    );
-
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(model.getMeshes()[0].getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
-        0,
-        vk::IndexType::eUint32
-    );
-
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -603,13 +585,66 @@ quartz::rendering::Swapchain::recordModelToDrawingCommandBuffer(
         nullptr
     );
 
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        model.getMeshes()[0].getIndices().size(),
-        1,
-        0,
-        0,
-        0
+    std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
+        std::deque(
+            doodad.getModel().getDefaultScene().getRootNodePtrs().begin(),
+            doodad.getModel().getDefaultScene().getRootNodePtrs().end()
+        )
     );
+
+    while (!nodeQueue.empty()) {
+        const std::shared_ptr<quartz::rendering::Node>& p_node = nodeQueue.front();
+        nodeQueue.pop();
+
+        for (const std::shared_ptr<quartz::rendering::Node>& p_child : p_node->getChildrenNodePtrs()) {
+            nodeQueue.push(p_child);
+        }
+
+        if (!p_node->getMeshPtr()) {
+            continue;
+        }
+
+        glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
+        m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+            *renderingPipeline.getVulkanPipelineLayoutPtr(),
+            vk::ShaderStageFlagBits::eVertex,
+            0,
+            sizeof(glm::mat4),
+            reinterpret_cast<void*>(&currentTransformationMatrix)
+        );
+
+        for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+            uint32_t baseColorTextureIndex = primitive.getMaterial().getBaseColorTextureMasterIndex();
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+                *renderingPipeline.getVulkanPipelineLayoutPtr(),
+                vk::ShaderStageFlagBits::eFragment,
+                sizeof(glm::mat4),
+                sizeof(uint32_t),
+                reinterpret_cast<void*>(&baseColorTextureIndex)
+            );
+
+            uint32_t offset = 0;
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+                0,
+                *(primitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+                offset
+            );
+
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+                *(primitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+                0,
+                vk::IndexType::eUint32
+            );
+
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+                primitive.getIndexCount(),
+                1,
+                0,
+                0,
+                0
+            );
+        }
+    }
 }
 
 void

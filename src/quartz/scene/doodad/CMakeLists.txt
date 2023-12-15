@@ -5,6 +5,7 @@ add_library(
         QUARTZ_SCENE_Doodad
         SHARED
         Doodad.cpp
+        Transform.cpp
 )
 
 target_compile_options(

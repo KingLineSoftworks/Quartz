@@ -30,4 +30,5 @@ target_link_libraries(
         QUARTZ_RENDERING_Pipeline
         QUARTZ_RENDERING_Window
         QUARTZ_RENDERING_VulkanUtil
+        QUARTZ_SCENE_Doodad
 )

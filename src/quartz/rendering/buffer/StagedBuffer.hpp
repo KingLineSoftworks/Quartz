@@ -14,6 +14,7 @@ namespace rendering {
 
 class quartz::rendering::StagedBuffer {
 public: // member functions
+    StagedBuffer();
     StagedBuffer(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t sizeBytes,

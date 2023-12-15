@@ -2,14 +2,18 @@
 
 // -----==== Uniforms from the CPU =====----- //
 
+// ... world level things ... //
+
 layout(binding = 0) uniform CameraUniformBufferObject {
     mat4 viewMatrix;
     mat4 projectionMatrix;
 } camera;
 
-layout(binding = 1) uniform ModelUniformBufferObject {
+// ... mesh level things ... //
+
+layout(push_constant) uniform perObjectVertexPushConstant {
     mat4 modelMatrix;
-} model;
+} pushConstant;
 
 // -----==== Inputs =====----- //
 
@@ -33,12 +37,19 @@ void main() {
     gl_Position =
         camera.projectionMatrix *
         camera.viewMatrix *
-        model.modelMatrix *
+        pushConstant.modelMatrix *
         vec4(in_position, 1.0);
+
+    // ----- Set the normal of the vertex ----- //
+
+    out_fragmentNormal = normalize(
+        vec3(
+            pushConstant.modelMatrix * vec4(in_normal, 0.0)
+        )
+    );
 
     // ----- set output for fragment shader to use as input ----- //
 
-    out_fragmentNormal = in_normal;
     out_fragmentColor = in_color;
     out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
 

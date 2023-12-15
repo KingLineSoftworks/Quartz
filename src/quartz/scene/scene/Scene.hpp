@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "quartz/managers/input_manager/InputManager.hpp"
@@ -9,6 +10,7 @@
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "quartz/scene/doodad/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 
@@ -35,7 +37,7 @@ public: // member functions
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
-        const std::vector<std::string>& filepaths
+        const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
     void update(
@@ -47,7 +49,7 @@ public: // member functions
 private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
-        const std::vector<std::string>& filepaths
+        const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
 private: // member variables

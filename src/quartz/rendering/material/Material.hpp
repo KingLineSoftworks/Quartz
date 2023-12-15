@@ -20,6 +20,7 @@ public: // member functions
         const uint32_t emissionTextureMasterIndex,
         const uint32_t metallicRoughnessTextureMasterIndex
     );
+    Material(const Material& other);
     Material(Material&& other);
     ~Material();
 

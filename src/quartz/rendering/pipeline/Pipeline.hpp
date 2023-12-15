@@ -78,7 +78,6 @@ public: // member functions
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
-    void updateModelUniformBuffer(const quartz::scene::Doodad& doodad);
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
@@ -88,21 +87,17 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
-
     static std::vector<quartz::rendering::LocallyMappedBuffer> createUniformBuffers(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t numBuffers
     );
-
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice
     );
-
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t numDescriptorSets
     );
-
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
@@ -111,18 +106,15 @@ private: // static functions
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
-
     static vk::UniqueRenderPass createVulkanRenderPassPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::SurfaceFormatKHR& surfaceFormat,
         const vk::Format& depthFormat
     );
-
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
     );
-
     static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
