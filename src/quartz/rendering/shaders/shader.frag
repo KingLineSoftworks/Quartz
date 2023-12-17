@@ -1,5 +1,7 @@
 #version 450
 
+#define MAX_NUMBER_BASE_COLOR_TEXTURES 100
+
 // -----==== Uniforms from the CPU =====----- //
 
 // ... world level things ... //
@@ -16,10 +18,12 @@ layout(binding = 2) uniform DirectionalLight {
 // ... object level things ... //
 
 layout(binding = 3) uniform sampler baseColorTextureSampler;
-layout(binding = 4) uniform texture2D baseColorTextures[100];
+/** @todo 2023/12/15 Create uniform sampler for normal textures */
+layout(binding = 4) uniform texture2D baseColorTextures[MAX_NUMBER_BASE_COLOR_TEXTURES];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
-    layout(offset = 64)uint baseColorTextureID;
+    layout(offset = 64) uint baseColorTextureID;
+    layout(offset = 68) uint normalTextureID;
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
@@ -35,6 +39,9 @@ layout(location = 0) out vec4 out_fragmentColor;
 // -----==== Logic =====----- //
 
 void main() {
+
+    // ... base color ... //
+
     vec3 fragmentBaseColor = texture(
         sampler2D(
             baseColorTextures[pushConstant.baseColorTextureID],
@@ -42,6 +49,25 @@ void main() {
         ),
         in_baseColorTextureCoordinate
     ).rgb;
+
+    // ... normal ... //
+
+    // get the normal displacement from the normal map
+    vec3 normalDisplacement = texture(
+        sampler2D(
+            baseColorTextures[pushConstant.normalTextureID],
+            baseColorTextureSampler
+        ),
+        in_baseColorTextureCoordinate
+    ).rgb;
+
+    // convert it to be [-1, 1] from [0, 1]
+    normalDisplacement = normalize((normalDisplacement * 2.0) - 1.0);
+
+    // convert it to tangent space
+    vec3 normal = normalize(in_fragmentTBN * normalDisplacement);
+
+    normal = in_fragmentTBN[2];
 
     // ... ambient light ... //
 
@@ -52,7 +78,7 @@ void main() {
     vec3 fragmentToLightDirection = normalize(-directionalLight.direction);
 
     float directionalLightImpact = max(
-        dot(in_fragmentTBN[2], fragmentToLightDirection),
+        dot(normal, fragmentToLightDirection),
         0.0
     );
 

@@ -62,26 +62,38 @@ quartz::rendering::Texture::initializeMasterList(
     quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES);
 
     LOG_TRACE(TEXTURE, "Creating base color default texture");
-    const std::vector<uint8_t> pixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta
+    const std::vector<uint8_t> baseColorPixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta (r=1, g=0, b=1, a=1)
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault =
         std::make_shared<quartz::rendering::Texture>(
             renderingDevice,
             1,
             1,
             4,
-            reinterpret_cast<const void*>(pixels.data())
+            reinterpret_cast<const void*>(baseColorPixels.data())
         );
     quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
-    quartz::rendering::Texture::baseColorDefaultIndex =
-        quartz::rendering::Texture::masterList.size() - 1;
-    LOG_TRACE(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
+    quartz::rendering::Texture::baseColorDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
+    LOG_INFO(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
 
     /**
      * @todo 2023/11/19 Create default textures for each of
-     *   normal
      *   emission
      *   metallicRoughness
      */
+
+    LOG_TRACE(TEXTURE, "Creating normal default texture");
+    const std::vector<uint8_t> normalPixels = { 0x80, 0x80, 0xFF, 0xFF }; // Default to neutral (r=0.5, g=0.5, b=1.0, a=1.0)
+    std::shared_ptr<quartz::rendering::Texture> p_normalDefault =
+        std::make_shared<quartz::rendering::Texture>(
+            renderingDevice,
+            1,
+            1,
+            4,
+            reinterpret_cast<const void*>(normalPixels.data())
+        );
+    quartz::rendering::Texture::masterList.push_back(p_normalDefault);
+    quartz::rendering::Texture::normalDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
+    LOG_INFO(TEXTURE, "Normal default at index {}", quartz::rendering::Texture::normalDefaultIndex);
 }
 
 void

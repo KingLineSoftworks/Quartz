@@ -95,14 +95,15 @@ private: // static variables
     static uint32_t normalDefaultIndex;
     static uint32_t emissionDefaultIndex;
     static uint32_t metallicRoughnessDefaultIndex;
+
+    /**
+     * @todo 2023/12/16 Maintain a list of weak pointers in parallel to the master list
+     *   of shared pointers, so we can give this weak pointer list out to people without
+     *   modifying the lifetime of the shared pointers stored here
+     */
     static std::vector<std::shared_ptr<Texture>> masterList;
 
 private: // member variables
-    /**
-     * @todo 2023/11/10 We probably only want to have one sampler for each type of texture. It seems
-     *   to be the case that all base color textures will have the same type of sampler,
-     *   likewise with all normal textures, etc ...
-     */
     quartz::rendering::StagedImageBuffer m_stagedImageBuffer;
     vk::UniqueImageView mp_vulkanImageView;
     vk::UniqueSampler mp_vulkanSampler;

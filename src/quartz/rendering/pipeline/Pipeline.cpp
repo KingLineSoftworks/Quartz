@@ -19,12 +19,6 @@ quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
     projectionMatrix(projectionMatrix_)
 {}
 
-quartz::rendering::ModelUniformBufferObject::ModelUniformBufferObject(
-    const glm::mat4 modelMatrix_
-) :
-    modelMatrix(modelMatrix_)
-{}
-
 vk::UniqueShaderModule
 quartz::rendering::Pipeline::createVulkanShaderModulePtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -143,6 +137,10 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
+    /**
+     * @todo 2023/12/15 Create descriptor set layout binding for normal texture sampler
+     */
+
     vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
         4,
         vk::DescriptorType::eSampledImage,
@@ -209,6 +207,10 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         numDescriptorSets
     );
     LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", baseColorTextureSamplerPoolSize.descriptorCount);
+
+    /**
+     * @todo 2023/12/15 Create descriptor pool size for normal texture sampler
+     */
 
     vk::DescriptorPoolSize baseColorTexturesPoolSize(
         vk::DescriptorType::eSampledImage,
@@ -358,7 +360,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         LOG_TRACE(PIPELINE, "Allocating space for base color texture sampler");
         vk::DescriptorImageInfo baseColorTextureSamplerImageInfo(
-            *(texturePtrs[0]->getVulkanSamplerPtr()),
+            *(texturePtrs[quartz::rendering::Texture::getBaseColorDefaultIndex()]->getVulkanSamplerPtr()),
             {},
             {}
         );
@@ -373,6 +375,10 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
+        /**
+         * @todo 2023/12/15 Allocate space for a sampler for the normal texture
+         */
+
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
         std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
         for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
@@ -384,11 +390,11 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         }
 
         uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES - baseColorTextureImageInfos.size();
-        LOG_TRACE(PIPELINE, "Filling remaining {} textures with texture 0", remainingTextureSpaces);
+        LOG_TRACE(PIPELINE, "Filling remaining {} textures with default base color texture", remainingTextureSpaces);
         for (uint32_t j = 0; j < remainingTextureSpaces; ++j) {
             baseColorTextureImageInfos.emplace_back(
                 nullptr,
-                *(texturePtrs[0]->getVulkanImageViewPtr()),
+                *(texturePtrs[quartz::rendering::Texture::getBaseColorDefaultIndex()]->getVulkanImageViewPtr()),
                 vk::ImageLayout::eShaderReadOnlyOptimal
             );
         }
@@ -535,7 +541,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     vk::PushConstantRange fragmentPushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
         sizeof(glm::mat4),
-        sizeof(uint32_t)
+        sizeof(uint32_t) * 2
     );
 
     std::vector<vk::PushConstantRange> pushConstantRanges = {

@@ -90,6 +90,18 @@ add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
 add_compile_definitions(GLM_FORCE_RADIANS)
 
+# mikktspace
+add_library(
+    mikktspace
+    SHARED
+    "${VENDOR_ROOT_DIR}/MikkTSpace/mikktspace.c"
+)
+target_include_directories(
+    mikktspace
+    PUBLIC
+    "${VENDOR_ROOT_DIR}/MikkTSpace"
+)
+
 # spdlog
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 

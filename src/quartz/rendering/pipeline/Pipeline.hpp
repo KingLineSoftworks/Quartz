@@ -19,7 +19,6 @@
 namespace quartz {
 namespace rendering {
     struct CameraUniformBufferObject;
-    struct ModelUniformBufferObject;
     class Pipeline;
 }
 }
@@ -35,17 +34,6 @@ public: // member functions
 public: // member variables
     alignas(16) glm::mat4 viewMatrix;
     alignas(16) glm::mat4 projectionMatrix;
-};
-
-struct quartz::rendering::ModelUniformBufferObject {
-public: // member functions
-    ModelUniformBufferObject() = default;
-    ModelUniformBufferObject(
-        const glm::mat4 modelMatrix_
-    );
-
-public: // member variables
-    alignas(16) glm::mat4 modelMatrix;
 };
 
 class quartz::rendering::Pipeline {

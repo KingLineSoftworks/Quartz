@@ -31,6 +31,9 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
             case quartz::rendering::Vertex::AttributeType::Normal:
                 LOG_CRITICAL(MODEL_PRIMITIVE, "Primitive must contain a {} attribute", attributeString);
                 throw std::runtime_error("");
+            case quartz::rendering::Vertex::AttributeType::Tangent:
+                LOG_INFO(MODEL_PRIMITIVE, "Manually calculating vertex tangents. Assuming other attributes are already populated");
+                return;
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
                 LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
                 break;
@@ -81,6 +84,18 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
         tinygltfVecType = TINYGLTF_TYPE_VEC2;
     }
 
+    bool hasTangent = true;
+    if (attributeType == quartz::rendering::Vertex::AttributeType::Normal) {
+        const std::string tangentString = quartz::rendering::Vertex::getAttributeGLTFString(
+            quartz::rendering::Vertex::AttributeType::Tangent
+        );
+
+        if (gltfPrimitive.attributes.find(tangentString) == gltfPrimitive.attributes.end()) {
+            LOG_INFO(MODEL_PRIMITIVE, "No tangent attribute present. Approximating them using normal");
+            hasTangent = false;
+        }
+    }
+
     const int32_t byteStride = accessor.ByteStride(bufferView) ?
         accessor.ByteStride(bufferView) / sizeof (float) :
         tinygltf::GetNumComponentsInType(tinygltfVecType);
@@ -94,6 +109,24 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
             }
             case quartz::rendering::Vertex::AttributeType::Normal: {
                 verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
+                /**
+                 * @todo 2023/12/16 If we don't have a tangent attribute we should populate it here
+                 *   so it is orthogonal to the current normal
+                 */
+                if (!hasTangent) {
+                    glm::vec3 t = glm::cross(verticesToPopulate[i].normal, glm::vec3(1.0f, 0.0f, 0.0f));
+                    glm::vec3 t2 = glm::cross(verticesToPopulate[i].normal, glm::vec3(0.0f, 1.0f, 0.0f));
+                    glm::vec3 t3 = glm::cross(verticesToPopulate[i].normal, glm::vec3(0.0f, 0.0f, 1.0f));
+
+                    if (glm::length(t2) > glm::length(t)) {
+                        t = t2;
+                    }
+                    if (glm::length(t3) > glm::length(t)) {
+                        t = t3;
+                    }
+
+                    verticesToPopulate[i].tangent = glm::normalize(t);
+                }
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::Tangent: {
@@ -128,9 +161,9 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
     std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
         quartz::rendering::Vertex::AttributeType::Position,
         quartz::rendering::Vertex::AttributeType::Normal,
-        quartz::rendering::Vertex::AttributeType::Tangent,
         quartz::rendering::Vertex::AttributeType::Color,
         quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::Tangent, // do tangents last so we can use everything else in calculations
     };
 
     for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {

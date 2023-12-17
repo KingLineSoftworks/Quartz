@@ -614,13 +614,16 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
-            uint32_t baseColorTextureIndex = primitive.getMaterial().getBaseColorTextureMasterIndex();
+            std::vector<uint32_t> textureIndices = {
+                primitive.getMaterial().getBaseColorTextureMasterIndex(),
+                primitive.getMaterial().getNormalTextureMasterIndex()
+            };
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,
                 sizeof(glm::mat4),
-                sizeof(uint32_t),
-                reinterpret_cast<void*>(&baseColorTextureIndex)
+                sizeof(uint32_t) * textureIndices.size(),
+                textureIndices.data()
             );
 
             uint32_t offset = 0;
