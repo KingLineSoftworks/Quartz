@@ -59,15 +59,6 @@ private: // static functions
     );
 
 private: // member variables
-
-    // If we don't have a texture of a certain type we need to set those coordinates to 0,0
-
-    /**
-     * @todo 2023/12/18 If we don't have a texture of a certain type, then set the
-     *   corresponding coordinates to (0,0). We need to load the material first so
-     *   we know which textures are defaulted.
-     */
-
     const quartz::rendering::Material& m_material;
     uint32_t m_indexCount;
     std::vector<uint32_t> m_indices;

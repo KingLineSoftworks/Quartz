@@ -73,16 +73,6 @@ namespace rendering {
  *
  */
 
-/**
- * @todo 2023/12/1 This is the master todo list
- *
- * @todo Create representations of scenes
- * @todo Create representations of nodes
- * @todo Store buffers in model and pass those to meshes (and primitives) for
- *   them to use with their accessors and buffer views
- *
- */
-
 class quartz::rendering::Model {
 public: // member functions
     Model(

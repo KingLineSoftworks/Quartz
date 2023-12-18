@@ -61,17 +61,6 @@ private: // member functions
     void setParentPtr(const Node* p_parent) { mp_parent = p_parent; }
 
 private: // member variables
-
-    /**
-     * @todo 2023/12/08 Track a private static variable which tells us how many nodes
-     *   (with meshes) in total have been created so we can give each node (with a
-     *   mesh) a unique identifier. This will allow it to put its transformation
-     *   matrix into the dynamic uniform buffer at the correct index. We only need to
-     *   track the number of nodes with meshes because if a node doesn't have a mesh
-     *   then we won't be rendering it, so we don't care about putting its model
-     *   matrix into the dynamic uniform buffer.
-     */
-
     const Node* mp_parent;
     std::vector<std::shared_ptr<Node>> m_childrenPtrs;
     glm::mat4 m_localTransformationMatrix;

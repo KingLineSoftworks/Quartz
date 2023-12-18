@@ -61,29 +61,21 @@ void quartz::Application::run() {
     UNUSED double currentFrameStartTime = 0.0f;
     UNUSED double frameTimeAccumulator = 0.0f;
 
-    /**
-     * @todo 2023/12/12 FIX COORDINATE SYSTEM.
-     *   WE ARE CURRENTLY USING SOME SORT OF COORDINATE SYSTEM (I FORGOT WHICH).
-     *   BUT IT IS CLEARLY NOT THE SAME AS THE COORDINATE SYSTEM THAT GLTF USES.
-     *   ALL GLTF MODELS ARE LOADING IN UPSIDE DOWN AND WHEN WE USE THE BOOM BOX WITH AXES
-     *   WE CAN CLEARLY SEE THAT OUR COORDINATE SYSTEM IS INCORRECT.
-     */
-
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
 
             // =============================================
             // boxes
             // =============================================
 
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
-//                {
-//                    {-3.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
+                {
+                    {-3.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
 
             // =============================================
             // others
@@ -91,26 +83,26 @@ void quartz::Application::run() {
 
             // first row
 
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-//                {
-//                    {0.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {100.0f, 100.0f, 100.0f}
-//                },
-//            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-//                {
-//                    {-5.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {20.0f, 20.0f, 20.0f}
-//                }
-//            },
             {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+                {
+                    {0.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {100.0f, 100.0f, 100.0f}
+                },
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+                {
+                    {-5.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {20.0f, 20.0f, 20.0f}
+                }
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
                 {
                     {5.0f, 0.0f, 0.0f},
                     0.0f,
@@ -118,46 +110,45 @@ void quartz::Application::run() {
                     {1.0f, 1.0f, 1.0f}
                 }
             },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
-//                {
-//                    {5.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+                {
+                    {10.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
 
             // second row
 
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
-//                {
-//                    {0.0f, 0.0f, 5.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {0.005f, 0.005f, 0.005f}
-//                },
-//            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BarramundiFish/glTF/BarramundiFish.gltf",
-//                {
-//                    {0.0f, 0.0f, 5.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {3.0f, 3.0f, 3.0}
-//                },
-//            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-//                {
-////                    {-5.0f, 0.0f, 5.0f},
-//                    {0.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+                {
+                    {-5.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BarramundiFish/glTF/BarramundiFish.gltf",
+                {
+                    {0.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {3.0f, 3.0f, 3.0}
+                },
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
+                {
+                    {5.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {0.005f, 0.005f, 0.005f}
+                },
+            },
         };
 
     LOG_INFOthis("Loading scene");

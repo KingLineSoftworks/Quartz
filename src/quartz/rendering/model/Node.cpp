@@ -191,7 +191,7 @@ quartz::rendering::Node::getTransformationMatrix() const {
          *   children nodes to also be flipped (causing them to be rightside up).
          *
          * @todo 2023/12/15 Figure out why this is happening. This fixes the problem but forces the
-         *   transformation matrices to be non identity matrices.
+         *   transformation matrices to be non identity matrices, I think ...
          */
 
         glm::mat4 rotationMatrix = glm::mat4(1.0);

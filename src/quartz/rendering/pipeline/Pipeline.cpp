@@ -137,10 +137,6 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    /**
-     * @todo 2023/12/15 Create descriptor set layout binding for normal texture sampler
-     */
-
     vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
         4,
         vk::DescriptorType::eSampledImage,
@@ -207,10 +203,6 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         numDescriptorSets
     );
     LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", baseColorTextureSamplerPoolSize.descriptorCount);
-
-    /**
-     * @todo 2023/12/15 Create descriptor pool size for normal texture sampler
-     */
 
     vk::DescriptorPoolSize baseColorTexturesPoolSize(
         vk::DescriptorType::eSampledImage,
@@ -374,10 +366,6 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {},
             {}
         );
-
-        /**
-         * @todo 2023/12/15 Allocate space for a sampler for the normal texture
-         */
 
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
         std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;

@@ -46,11 +46,6 @@ public: // member variables
     glm::vec3 color;
     glm::vec2 baseColorTextureCoordinate;
     glm::vec2 normalTextureCoordinate;
-    /**
-     * @todo 2023/12/18 Add a normal map texture coordinate attribute. We are curently using the base color
-     *   texture coordinate for our normal map coordinates and that doesn't work when we have to use the
-     *   default normal map or a normal map of a different size / layout.
-     */
 };
 
 template <> struct std::hash<quartz::rendering::Vertex> {
