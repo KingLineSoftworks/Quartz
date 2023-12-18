@@ -62,7 +62,7 @@ quartz::rendering::Texture::initializeMasterList(
     quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES);
 
     LOG_TRACE(TEXTURE, "Creating base color default texture");
-    const std::vector<uint8_t> baseColorPixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta (r=1, g=0, b=1, a=1)
+    const std::vector<uint8_t> baseColorPixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta (r=1.0, g=0.0, b=1.0, a=1.0)
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault =
         std::make_shared<quartz::rendering::Texture>(
             renderingDevice,
@@ -312,8 +312,6 @@ quartz::rendering::Texture::createVulkanSamplerPtr(
     const vk::SamplerAddressMode addressModeV,
     const vk::SamplerAddressMode addressModeW
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
-
     vk::PhysicalDeviceProperties physicalDeviceProperties =
         renderingDevice.getVulkanPhysicalDevice().getProperties();
 

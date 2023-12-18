@@ -126,21 +126,25 @@ quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
     const int32_t localIndex,
     const quartz::rendering::Texture::Type textureType
 ) {
-    if (masterIndices.empty()) {
+    if (masterIndices.empty() || localIndex < 0) {
+        uint32_t masterIndex = 0;
+
         switch (textureType) {
             case quartz::rendering::Texture::Type::BaseColor:
-                return quartz::rendering::Texture::getBaseColorDefaultIndex();
+                masterIndex = quartz::rendering::Texture::getBaseColorDefaultIndex();
+                break;
             case quartz::rendering::Texture::Type::Normal:
-                return quartz::rendering::Texture::getNormalDefaultIndex();
+                masterIndex = quartz::rendering::Texture::getNormalDefaultIndex();
+                break;
             case quartz::rendering::Texture::Type::Emission:
-                return quartz::rendering::Texture::getEmissionDefaultIndex();
+                masterIndex = quartz::rendering::Texture::getEmissionDefaultIndex();
+                break;
             case quartz::rendering::Texture::Type::MetallicRoughness:
-                return quartz::rendering::Texture::getMetallicRoughnessDefaultIndex();
+                masterIndex = quartz::rendering::Texture::getMetallicRoughnessDefaultIndex();
+                break;
         }
-    }
 
-    if (localIndex < 0) {
-        return masterIndices[0];
+        return masterIndex;
     }
 
     return masterIndices[localIndex];
@@ -159,13 +163,22 @@ quartz::rendering::Model::getTextureMasterIndex(
 
     int32_t localIndex = -1;
 
-    std::map<std::string, tinygltf::Parameter>::const_iterator iterator =
-        gltfMaterial.values.find(textureTypeString);
-
-    if (iterator != gltfMaterial.values.end()) {
-        localIndex = iterator->second.TextureIndex();
-        LOG_TRACE(MODEL, "  Found base color texture local index {}", localIndex);
+    switch(textureType) {
+        case quartz::rendering::Texture::Type::BaseColor:
+            localIndex = gltfMaterial.pbrMetallicRoughness.baseColorTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::Normal:
+            localIndex = gltfMaterial.normalTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::Emission:
+            localIndex = gltfMaterial.emissiveTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::MetallicRoughness:
+            localIndex = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
+            break;
     }
+
+    LOG_TRACE(MODEL, "  Found texture local index {}", localIndex);
 
     const uint32_t masterIndex =
         quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(

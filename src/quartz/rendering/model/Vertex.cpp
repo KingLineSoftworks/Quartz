@@ -18,6 +18,7 @@ quartz::rendering::Vertex::getAttributeGLTFString(
         case quartz::rendering::Vertex::AttributeType::Color:
             return "COLOR_0";
         case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
             return "TEXCOORD_0";
     }
 }
@@ -65,6 +66,12 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
             0,
             vk::Format::eR32G32Sfloat,
             offsetof(quartz::rendering::Vertex, baseColorTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            5,
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, normalTextureCoordinate)
         )
     };
 
@@ -76,7 +83,8 @@ quartz::rendering::Vertex::Vertex() :
     normal(1.0f, 0.0f, 0.0f),
     tangent(0.0f, 0.0f, 1.0f),
     color(1.0f, 1.0f, 1.0f),
-    baseColorTextureCoordinate(0.0f, 0.0f)
+    baseColorTextureCoordinate(0.0f, 0.0f),
+    normalTextureCoordinate(0.0f, 0.0f)
 {}
 
 quartz::rendering::Vertex::Vertex(
@@ -84,13 +92,15 @@ quartz::rendering::Vertex::Vertex(
     const glm::vec3& normal_,
     const glm::vec3& tangent_,
     const glm::vec3& color_,
-    const glm::vec2& baseColorTextureCoordinate_
+    const glm::vec2& baseColorTextureCoordinate_,
+    const glm::vec2& normalTextureCoordinate_
 ) :
     position(position_),
     normal(normal_),
     tangent(tangent_),
     color(color_),
-    baseColorTextureCoordinate(baseColorTextureCoordinate_)
+    baseColorTextureCoordinate(baseColorTextureCoordinate_),
+    normalTextureCoordinate(normalTextureCoordinate_)
 {}
 
 bool
@@ -115,6 +125,9 @@ quartz::rendering::Vertex::operator==(
         color.z == other.color.z &&
 
         baseColorTextureCoordinate.x == other.baseColorTextureCoordinate.x &&
-        baseColorTextureCoordinate.y == other.baseColorTextureCoordinate.y
+        baseColorTextureCoordinate.y == other.baseColorTextureCoordinate.y &&
+
+        normalTextureCoordinate.x == other.normalTextureCoordinate.x &&
+        normalTextureCoordinate.y == other.normalTextureCoordinate.y
     );
 }

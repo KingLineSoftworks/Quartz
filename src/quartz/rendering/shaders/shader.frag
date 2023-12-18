@@ -17,9 +17,8 @@ layout(binding = 2) uniform DirectionalLight {
 
 // ... object level things ... //
 
-layout(binding = 3) uniform sampler baseColorTextureSampler;
-/** @todo 2023/12/15 Create uniform sampler for normal textures */
-layout(binding = 4) uniform texture2D baseColorTextures[MAX_NUMBER_BASE_COLOR_TEXTURES];
+layout(binding = 3) uniform sampler textureSampler;
+layout(binding = 4) uniform texture2D textures[MAX_NUMBER_BASE_COLOR_TEXTURES];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
     layout(offset = 64) uint baseColorTextureID;
@@ -31,6 +30,7 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 layout(location = 0) in mat3 in_fragmentTBN;
 layout(location = 3) in vec3 in_fragmentColor;
 layout(location = 4) in vec2 in_baseColorTextureCoordinate;
+layout(location = 5) in vec2 in_normalTextureCoordinate;
 
 // -----==== Output =====----- //
 
@@ -44,8 +44,8 @@ void main() {
 
     vec3 fragmentBaseColor = texture(
         sampler2D(
-            baseColorTextures[pushConstant.baseColorTextureID],
-            baseColorTextureSampler
+            textures[pushConstant.baseColorTextureID],
+            textureSampler
         ),
         in_baseColorTextureCoordinate
     ).rgb;
@@ -55,10 +55,10 @@ void main() {
     // get the normal displacement from the normal map
     vec3 normalDisplacement = texture(
         sampler2D(
-            baseColorTextures[pushConstant.normalTextureID],
-            baseColorTextureSampler
+            textures[pushConstant.normalTextureID],
+            textureSampler
         ),
-        in_baseColorTextureCoordinate
+        in_normalTextureCoordinate
     ).rgb;
 
     // convert it to be [-1, 1] from [0, 1]
@@ -66,8 +66,6 @@ void main() {
 
     // convert it to tangent space
     vec3 normal = normalize(in_fragmentTBN * normalDisplacement);
-//
-//    normal = in_fragmentTBN[2];
 
     // ... ambient light ... //
 

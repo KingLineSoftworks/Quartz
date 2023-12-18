@@ -109,17 +109,8 @@ void quartz::Application::run() {
 //                    {20.0f, 20.0f, 20.0f}
 //                }
 //            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-//                {
-//                    {5.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//            },
             {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
                 {
                     {5.0f, 0.0f, 0.0f},
                     0.0f,
@@ -127,6 +118,15 @@ void quartz::Application::run() {
                     {1.0f, 1.0f, 1.0f}
                 }
             },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
+//                {
+//                    {5.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//            },
 
             // second row
 
@@ -148,15 +148,16 @@ void quartz::Application::run() {
 //                    {3.0f, 3.0f, 3.0}
 //                },
 //            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-                {
-                    {-5.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+//                {
+////                    {-5.0f, 0.0f, 5.0f},
+//                    {0.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//            },
         };
 
     LOG_INFOthis("Loading scene");

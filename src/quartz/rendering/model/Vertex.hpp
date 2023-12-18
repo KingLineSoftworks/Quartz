@@ -18,7 +18,8 @@ public: // enums
         Normal,
         Tangent,
         Color,
-        BaseColorTextureCoordinate
+        BaseColorTextureCoordinate,
+        NormalTextureCoordinate
     };
 
 public: // member functions
@@ -28,7 +29,8 @@ public: // member functions
         const glm::vec3& normal_,
         const glm::vec3& tangent_,
         const glm::vec3& color_,
-        const glm::vec2& baseColorTextureCoordinate_
+        const glm::vec2& baseColorTextureCoordinate_,
+        const glm::vec2& normalTextureCoordinate_
     );
     bool operator==(const Vertex& other) const;
 
@@ -43,6 +45,12 @@ public: // member variables
     glm::vec3 tangent;
     glm::vec3 color;
     glm::vec2 baseColorTextureCoordinate;
+    glm::vec2 normalTextureCoordinate;
+    /**
+     * @todo 2023/12/18 Add a normal map texture coordinate attribute. We are curently using the base color
+     *   texture coordinate for our normal map coordinates and that doesn't work when we have to use the
+     *   default normal map or a normal map of a different size / layout.
+     */
 };
 
 template <> struct std::hash<quartz::rendering::Vertex> {
@@ -54,7 +62,8 @@ template <> struct std::hash<quartz::rendering::Vertex> {
             vertex.normal.x, vertex.normal.y, vertex.normal.z,
             vertex.tangent.x, vertex.tangent.y, vertex.tangent.z,
             vertex.color.x, vertex.color.y, vertex.color.z,
-            vertex.baseColorTextureCoordinate.x, vertex.baseColorTextureCoordinate.y
+            vertex.baseColorTextureCoordinate.x, vertex.baseColorTextureCoordinate.y,
+            vertex.normalTextureCoordinate.x, vertex.normalTextureCoordinate.y
         };
 
         for (const float value : values) {
