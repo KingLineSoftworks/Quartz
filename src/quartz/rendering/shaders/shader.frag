@@ -66,8 +66,8 @@ void main() {
 
     // convert it to tangent space
     vec3 normal = normalize(in_fragmentTBN * normalDisplacement);
-
-    normal = in_fragmentTBN[2];
+//
+//    normal = in_fragmentTBN[2];
 
     // ... ambient light ... //
 

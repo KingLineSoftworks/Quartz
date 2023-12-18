@@ -118,15 +118,15 @@ void quartz::Application::run() {
 //                    {1.0f, 1.0f, 1.0f}
 //                }
 //            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
-//                {
-//                    {5.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
+                {
+                    {5.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
 
             // second row
 

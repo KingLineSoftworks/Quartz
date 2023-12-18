@@ -38,6 +38,7 @@ quartz::rendering::TangentCalculator::populateVerticesWithTangents(
     mikktspaceInterface.m_getPosition = quartz::rendering::TangentCalculator::getPosition;
     mikktspaceInterface.m_getNormal = quartz::rendering::TangentCalculator::getNormal;
     mikktspaceInterface.m_getTexCoord = quartz::rendering::TangentCalculator::getTextureCoordinate;
+    mikktspaceInterface.m_setTSpace = nullptr;
     mikktspaceInterface.m_setTSpaceBasic = quartz::rendering::TangentCalculator::setTangentSpaceBasic;
 
     quartz::rendering::TangentCalculator::Information information(
@@ -53,6 +54,19 @@ quartz::rendering::TangentCalculator::populateVerticesWithTangents(
     mikktspaceContext.m_pInterface = &mikktspaceInterface;
     mikktspaceContext.m_pUserData = &information;
 
+    LOG_TRACE(MODEL_PRIMITIVE, "Got {} faces (from {} indices):", information.indexCount / 3, information.indexCount);
+    for (uint32_t i = 0; i < information.indexCount / 3; i++) {
+        const uint32_t iBase = i * 3;
+        const uint32_t i0 = iBase;
+        const uint32_t i1 = iBase + 1;
+        const uint32_t i2 = iBase + 2;
+        LOG_TRACE(MODEL_PRIMITIVE, "  {:>2} : vertices {:>2} - {:>2} - {:>2} [ indices {:>2} {:>2} {:>2} ]", i, information.p_indices[i0], information.p_indices[i1], information.p_indices[i2], i0, i1, i2);
+    }
+    LOG_TRACE(MODEL_PRIMITIVE, "Got vertices:");
+    for (uint32_t i = 0; i < information.vertexCount; ++i) {
+        LOG_TRACE(MODEL_PRIMITIVE, "  {} , {} , {}", information.p_verticesToPopulate[i].position.x, information.p_verticesToPopulate[i].position.y, information.p_verticesToPopulate[i].position.z);
+    }
+
     genTangSpaceDefault(&mikktspaceContext);
 }
 
@@ -60,23 +74,22 @@ uint32_t
 quartz::rendering::TangentCalculator::getVertexIndex(
     const SMikkTSpaceContext* p_mikktspaceContext,
     int32_t faceIndex,
-    int32_t vertexIndex
+    int32_t faceLocalVertexIndex
 ) {
     const quartz::rendering::TangentCalculator::Information* p_information =
         static_cast<quartz::rendering::TangentCalculator::Information*>(p_mikktspaceContext->m_pUserData);
 
     const uint32_t verticesPerFace = quartz::rendering::TangentCalculator::getNumVerticesOfFace(p_mikktspaceContext, faceIndex);
 
-    const uint32_t indicesIndex = (faceIndex * verticesPerFace) + vertexIndex;
+    const uint32_t indicesIndex = (faceIndex * verticesPerFace) + faceLocalVertexIndex;
 
     if (indicesIndex >= p_information->indexCount) {
-        LOG_ERROR(MODEL_PRIMITIVE, "Attempting to get master index at index {} when we have only {} indices", indicesIndex, p_information->indexCount);
+        LOG_ERROR(MODEL_PRIMITIVE, "  Attempting to get master index at index {} when we have only {} indices", indicesIndex, p_information->indexCount);
         return 0;
     }
 
-    LOG_TRACE(MODEL_PRIMITIVE, "Getting index {}", indicesIndex);
     const uint32_t masterIndex = p_information->p_indices[indicesIndex];
-    LOG_TRACE(MODEL_PRIMITIVE, "Got index of {}", masterIndex);
+    LOG_TRACE(MODEL_PRIMITIVE, "  - face {} + vertex {} = master index {} = index {}", faceIndex, faceLocalVertexIndex, indicesIndex, masterIndex);
 
     return masterIndex;
 }
@@ -85,7 +98,7 @@ glm::vec3
 quartz::rendering::TangentCalculator::getVertexAttribute(
     const SMikkTSpaceContext* p_mikktspaceContext,
     const int32_t faceIndex,
-    const int32_t vertexIndex,
+    const int32_t faceLocalVertexIndex,
     const quartz::rendering::Vertex::AttributeType type
 ) {
     const quartz::rendering::TangentCalculator::Information* p_information =
@@ -94,28 +107,28 @@ quartz::rendering::TangentCalculator::getVertexAttribute(
     const uint32_t masterVertexIndex = quartz::rendering::TangentCalculator::getVertexIndex(
         p_mikktspaceContext,
         faceIndex,
-        vertexIndex
+        faceLocalVertexIndex
     );
 
     if (masterVertexIndex >= p_information->vertexCount) {
-        LOG_ERROR(MODEL_PRIMITIVE, "Attempting to get vertex at position {} when we have only {} vertices", masterVertexIndex, p_information->vertexCount);
+        LOG_ERROR(MODEL_PRIMITIVE, "  Attempting to get vertex at position {} when we have only {} vertices", masterVertexIndex, p_information->vertexCount);
         return {0.0f, 0.0f, 0.0f};
     }
 
-    LOG_TRACE(MODEL_PRIMITIVE, "Getting vertex {}");
     const quartz::rendering::Vertex& vertex = p_information->p_verticesToPopulate[masterVertexIndex];
 
     switch (type) {
         case quartz::rendering::Vertex::AttributeType::Position:
-            LOG_TRACE(MODEL_PRIMITIVE, "Got vertex with position {} , {} , {}", vertex.position.x, vertex.position.y, vertex.position.z);
+            LOG_TRACE(MODEL_PRIMITIVE, "  - got vertex with position {} , {} , {}", vertex.position.x, vertex.position.y, vertex.position.z);
             return vertex.position;
         case quartz::rendering::Vertex::AttributeType::Normal:
-            LOG_TRACE(MODEL_PRIMITIVE, "Got vertex with normal {} , {} , {}", vertex.normal.x, vertex.normal.y, vertex.normal.z);
+            LOG_TRACE(MODEL_PRIMITIVE, "  - got vertex with normal {} , {} , {}", vertex.normal.x, vertex.normal.y, vertex.normal.z);
             return vertex.normal;
         case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
-            LOG_TRACE(MODEL_PRIMITIVE, "Got vertex with texture coordinate {} , {} , {}", vertex.baseColorTextureCoordinate.x, vertex.baseColorTextureCoordinate.y);
+            LOG_TRACE(MODEL_PRIMITIVE, "  - got vertex with texture coordinate {} , {} , {}", vertex.baseColorTextureCoordinate.x, vertex.baseColorTextureCoordinate.y);
             return {vertex.baseColorTextureCoordinate.x, vertex.baseColorTextureCoordinate.y, 0.0f};
         default:
+            LOG_ERROR(MODEL_PRIMITIVE, "  Not getting vertex attribute {}", quartz::rendering::Vertex::getAttributeGLTFString(type));
             return {0.0f, 0.0f, 0.0f};
     }
 }
@@ -129,10 +142,8 @@ quartz::rendering::TangentCalculator::getNumFaces(
         static_cast<quartz::rendering::TangentCalculator::Information*>(p_mikktspaceContext->m_pUserData);
 
     const uint32_t indexCount = p_information->p_gltfModel->accessors[p_information->p_gltfPrimitive->indices].count;
-    LOG_TRACE(MODEL_PRIMITIVE, "Using {} indices", indexCount);
 
     const uint32_t faceCount = indexCount / 3;
-    LOG_TRACE(MODEL_PRIMITIVE, "{} indices gives {} faces", indexCount, faceCount);
 
     return faceCount;
 }
@@ -142,7 +153,6 @@ quartz::rendering::TangentCalculator::getNumVerticesOfFace(
     UNUSED const SMikkTSpaceContext* p_mikktspaceContext,
     UNUSED int32_t faceIndex
 ) {
-    LOG_TRACE(MODEL_PRIMITIVE, "Using 3 vertices per face because we are only supporting triangles for tangent calculation");
     return 3;
 }
 
@@ -151,9 +161,9 @@ quartz::rendering::TangentCalculator::getPosition(
     const SMikkTSpaceContext* p_mikktspaceContext,
     float positionToPopulate3[],
     int32_t faceIndex,
-    int32_t vertexIndex
+    int32_t faceLocalVertexIndex
 ) {
-    LOG_FUNCTION_CALL_TRACE(MODEL_PRIMITIVE, "Face index {} , vertex index {}", faceIndex, vertexIndex);
+    LOG_TRACE(MODEL_PRIMITIVE, "POSITION | face {} + vertex {}", faceIndex, faceLocalVertexIndex);
     positionToPopulate3[0] = 0.0f;
     positionToPopulate3[1] = 0.0f;
     positionToPopulate3[2] = 0.0f;
@@ -161,7 +171,7 @@ quartz::rendering::TangentCalculator::getPosition(
     const glm::vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
         p_mikktspaceContext,
         faceIndex,
-        vertexIndex,
+        faceLocalVertexIndex,
         quartz::rendering::Vertex::AttributeType::Position
     );
 
@@ -170,19 +180,14 @@ quartz::rendering::TangentCalculator::getPosition(
     positionToPopulate3[2] = vertexAttribute.z;
 }
 
-/**
- * @todo 2023/12/17 Make a helper function that takes in a vertex attribute and returns the
- *   corresponding glm::vec3 so we don't need to have this logic repeated everywhere
- */
-
 void
 quartz::rendering::TangentCalculator::getNormal(
     const SMikkTSpaceContext* p_mikktspaceContext,
     float normalToPopulate3[],
     int32_t faceIndex,
-    int32_t vertexIndex
+    int32_t faceLocalVertexIndex
 ) {
-    LOG_FUNCTION_CALL_TRACE(MODEL_PRIMITIVE, "Face index {} , vertex index {}", faceIndex, vertexIndex);
+    LOG_TRACE(MODEL_PRIMITIVE, "NORMAL | face {} + vertex {}", faceIndex, faceLocalVertexIndex);
     normalToPopulate3[0] = 0.0f;
     normalToPopulate3[1] = 0.0f;
     normalToPopulate3[2] = 0.0f;
@@ -190,7 +195,7 @@ quartz::rendering::TangentCalculator::getNormal(
     const glm::vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
         p_mikktspaceContext,
         faceIndex,
-        vertexIndex,
+        faceLocalVertexIndex,
         quartz::rendering::Vertex::AttributeType::Position
     );
 
@@ -204,16 +209,16 @@ quartz::rendering::TangentCalculator::getTextureCoordinate(
     const SMikkTSpaceContext* p_mikktspaceContext,
     float textureCoordinateToPopulate2[],
     int32_t faceIndex,
-    int32_t vertexIndex
+    int32_t faceLocalVertexIndex
 ) {
-    LOG_FUNCTION_CALL_TRACE(MODEL_PRIMITIVE, "Face index {} , vertex index {}", faceIndex, vertexIndex);
+    LOG_TRACE(MODEL_PRIMITIVE, "TEX COORD | face {} + vertex {}", faceIndex, faceLocalVertexIndex);
     textureCoordinateToPopulate2[0] = 0.0f;
     textureCoordinateToPopulate2[1] = 0.0f;
 
     const glm::vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
         p_mikktspaceContext,
         faceIndex,
-        vertexIndex,
+        faceLocalVertexIndex,
         quartz::rendering::Vertex::AttributeType::Position
     );
 
@@ -227,23 +232,23 @@ quartz::rendering::TangentCalculator::setTangentSpaceBasic(
     const float populatedTangent3[],
     UNUSED float fSign,
     int32_t faceIndex,
-    int32_t vertexIndex
+    int32_t faceLocalVertexIndex
 ) {
+    LOG_TRACE(MODEL_PRIMITIVE, "TANGENT | face {} + vertex {}", faceIndex, faceLocalVertexIndex);
     quartz::rendering::TangentCalculator::Information* p_information =
         static_cast<quartz::rendering::TangentCalculator::Information*>(p_mikktspaceContext->m_pUserData);
 
     const uint32_t masterVertexIndex = quartz::rendering::TangentCalculator::getVertexIndex(
         p_mikktspaceContext,
         faceIndex,
-        vertexIndex
+        faceLocalVertexIndex
     );
 
     if (masterVertexIndex >= p_information->vertexCount) {
-        LOG_ERROR(MODEL_PRIMITIVE, "Attempting to get vertex at position {} when we have only {} vertices", masterVertexIndex, p_information->vertexCount);
+        LOG_ERROR(MODEL_PRIMITIVE, "  Attempting to get vertex at position {} when we have only {} vertices", masterVertexIndex, p_information->vertexCount);
         return;
     }
 
-    LOG_TRACE(MODEL_PRIMITIVE, "Getting vertex {}");
     quartz::rendering::Vertex& vertex = p_information->p_verticesToPopulate[masterVertexIndex];
 
     /**

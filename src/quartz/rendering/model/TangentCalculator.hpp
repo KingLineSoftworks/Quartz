@@ -53,12 +53,12 @@ public: // static functions
     static uint32_t getVertexIndex(
         const SMikkTSpaceContext* p_mikktspaceContext,
         int32_t faceIndex,
-        int32_t vertexIndex
+        int32_t faceLocalVertexIndex
     );
     static glm::vec3 getVertexAttribute(
         const SMikkTSpaceContext* p_mikktspaceContext,
         const int32_t faceIndex,
-        const int32_t vertexIndex,
+        const int32_t faceLocalVertexIndex,
         const quartz::rendering::Vertex::AttributeType type
     );
 
@@ -77,26 +77,26 @@ public: // static functions
         const SMikkTSpaceContext* p_mikktspaceContext,
         float positionToPopulate3[],
         int32_t faceIndex,
-        int32_t vertexIndex
+        int32_t faceLocalVertexIndex
     );
     static void getNormal(
         const SMikkTSpaceContext* p_mikktspaceContext,
         float normalToPopulate3[],
         int32_t faceIndex,
-        int32_t vertexIndex
+        int32_t faceLocalVertexIndex
     );
     static void getTextureCoordinate(
         const SMikkTSpaceContext* p_mikktspaceContext,
         float textureCoordinateToPopulate2[],
         int32_t faceIndex,
-        int32_t vertexIndex
+        int32_t faceLocalVertexIndex
     );
     static void setTangentSpaceBasic(
         const SMikkTSpaceContext* p_mikktspaceContext,
         const float populatedTangent3[],
         float fSign,
         int32_t faceIndex,
-        int32_t vertexIndex
+        int32_t faceLocalVertexIndex
     );
 
 public: // member functions

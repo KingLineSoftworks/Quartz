@@ -51,7 +51,7 @@ int main() {
         {"MATERIAL", util::Logger::Level::info},
         {"MODEL", util::Logger::Level::info},
         {"MODEL_MESH", util::Logger::Level::info},
-        {"MODEL_PRIMITIVE", util::Logger::Level::trace},
+        {"MODEL_PRIMITIVE", util::Logger::Level::info},
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},
