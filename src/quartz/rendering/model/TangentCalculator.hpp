@@ -3,7 +3,11 @@
 #include <cstdint>
 #include <vector>
 
+#include <glm/vec3.hpp>
+
 #include <mikktspace.h>
+
+#include <tiny_gltf.h>
 
 #include "quartz/rendering/model/Vertex.hpp"
 
@@ -14,21 +18,54 @@ namespace rendering {
 }
 
 class quartz::rendering::TangentCalculator {
+public: // classes and enums
+    struct Information {
+        Information(
+            const tinygltf::Model* p_gltfModel_,
+            const tinygltf::Primitive* p_gltfPrimitive_,
+            const uint32_t* p_indices_,
+            const uint32_t indexCount_,
+            quartz::rendering::Vertex* p_verticesToPopulate_,
+            const uint32_t vertexCount_
+        );
+
+        const tinygltf::Model* p_gltfModel;
+        const tinygltf::Primitive* p_gltfPrimitive;
+        const uint32_t* p_indices;
+        const uint32_t indexCount;
+        quartz::rendering::Vertex* p_verticesToPopulate;
+        const uint32_t vertexCount;
+    };
+
 public: // static functions
 
     static void populateVerticesWithTangents(
+        const tinygltf::Model& gltfModel,
+        const tinygltf::Primitive& gltfPrimitive,
+        const std::vector<uint32_t>& indices,
         std::vector<quartz::rendering::Vertex>& verticesToPopulate
+    );
+
+    /**
+     * @brief Helper functions
+     */
+
+    static uint32_t getVertexIndex(
+        const SMikkTSpaceContext* p_mikktspaceContext,
+        int32_t faceIndex,
+        int32_t vertexIndex
+    );
+    static glm::vec3 getVertexAttribute(
+        const SMikkTSpaceContext* p_mikktspaceContext,
+        const int32_t faceIndex,
+        const int32_t vertexIndex,
+        const quartz::rendering::Vertex::AttributeType type
     );
 
     /**
      * @brief Callbacks for MikkTSpace to use
      */
 
-    static int32_t getVertexIndex(
-        const SMikkTSpaceContext* p_mikktspaceContext,
-        int32_t faceIndex,
-        int32_t vertexIndex
-    );
     static int32_t getNumFaces(
         const SMikkTSpaceContext* p_mikktspaceContext
     );
@@ -38,25 +75,25 @@ public: // static functions
     );
     static void getPosition(
         const SMikkTSpaceContext* p_mikktspaceContext,
-        float outpos[],
+        float positionToPopulate3[],
         int32_t faceIndex,
         int32_t vertexIndex
     );
     static void getNormal(
         const SMikkTSpaceContext* p_mikktspaceContext,
-        float outnormal[],
+        float normalToPopulate3[],
         int32_t faceIndex,
         int32_t vertexIndex
     );
     static void getTextureCoordinate(
         const SMikkTSpaceContext* p_mikktspaceContext,
-        float outuv[],
+        float textureCoordinateToPopulate2[],
         int32_t faceIndex,
         int32_t vertexIndex
     );
-    static void setTSpaceBasic(
-        const SMikkTSpaceContext *context,
-        const float tangentu[],
+    static void setTangentSpaceBasic(
+        const SMikkTSpaceContext* p_mikktspaceContext,
+        const float populatedTangent3[],
         float fSign,
         int32_t faceIndex,
         int32_t vertexIndex

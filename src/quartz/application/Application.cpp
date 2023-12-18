@@ -91,24 +91,24 @@ void quartz::Application::run() {
 
             // first row
 
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-                {
-                    {0.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {100.0f, 100.0f, 100.0f}
-                },
-            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-                {
-                    {-5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {20.0f, 20.0f, 20.0f}
-                }
-            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+//                {
+//                    {0.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {100.0f, 100.0f, 100.0f}
+//                },
+//            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+//                {
+//                    {-5.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {20.0f, 20.0f, 20.0f}
+//                }
+//            },
 //            {
 //                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
 //                {
@@ -118,15 +118,15 @@ void quartz::Application::run() {
 //                    {1.0f, 1.0f, 1.0f}
 //                }
 //            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
-                {
-                    {5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf",
+//                {
+//                    {5.0f, 0.0f, 0.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//            },
 
             // second row
 
@@ -139,15 +139,15 @@ void quartz::Application::run() {
 //                    {0.005f, 0.005f, 0.005f}
 //                },
 //            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BarramundiFish/glTF/BarramundiFish.gltf",
-                {
-                    {0.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {3.0f, 3.0f, 3.0}
-                },
-            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BarramundiFish/glTF/BarramundiFish.gltf",
+//                {
+//                    {0.0f, 0.0f, 5.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {3.0f, 3.0f, 3.0}
+//                },
+//            },
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
                 {

@@ -9,6 +9,7 @@
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/material/Material.hpp"
+#include "quartz/rendering/model/TangentCalculator.hpp"
 #include "quartz/rendering/model/Vertex.hpp"
 #include "quartz/rendering/model/Primitive.hpp"
 
@@ -17,11 +18,12 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
     std::vector<quartz::rendering::Vertex>& verticesToPopulate,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
+    const std::vector<uint32_t>& indices,
     const quartz::rendering::Vertex::AttributeType attributeType
 ) {
     const std::string attributeString =
         quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
-    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "{}", attributeString);
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "{} with {} indices", attributeString, indices.size());
 
     if (gltfPrimitive.attributes.find(attributeString) == gltfPrimitive.attributes.end()) {
         LOG_TRACE(MODEL_PRIMITIVE, "Primitive does not contain a {} attribute", attributeString);
@@ -33,6 +35,12 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
                 throw std::runtime_error("");
             case quartz::rendering::Vertex::AttributeType::Tangent:
                 LOG_INFO(MODEL_PRIMITIVE, "Manually calculating vertex tangents. Assuming other attributes are already populated");
+                quartz::rendering::TangentCalculator::populateVerticesWithTangents(
+                    gltfModel,
+                    gltfPrimitive,
+                    indices,
+                    verticesToPopulate
+                );
                 return;
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
                 LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
@@ -109,24 +117,6 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
             }
             case quartz::rendering::Vertex::AttributeType::Normal: {
                 verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
-                /**
-                 * @todo 2023/12/16 If we don't have a tangent attribute we should populate it here
-                 *   so it is orthogonal to the current normal
-                 */
-                if (!hasTangent) {
-                    glm::vec3 t = glm::cross(verticesToPopulate[i].normal, glm::vec3(1.0f, 0.0f, 0.0f));
-                    glm::vec3 t2 = glm::cross(verticesToPopulate[i].normal, glm::vec3(0.0f, 1.0f, 0.0f));
-                    glm::vec3 t3 = glm::cross(verticesToPopulate[i].normal, glm::vec3(0.0f, 0.0f, 1.0f));
-
-                    if (glm::length(t2) > glm::length(t)) {
-                        t = t2;
-                    }
-                    if (glm::length(t3) > glm::length(t)) {
-                        t = t3;
-                    }
-
-                    verticesToPopulate[i].tangent = glm::normalize(t);
-                }
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::Tangent: {
@@ -145,51 +135,8 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
     }
 }
 
-quartz::rendering::StagedBuffer
-quartz::rendering::Primitive::createStagedVertexBuffer(
-    const quartz::rendering::Device& renderingDevice,
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Primitive& gltfPrimitive
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
-
-    const uint32_t accessorIndex = gltfPrimitive.attributes.find("POSITION")->second;
-    const uint32_t vertexCount = gltfModel.accessors[accessorIndex].count;
-
-    std::vector<quartz::rendering::Vertex> vertices(vertexCount);
-
-    std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
-        quartz::rendering::Vertex::AttributeType::Position,
-        quartz::rendering::Vertex::AttributeType::Normal,
-        quartz::rendering::Vertex::AttributeType::Color,
-        quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
-        quartz::rendering::Vertex::AttributeType::Tangent, // do tangents last so we can use everything else in calculations
-    };
-
-    for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
-        quartz::rendering::Primitive::populateVerticesWithAttribute(
-            vertices,
-            gltfModel,
-            gltfPrimitive,
-            attributeType
-        );
-    }
-
-    LOG_TRACE(MODEL_PRIMITIVE, "Successfully populated {} vertices", vertexCount);
-
-    quartz::rendering::StagedBuffer stagedVertexBuffer(
-        renderingDevice,
-        sizeof(quartz::rendering::Vertex) * vertices.size(),
-        vk::BufferUsageFlagBits::eVertexBuffer,
-        vertices.data()
-    );
-
-    return stagedVertexBuffer;
-}
-
-quartz::rendering::StagedBuffer
-quartz::rendering::Primitive::createStagedIndexBuffer(
-    const quartz::rendering::Device& renderingDevice,
+std::vector<uint32_t>
+quartz::rendering::Primitive::getIndices(
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive
 ) {
@@ -241,15 +188,51 @@ quartz::rendering::Primitive::createStagedIndexBuffer(
     }
 
     LOG_TRACE(MODEL_PRIMITIVE, "Successfully loaded {} indices for primitive", indexCount);
+    return indices;
+}
 
-    quartz::rendering::StagedBuffer stagedIndexBuffer(
+quartz::rendering::StagedBuffer
+quartz::rendering::Primitive::createStagedVertexBuffer(
+    const quartz::rendering::Device& renderingDevice,
+    const tinygltf::Model& gltfModel,
+    const tinygltf::Primitive& gltfPrimitive,
+    const std::vector<uint32_t>& indices
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
+
+    const uint32_t accessorIndex = gltfPrimitive.attributes.find("POSITION")->second;
+    const uint32_t vertexCount = gltfModel.accessors[accessorIndex].count;
+
+    std::vector<quartz::rendering::Vertex> vertices(vertexCount);
+
+    std::vector<quartz::rendering::Vertex::AttributeType> attributeTypes = {
+        quartz::rendering::Vertex::AttributeType::Position,
+        quartz::rendering::Vertex::AttributeType::Normal,
+        quartz::rendering::Vertex::AttributeType::Color,
+        quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::Tangent, // do tangents last so we can use everything else in calculations
+    };
+
+    for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
+        quartz::rendering::Primitive::populateVerticesWithAttribute(
+            vertices,
+            gltfModel,
+            gltfPrimitive,
+            indices,
+            attributeType
+        );
+    }
+
+    LOG_TRACE(MODEL_PRIMITIVE, "Successfully populated {} vertices", vertexCount);
+
+    quartz::rendering::StagedBuffer stagedVertexBuffer(
         renderingDevice,
-        sizeof(uint32_t) * indices.size(),
-        vk::BufferUsageFlagBits::eIndexBuffer,
-        indices.data()
+        sizeof(quartz::rendering::Vertex) * vertices.size(),
+        vk::BufferUsageFlagBits::eVertexBuffer,
+        vertices.data()
     );
 
-    return stagedIndexBuffer;
+    return stagedVertexBuffer;
 }
 
 const quartz::rendering::Material&
@@ -281,18 +264,26 @@ quartz::rendering::Primitive::Primitive(
     const std::vector<quartz::rendering::Material>& materials
 ) :
     m_indexCount(gltfModel.accessors[gltfPrimitive.indices].count),
-    m_stagedVertexBuffer(
-        quartz::rendering::Primitive::createStagedVertexBuffer(
-            renderingDevice,
+    m_indices(
+        quartz::rendering::Primitive::getIndices(
             gltfModel,
             gltfPrimitive
         )
     ),
-    m_stagedIndexBuffer(
-        quartz::rendering::Primitive::createStagedIndexBuffer(
+    m_stagedVertexBuffer(
+        quartz::rendering::Primitive::createStagedVertexBuffer(
             renderingDevice,
             gltfModel,
-            gltfPrimitive
+            gltfPrimitive,
+            m_indices
+        )
+    ),
+    m_stagedIndexBuffer(
+        quartz::rendering::StagedBuffer(
+            renderingDevice,
+            sizeof(uint32_t) * m_indices.size(),
+            vk::BufferUsageFlagBits::eIndexBuffer,
+            m_indices.data()
         )
     ),
     m_material(

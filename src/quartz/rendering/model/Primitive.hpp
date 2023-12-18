@@ -37,17 +37,18 @@ private: // static functions
         std::vector<quartz::rendering::Vertex>& verticesToPopulate,
         const tinygltf::Model& gltfModel,
         const tinygltf::Primitive& gltfPrimitive,
+        const std::vector<uint32_t>& indices,
         const quartz::rendering::Vertex::AttributeType attributeType
+    );
+    static std::vector<uint32_t> getIndices(
+        const tinygltf::Model& gltfModel,
+        const tinygltf::Primitive& gltfPrimitive
     );
     static quartz::rendering::StagedBuffer createStagedVertexBuffer(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const tinygltf::Primitive& gltfPrimitive
-    );
-    static quartz::rendering::StagedBuffer createStagedIndexBuffer(
-        const quartz::rendering::Device& renderingDevice,
-        const tinygltf::Model& gltfModel,
-        const tinygltf::Primitive& gltfPrimitive
+        const tinygltf::Primitive& gltfPrimitive,
+        const std::vector<uint32_t>& indices
     );
     static const quartz::rendering::Material& getMaterial(
         const tinygltf::Primitive& gltfPrimitive,
@@ -55,7 +56,16 @@ private: // static functions
     );
 
 private: // member variables
+
+    /**
+     * @todo 2023/12/16 Retrieve all of the indices before we create the list of vertices
+     *   because we need the indices when we want to calculate the vertex tangents
+     * @todo 2023/12/16 Store the list of indices here so we can give it to the vertex
+     *   buffer calculation
+     */
+
     uint32_t m_indexCount;
+    std::vector<uint32_t> m_indices;
     quartz::rendering::StagedBuffer m_stagedVertexBuffer;
     quartz::rendering::StagedBuffer m_stagedIndexBuffer;
     const quartz::rendering::Material& m_material;
