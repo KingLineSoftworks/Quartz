@@ -86,9 +86,20 @@ void main() {
         directionalLight.color *
         (directionalLightImpact * fragmentBaseColor);
 
+    // ... get the emissive color ... //
+
+    vec3 emissiveColor = texture(
+        sampler2D(
+            textures[pushConstant.emissiveTextureID],
+            textureSampler
+        ),
+        in_emissiveTextureCoordinate
+    ).rgb;
+
     // ... put it all together ... //
 
-    out_fragmentColor = vec4(
-        ambientLightContribution + directionalLightContribution, 1.0
-    );
+    vec3 result = ambientLightContribution + directionalLightContribution;
+    result += emissiveColor;
+
+    out_fragmentColor = vec4(result, 1.0);
 }

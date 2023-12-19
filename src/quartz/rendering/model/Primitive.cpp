@@ -247,7 +247,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate: {
-                verticesToPopulate[i].normalTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                verticesToPopulate[i].emissiveTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
                 break;
             }
         }
