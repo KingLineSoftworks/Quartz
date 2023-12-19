@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_NUMBER_BASE_COLOR_TEXTURES 100
+#define MAX_NUMBER_TEXTURES 100
 
 // -----==== Uniforms from the CPU =====----- //
 
@@ -18,11 +18,12 @@ layout(binding = 2) uniform DirectionalLight {
 // ... object level things ... //
 
 layout(binding = 3) uniform sampler textureSampler;
-layout(binding = 4) uniform texture2D textures[MAX_NUMBER_BASE_COLOR_TEXTURES];
+layout(binding = 4) uniform texture2D textures[MAX_NUMBER_TEXTURES];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
     layout(offset = 64) uint baseColorTextureID;
     layout(offset = 68) uint normalTextureID;
+    layout(offset = 72) uint emissiveTextureID;
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
@@ -31,6 +32,7 @@ layout(location = 0) in mat3 in_fragmentTBN;
 layout(location = 3) in vec3 in_fragmentColor;
 layout(location = 4) in vec2 in_baseColorTextureCoordinate;
 layout(location = 5) in vec2 in_normalTextureCoordinate;
+layout(location = 6) in vec2 in_emissiveTextureCoordinate;
 
 // -----==== Output =====----- //
 

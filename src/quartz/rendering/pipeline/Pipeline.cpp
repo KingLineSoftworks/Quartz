@@ -529,7 +529,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     vk::PushConstantRange fragmentPushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
         sizeof(glm::mat4),
-        sizeof(uint32_t) * 2
+        sizeof(uint32_t) * 3
     );
 
     std::vector<vk::PushConstantRange> pushConstantRanges = {

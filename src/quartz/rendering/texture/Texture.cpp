@@ -62,38 +62,51 @@ quartz::rendering::Texture::initializeMasterList(
     quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES);
 
     LOG_TRACE(TEXTURE, "Creating base color default texture");
-    const std::vector<uint8_t> baseColorPixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta (r=1.0, g=0.0, b=1.0, a=1.0)
+    const std::vector<uint8_t> baseColorPixel = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta (r=1.0, g=0.0, b=1.0, a=1.0)
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault =
         std::make_shared<quartz::rendering::Texture>(
             renderingDevice,
             1,
             1,
             4,
-            reinterpret_cast<const void*>(baseColorPixels.data())
+            reinterpret_cast<const void*>(baseColorPixel.data())
         );
     quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
     quartz::rendering::Texture::baseColorDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
     LOG_INFO(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
 
-    /**
-     * @todo 2023/11/19 Create default textures for each of
-     *   emission
-     *   metallicRoughness
-     */
-
     LOG_TRACE(TEXTURE, "Creating normal default texture");
-    const std::vector<uint8_t> normalPixels = { 0x80, 0x80, 0xFF, 0xFF }; // Default to neutral (r=0.5, g=0.5, b=1.0, a=1.0)
+    const std::vector<uint8_t> normalPixel = { 0x80, 0x80, 0xFF, 0xFF }; // Default to neutral (r=0.5, g=0.5, b=1.0, a=1.0)
     std::shared_ptr<quartz::rendering::Texture> p_normalDefault =
         std::make_shared<quartz::rendering::Texture>(
             renderingDevice,
             1,
             1,
             4,
-            reinterpret_cast<const void*>(normalPixels.data())
+            reinterpret_cast<const void*>(normalPixel.data())
         );
     quartz::rendering::Texture::masterList.push_back(p_normalDefault);
     quartz::rendering::Texture::normalDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
     LOG_INFO(TEXTURE, "Normal default at index {}", quartz::rendering::Texture::normalDefaultIndex);
+
+    LOG_TRACE(TEXTURE, "Creating emissive default texture");
+    const std::vector<uint8_t> emissivePixel = { 0x00, 0x00, 0x00, 0x00 };
+    std::shared_ptr<quartz::rendering::Texture> p_emissiveDefault =
+        std::make_shared<quartz::rendering::Texture>(
+            renderingDevice,
+            1,
+            1,
+            4,
+            reinterpret_cast<const void*>(emissivePixel.data())
+        );
+    quartz::rendering::Texture::masterList.push_back(p_emissiveDefault);
+    quartz::rendering::Texture::emissionDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
+    LOG_INFO(TEXTURE, "Emissive default at index {}", quartz::rendering::Texture::emissionDefaultIndex);
+
+    /**
+     * @todo 2023/11/19 Create default textures for each of
+     *   metallicRoughness
+     */
 }
 
 void
@@ -112,7 +125,7 @@ quartz::rendering::Texture::getTextureTypeGLTFString(
             return "baseColorTexture";
         case quartz::rendering::Texture::Type::Normal:
             return "normalTexture";
-        case quartz::rendering::Texture::Type::Emission:
+        case quartz::rendering::Texture::Type::Emissive:
             return "emissiveTexture";
         case quartz::rendering::Texture::Type::MetallicRoughness:
             return "metallicRoughnessTexture";

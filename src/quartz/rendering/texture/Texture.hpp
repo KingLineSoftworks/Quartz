@@ -20,7 +20,7 @@ public: // enums
     enum class Type {
         BaseColor = 0,
         Normal = 1,
-        Emission = 2,
+        Emissive = 2,
         MetallicRoughness = 3
     };
 
@@ -39,7 +39,7 @@ public: // static functions
 
     static uint32_t getBaseColorDefaultIndex() { return quartz::rendering::Texture::baseColorDefaultIndex; }
     static uint32_t getNormalDefaultIndex() { return quartz::rendering::Texture::normalDefaultIndex; }
-    static uint32_t getEmissionDefaultIndex() { return quartz::rendering::Texture::emissionDefaultIndex; }
+    static uint32_t getEmissiveDefaultIndex() { return quartz::rendering::Texture::emissionDefaultIndex; }
     static uint32_t getMetallicRoughnessDefaultIndex() { return quartz::rendering::Texture::metallicRoughnessDefaultIndex; }
 
     static std::weak_ptr<Texture> getTexture(const uint32_t index) { return quartz::rendering::Texture::masterList[index]; }

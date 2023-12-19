@@ -36,149 +36,18 @@ quartz::rendering::Primitive::getMaterial(
     return materials[materialIndex];
 }
 
-void
-quartz::rendering::Primitive::populateVerticesWithAttribute(
-    std::vector<quartz::rendering::Vertex>& verticesToPopulate,
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Primitive& gltfPrimitive,
-    const quartz::rendering::Material& material,
-    const std::vector<uint32_t>& indices,
-    const quartz::rendering::Vertex::AttributeType attributeType
-) {
-    const std::string attributeString =
-        quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
-    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "{} with {} indices", attributeString, indices.size());
-
-    if (gltfPrimitive.attributes.find(attributeString) == gltfPrimitive.attributes.end()) {
-        LOG_TRACE(MODEL_PRIMITIVE, "Primitive does not contain a {} attribute", attributeString);
-
-        switch (attributeType) {
-            case quartz::rendering::Vertex::AttributeType::Position:
-            case quartz::rendering::Vertex::AttributeType::Normal:
-                LOG_CRITICAL(MODEL_PRIMITIVE, "Primitive must contain a {} attribute", attributeString);
-                throw std::runtime_error("");
-            case quartz::rendering::Vertex::AttributeType::Tangent:
-                LOG_INFO(MODEL_PRIMITIVE, "Manually calculating vertex tangents. Assuming other attributes are already populated");
-                quartz::rendering::TangentCalculator::populateVerticesWithTangents(
-                    gltfModel,
-                    gltfPrimitive,
-                    indices,
-                    verticesToPopulate
-                );
-                return;
-            case quartz::rendering::Vertex::AttributeType::Color:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default color");
-                return;
-            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
-                return;
-            case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture");
-                return;
-        }
-    }
-
-    if (
-        attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate &&
-        material.getBaseColorTextureMasterIndex() == quartz::rendering::Texture::getBaseColorDefaultIndex()
-    ) {
-        LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture so leaving corresponding texture coordinates as (0,0)");
-        return;
-
-    }
-
-    if (
-        attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate &&
-        material.getNormalTextureMasterIndex() == quartz::rendering::Texture::getNormalDefaultIndex()
-    ) {
-        LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture so leaving corresponding texture coordinates as (0,0)");
-        return;
-    }
-
-    LOG_TRACE(MODEL_PRIMITIVE, "Loading {} attribute", attributeString);
-
-    const uint32_t accessorIndex = gltfPrimitive.attributes.find(attributeString)->second;
-    LOG_TRACE(MODEL_PRIMITIVE, "Using accessor at index {}", accessorIndex);
-    const tinygltf::Accessor& accessor = gltfModel.accessors[accessorIndex];
-
-    const uint32_t bufferViewIndex = accessor.bufferView;
-    LOG_TRACE(MODEL_PRIMITIVE, "Using buffer view at index {}", bufferViewIndex);
-    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[bufferViewIndex];
-
-    const uint32_t bufferIndex = bufferView.buffer;
-    LOG_TRACE(MODEL_PRIMITIVE, "Using buffer at index {}", bufferIndex);
-    const tinygltf::Buffer& buffer = gltfModel.buffers[bufferIndex];
-
-    const uint32_t accessorByteOffset = accessor.byteOffset;
-    const uint32_t bufferViewByteOffset = bufferView.byteOffset;
-    const std::vector<uint8_t>& bufferData = buffer.data;
-    const uint8_t* bufferDataStartAddress = bufferData.data();
-    const uint8_t* desiredDataStartAddress = bufferDataStartAddress + accessorByteOffset + bufferViewByteOffset;
-    LOG_TRACE(MODEL_PRIMITIVE, "Accessor uses byte offset of {}", accessorByteOffset);
-    LOG_TRACE(MODEL_PRIMITIVE, "Buffer view uses byte offset of {}", bufferViewByteOffset);
-    LOG_TRACE(MODEL_PRIMITIVE, "Using total byte offset of {}", accessorByteOffset + bufferViewByteOffset);
-    LOG_TRACE(MODEL_PRIMITIVE, "Buffer data starting at {}", reinterpret_cast<const void*>(bufferDataStartAddress));
-    LOG_TRACE(MODEL_PRIMITIVE, "Using data starting at {}", reinterpret_cast<const void*>(desiredDataStartAddress));
-    LOG_TRACE(
-        MODEL_PRIMITIVE, "{} + {} = {} SHOULD EQUAL {}",
-        reinterpret_cast<const void*>(bufferDataStartAddress),
-        accessorByteOffset + bufferViewByteOffset,
-        reinterpret_cast<const void*>(bufferDataStartAddress + accessorByteOffset + bufferViewByteOffset),
-        reinterpret_cast<const void*>(desiredDataStartAddress)
-    );
-
-    const float* p_data = reinterpret_cast<const float*>(desiredDataStartAddress);
-
-    uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
-    if (
-        attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate ||
-        attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate
-    ) {
-        LOG_TRACE(MODEL_PRIMITIVE, "{} attribute uses vector2", attributeString);
-        tinygltfVecType = TINYGLTF_TYPE_VEC2;
-    }
-
-    const int32_t byteStride = accessor.ByteStride(bufferView) ?
-        accessor.ByteStride(bufferView) / sizeof (float) :
-        tinygltf::GetNumComponentsInType(tinygltfVecType);
-    LOG_TRACE(MODEL_PRIMITIVE, "Using a byte stride of {}", byteStride);
-
-    for (uint32_t i = 0; i < verticesToPopulate.size(); ++i) {
-        switch (attributeType) {
-            case quartz::rendering::Vertex::AttributeType::Position: {
-                verticesToPopulate[i].position = glm::make_vec3(&p_data[i * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::Normal: {
-                verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::Tangent: {
-                verticesToPopulate[i].tangent = glm::make_vec3(&p_data[i * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::Color: {
-                verticesToPopulate[i].color = glm::make_vec3(&p_data[i * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate: {
-                verticesToPopulate[i].baseColorTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
-                break;
-            }
-            case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate: {
-                verticesToPopulate[i].normalTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
-                break;
-            }
-        }
-    }
-}
-
 std::vector<uint32_t>
 quartz::rendering::Primitive::getIndices(
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
+
+    /**
+     * @todo 2023/12/19 This accessor logic for getting a raw pointer to the data
+     *   is shared with the populate vertices with attributes function. This can probably
+     *   be pulled out and make both functions much cleaner
+     */
 
     const uint32_t indexAccessorIndex = gltfPrimitive.indices; // will always be >= 0
     const tinygltf::Accessor& indexAccessor = gltfModel.accessors[indexAccessorIndex];
@@ -229,6 +98,162 @@ quartz::rendering::Primitive::getIndices(
     return indices;
 }
 
+/**
+ * @todo 2023/12/19 Break this function up. It is getting to be too large
+ */
+
+void
+quartz::rendering::Primitive::populateVerticesWithAttribute(
+    std::vector<quartz::rendering::Vertex>& verticesToPopulate,
+    const tinygltf::Model& gltfModel,
+    const tinygltf::Primitive& gltfPrimitive,
+    const quartz::rendering::Material& material,
+    const std::vector<uint32_t>& indices,
+    const quartz::rendering::Vertex::AttributeType attributeType
+) {
+    const std::string attributeNameString = quartz::rendering::Vertex::getAttributeNameString(attributeType);
+    const std::string attributeGLTFString = quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "{} ( {} ) with {} indices", attributeNameString, attributeGLTFString, indices.size());
+    LOG_TRACE(MODEL_PRIMITIVE, "Loading {} ( {} ) attribute", attributeNameString, attributeGLTFString);
+
+    if (gltfPrimitive.attributes.find(attributeGLTFString) == gltfPrimitive.attributes.end()) {
+        LOG_TRACE(MODEL_PRIMITIVE, "Primitive does not contain a {} ( {} ) attribute", attributeNameString, attributeGLTFString);
+
+        switch (attributeType) {
+            case quartz::rendering::Vertex::AttributeType::Position:
+            case quartz::rendering::Vertex::AttributeType::Normal:
+                LOG_CRITICAL(MODEL_PRIMITIVE, "Primitive must contain a {} ( {} ) attribute", attributeNameString, attributeGLTFString);
+                throw std::runtime_error("");
+            case quartz::rendering::Vertex::AttributeType::Tangent:
+                LOG_TRACE(MODEL_PRIMITIVE, "Manually calculating vertex tangents. Assuming other attributes are already populated");
+                quartz::rendering::TangentCalculator::populateVerticesWithTangents(
+                    gltfModel,
+                    gltfPrimitive,
+                    indices,
+                    verticesToPopulate
+                );
+                return;
+            case quartz::rendering::Vertex::AttributeType::Color:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default color");
+                return;
+            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
+                return;
+            case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture");
+                return;
+            case quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default emissive texture");
+                return;
+        }
+    }
+
+    if (
+        attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate &&
+        material.getBaseColorTextureMasterIndex() == quartz::rendering::Texture::getBaseColorDefaultIndex()
+    ) {
+        LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture so leaving corresponding texture coordinates as (0,0)");
+        return;
+
+    }
+
+    if (
+        attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate &&
+        material.getNormalTextureMasterIndex() == quartz::rendering::Texture::getNormalDefaultIndex()
+    ) {
+        LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture so leaving corresponding texture coordinates as (0,0)");
+        return;
+    }
+
+    if (
+        attributeType == quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate &&
+        material.getEmissiveTextureMasterIndex() == quartz::rendering::Texture::getEmissiveDefaultIndex()
+    ) {
+        LOG_TRACE(MODEL_PRIMITIVE, "Using default emissive texture so leaving corresponding texture coordinates as (0,0)");
+        return;
+    }
+
+    const uint32_t accessorIndex = gltfPrimitive.attributes.find(attributeGLTFString)->second;
+    LOG_TRACE(MODEL_PRIMITIVE, "Using accessor at index {}", accessorIndex);
+    const tinygltf::Accessor& accessor = gltfModel.accessors[accessorIndex];
+
+    const uint32_t bufferViewIndex = accessor.bufferView;
+    LOG_TRACE(MODEL_PRIMITIVE, "Using buffer view at index {}", bufferViewIndex);
+    const tinygltf::BufferView& bufferView = gltfModel.bufferViews[bufferViewIndex];
+
+    const uint32_t bufferIndex = bufferView.buffer;
+    LOG_TRACE(MODEL_PRIMITIVE, "Using buffer at index {}", bufferIndex);
+    const tinygltf::Buffer& buffer = gltfModel.buffers[bufferIndex];
+
+    const uint32_t accessorByteOffset = accessor.byteOffset;
+    const uint32_t bufferViewByteOffset = bufferView.byteOffset;
+    const std::vector<uint8_t>& bufferData = buffer.data;
+    const uint8_t* bufferDataStartAddress = bufferData.data();
+    const uint8_t* desiredDataStartAddress = bufferDataStartAddress + accessorByteOffset + bufferViewByteOffset;
+    LOG_TRACE(MODEL_PRIMITIVE, "Accessor uses byte offset of {}", accessorByteOffset);
+    LOG_TRACE(MODEL_PRIMITIVE, "Buffer view uses byte offset of {}", bufferViewByteOffset);
+    LOG_TRACE(MODEL_PRIMITIVE, "Using total byte offset of {}", accessorByteOffset + bufferViewByteOffset);
+    LOG_TRACE(MODEL_PRIMITIVE, "Buffer data starting at {}", reinterpret_cast<const void*>(bufferDataStartAddress));
+    LOG_TRACE(MODEL_PRIMITIVE, "Using data starting at {}", reinterpret_cast<const void*>(desiredDataStartAddress));
+    LOG_TRACE(
+        MODEL_PRIMITIVE, "{} + {} = {} SHOULD EQUAL {}",
+        reinterpret_cast<const void*>(bufferDataStartAddress),
+        accessorByteOffset + bufferViewByteOffset,
+        reinterpret_cast<const void*>(bufferDataStartAddress + accessorByteOffset + bufferViewByteOffset),
+        reinterpret_cast<const void*>(desiredDataStartAddress)
+    );
+
+    const float* p_data = reinterpret_cast<const float*>(desiredDataStartAddress);
+
+    uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
+    if (
+        attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate ||
+        attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate ||
+        attributeType == quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate
+        ) {
+        LOG_TRACE(MODEL_PRIMITIVE, "{} ( {} ) attribute uses vector2", attributeNameString, attributeGLTFString);
+        tinygltfVecType = TINYGLTF_TYPE_VEC2;
+    }
+
+    const int32_t byteStride = accessor.ByteStride(bufferView) ?
+        accessor.ByteStride(bufferView) / sizeof (float) :
+        tinygltf::GetNumComponentsInType(tinygltfVecType);
+    LOG_TRACE(MODEL_PRIMITIVE, "Using a byte stride of {}", byteStride);
+
+    for (uint32_t i = 0; i < verticesToPopulate.size(); ++i) {
+        switch (attributeType) {
+            case quartz::rendering::Vertex::AttributeType::Position: {
+                verticesToPopulate[i].position = glm::make_vec3(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::Normal: {
+                verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::Tangent: {
+                verticesToPopulate[i].tangent = glm::make_vec3(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::Color: {
+                verticesToPopulate[i].color = glm::make_vec3(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate: {
+                verticesToPopulate[i].baseColorTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate: {
+                verticesToPopulate[i].normalTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate: {
+                verticesToPopulate[i].normalTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+        }
+    }
+}
+
 quartz::rendering::StagedBuffer
 quartz::rendering::Primitive::createStagedVertexBuffer(
     const quartz::rendering::Device& renderingDevice,
@@ -250,6 +275,7 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
         quartz::rendering::Vertex::AttributeType::Color,
         quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::Tangent, // do tangents last so we can use everything else in calculations
     };
 

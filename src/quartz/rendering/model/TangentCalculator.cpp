@@ -54,8 +54,8 @@ quartz::rendering::TangentCalculator::populateVerticesWithTangents(
     mikktspaceContext.m_pInterface = &mikktspaceInterface;
     mikktspaceContext.m_pUserData = &information;
 
-    LOG_TRACE(MODEL_PRIMITIVE, "Got {} faces (from {} indices):", information.indexCount / 3, information.indexCount);
-    LOG_TRACE(MODEL_PRIMITIVE, "Got {} vertices:", information.vertexCount);
+    LOG_TRACE(MODEL_PRIMITIVE, "Got {} faces (from {} indices)", information.indexCount / 3, information.indexCount);
+    LOG_TRACE(MODEL_PRIMITIVE, "Got {} vertices", information.vertexCount);
 
     genTangSpaceDefault(&mikktspaceContext);
 }

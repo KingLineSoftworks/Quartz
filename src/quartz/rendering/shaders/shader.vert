@@ -23,6 +23,7 @@ layout(location = 2) in vec3 in_tangent;
 layout(location = 3) in vec3 in_color;
 layout(location = 4) in vec2 in_baseColorTextureCoordinate;
 layout(location = 5) in vec2 in_normalTextureCoordinate;
+layout(location = 6) in vec2 in_emissiveTextureCoordinate;
 
 // -----==== Outputs to fragment shader =====----- //
 
@@ -30,6 +31,7 @@ layout(location = 0) out mat3 out_fragmentTBN;
 layout(location = 3) out vec3 out_fragmentColor;
 layout(location = 4) out vec2 out_baseColorTextureCoordinate;
 layout(location = 5) out vec2 out_normalTextureCoordinate;
+layout(location = 6) out vec2 out_emissiveTextureCoordinate;
 
 // -----==== Logic =====----- //
 
@@ -59,4 +61,5 @@ void main() {
     out_fragmentColor = in_color;
     out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
     out_normalTextureCoordinate = in_normalTextureCoordinate;
+    out_emissiveTextureCoordinate = in_emissiveTextureCoordinate;
 }

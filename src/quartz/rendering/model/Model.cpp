@@ -136,8 +136,8 @@ quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
             case quartz::rendering::Texture::Type::Normal:
                 masterIndex = quartz::rendering::Texture::getNormalDefaultIndex();
                 break;
-            case quartz::rendering::Texture::Type::Emission:
-                masterIndex = quartz::rendering::Texture::getEmissionDefaultIndex();
+            case quartz::rendering::Texture::Type::Emissive:
+                masterIndex = quartz::rendering::Texture::getEmissiveDefaultIndex();
                 break;
             case quartz::rendering::Texture::Type::MetallicRoughness:
                 masterIndex = quartz::rendering::Texture::getMetallicRoughnessDefaultIndex();
@@ -170,7 +170,7 @@ quartz::rendering::Model::getTextureMasterIndex(
         case quartz::rendering::Texture::Type::Normal:
             localIndex = gltfMaterial.normalTexture.index;
             break;
-        case quartz::rendering::Texture::Type::Emission:
+        case quartz::rendering::Texture::Type::Emissive:
             localIndex = gltfMaterial.emissiveTexture.index;
             break;
         case quartz::rendering::Texture::Type::MetallicRoughness:
@@ -229,7 +229,7 @@ quartz::rendering::Model::loadMaterials(
         const uint32_t emissionMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
             masterIndices,
-            quartz::rendering::Texture::Type::Emission
+            quartz::rendering::Texture::Type::Emissive
         );
         const uint32_t metallicRoughnessMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
