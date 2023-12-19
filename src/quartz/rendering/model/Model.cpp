@@ -212,9 +212,9 @@ quartz::rendering::Model::loadMaterials(
     LOG_TRACE(MODEL, "Processing {} materials", gltfModel.materials.size());
     for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
         LOG_SCOPE_CHANGE_TRACE(MODEL);
-        LOG_TRACE(MODEL, "Processing material {}", i);
 
         const tinygltf::Material& gltfMaterial = gltfModel.materials[i];
+        LOG_TRACE(MODEL, "Processing material {} with name \"{}\"", i, gltfMaterial.name);
 
         const uint32_t baseColorMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,

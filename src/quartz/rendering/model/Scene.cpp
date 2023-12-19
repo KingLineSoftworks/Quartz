@@ -23,7 +23,7 @@ quartz::rendering::Scene::loadRootNodePtrs(
     for (uint32_t i = 0; i < gltfScene.nodes.size(); ++i) {
         const uint32_t currentNodeIndex = gltfScene.nodes[i];
         const tinygltf::Node gltfNode = gltfModel.nodes[currentNodeIndex];
-        LOG_TRACE(MODEL_SCENE, "Scene's {}th root node is at index {}", i, currentNodeIndex);
+        LOG_TRACE(MODEL_SCENE, "Scene's {}th root node is at index {} with name \"{}\"", i, currentNodeIndex, gltfNode.name);
 
         rootNodePtrs.emplace_back(std::make_shared<quartz::rendering::Node>(
             renderingDevice,

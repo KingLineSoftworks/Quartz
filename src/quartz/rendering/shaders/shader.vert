@@ -20,18 +20,20 @@ layout(push_constant) uniform perObjectVertexPushConstant {
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec3 in_tangent;
-layout(location = 3) in vec3 in_color;
-layout(location = 4) in vec2 in_baseColorTextureCoordinate;
-layout(location = 5) in vec2 in_normalTextureCoordinate;
-layout(location = 6) in vec2 in_emissiveTextureCoordinate;
+layout(location = 3) in vec3 in_baseColor;
+layout(location = 4) in vec3 in_emissiveFactor;
+layout(location = 5) in vec2 in_baseColorTextureCoordinate;
+layout(location = 6) in vec2 in_normalTextureCoordinate;
+layout(location = 7) in vec2 in_emissiveTextureCoordinate;
 
 // -----==== Outputs to fragment shader =====----- //
 
-layout(location = 0) out mat3 out_fragmentTBN;
-layout(location = 3) out vec3 out_fragmentColor;
-layout(location = 4) out vec2 out_baseColorTextureCoordinate;
-layout(location = 5) out vec2 out_normalTextureCoordinate;
-layout(location = 6) out vec2 out_emissiveTextureCoordinate;
+layout(location = 0) out mat3 out_TBN;
+layout(location = 3) out vec3 out_baseColor;
+layout(location = 4) out vec3 out_emissiveFactor;
+layout(location = 5) out vec2 out_baseColorTextureCoordinate;
+layout(location = 6) out vec2 out_normalTextureCoordinate;
+layout(location = 7) out vec2 out_emissiveTextureCoordinate;
 
 // -----==== Logic =====----- //
 
@@ -54,11 +56,12 @@ void main() {
 
     vec3 B = normalize(cross(N, T)); // Prob don't need to normalize bc T & N are normalized
 
-    out_fragmentTBN = mat3(T, B, N);
+    out_TBN = mat3(T, B, N);
 
     // ----- set output for fragment shader to use as input ----- //
 
-    out_fragmentColor = in_color;
+    out_baseColor = in_baseColor;
+    out_emissiveFactor = in_emissiveFactor;
     out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
     out_normalTextureCoordinate = in_normalTextureCoordinate;
     out_emissiveTextureCoordinate = in_emissiveTextureCoordinate;

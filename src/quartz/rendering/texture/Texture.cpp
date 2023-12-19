@@ -275,45 +275,41 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
 
 vk::Filter
 quartz::rendering::Texture::getVulkanFilterMode(const int32_t filterMode) {
-    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "{}", filterMode);
-
     switch (filterMode) {
         case -1:
         case 9728:
         case 9984:
         case 9985:
-            LOG_TRACE(TEXTURE, "{} = Nearest", filterMode);
+            LOG_TRACE(TEXTURE, "filter mode {} = Nearest", filterMode);
             return vk::Filter::eNearest;
         case 9729:
         case 9986:
         case 9987:
-            LOG_TRACE(TEXTURE, "{} = Linear", filterMode);
+            LOG_TRACE(TEXTURE, "filter mode {} = Linear", filterMode);
             return vk::Filter::eLinear;
+        default:
+            LOG_WARNING(TEXTURE, "filter mode {} = unknown, using Nearest", filterMode);
+            return vk::Filter::eNearest;
     }
-
-    LOG_WARNING(TEXTURE, "Unknown filter mode for {}, using nearest", filterMode);
-    return vk::Filter::eNearest;
 }
 
 vk::SamplerAddressMode
 quartz::rendering::Texture::getVulkanSamplerAddressMode(const int32_t addressMode) {
-    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "{}", addressMode);
-
     switch (addressMode) {
         case -1:
         case 10497:
-            LOG_TRACE(TEXTURE, "{} = Repeat", addressMode);
+            LOG_TRACE(TEXTURE, "address address mode {} = Repeat", addressMode);
             return vk::SamplerAddressMode::eRepeat;
         case 33071:
-            LOG_TRACE(TEXTURE, "{} = Clamp to edge", addressMode);
+            LOG_TRACE(TEXTURE, "address address mode {} = Clamp to edge", addressMode);
             return vk::SamplerAddressMode::eClampToEdge;
         case 33648:
-            LOG_TRACE(TEXTURE, "{} = Mirrored repeat", addressMode);
+            LOG_TRACE(TEXTURE, "address address mode {} = Mirrored repeat", addressMode);
             return vk::SamplerAddressMode::eMirroredRepeat;
+        default:
+            LOG_WARNING(TEXTURE, "sampler address mode {} = unknown, using Repeat", addressMode);
+            return vk::SamplerAddressMode::eRepeat;
     }
-
-    LOG_WARNING(TEXTURE, "Unknown sampler address mode for {}, using repeat", addressMode);
-    return vk::SamplerAddressMode::eRepeat;
 }
 
 vk::UniqueSampler

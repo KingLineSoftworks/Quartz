@@ -28,11 +28,12 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 
 // -----==== Input from vertex shader =====----- //
 
-layout(location = 0) in mat3 in_fragmentTBN;
-layout(location = 3) in vec3 in_fragmentColor;
-layout(location = 4) in vec2 in_baseColorTextureCoordinate;
-layout(location = 5) in vec2 in_normalTextureCoordinate;
-layout(location = 6) in vec2 in_emissiveTextureCoordinate;
+layout(location = 0) in mat3 in_TBN;
+layout(location = 3) in vec3 in_baseColor;
+layout(location = 4) in vec4 in_emissiveFactor;
+layout(location = 5) in vec2 in_baseColorTextureCoordinate;
+layout(location = 6) in vec2 in_normalTextureCoordinate;
+layout(location = 7) in vec2 in_emissiveTextureCoordinate;
 
 // -----==== Output =====----- //
 

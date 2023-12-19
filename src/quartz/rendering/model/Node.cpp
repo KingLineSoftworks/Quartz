@@ -29,7 +29,7 @@ quartz::rendering::Node::loadChildrenNodePtrs(
     for (uint32_t i = 0; i < gltfNode.children.size(); ++i) {
         const uint32_t currentNodeIndex = gltfNode.children[i];
         const tinygltf::Node currentGltfNode = gltfModel.nodes[currentNodeIndex];
-        LOG_TRACE(MODEL_SCENE, "Node's {}th child node is at index {}", i, currentNodeIndex);
+        LOG_TRACE(MODEL_SCENE, "Node's {}th child node is at index {} with name \"{}\"", i, currentNodeIndex, currentGltfNode.name);
 
         childrenNodePtrs.emplace_back(std::make_shared<quartz::rendering::Node>(
             renderingDevice,
@@ -106,8 +106,8 @@ quartz::rendering::Node::loadMeshPtr(
         return nullptr;
     }
 
-    LOG_TRACE(MODEL_NODE, "Using mesh at index {}", meshIndex);
     const tinygltf::Mesh& gltfMesh = gltfModel.meshes[meshIndex];
+    LOG_TRACE(MODEL_NODE, "Using mesh at index {} with name \"{}\"", meshIndex, gltfMesh.name);
 
     return std::make_shared<quartz::rendering::Mesh>(
         renderingDevice,
