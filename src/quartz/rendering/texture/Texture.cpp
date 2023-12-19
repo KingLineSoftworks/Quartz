@@ -90,7 +90,7 @@ quartz::rendering::Texture::initializeMasterList(
     LOG_INFO(TEXTURE, "Normal default at index {}", quartz::rendering::Texture::normalDefaultIndex);
 
     LOG_TRACE(TEXTURE, "Creating emissive default texture");
-    const std::vector<uint8_t> emissivePixel = { 0x00, 0x00, 0x00, 0x00 };
+    const std::vector<uint8_t> emissivePixel = { 0x00, 0x00, 0x00, 0x00 }; // Default to no emissive color
     std::shared_ptr<quartz::rendering::Texture> p_emissiveDefault =
         std::make_shared<quartz::rendering::Texture>(
             renderingDevice,

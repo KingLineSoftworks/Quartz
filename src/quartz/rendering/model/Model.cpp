@@ -241,7 +241,11 @@ quartz::rendering::Model::loadMaterials(
             baseColorMasterIndex,
             normalMasterIndex,
             emissionMasterIndex,
-            metallicRoughnessMasterIndex
+            metallicRoughnessMasterIndex,
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            1.0f,
+            1.0f
         );
     }
 

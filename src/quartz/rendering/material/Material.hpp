@@ -1,24 +1,30 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+
 #include "quartz/rendering/Loggers.hpp"
 
 namespace quartz {
 namespace rendering {
-    class Material;
+    struct Material;
 }
 }
 
 /**
  * @brief Based on GLTF 2.0 materials specified <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material">here</a>
  */
-class quartz::rendering::Material {
+struct quartz::rendering::Material {
 public: // member functions
     Material();
     Material(
         const uint32_t baseColorTextureMasterIndex,
         const uint32_t normalTextureMasterIndex,
         const uint32_t emissiveTextureMasterIndex,
-        const uint32_t metallicRoughnessTextureMasterIndex
+        const uint32_t metallicRoughnessTextureMasterIndex,
+        const glm::vec3& baseColorFactor,
+        const glm::vec3& emissiveFactor,
+        const float metallicFactor,
+        const float roughnessFactor
     );
     Material(const Material& other);
     Material(Material&& other);
@@ -34,8 +40,13 @@ public: // member functions
 private: // static functions
 
 private: // member variables
-    uint32_t m_baseColorTextureMasterIndex;
-    uint32_t m_normalTextureMasterIndex;
-    uint32_t m_emissiveTextureMasterIndex;
-    uint32_t m_metallicRoughnessTextureMasterIndex;
+    alignas(4) uint32_t m_baseColorTextureMasterIndex;
+    alignas(4) uint32_t m_normalTextureMasterIndex;
+    alignas(4) uint32_t m_emissiveTextureMasterIndex;
+    alignas(4) uint32_t m_metallicRoughnessTextureMasterIndex;
+
+    alignas(16) glm::vec3 m_baseColorFactor;
+    alignas(16) glm::vec3 m_emissiveFactor;
+    alignas(4) float m_metallicFactor;
+    alignas(4) float m_roughnessFactor;
 };
