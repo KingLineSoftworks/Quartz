@@ -1,7 +1,87 @@
+#include <memory>
+#include <vector>
+
 #include <glm/vec3.hpp>
 
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
+
+uint32_t quartz::rendering::Material::defaultMaterialIndex = 0;
+std::vector<std::shared_ptr<quartz::rendering::Material>> quartz::rendering::Material::masterList;
+
+uint32_t
+quartz::rendering::Material::createMaterial(
+    const uint32_t baseColorTextureMasterIndex,
+    const uint32_t normalTextureMasterIndex,
+    const uint32_t emissiveTextureMasterIndex,
+    const uint32_t metallicRoughnessTextureMasterIndex,
+    const glm::vec3& baseColorFactor,
+    const glm::vec3& emissiveFactor,
+    const float metallicFactor,
+    const float roughnessFactor
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
+
+    if (quartz::rendering::Material::masterList.empty()) {
+        LOG_TRACE(MATERIAL, "Master list is empty, initializing");
+        quartz::rendering::Material::initializeMasterList();
+    }
+
+    std::shared_ptr<quartz::rendering::Material> p_material =
+        std::make_shared<quartz::rendering::Material>(
+            baseColorTextureMasterIndex,
+            normalTextureMasterIndex,
+            emissiveTextureMasterIndex,
+            metallicRoughnessTextureMasterIndex,
+            baseColorFactor,
+            emissiveFactor,
+            metallicFactor,
+            roughnessFactor
+        );
+
+    quartz::rendering::Material::masterList.push_back(p_material);
+
+    uint32_t insertedIndex = quartz::rendering::Material::masterList.size() - 1;
+    LOG_TRACE(MATERIAL, "Material was inserted into master list at index {}", insertedIndex);
+
+    return insertedIndex;
+}
+
+void
+quartz::rendering::Material::initializeMasterList() {
+    LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
+
+    if (!quartz::rendering::Material::masterList.empty()) {
+        LOG_TRACE(TEXTURE, "Master list is already initialized. Not doing anything");
+        return;
+    }
+
+    /**
+     * @todo 2023/12/19 Initialize the texture master list right here so we don't have
+     *   to assume and we can be certain.
+     */
+
+    /**
+     * @todo 2023/12/19 Compile time determine number of materials we want to have and
+     *   reserve that many spaces for them right here
+     */
+
+    LOG_TRACE(MATERIAL, "Creating default material. Assuming textures have already been initialized");
+    std::shared_ptr<quartz::rendering::Material> p_defaultMaterial =
+        std::make_shared<quartz::rendering::Material>(
+            quartz::rendering::Texture::getBaseColorDefaultIndex(),
+            quartz::rendering::Texture::getNormalDefaultIndex(),
+            quartz::rendering::Texture::getEmissiveDefaultIndex(),
+            quartz::rendering::Texture::getMetallicRoughnessDefaultIndex(),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            1.0f,
+            1.0f
+        );
+    quartz::rendering::Material::masterList.push_back(p_defaultMaterial);
+    quartz::rendering::Material::defaultMaterialIndex = quartz::rendering::Material::masterList.size() - 1;
+    LOG_INFO(MATERIAL, "Default material at index {}", quartz::rendering::Material::defaultMaterialIndex);
+}
 
 quartz::rendering::Material::Material() :
     m_baseColorTextureMasterIndex(quartz::rendering::Texture::getBaseColorDefaultIndex()),

@@ -38,7 +38,7 @@ public: // member functions
 
 public: // static functions
     static std::string getAttributeNameString(const quartz::rendering::Vertex::AttributeType attributeType);
-    static std::string getAttributeGLTFString(const quartz::rendering::Vertex::AttributeType attributeType);
+static std::string getAttributeGLTFString(const quartz::rendering::Vertex::AttributeType attributeType);
     static vk::VertexInputBindingDescription getVulkanVertexInputBindingDescription();
     static std::vector<vk::VertexInputAttributeDescription> getVulkanVertexInputAttributeDescriptions();
 

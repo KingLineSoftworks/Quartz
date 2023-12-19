@@ -92,7 +92,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
-    static uint32_t getMasterTextureIndexFromLocalIndex(
+    static uint32_t getTextureMasterIndexFromLocalIndex(
         const std::vector<uint32_t>& masterIndices,
         const int32_t localIndex,
         const quartz::rendering::Texture::Type textureType
@@ -106,6 +106,8 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
+//    static uint32_t getMaterialMasterIndexFromLocalIndex();
+//    static uint32_t getMaterialMasterIndex();
     static std::vector<quartz::rendering::Scene> loadScenes(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,

@@ -121,7 +121,7 @@ quartz::rendering::Model::loadTextures(
 }
 
 uint32_t
-quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+quartz::rendering::Model::getTextureMasterIndexFromLocalIndex(
     const std::vector<uint32_t>& masterIndices,
     const int32_t localIndex,
     const quartz::rendering::Texture::Type textureType
@@ -181,7 +181,7 @@ quartz::rendering::Model::getTextureMasterIndex(
     LOG_TRACE(MODEL, "  Found texture local index {}", localIndex);
 
     const uint32_t masterIndex =
-        quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+        quartz::rendering::Model::getTextureMasterIndexFromLocalIndex(
             masterIndices,
             localIndex,
             textureType
@@ -192,6 +192,9 @@ quartz::rendering::Model::getTextureMasterIndex(
     return masterIndex;
 }
 
+/**
+ * @todo 2023/12/19 Use material master indices retrieved from master material list
+ */
 std::vector<quartz::rendering::Material>
 quartz::rendering::Model::loadMaterials(
     const quartz::rendering::Device& renderingDevice,

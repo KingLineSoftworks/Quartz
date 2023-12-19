@@ -2,10 +2,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_MSC_SECURE_CRT
 
-//#include <tiny_gltf.h>
-
-//#include <stb_image.h>
-
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
@@ -73,9 +69,9 @@ quartz::rendering::Texture::initializeMasterList(
         );
     quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
     quartz::rendering::Texture::baseColorDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
-    LOG_INFO(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
+    LOG_INFO(TEXTURE, "Default base color texture at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
 
-    LOG_TRACE(TEXTURE, "Creating normal default texture");
+    LOG_TRACE(TEXTURE, "Creating default normal texture");
     const std::vector<uint8_t> normalPixel = { 0x80, 0x80, 0xFF, 0xFF }; // Default to neutral (r=0.5, g=0.5, b=1.0, a=1.0)
     std::shared_ptr<quartz::rendering::Texture> p_normalDefault =
         std::make_shared<quartz::rendering::Texture>(
@@ -87,9 +83,9 @@ quartz::rendering::Texture::initializeMasterList(
         );
     quartz::rendering::Texture::masterList.push_back(p_normalDefault);
     quartz::rendering::Texture::normalDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
-    LOG_INFO(TEXTURE, "Normal default at index {}", quartz::rendering::Texture::normalDefaultIndex);
+    LOG_INFO(TEXTURE, "Default normal texture at index {}", quartz::rendering::Texture::normalDefaultIndex);
 
-    LOG_TRACE(TEXTURE, "Creating emissive default texture");
+    LOG_TRACE(TEXTURE, "Creating default emissive texture");
     const std::vector<uint8_t> emissivePixel = { 0x00, 0x00, 0x00, 0x00 }; // Default to no emissive color
     std::shared_ptr<quartz::rendering::Texture> p_emissiveDefault =
         std::make_shared<quartz::rendering::Texture>(
@@ -101,7 +97,7 @@ quartz::rendering::Texture::initializeMasterList(
         );
     quartz::rendering::Texture::masterList.push_back(p_emissiveDefault);
     quartz::rendering::Texture::emissionDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
-    LOG_INFO(TEXTURE, "Emissive default at index {}", quartz::rendering::Texture::emissionDefaultIndex);
+    LOG_INFO(TEXTURE, "Default emissive texture at index {}", quartz::rendering::Texture::emissionDefaultIndex);
 
     /**
      * @todo 2023/11/19 Create default textures for each of

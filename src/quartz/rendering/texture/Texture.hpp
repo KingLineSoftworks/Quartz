@@ -37,6 +37,9 @@ public: // static functions
 
     static std::string getTextureTypeGLTFString(const quartz::rendering::Texture::Type type);
 
+    /**
+     * @todo 2023/12/19 Rename these to getDefault_____Index so we have to read through "default" first
+     */
     static uint32_t getBaseColorDefaultIndex() { return quartz::rendering::Texture::baseColorDefaultIndex; }
     static uint32_t getNormalDefaultIndex() { return quartz::rendering::Texture::normalDefaultIndex; }
     static uint32_t getEmissiveDefaultIndex() { return quartz::rendering::Texture::emissionDefaultIndex; }
@@ -91,6 +94,10 @@ private: // static functions
     );
 
 private: // static variables
+    /**
+     * @todo 2023/12/19 Rename these to default____Index (we want to read through
+     *   default to get to the type of texture we're using).
+     */
     static uint32_t baseColorDefaultIndex;
     static uint32_t normalDefaultIndex;
     static uint32_t emissionDefaultIndex;

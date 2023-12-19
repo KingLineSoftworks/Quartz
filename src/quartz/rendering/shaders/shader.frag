@@ -20,6 +20,18 @@ layout(binding = 2) uniform DirectionalLight {
 layout(binding = 3) uniform sampler textureSampler;
 layout(binding = 4) uniform texture2D textures[MAX_NUMBER_TEXTURES];
 
+//layout(binding = 5) uniform Material {
+//    uint baseColorTextureIndex;
+//    uint normalTextureIndex;
+//    uint emissiveTextureIndex;
+//    uint metallicRoughnessTextureIndex;
+//
+//    vec3 baseColorFactor;
+//    vec3 emissiveFactor;
+//    float metallicFactor;
+//    float roughnessFactor;
+//} materials[100];
+
 layout(push_constant) uniform perObjectFragmentPushConstant {
     layout(offset = 64) uint baseColorTextureID;
     layout(offset = 68) uint normalTextureID;
@@ -29,11 +41,10 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 // -----==== Input from vertex shader =====----- //
 
 layout(location = 0) in mat3 in_TBN;
-layout(location = 3) in vec3 in_baseColor;
-layout(location = 4) in vec4 in_emissiveFactor;
-layout(location = 5) in vec2 in_baseColorTextureCoordinate;
-layout(location = 6) in vec2 in_normalTextureCoordinate;
-layout(location = 7) in vec2 in_emissiveTextureCoordinate;
+layout(location = 3) in vec3 in_color;
+layout(location = 4) in vec2 in_baseColorTextureCoordinate;
+layout(location = 5) in vec2 in_normalTextureCoordinate;
+layout(location = 6) in vec2 in_emissiveTextureCoordinate;
 
 // -----==== Output =====----- //
 
@@ -68,7 +79,7 @@ void main() {
     normalDisplacement = normalize((normalDisplacement * 2.0) - 1.0);
 
     // convert it to tangent space
-    vec3 normal = normalize(in_fragmentTBN * normalDisplacement);
+    vec3 normal = normalize(in_TBN * normalDisplacement);
 
     // ... ambient light ... //
 

@@ -23,6 +23,14 @@ namespace rendering {
 }
 }
 
+/**
+ * @todo 2023/12/19 Get rid of this and just use the normal camera class? We
+ *   might need to get rid of some fields if we do so. We should at least move
+ *   this struct to be defined in Camera.hpp. It could be convenient to also
+ *   have a constructor for this class that just takes in a reference to a
+ *   camera object and populates itself if we decide not to use the full
+ *   camera class as the uniform buffer object
+ */
 struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
@@ -31,9 +39,9 @@ public: // member functions
         const glm::mat4 projectionMatrix_
     );
 
-public: // member variables
-    alignas(16) glm::mat4 viewMatrix;
-    alignas(16) glm::mat4 projectionMatrix;
+private: // member variables
+    UNUSED alignas(16) glm::mat4 viewMatrix;
+    UNUSED alignas(16) glm::mat4 projectionMatrix;
 };
 
 class quartz::rendering::Pipeline {
