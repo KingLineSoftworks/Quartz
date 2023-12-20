@@ -10,7 +10,7 @@ quartz::rendering::Mesh::loadPrimitives(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Mesh& gltfMesh,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& masterMaterialIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_MESH, "");
 
@@ -30,7 +30,7 @@ quartz::rendering::Mesh::loadPrimitives(
             renderingDevice,
             gltfModel,
             gltfPrimitive,
-            materials
+            masterMaterialIndices
         );
     }
 
@@ -41,14 +41,14 @@ quartz::rendering::Mesh::Mesh(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Mesh& gltfMesh,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& masterMaterialIndices
 ) :
     m_primitives(
         quartz::rendering::Mesh::loadPrimitives(
             renderingDevice,
             gltfModel,
             gltfMesh,
-            materials
+            masterMaterialIndices
         )
     )
 {

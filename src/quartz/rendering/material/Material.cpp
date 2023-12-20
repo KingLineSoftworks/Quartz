@@ -11,6 +11,7 @@ std::vector<std::shared_ptr<quartz::rendering::Material>> quartz::rendering::Mat
 
 uint32_t
 quartz::rendering::Material::createMaterial(
+    const quartz::rendering::Device& renderingDevice,
     const uint32_t baseColorTextureMasterIndex,
     const uint32_t normalTextureMasterIndex,
     const uint32_t emissiveTextureMasterIndex,
@@ -24,7 +25,7 @@ quartz::rendering::Material::createMaterial(
 
     if (quartz::rendering::Material::masterList.empty()) {
         LOG_TRACE(MATERIAL, "Master list is empty, initializing");
-        quartz::rendering::Material::initializeMasterList();
+        quartz::rendering::Material::initializeMasterList(renderingDevice);
     }
 
     std::shared_ptr<quartz::rendering::Material> p_material =
@@ -48,18 +49,18 @@ quartz::rendering::Material::createMaterial(
 }
 
 void
-quartz::rendering::Material::initializeMasterList() {
+quartz::rendering::Material::initializeMasterList(
+    const quartz::rendering::Device& renderingDevice
+) {
     LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
 
     if (!quartz::rendering::Material::masterList.empty()) {
-        LOG_TRACE(TEXTURE, "Master list is already initialized. Not doing anything");
+        LOG_TRACE(MATERIAL, "Master list is already initialized. Not doing anything");
         return;
     }
 
-    /**
-     * @todo 2023/12/19 Initialize the texture master list right here so we don't have
-     *   to assume and we can be certain.
-     */
+    LOG_TRACE(MATERIAL, "Initializing textures");
+    quartz::rendering::Texture::initializeMasterList(renderingDevice);
 
     /**
      * @todo 2023/12/19 Compile time determine number of materials we want to have and

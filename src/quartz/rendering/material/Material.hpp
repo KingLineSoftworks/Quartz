@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -19,6 +20,7 @@ namespace rendering {
 class quartz::rendering::Material {
 public: // static functions
     static uint32_t createMaterial(
+        const quartz::rendering::Device& renderingDevice,
         const uint32_t baseColorTextureMasterIndex,
         const uint32_t normalTextureMasterIndex,
         const uint32_t emissiveTextureMasterIndex,
@@ -28,10 +30,13 @@ public: // static functions
         const float metallicFactor,
         const float roughnessFactor
     );
-    static void initializeMasterList();
+    static void initializeMasterList(const quartz::rendering::Device& renderingDevice);
     static void cleanupAllMaterials();
 
     static uint32_t getDefaultMaterialIndex() { return quartz::rendering::Material::defaultMaterialIndex; }
+
+    static const std::shared_ptr<Material>& getMaterialPtr(const uint32_t index) { return quartz::rendering::Material::masterList[index]; }
+    static const std::vector<std::shared_ptr<Material>>& getMasterList() { return quartz::rendering::Material::masterList; }
 
 public: // member functions
     Material();

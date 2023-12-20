@@ -102,7 +102,7 @@ private: // static functions
         const std::vector<uint32_t>& masterIndices,
         const quartz::rendering::Texture::Type textureType
     );
-    static std::vector<quartz::rendering::Material> loadMaterials(
+    static std::vector<uint32_t> loadMaterials(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
@@ -111,13 +111,18 @@ private: // static functions
     static std::vector<quartz::rendering::Scene> loadScenes(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialIndices
     );
 
 private: // member variables
     const tinygltf::Model m_gltfModel;
 
-    std::vector<quartz::rendering::Material> m_materials;
+    /**
+     * @todo 2023/12/20 We might not even need to track this as a member variable anymore
+     *   because all of the materials are being stored as shared pointers in
+     *   a static master list
+     */
+    std::vector<uint32_t> m_materialIndices;
 
     uint32_t m_defaultSceneIndex;
     std::vector<quartz::rendering::Scene> m_scenes;

@@ -1,3 +1,4 @@
+#include <memory>
 #include <vector>
 
 #include <glm/vec3.hpp>
@@ -14,26 +15,29 @@
 #include "quartz/rendering/model/Primitive.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 
-const quartz::rendering::Material&
+uint32_t
 quartz::rendering::Primitive::getMaterial(
     const tinygltf::Primitive& gltfPrimitive,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& masterMaterialIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
 
-    int32_t materialIndex = gltfPrimitive.material;
-    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material {}", materialIndex);
+    int32_t modelLocalMaterialIndex = gltfPrimitive.material;
+    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material at index {}", modelLocalMaterialIndex);
 
-    if (materialIndex < 0) {
-        LOG_TRACE(MODEL_PRIMITIVE, "Actually using material 0 (default)");
-        return materials[0];
+    LOG_TRACE(MODEL, "Checking material indices:");
+    for (uint32_t i = 0; i < masterMaterialIndices.size(); ++i) {
+        LOG_TRACE(MODEL, "  {:2d} : {:2d}", i, masterMaterialIndices[i]);
     }
 
-    materialIndex += 1;
-    LOG_TRACE(MODEL_PRIMITIVE, "Actually using material {}", materialIndex);
-    LOG_TRACE(MODEL_PRIMITIVE, "  (to account for default material at index 0)");
+    if (modelLocalMaterialIndex < 0) {
+        LOG_TRACE(MODEL_PRIMITIVE, "Actually using material 0 (default)");
+        return quartz::rendering::Material::getDefaultMaterialIndex();
+    }
 
-    return materials[materialIndex];
+    LOG_TRACE(MODEL_PRIMITIVE, "Material at index {} is material {}", modelLocalMaterialIndex, masterMaterialIndices[modelLocalMaterialIndex]);
+
+    return masterMaterialIndices[modelLocalMaterialIndex];
 }
 
 std::vector<uint32_t>
@@ -107,7 +111,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
     std::vector<quartz::rendering::Vertex>& verticesToPopulate,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
-    const quartz::rendering::Material& material,
+    const std::shared_ptr<quartz::rendering::Material>& p_material,
     const std::vector<uint32_t>& indices,
     const quartz::rendering::Vertex::AttributeType attributeType
 ) {
@@ -150,7 +154,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
 
     if (
         attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate &&
-        material.getBaseColorTextureMasterIndex() == quartz::rendering::Texture::getBaseColorDefaultIndex()
+        p_material->getBaseColorTextureMasterIndex() == quartz::rendering::Texture::getBaseColorDefaultIndex()
     ) {
         LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture so leaving corresponding texture coordinates as (0,0)");
         return;
@@ -159,7 +163,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
 
     if (
         attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate &&
-        material.getNormalTextureMasterIndex() == quartz::rendering::Texture::getNormalDefaultIndex()
+        p_material->getNormalTextureMasterIndex() == quartz::rendering::Texture::getNormalDefaultIndex()
     ) {
         LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture so leaving corresponding texture coordinates as (0,0)");
         return;
@@ -167,7 +171,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
 
     if (
         attributeType == quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate &&
-        material.getEmissiveTextureMasterIndex() == quartz::rendering::Texture::getEmissiveDefaultIndex()
+        p_material->getEmissiveTextureMasterIndex() == quartz::rendering::Texture::getEmissiveDefaultIndex()
     ) {
         LOG_TRACE(MODEL_PRIMITIVE, "Using default emissive texture so leaving corresponding texture coordinates as (0,0)");
         return;
@@ -210,7 +214,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
         attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate ||
         attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate ||
         attributeType == quartz::rendering::Vertex::AttributeType::EmissiveTextureCoordinate
-        ) {
+    ) {
         LOG_TRACE(MODEL_PRIMITIVE, "{} ( {} ) attribute uses vector2", attributeNameString, attributeGLTFString);
         tinygltfVecType = TINYGLTF_TYPE_VEC2;
     }
@@ -259,7 +263,7 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
-    const quartz::rendering::Material& material,
+    const std::shared_ptr<quartz::rendering::Material>& p_material,
     const std::vector<uint32_t>& indices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
@@ -284,7 +288,7 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
             vertices,
             gltfModel,
             gltfPrimitive,
-            material,
+            p_material,
             indices,
             attributeType
         );
@@ -306,12 +310,12 @@ quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& masterMaterialIndices
 ) :
-    m_material(
+    m_materialIndex(
         quartz::rendering::Primitive::getMaterial(
             gltfPrimitive,
-            materials
+            masterMaterialIndices
         )
     ),
     m_indexCount(gltfModel.accessors[gltfPrimitive.indices].count),
@@ -326,7 +330,7 @@ quartz::rendering::Primitive::Primitive(
             renderingDevice,
             gltfModel,
             gltfPrimitive,
-            m_material,
+            quartz::rendering::Material::getMaterialPtr(m_materialIndex),
             m_indices
         )
     ),
@@ -345,7 +349,7 @@ quartz::rendering::Primitive::Primitive(
 quartz::rendering::Primitive::Primitive(
     quartz::rendering::Primitive&& other
 ) :
-    m_material(other.m_material),
+    m_materialIndex(other.m_materialIndex),
     m_indexCount(other.m_indexCount),
     m_stagedVertexBuffer(std::move(other.m_stagedVertexBuffer)),
     m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer))

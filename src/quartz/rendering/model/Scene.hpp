@@ -20,7 +20,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Scene& gltfScene,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& masterMaterialIndices
     );
     Scene(Scene&& other);
     ~Scene();
@@ -35,7 +35,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Scene& gltfScene,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& masterMaterialIndices
     );
 
 private: // member variables

@@ -614,10 +614,11 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+            const std::shared_ptr<quartz::rendering::Material>& p_material = quartz::rendering::Material::getMaterialPtr(primitive.getMaterialIndex());
             std::vector<uint32_t> textureIndices = {
-                primitive.getMaterial().getBaseColorTextureMasterIndex(),
-                primitive.getMaterial().getNormalTextureMasterIndex(),
-                primitive.getMaterial().getEmissiveTextureMasterIndex()
+                p_material->getBaseColorTextureMasterIndex(),
+                p_material->getNormalTextureMasterIndex(),
+                p_material->getEmissiveTextureMasterIndex()
             };
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
