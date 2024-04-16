@@ -142,6 +142,7 @@ include_directories(
 
 # Utility
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
+add_subdirectory("${UTIL_SOURCE_DIR}/errors")
 add_subdirectory("${UTIL_SOURCE_DIR}/file_system")
 add_subdirectory("${UTIL_SOURCE_DIR}/logger")
 
