@@ -94,6 +94,17 @@ quartz::rendering::Pipeline::createUniformBuffers(
                 vk::MemoryPropertyFlagBits::eHostCoherent
             )
         );
+
+        LOG_TRACE(PIPELINE, "Creating materials buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::rendering::Material) * QUARTZ_MAX_NUMBER_MATERIALS,
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
     }
 
     return buffers;
@@ -129,18 +140,26 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding baseColorTextureSamplerLayoutBinding(
+    vk::DescriptorSetLayoutBinding materialsLayoutBinding(
         3,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding textureSamplerLayoutBinding(
+        4,
         vk::DescriptorType::eSampler,
         1,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
 
-    vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
-        4,
+    vk::DescriptorSetLayoutBinding texturesLayoutBinding(
+        5,
         vk::DescriptorType::eSampledImage,
-        QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
+        QUARTZ_MAX_NUMBER_TEXTURES,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
@@ -149,8 +168,9 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         cameraUniformBufferLayoutBinding,
         ambientLightLayoutBinding,
         directionalLightLayoutBinding,
-        baseColorTextureSamplerLayoutBinding,
-        baseColorTexturesLayoutBinding
+        materialsLayoutBinding,
+        textureSamplerLayoutBinding,
+        texturesLayoutBinding,
     };
 
     LOG_TRACE(PIPELINE, "Using {} layout bindings", layoutBindings.size());
@@ -198,24 +218,31 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     );
     LOG_TRACE(PIPELINE, "Allowing directional light of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
 
-    vk::DescriptorPoolSize baseColorTextureSamplerPoolSize(
+    vk::DescriptorPoolSize materialsPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing materials of type uniform buffer with count {}", materialsPoolSize.descriptorCount);
+
+    vk::DescriptorPoolSize textureSamplerPoolSize(
         vk::DescriptorType::eSampler,
         numDescriptorSets
     );
-    LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", baseColorTextureSamplerPoolSize.descriptorCount);
+    LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", textureSamplerPoolSize.descriptorCount);
 
-    vk::DescriptorPoolSize baseColorTexturesPoolSize(
+    vk::DescriptorPoolSize texturesPoolSize(
         vk::DescriptorType::eSampledImage,
-        numDescriptorSets * QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES
+        numDescriptorSets * QUARTZ_MAX_NUMBER_TEXTURES
     );
-    LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {}", baseColorTexturesPoolSize.descriptorCount);
+    LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {}", texturesPoolSize.descriptorCount);
 
     std::vector<vk::DescriptorPoolSize> descriptorPoolSizes = {
         cameraUniformBufferObjectPoolSize,
         ambientLightPoolSize,
         directionalLightPoolSize,
-        baseColorTextureSamplerPoolSize,
-        baseColorTexturesPoolSize
+        materialsPoolSize,
+        textureSamplerPoolSize,
+        texturesPoolSize,
     };
 
     LOG_TRACE(PIPELINE, "Using {} pool sizes", descriptorPoolSizes.size());
@@ -252,6 +279,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool,
+    const std::vector<std::shared_ptr<quartz::rendering::Material>>& materialPtrs,
     const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
@@ -280,7 +308,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     }
     LOG_TRACE(PIPELINE, "Successfully allocated {} vk::DescriptorSet(s)", descriptorSets.size());
 
-    const uint32_t numDifferentUniformBuffers = 3;
+    const uint32_t numDifferentUniformBuffers = 4;
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         LOG_SCOPE_CHANGE_TRACE(PIPELINE);
 
@@ -350,50 +378,89 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        LOG_TRACE(PIPELINE, "Allocating space for base color texture sampler");
-        vk::DescriptorImageInfo baseColorTextureSamplerImageInfo(
-            *(texturePtrs[quartz::rendering::Texture::getBaseColorDefaultIndex()]->getVulkanSamplerPtr()),
+        const uint32_t materialsIndex = i * numDifferentUniformBuffers + 3;
+        LOG_TRACE(PIPELINE, "Allocating space for {} materials using uniform buffer at index {}", materialPtrs.size(), materialsIndex);
+#if false
+        std::vector<vk::DescriptorBufferInfo> materialInfos;
+        for (uint32_t j = 0; j < materialPtrs.size(); ++j) {
+            materialInfos.emplace_back(
+                *(uniformBuffers[materialsIndex].getVulkanLogicalBufferPtr()),
+                j * sizeof(quartz::rendering::Material),
+                sizeof(quartz::rendering::Material)
+            );
+        }
+        vk::WriteDescriptorSet materialsWriteDescriptorSet(
+            descriptorSets[i],
+            3,
+            0,
+            QUARTZ_MAX_NUMBER_MATERIALS,
+            vk::DescriptorType::eUniformBuffer,
             {},
+            materialInfos.data(),
             {}
         );
-        vk::WriteDescriptorSet baseColorTextureSamplerWriteDescriptorSet(
+#else
+        vk::DescriptorBufferInfo materialsInfo(
+            *(uniformBuffers[materialsIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::rendering::Material) * QUARTZ_MAX_NUMBER_MATERIALS
+        );
+        vk::WriteDescriptorSet materialsWriteDescriptorSet(
             descriptorSets[i],
             3,
             0,
             1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &materialsInfo,
+            {}
+        );
+#endif
+
+        LOG_TRACE(PIPELINE, "Allocating space for texture sampler");
+        vk::DescriptorImageInfo textureSamplerImageInfo(
+            *(texturePtrs[quartz::rendering::Texture::getBaseColorDefaultIndex()]->getVulkanSamplerPtr()),
+            {},
+            {}
+        );
+        vk::WriteDescriptorSet textureSamplerWriteDescriptorSet(
+            descriptorSets[i],
+            4,
+            0,
+            1,
             vk::DescriptorType::eSampler,
-            &baseColorTextureSamplerImageInfo,
+            &textureSamplerImageInfo,
             {},
             {}
         );
 
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
-        std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
+        std::vector<vk::DescriptorImageInfo> textureImageInfos;
         for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
-            baseColorTextureImageInfos.emplace_back(
+            textureImageInfos.emplace_back(
                 nullptr,
                 *(texturePtrs[j]->getVulkanImageViewPtr()),
                 vk::ImageLayout::eShaderReadOnlyOptimal
             );
         }
 
-        uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES - baseColorTextureImageInfos.size();
+        uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_TEXTURES - textureImageInfos.size();
         LOG_TRACE(PIPELINE, "Filling remaining {} textures with default base color texture", remainingTextureSpaces);
         for (uint32_t j = 0; j < remainingTextureSpaces; ++j) {
-            baseColorTextureImageInfos.emplace_back(
+            textureImageInfos.emplace_back(
                 nullptr,
                 *(texturePtrs[quartz::rendering::Texture::getBaseColorDefaultIndex()]->getVulkanImageViewPtr()),
                 vk::ImageLayout::eShaderReadOnlyOptimal
             );
         }
 
-        vk::WriteDescriptorSet baseColorTexturesDescriptorWriteSet(
+        vk::WriteDescriptorSet texturesDescriptorWriteSet(
             descriptorSets[i],
-            4,
+            5,
             0,
-            QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
+            QUARTZ_MAX_NUMBER_TEXTURES,
             vk::DescriptorType::eSampledImage,
-            baseColorTextureImageInfos.data(),
+            textureImageInfos.data(),
             {},
             {}
         );
@@ -402,14 +469,12 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             cameraUBODescriptorWriteSet,
             ambientLightDescriptorWriteSet,
             directionalLightWriteDescriptorSet,
-            baseColorTextureSamplerWriteDescriptorSet,
-            baseColorTexturesDescriptorWriteSet
+            materialsWriteDescriptorSet,
+            textureSamplerWriteDescriptorSet,
+            texturesDescriptorWriteSet
         };
 
-        LOG_TRACE(
-            PIPELINE, "Updating descriptor sets with {} descriptor writes",
-            writeDescriptorSets.size()
-        );
+        LOG_TRACE(PIPELINE, "Updating descriptor sets with {} descriptor writes", writeDescriptorSets.size());
 
         p_logicalDevice->updateDescriptorSets(
             writeDescriptorSets.size(),
@@ -529,7 +594,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     vk::PushConstantRange fragmentPushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
         sizeof(glm::mat4),
-        sizeof(uint32_t) * 3
+        sizeof(uint32_t)
     );
 
     std::vector<vk::PushConstantRange> pushConstantRanges = {
@@ -902,6 +967,7 @@ quartz::rendering::Pipeline::recreate(
 void
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const quartz::rendering::Device& renderingDevice,
+    const std::vector<std::shared_ptr<quartz::rendering::Material>>& materialPtrs,
     const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
@@ -915,6 +981,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             m_uniformBuffers,
             mp_vulkanDescriptorSetLayout,
             m_vulkanDescriptorPoolPtr,
+            materialPtrs,
             texturePtrs
         );
 }
@@ -928,9 +995,9 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
         camera.getProjectionMatrix()
     );
 
-    const uint32_t cameraIndex = m_currentInFlightFrameIndex * 3;
+    const uint32_t cameraBufferIndex = m_currentInFlightFrameIndex * 4 + 0;
     memcpy(
-        m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
+        m_uniformBuffers[cameraBufferIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
         sizeof(quartz::rendering::CameraUniformBufferObject)
     );
@@ -940,9 +1007,9 @@ void
 quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
     const quartz::scene::AmbientLight& ambientLight
 ) {
-    const uint32_t ambientLightIndex = m_currentInFlightFrameIndex * 3 + 1;
+    const uint32_t ambientLightBufferIndex = m_currentInFlightFrameIndex * 4 + 1;
     memcpy(
-        m_uniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
+        m_uniformBuffers[ambientLightBufferIndex].getMappedLocalMemoryPtr(),
         &ambientLight,
         sizeof(quartz::scene::AmbientLight)
     );
@@ -952,10 +1019,32 @@ void
 quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
     const quartz::scene::DirectionalLight& directionalLight
 ) {
-    const uint32_t directionalLightIndex = m_currentInFlightFrameIndex * 3 + 2;
+    const uint32_t directionalLightBufferIndex = m_currentInFlightFrameIndex * 4 + 2;
     memcpy(
-        m_uniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
+        m_uniformBuffers[directionalLightBufferIndex].getMappedLocalMemoryPtr(),
         &directionalLight,
         sizeof(quartz::scene::DirectionalLight)
     );
+}
+
+void
+quartz::rendering::Pipeline::updateMaterialsUniformBuffer(
+    const std::vector<std::shared_ptr<quartz::rendering::Material>>& materialPtrs
+) {
+    const uint32_t materialBufferIndex = m_currentInFlightFrameIndex * 4 + 3;
+
+    uint8_t* p_localMemoryBase = static_cast<uint8_t*>(m_uniformBuffers[materialBufferIndex].getMappedLocalMemoryPtr());
+
+    for (uint32_t i = 0; i < materialPtrs.size(); ++i) {
+        const std::shared_ptr<quartz::rendering::Material>& p_material = materialPtrs[i];
+
+        void* p_localMemoryWithOffset = static_cast<void*>(p_localMemoryBase + i * sizeof(quartz::rendering::Material));
+
+        memcpy(
+            p_localMemoryWithOffset,
+            p_material.get(),
+            sizeof(quartz::rendering::Material)
+        );
+    }
+
 }

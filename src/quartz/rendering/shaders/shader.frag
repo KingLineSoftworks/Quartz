@@ -1,6 +1,7 @@
 #version 450
 
 #define MAX_NUMBER_TEXTURES 100
+#define MAX_NUMBER_MATERIALS 100
 
 // -----==== Uniforms from the CPU =====----- //
 
@@ -17,25 +18,23 @@ layout(binding = 2) uniform DirectionalLight {
 
 // ... object level things ... //
 
-layout(binding = 3) uniform sampler textureSampler;
-layout(binding = 4) uniform texture2D textures[MAX_NUMBER_TEXTURES];
+layout(binding = 3) uniform Material {
+    uint baseColorTextureIndex;
+    uint normalTextureIndex;
+    uint emissiveTextureIndex;
+    uint metallicRoughnessTextureIndex;
 
-//layout(binding = 5) uniform Material {
-//    uint baseColorTextureIndex;
-//    uint normalTextureIndex;
-//    uint emissiveTextureIndex;
-//    uint metallicRoughnessTextureIndex;
-//
-//    vec3 baseColorFactor;
-//    vec3 emissiveFactor;
-//    float metallicFactor;
-//    float roughnessFactor;
-//} materials[100];
+    vec3 baseColorFactor;
+    vec3 emissiveFactor;
+    float metallicFactor;
+    float roughnessFactor;
+} materials[MAX_NUMBER_MATERIALS];
+
+layout(binding = 4) uniform sampler textureSampler;
+layout(binding = 5) uniform texture2D textures[MAX_NUMBER_TEXTURES];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
-    layout(offset = 64) uint baseColorTextureID;
-    layout(offset = 68) uint normalTextureID;
-    layout(offset = 72) uint emissiveTextureID;
+    layout(offset = 64) uint materialIndex;
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
@@ -56,9 +55,9 @@ void main() {
 
     // ... base color ... //
 
-    vec3 fragmentBaseColor = texture(
+    vec3 baseColor = texture(
         sampler2D(
-            textures[pushConstant.baseColorTextureID],
+            textures[materials[pushConstant.materialIndex].baseColorTextureIndex],
             textureSampler
         ),
         in_baseColorTextureCoordinate
@@ -66,24 +65,21 @@ void main() {
 
     // ... normal ... //
 
-    // get the normal displacement from the normal map
     vec3 normalDisplacement = texture(
         sampler2D(
-            textures[pushConstant.normalTextureID],
+            textures[materials[pushConstant.materialIndex].normalTextureIndex],
             textureSampler
         ),
         in_normalTextureCoordinate
     ).rgb;
 
-    // convert it to be [-1, 1] from [0, 1]
-    normalDisplacement = normalize((normalDisplacement * 2.0) - 1.0);
+    normalDisplacement = normalize((normalDisplacement * 2.0) - 1.0); // convert it to [-1, 1] from [0, 1]
 
-    // convert it to tangent space
-    vec3 normal = normalize(in_TBN * normalDisplacement);
+    vec3 normal = normalize(in_TBN * normalDisplacement); // convert it to tangent space
 
     // ... ambient light ... //
 
-    vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor;
+    vec3 ambientLightContribution = ambientLight.color * baseColor;
 
     // ... directional light ... //
 
@@ -96,13 +92,13 @@ void main() {
 
     vec3 directionalLightContribution =
         directionalLight.color *
-        (directionalLightImpact * fragmentBaseColor);
+        (directionalLightImpact * baseColor);
 
     // ... get the emissive color ... //
 
     vec3 emissiveColor = texture(
         sampler2D(
-            textures[pushConstant.emissiveTextureID],
+            textures[materials[pushConstant.materialIndex].emissiveTextureIndex],
             textureSampler
         ),
         in_emissiveTextureCoordinate

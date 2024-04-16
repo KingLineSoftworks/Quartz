@@ -61,6 +61,7 @@ public: // member functions
 
     void allocateVulkanDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
+        const std::vector<std::shared_ptr<quartz::rendering::Material>>& materialPtrs,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
@@ -76,6 +77,7 @@ public: // member functions
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
+    void updateMaterialsUniformBuffer(const std::vector<std::shared_ptr<quartz::rendering::Material>>& materialPtrs);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions
@@ -100,6 +102,7 @@ private: // static functions
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
+        const std::vector<std::shared_ptr<quartz::rendering::Material>>& materialPtrs,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
     static vk::UniqueRenderPass createVulkanRenderPassPtr(
