@@ -30,12 +30,10 @@ quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
         }
     );
 
-    vk::UniqueImageView p_imageView =
-        p_logicalDevice->createImageViewUnique(imageViewCreateInfo);
+    vk::UniqueImageView p_imageView = p_logicalDevice->createImageViewUnique(imageViewCreateInfo);
 
     if (!p_imageView) {
-        LOG_CRITICAL(VULKANUTIL, "Failed to create vk::ImageView");
-        throw std::runtime_error("");
+        LOG_THROW(VULKANUTIL, util::VulkanCreationFailedError, "Failed to create vk::ImageView");
     }
 
     return p_imageView;
@@ -55,12 +53,10 @@ quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
         graphicsQueueFamilyIndex
     );
 
-    vk::UniqueCommandPool p_commandPool =
-        p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
+    vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_CRITICAL(VULKANUTIL, "Failed to create vk::CommandPool");
-        throw std::runtime_error("");
+        LOG_THROW(VULKANUTIL, util::VulkanCreationFailedError, "Failed to create vk::CommandPool");
     }
 
     return p_commandPool;
@@ -72,9 +68,7 @@ quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
     const vk::UniqueCommandPool& p_commandPool,
     UNUSED const uint32_t desiredCommandBufferCount
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        VULKANUTIL, "{} command buffers desired", desiredCommandBufferCount
-    );
+    LOG_FUNCTION_SCOPE_TRACE(VULKANUTIL, "{} command buffers desired", desiredCommandBufferCount);
 
     vk::CommandBufferAllocateInfo commandBufferAllocateInfo(
         *p_commandPool,
@@ -82,30 +76,21 @@ quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
         desiredCommandBufferCount
     );
 
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs =
-        p_logicalDevice->allocateCommandBuffersUnique(
-            commandBufferAllocateInfo
-        );
+    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(
+        commandBufferAllocateInfo
+    );
 
     if (commandBufferPtrs.size() != desiredCommandBufferCount) {
-        LOG_CRITICAL(
-            SWAPCHAIN, "Allocated {} vk::CommandBuffer(s) instead of {}",
-            commandBufferPtrs.size(), desiredCommandBufferCount
-        );
-        throw std::runtime_error("");
+        LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Allocated {} vk::CommandBuffer(s) instead of {}", commandBufferPtrs.size(), desiredCommandBufferCount);
     }
 
     for (uint32_t i = 0; i < commandBufferPtrs.size(); ++i) {
         if (!commandBufferPtrs[i]) {
-            LOG_CRITICAL(VULKANUTIL, "Failed to allocate vk::CommandBuffer {}", i);
-            throw std::runtime_error("");
+            LOG_THROW(VULKANUTIL, util::VulkanCreationFailedError, "Failed to allocate vk::CommandBuffer {}", i);
         }
     }
 
-    LOG_TRACE(
-        VULKANUTIL, "Successfully allocated {} vk::CommandBuffer(s)",
-        commandBufferPtrs.size()
-    );
+    LOG_TRACE(VULKANUTIL, "Successfully allocated {} vk::CommandBuffer(s)", commandBufferPtrs.size());
 
     return commandBufferPtrs;
 }

@@ -54,12 +54,10 @@ quartz::rendering::Swapchain::createVulkanSwapchainPtr(
         true
     );
 
-    vk::UniqueSwapchainKHR uniqueSwapchain =
-        p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
+    vk::UniqueSwapchainKHR uniqueSwapchain = p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
 
     if (!uniqueSwapchain) {
-        LOG_CRITICAL(SWAPCHAIN, "Failed to create the vk::SwapchainKHR");
-        throw std::runtime_error("");
+        LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create the vk::SwapchainKHR");
     }
 
     return uniqueSwapchain;
@@ -95,10 +93,7 @@ quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
         );
     }
 
-    LOG_TRACE(
-        SWAPCHAIN, "Successfully created all {} vk::ImageViews",
-        swapchainImages.size()
-    );
+    LOG_TRACE(SWAPCHAIN, "Successfully created all {} vk::ImageViews", swapchainImages.size());
 
     return imageViewPtrs;
 }
@@ -111,16 +106,13 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
     const vk::UniqueImageView& p_depthBufferImageView,
     const vk::UniqueRenderPass& p_renderPass
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        SWAPCHAIN, "{} swapchain image views", swapchainImageViewPtrs.size()
-    );
+    LOG_FUNCTION_SCOPE_TRACE(SWAPCHAIN, "{} swapchain image views", swapchainImageViewPtrs.size());
 
     std::vector<vk::UniqueFramebuffer> framebufferPtrs(
         swapchainImageViewPtrs.size()
     );
 
     for (uint32_t i = 0; i < swapchainImageViewPtrs.size(); ++i) {
-
         std::vector<vk::ImageView> attachments = {
             *swapchainImageViewPtrs[i],
             *p_depthBufferImageView
@@ -140,15 +132,11 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
         );
 
         if (!framebufferPtrs[i]) {
-            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Framebuffer {}", i);
-            throw std::runtime_error("");
+            LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create vk::Framebuffer {}", i);
         }
     }
 
-    LOG_TRACE(
-        SWAPCHAIN, "Successfully created {} vk::Framebuffer(s)",
-        framebufferPtrs.size()
-    );
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Framebuffer(s)", framebufferPtrs.size());
 
     return framebufferPtrs;
 }
@@ -170,14 +158,10 @@ quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         );
 
         if (!semaphorePtrs[i]) {
-            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Semaphore {}", i);
-            throw std::runtime_error("");
+            LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create vk::Semaphore {}", i);
         }
     }
-    LOG_TRACE(
-        SWAPCHAIN, "Successfully created {} vk::Semaphore(s)",
-        semaphorePtrs.size()
-    );
+    LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Semaphore(s)", semaphorePtrs.size());
 
     return semaphorePtrs;
 }
@@ -201,8 +185,7 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
         );
 
         if (!fencePtrs[i]) {
-            LOG_CRITICAL(SWAPCHAIN, "Failed to create vk::Fence {}", i);
-            throw std::runtime_error("");
+            LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create vk::Fence {}", i);
         }
     }
 
@@ -300,39 +283,21 @@ void
 quartz::rendering::Swapchain::reset() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    for (
-        vk::UniqueFence& uniqueInFlightFence :
-        m_vulkanInFlightFencePtrs
-    ) { uniqueInFlightFence.reset(); }
+    for (vk::UniqueFence& uniqueInFlightFence : m_vulkanInFlightFencePtrs) { uniqueInFlightFence.reset(); }
 
-    for (
-        vk::UniqueSemaphore& uniqueRenderFinishedSemaphore :
-        m_vulkanRenderFinishedSemaphorePtrs
-    ) { uniqueRenderFinishedSemaphore.reset(); }
+    for (vk::UniqueSemaphore& uniqueRenderFinishedSemaphore : m_vulkanRenderFinishedSemaphorePtrs) { uniqueRenderFinishedSemaphore.reset(); }
 
-    for (
-        vk::UniqueSemaphore& uniqueImageAvailableSemaphore :
-        m_vulkanImageAvailableSemaphorePtrs
-    ) { uniqueImageAvailableSemaphore.reset(); }
+    for (vk::UniqueSemaphore& uniqueImageAvailableSemaphore : m_vulkanImageAvailableSemaphorePtrs) { uniqueImageAvailableSemaphore.reset(); }
 
-    for (
-        vk::UniqueCommandBuffer& uniqueCommandBuffer :
-        m_vulkanDrawingCommandBufferPtrs
-    ) { uniqueCommandBuffer.reset(); }
+    for (vk::UniqueCommandBuffer& uniqueCommandBuffer : m_vulkanDrawingCommandBufferPtrs) { uniqueCommandBuffer.reset(); }
 
     mp_vulkanDrawingCommandPool.reset();
 
-    for (
-        vk::UniqueFramebuffer& uniqueFramebuffer :
-        m_vulkanFramebufferPtrs
-    ) { uniqueFramebuffer.reset(); }
+    for (vk::UniqueFramebuffer& uniqueFramebuffer : m_vulkanFramebufferPtrs) { uniqueFramebuffer.reset(); }
 
     m_depthBuffer.reset();
 
-    for (
-        vk::UniqueImageView& uniqueImageView :
-        m_vulkanImageViewPtrs
-    ) { uniqueImageView.reset(); }
+    for (vk::UniqueImageView& uniqueImageView : m_vulkanImageViewPtrs) { uniqueImageView.reset(); }
 
     mp_vulkanSwapchain.reset();
 }
@@ -345,26 +310,23 @@ quartz::rendering::Swapchain::recreate(
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    mp_vulkanSwapchain =
-        quartz::rendering::Swapchain::createVulkanSwapchainPtr(
-            renderingDevice.getGraphicsQueueFamilyIndex(),
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfacePtr(),
-            renderingWindow.getVulkanSurfaceCapabilities(),
-            renderingWindow.getVulkanSurfaceFormat(),
-            renderingWindow.getVulkanPresentMode(),
-            renderingWindow.getVulkanExtent()
-        );
-    m_vulkanImages =
-        renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(
-            *mp_vulkanSwapchain
-        );
-    m_vulkanImageViewPtrs =
-        quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfaceFormat(),
-            m_vulkanImages
-        );
+    mp_vulkanSwapchain = quartz::rendering::Swapchain::createVulkanSwapchainPtr(
+        renderingDevice.getGraphicsQueueFamilyIndex(),
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanSurfacePtr(),
+        renderingWindow.getVulkanSurfaceCapabilities(),
+        renderingWindow.getVulkanSurfaceFormat(),
+        renderingWindow.getVulkanPresentMode(),
+        renderingWindow.getVulkanExtent()
+    );
+    m_vulkanImages = renderingDevice.getVulkanLogicalDevicePtr()->getSwapchainImagesKHR(
+        *mp_vulkanSwapchain
+    );
+    m_vulkanImageViewPtrs = quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanSurfaceFormat(),
+        m_vulkanImages
+    );
     m_depthBuffer = quartz::rendering::DepthBuffer(
         renderingDevice,
         renderingWindow.getVulkanExtent().width,
@@ -373,41 +335,35 @@ quartz::rendering::Swapchain::recreate(
         renderingWindow.getVulkanDepthBufferFormat(),
         vk::ImageTiling::eOptimal
     );
-    m_vulkanFramebufferPtrs =
-        quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanExtent(),
-            m_vulkanImageViewPtrs,
-            m_depthBuffer.getVulkanImageViewPtr(),
-            renderingPipeline.getVulkanRenderPassPtr()
-        );
-    mp_vulkanDrawingCommandPool =
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
-            renderingDevice.getGraphicsQueueFamilyIndex(),
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            vk::CommandPoolCreateFlagBits::eResetCommandBuffer
-        );
-    m_vulkanDrawingCommandBufferPtrs =
-        quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            mp_vulkanDrawingCommandPool,
-            renderingPipeline.getMaxNumFramesInFlight()
-        );
-    m_vulkanImageAvailableSemaphorePtrs =
-        quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
-        );
-    m_vulkanRenderFinishedSemaphorePtrs =
-        quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
-        );
-    m_vulkanInFlightFencePtrs =
-        quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
-        );
+    m_vulkanFramebufferPtrs = quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingWindow.getVulkanExtent(),
+        m_vulkanImageViewPtrs,
+        m_depthBuffer.getVulkanImageViewPtr(),
+        renderingPipeline.getVulkanRenderPassPtr()
+    );
+    mp_vulkanDrawingCommandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
+        renderingDevice.getGraphicsQueueFamilyIndex(),
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        vk::CommandPoolCreateFlagBits::eResetCommandBuffer
+    );
+    m_vulkanDrawingCommandBufferPtrs = quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        mp_vulkanDrawingCommandPool,
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+    m_vulkanImageAvailableSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+    m_vulkanRenderFinishedSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
+    m_vulkanInFlightFencePtrs = quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        renderingPipeline.getMaxNumFramesInFlight()
+    );
 
     LOG_TRACEthis("Clearing the \"should recreate\" flag");
     m_shouldRecreate = false;
@@ -418,18 +374,14 @@ quartz::rendering::Swapchain::waitForInFlightFence(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
 ) {
-    vk::Result result =
-        renderingDevice.getVulkanLogicalDevicePtr()->waitForFences(
-            *(m_vulkanInFlightFencePtrs[inFlightFrameIndex]),
-            true,
-            std::numeric_limits<uint64_t>::max()
-        );
+    vk::Result result = renderingDevice.getVulkanLogicalDevicePtr()->waitForFences(
+        *(m_vulkanInFlightFencePtrs[inFlightFrameIndex]),
+        true,
+        std::numeric_limits<uint64_t>::max()
+    );
 
     if (result != vk::Result::eSuccess) {
-        LOG_ERRORthis(
-            "Failed to wait for previous frame to finish: {}",
-            static_cast<uint32_t>(result)
-        );
+        LOG_ERRORthis("Failed to wait for previous frame to finish: {}", static_cast<uint32_t>(result));
     }
 }
 
@@ -439,32 +391,22 @@ quartz::rendering::Swapchain::getAvailableImageIndex(
     const uint32_t inFlightFrameIndex
 ) {
     uint32_t availableImageIndex;
-    vk::Result acquireAvailableImageIndexResult =
-        renderingDevice.getVulkanLogicalDevicePtr()->acquireNextImageKHR(
-            *mp_vulkanSwapchain,
-            std::numeric_limits<uint64_t>::max(),
-            *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
-            {},
-            &availableImageIndex
-        );
+    vk::Result acquireAvailableImageIndexResult = renderingDevice.getVulkanLogicalDevicePtr()->acquireNextImageKHR(
+        *mp_vulkanSwapchain,
+        std::numeric_limits<uint64_t>::max(),
+        *(m_vulkanImageAvailableSemaphorePtrs[inFlightFrameIndex]),
+        {},
+        &availableImageIndex
+    );
 
     if (acquireAvailableImageIndexResult == vk::Result::eErrorOutOfDateKHR) {
-        LOG_INFOthis(
-            "Swapchain is out of date. Requesting recreation ( {} )",
-            static_cast<uint32_t>(acquireAvailableImageIndexResult)
-        );
+        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
         m_shouldRecreate = true;
     } else if (acquireAvailableImageIndexResult == vk::Result::eSuboptimalKHR) {
-        LOG_INFOthis(
-            "Swapchain is suboptimal. Requesting recreation ( {} )",
-            static_cast<uint32_t>(acquireAvailableImageIndexResult)
-        );
+        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
         m_shouldRecreate = true;
     } else if (acquireAvailableImageIndexResult != vk::Result::eSuccess) {
-        LOG_ERRORthis(
-            "Failed to retrieve available image index ( {} )",
-            static_cast<uint32_t>(acquireAvailableImageIndexResult)
-        );
+        LOG_ERRORthis("Failed to retrieve available image index ( {} )", static_cast<uint32_t>(acquireAvailableImageIndexResult));
     }
 
     return availableImageIndex;
@@ -487,7 +429,6 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
 ) {
-
     // ----- reset ----- //
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->reset();
@@ -686,25 +627,15 @@ quartz::rendering::Swapchain::presentImage(
         {}
     );
 
-    vk::Result presentResult =
-        renderingDevice.getVulkanPresentQueue().presentKHR(presentInfo);
+    vk::Result presentResult = renderingDevice.getVulkanPresentQueue().presentKHR(presentInfo);
 
     if (presentResult == vk::Result::eErrorOutOfDateKHR) {
-        LOG_INFOthis(
-            "Swapchain is out of date. Requesting recreation ( {} )",
-            static_cast<uint32_t>(presentResult)
-        );
+        LOG_INFOthis("Swapchain is out of date. Requesting recreation ( {} )", static_cast<uint32_t>(presentResult));
         m_shouldRecreate = true;
     } else if (presentResult == vk::Result::eSuboptimalKHR) {
-        LOG_INFOthis(
-            "Swapchain is suboptimal. Requesting recreation ( {} )",
-            static_cast<uint32_t>(presentResult)
-        );
+        LOG_INFOthis("Swapchain is suboptimal. Requesting recreation ( {} )", static_cast<uint32_t>(presentResult));
         m_shouldRecreate = true;
     } else if (presentResult != vk::Result::eSuccess) {
-        LOG_ERRORthis(
-            "Failed to retrieve available image index ( {} )",
-            static_cast<uint32_t>(presentResult)
-        );
+        LOG_ERRORthis("Failed to retrieve available image index ( {} )", static_cast<uint32_t>(presentResult));
     }
 }

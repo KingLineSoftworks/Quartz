@@ -16,12 +16,11 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
-            graphicsQueueFamilyIndex,
-            p_logicalDevice,
-            vk::CommandPoolCreateFlagBits::eTransient
-        );
+    vk::UniqueCommandPool p_commandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
+        graphicsQueueFamilyIndex,
+        p_logicalDevice,
+        vk::CommandPoolCreateFlagBits::eTransient
+    );
 
     vk::UniqueCommandBuffer p_commandBuffer = std::move(
         quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
@@ -31,11 +30,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         )[0]
     );
 
-    LOG_TRACE(
-        BUFFER,
-        "Recording commands to newly created command buffer for transitioning "
-        "image's layout"
-    );
+    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer for transitioning image's layout");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -50,11 +45,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         inputLayout == vk::ImageLayout::eUndefined &&
         outputLayout == vk::ImageLayout::eTransferDstOptimal
     ) {
-        LOG_TRACE(
-            BUFFER,
-            "Transferring image from undefined layout to optimal transfer "
-            "destination layout"
-        );
+        LOG_TRACE(BUFFER, "Transferring image from undefined layout to optimal transfer destination layout");
 
         destinationAccessMask = vk::AccessFlagBits::eTransferWrite;
 
@@ -64,11 +55,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         inputLayout == vk::ImageLayout::eTransferDstOptimal &&
         outputLayout == vk::ImageLayout::eShaderReadOnlyOptimal
     ) {
-        LOG_TRACE(
-            BUFFER,
-            "Transferring image from optimal transfer destination layout to "
-            "optimal shader read only format"
-        );
+        LOG_TRACE(BUFFER, "Transferring image from optimal transfer destination layout to optimal shader read only format");
 
         sourceAccessMask = vk::AccessFlagBits::eTransferWrite;
         destinationAccessMask = vk::AccessFlagBits::eShaderRead;
@@ -76,8 +63,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         sourceStage = vk::PipelineStageFlagBits::eTransfer;
         destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
     } else {
-        LOG_CRITICAL(BUFFER, "Unsupported image layout transition");
-        throw std::runtime_error("");
+        LOG_THROW(BUFFER, util::VulkanFeatureNotSupportedError, "Unsupported image layout transition");
     }
 
     vk::ImageMemoryBarrier imageMemoryBarrier(
@@ -128,12 +114,11 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    vk::UniqueCommandPool p_commandPool =
-        quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
-            graphicsQueueFamilyIndex,
-            p_logicalDevice,
-            vk::CommandPoolCreateFlagBits::eTransient
-        );
+    vk::UniqueCommandPool p_commandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
+        graphicsQueueFamilyIndex,
+        p_logicalDevice,
+        vk::CommandPoolCreateFlagBits::eTransient
+    );
 
     vk::UniqueCommandBuffer p_commandBuffer = std::move(
         quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
@@ -143,11 +128,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
         )[0]
     );
 
-    LOG_TRACE(
-        BUFFER,
-        "Recording commands to newly created command buffer for copying data "
-        "from staged buffer to image"
-    );
+    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer for copying data from staged buffer to image");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -207,13 +188,12 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
 ) {
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
-    vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory =
-        quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
-            physicalDevice,
-            p_logicalDevice,
-            p_image,
-            requiredMemoryProperties
-        );
+    vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory = quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
+        physicalDevice,
+        p_logicalDevice,
+        p_image,
+        requiredMemoryProperties
+    );
 
     LOG_TRACE(BUFFER, "Transitioning layout and populating memory from buffer");
 
