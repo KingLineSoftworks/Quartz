@@ -18,16 +18,12 @@ quartz::rendering::Window::glfwFramebufferSizeCallback(
 ) {
     // Get a pointer to the quartz::rendering::Window from the
     // GLFWwindow* so we may update its values
-    quartz::rendering::Window* p_quartzWindow =
-        reinterpret_cast<quartz::rendering::Window*>(
-            glfwGetWindowUserPointer(p_glfwWindow)
-        );
+    quartz::rendering::Window* p_quartzWindow = reinterpret_cast<quartz::rendering::Window*>(
+        glfwGetWindowUserPointer(p_glfwWindow)
+    );
 
     if (!p_quartzWindow) {
-        LOG_CRITICAL(
-            WINDOW,
-            "Retrieved invalid window pointer from glfw window user pointer"
-        );
+        LOG_CRITICAL(WINDOW, "Retrieved invalid window pointer from glfw window user pointer");
     }
 
     p_quartzWindow->m_widthPixels = updatedWindowWidthPixels;
@@ -42,10 +38,7 @@ quartz::rendering::Window::createGLFWwindowPtr(
     const uint32_t heightPixels,
     const void* p_windowUser
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        WINDOW, "{} ({}x{}) , user = {}",
-        name, widthPixels, heightPixels, p_windowUser
-    );
+    LOG_FUNCTION_SCOPE_TRACE(WINDOW, "{} ({}x{}) , user = {}", name, widthPixels, heightPixels, p_windowUser);
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -65,14 +58,11 @@ quartz::rendering::Window::createGLFWwindowPtr(
             glfwDestroyWindow(p_window);
         }
     );
-    LOG_TRACE(
-        WINDOW, "Created GLFW window pointer at {}",
-        static_cast<void*>(p_glfwWindow.get())
-    );
+    LOG_TRACE(WINDOW, "Created GLFW window pointer at {}", static_cast<void*>(p_glfwWindow.get()));
     if (!p_glfwWindow) {
-        LOG_CRITICAL(WINDOW, "Failed to create GLFW window pointer");
+        LOG_CRITICAL(WINDOW, "Terminating GLFW");
         glfwTerminate();
-        throw std::runtime_error("");
+        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create GLFW window pointer");
     }
 
     LOG_TRACE(WINDOW, "Setting GLFW window user pointer");
@@ -98,8 +88,7 @@ quartz::rendering::Window::createVulkanSurfacePtr(
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
 #ifndef ON_MAC
-    LOG_CRITICAL(WINDOW, "No support for non-mac platforms currently. Unable to create vk::SurfaceKHR");
-    throw std::runtime_error("");
+    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No support for non-mac platforms currently. Unable to create vk::SurfaceKHR");
 #endif
 
     VkSurfaceKHR rawVulkanSurface;
@@ -110,11 +99,7 @@ quartz::rendering::Window::createVulkanSurfacePtr(
         &rawVulkanSurface
     );
     if (createResult != VK_SUCCESS) {
-        LOG_CRITICAL(
-            WINDOW, "Failed to create VkSurfaceKHR ( {} )",
-            static_cast<int64_t>(createResult)
-        );
-        throw std::runtime_error("");
+        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create VkSurfaceKHR ( {} )", static_cast<int64_t>(createResult));
     }
 
     vk::UniqueSurfaceKHR p_surface(
@@ -122,8 +107,7 @@ quartz::rendering::Window::createVulkanSurfacePtr(
         *uniqueInstance
     );
     if (!p_surface) {
-        LOG_CRITICAL(WINDOW, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
-        throw std::runtime_error("");
+        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
     }
 
     return p_surface;
@@ -136,12 +120,10 @@ quartz::rendering::Window::getBestSurfaceFormat(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    std::vector<vk::SurfaceFormatKHR> surfaceFormats =
-        physicalDevice.getSurfaceFormatsKHR(*p_surface);
+    std::vector<vk::SurfaceFormatKHR> surfaceFormats = physicalDevice.getSurfaceFormatsKHR(*p_surface);
 
     if (surfaceFormats.empty()) {
-        LOG_CRITICAL(WINDOW, "No surface formats available for chosen physical device");
-        throw std::runtime_error("");
+        LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No surface formats available for chosen physical device");
     }
 
     LOG_TRACE(WINDOW, "Choosing suitable surface format");
@@ -155,8 +137,7 @@ quartz::rendering::Window::getBestSurfaceFormat(
         }
     }
 
-    LOG_CRITICAL(WINDOW, "No suitable surface formats found");
-    throw std::runtime_error("");
+    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No suitable surface formats found");
 }
 
 vk::PresentModeKHR
@@ -166,12 +147,10 @@ quartz::rendering::Window::getBestPresentMode(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-    std::vector<vk::PresentModeKHR> presentModes =
-        physicalDevice.getSurfacePresentModesKHR(*p_surface);
+    std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(*p_surface);
 
     if (presentModes.empty()) {
-        LOG_CRITICAL(WINDOW, "No present modes available for chosen physical device");
-        throw std::runtime_error("");
+        LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No present modes available for chosen physical device");
     }
 
     vk::PresentModeKHR bestPresentMode = vk::PresentModeKHR::eFifo;
@@ -201,23 +180,12 @@ quartz::rendering::Window::getBestVulkanExtent(
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
     LOG_TRACE(WINDOW, "Choosing best swap extent");
-    if (
-        surfaceCapabilities.currentExtent.width !=
-        std::numeric_limits<uint32_t>::max()
-    ) {
-        LOG_TRACE(
-            WINDOW, "Using capabilities's current swap extent of size {} x {}",
-            surfaceCapabilities.currentExtent.width,
-            surfaceCapabilities.currentExtent.height
-        );
+    if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+        LOG_TRACE(WINDOW, "Using capabilities's current swap extent of size {} x {}", surfaceCapabilities.currentExtent.width, surfaceCapabilities.currentExtent.height);
         return surfaceCapabilities.currentExtent;
     }
 
-    LOG_TRACE(
-        WINDOW,
-        "Creating our own swap extent (current extent of surface capabilities "
-        "has width of uint32_t max value, so we must handle manually)"
-    );
+    LOG_TRACE(WINDOW, "Creating our own swap extent (current extent of surface capabilities has width of uint32_t max value, so we must handle manually)");
 
     int32_t widthPixels;
     int32_t heightPixels;
@@ -226,39 +194,23 @@ quartz::rendering::Window::getBestVulkanExtent(
         &widthPixels,
         &heightPixels
     );
-    LOG_TRACE(
-        WINDOW, "Got GLFW framebuffer size of W {} pix x H {} pix",
-        widthPixels, heightPixels
-    );
+    LOG_TRACE(WINDOW, "Got GLFW framebuffer size of W {} pix x H {} pix", widthPixels, heightPixels);
 
     uint32_t adjustedWidthPixels = std::clamp(
         static_cast<uint32_t>(widthPixels),
         surfaceCapabilities.minImageExtent.width,
         surfaceCapabilities.maxImageExtent.width
     );
-    LOG_TRACE(
-        WINDOW, "Adjusted width of {} pixels (after clamp between {} and {})",
-        adjustedWidthPixels,
-        surfaceCapabilities.minImageExtent.width,
-        surfaceCapabilities.maxImageExtent.width
-    );
+    LOG_TRACE(WINDOW, "Adjusted width of {} pixels (after clamp between {} and {})", adjustedWidthPixels, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
 
     uint32_t adjustedHeightPixels = std::clamp(
         static_cast<uint32_t>(heightPixels),
         surfaceCapabilities.minImageExtent.height,
         surfaceCapabilities.maxImageExtent.height
     );
-    LOG_TRACE(
-        WINDOW, "Adjusted height of {} pixels (after clamp between {} and {})",
-        adjustedHeightPixels,
-        surfaceCapabilities.minImageExtent.height,
-        surfaceCapabilities.maxImageExtent.height
-    );
+    LOG_TRACE(WINDOW, "Adjusted height of {} pixels (after clamp between {} and {})", adjustedHeightPixels, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 
-    LOG_TRACE(
-        WINDOW, "Creating custom extent of W {} pix x H {} pix",
-        adjustedWidthPixels, adjustedHeightPixels
-    );
+    LOG_TRACE(WINDOW, "Creating custom extent of W {} pix x H {} pix", adjustedWidthPixels, adjustedHeightPixels);
     vk::Extent2D customExtent(
         static_cast<uint32_t>(adjustedWidthPixels),
         static_cast<uint32_t>(adjustedHeightPixels)
@@ -281,12 +233,10 @@ quartz::rendering::Window::getBestVulkanDepthBufferFormat(
 
     vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
 
-    vk::FormatFeatureFlags features =
-        vk::FormatFeatureFlagBits::eDepthStencilAttachment;
+    vk::FormatFeatureFlags features = vk::FormatFeatureFlagBits::eDepthStencilAttachment;
 
     for (const vk::Format& format : formatCandidates) {
-        vk::FormatProperties properties =
-            physicalDevice.getFormatProperties(format);
+        vk::FormatProperties properties = physicalDevice.getFormatProperties(format);
 
         if (
             tiling == vk::ImageTiling::eLinear &&
@@ -303,11 +253,7 @@ quartz::rendering::Window::getBestVulkanDepthBufferFormat(
         }
     }
 
-    LOG_CRITICAL(
-        WINDOW,
-        "Failed to find supported depth buffer image format"
-    );
-    throw std::runtime_error("");
+    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "Failed to find supported depth buffer image format");
 }
 
 quartz::rendering::Window::Window(
@@ -364,17 +310,13 @@ quartz::rendering::Window::Window(
         )
     )
 {
-    LOG_FUNCTION_CALL_TRACEthis(
-        "{} ( {} x {} )", m_name, m_widthPixels, m_heightPixels
-    );
+    LOG_FUNCTION_CALL_TRACEthis("{} ( {} x {} )", m_name, m_widthPixels, m_heightPixels);
 }
 
 quartz::rendering::Window::~Window() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    LOG_TRACEthis(
-        "Destroying GLFW window at {}", static_cast<void*>(mp_glfwWindow.get())
-    );
+    LOG_TRACEthis("Destroying GLFW window at {}", static_cast<void*>(mp_glfwWindow.get()));
     glfwDestroyWindow(mp_glfwWindow.get());
 
     LOG_TRACEthis("Terminating GLFW");
@@ -400,10 +342,9 @@ quartz::rendering::Window::recreate(
         renderingInstance.getVulkanInstancePtr()
     );
 
-    m_vulkanSurfaceCapabilities =
-        renderingDevice.getVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(
-            *mp_vulkanSurface
-        );
+    m_vulkanSurfaceCapabilities = renderingDevice.getVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(
+        *mp_vulkanSurface
+    );
 
     m_vulkanSurfaceFormat = quartz::rendering::Window::getBestSurfaceFormat(
         mp_vulkanSurface,
@@ -449,4 +390,3 @@ quartz::rendering::Window::setShouldDisplayCursor(
         glfwSetInputMode(mp_glfwWindow.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
-

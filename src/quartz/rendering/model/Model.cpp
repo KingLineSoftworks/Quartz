@@ -21,9 +21,7 @@ quartz::rendering::Model::loadGLTFModel(
     std::string warningString;
     std::string errorString;
 
-    const bool isBinaryFile =
-        util::FileSystem::getFileExtension(filepath) ==
-        "glb";
+    const bool isBinaryFile = util::FileSystem::getFileExtension(filepath) == "glb";
 
     LOG_TRACE(MODEL, "Using {} gltf file at {}", isBinaryFile ? "binary" : "ascii", filepath);
 
@@ -43,24 +41,20 @@ quartz::rendering::Model::loadGLTFModel(
             );
 
     if (!fileLoadedSuccessfully) {
-        LOG_CRITICAL(MODEL, "Failed to load model at {}", filepath);
-        LOG_CRITICAL(MODEL, "  - Warning : {}", warningString);
-        LOG_CRITICAL(MODEL, "  - Error   : {}", errorString);
-        throw std::runtime_error("");
+        if (!warningString.empty()) {
+            LOG_THROW(MODEL, util::AssetLoadFailedError, "Failed to load model at {} (warning: \"{}\")", filepath, warningString);
+        } else if (!errorString.empty()) {
+            LOG_THROW(MODEL, util::AssetLoadFailedError, "Failed to load model at {} (error: \"{}\")", filepath, errorString);
+        }
+        LOG_THROW(MODEL, util::AssetLoadFailedError, "Failed to load model at {} (no warning or error strings)", filepath);
     }
 
     if (!warningString.empty()) {
-        LOG_WARNING(
-            MODEL, "TinyGLTF::Load{}FromFile warning : {}",
-            isBinaryFile ? "Binary" : "ASCII", warningString
-        );
+        LOG_WARNING(MODEL, "TinyGLTF::Load{}FromFile warning : {}", isBinaryFile ? "Binary" : "ASCII", warningString);
     }
 
     if (!errorString.empty()) {
-        LOG_ERROR(
-            MODEL, "TinyGLTF::Load{}FromFile error : {}",
-            isBinaryFile ? "Binary" : "ASCII", errorString
-        );
+        LOG_ERROR(MODEL, "TinyGLTF::Load{}FromFile error : {}", isBinaryFile ? "Binary" : "ASCII", errorString);
     }
 
     return gltfModel;
@@ -152,27 +146,24 @@ quartz::rendering::Model::getTextureMasterIndex(
     const std::vector<uint32_t>& masterIndices,
     const quartz::rendering::Texture::Type textureType
 ) {
-    const std::string textureTypeString =
-        quartz::rendering::Texture::getTextureTypeGLTFString(textureType);
+    const std::string textureTypeString = quartz::rendering::Texture::getTextureTypeGLTFString(textureType);
 
     LOG_TRACE(MODEL, "Looking for {}", textureTypeString);
 
     int32_t localIndex = -1;
 
-    std::map<std::string, tinygltf::Parameter>::const_iterator iterator =
-        gltfMaterial.values.find(textureTypeString);
+    std::map<std::string, tinygltf::Parameter>::const_iterator iterator = gltfMaterial.values.find(textureTypeString);
 
     if (iterator != gltfMaterial.values.end()) {
         localIndex = iterator->second.TextureIndex();
         LOG_TRACE(MODEL, "  Found base color texture local index {}", localIndex);
     }
 
-    const uint32_t masterIndex =
-        quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
-            masterIndices,
-            localIndex,
-            textureType
-        );
+    const uint32_t masterIndex = quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
+        masterIndices,
+        localIndex,
+        textureType
+    );
 
     LOG_TRACE(MODEL, "  {} master index = {}", textureTypeString, masterIndex);
 
@@ -186,11 +177,10 @@ quartz::rendering::Model::loadMaterials(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
-    std::vector<uint32_t> masterIndices =
-        quartz::rendering::Model::loadTextures(
-            renderingDevice,
-            gltfModel
-        );
+    std::vector<uint32_t> masterIndices = quartz::rendering::Model::loadTextures(
+        renderingDevice,
+        gltfModel
+    );
 
     std::vector<quartz::rendering::Material> materials = {
         {} // a default material

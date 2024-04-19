@@ -19,8 +19,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
     const tinygltf::Primitive& gltfPrimitive,
     const quartz::rendering::Vertex::AttributeType attributeType
 ) {
-    const std::string attributeString =
-        quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
+    const std::string attributeString = quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "{}", attributeString);
 
     if (gltfPrimitive.attributes.find(attributeString) == gltfPrimitive.attributes.end()) {
@@ -29,8 +28,7 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
         switch (attributeType) {
             case quartz::rendering::Vertex::AttributeType::Position:
             case quartz::rendering::Vertex::AttributeType::Normal:
-                LOG_CRITICAL(MODEL_PRIMITIVE, "Primitive must contain a {} attribute", attributeString);
-                throw std::runtime_error("");
+                LOG_THROW(MODEL_PRIMITIVE, util::AssetInsufficientError, "Primitive must contain a {} attribute", attributeString);
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
                 LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
                 break;

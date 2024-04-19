@@ -17,4 +17,7 @@ target_link_libraries(
 
     PUBLIC
     spdlog
+
+    PUBLIC
+    UTIL_Errors
 )

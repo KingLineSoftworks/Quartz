@@ -8,8 +8,11 @@
 
 #include "spdlog/async.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/fmt/fmt.h"
 
 #include "util/macros.hpp"
+#include "util/errors/AssetErrors.hpp"
+#include "util/errors/VulkanErrors.hpp"
 
 namespace util {
     class Logger;
@@ -273,6 +276,13 @@ private: // private static variables
     util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
 #define LOG_CRITICALthis(...) \
     util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
+
+#define LOG_THROW(REGISTRATION_NAME, ERROR_TYPE, ...) \
+    util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__); \
+    throw ERROR_TYPE(fmt::format(__VA_ARGS__))
+#define LOG_THROWthis(ERROR_TYPE, ...) \
+    util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__); \
+    throw ERROR_TYPE(fmt::format(__VA_ARGS__))
 
 /**
  * @brief Log a scope change

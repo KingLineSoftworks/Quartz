@@ -72,7 +72,7 @@ quartz::scene::Camera::update(
 ) {
     // ----- update orientation ----- //
 
-    const float mouseSensitivity = 0.1f;
+    const float mouseSensitivity = 0.25f;
 
     const float calibratedMousePositionOffset_x = p_inputManager->getMousePositionOffset_x() * mouseSensitivity;
     const float calibratedMousePositionOffset_y = p_inputManager->getMousePositionOffset_y() * mouseSensitivity;

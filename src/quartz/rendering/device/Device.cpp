@@ -14,14 +14,10 @@ quartz::rendering::Device::getBestPhysicalDevice(
 
     // ----- get list of physical devices available to us ----- //
 
-    std::vector<vk::PhysicalDevice> physicalDevices =
-        p_instance->enumeratePhysicalDevices();
-    LOG_TRACE(
-        DEVICE, "{} physical devices available", physicalDevices.size()
-    );
+    std::vector<vk::PhysicalDevice> physicalDevices = p_instance->enumeratePhysicalDevices();
+    LOG_TRACE(DEVICE, "{} physical devices available", physicalDevices.size());
     if (physicalDevices.empty()) {
-        LOG_CRITICAL(DEVICE, "Failed to find GPUs with vulkan support");
-        throw std::runtime_error("");
+        LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "Failed to find GPUs with vulkan support");
     }
 
     // ----- choose the best (first) suitable physical device, ----- //
@@ -33,31 +29,22 @@ quartz::rendering::Device::getBestPhysicalDevice(
 
         vk::PhysicalDevice physicalDevice = physicalDevices[i];
 
-        vk::PhysicalDeviceFeatures supportedFeatures =
-            physicalDevice.getFeatures();
+        vk::PhysicalDeviceFeatures supportedFeatures = physicalDevice.getFeatures();
         /// @todo 2023/11/01 check for supportedFeatures.depthBounds
         if (!supportedFeatures.samplerAnisotropy) {
             LOG_TRACE(DEVICE, "    - Sampler anisotropy not supported. Next");
             continue;
         }
 
-        std::vector<vk::QueueFamilyProperties> queueFamilyProperties =
-            physicalDevice.getQueueFamilyProperties();
-        LOG_TRACE(
-            DEVICE, "    - {} queue families available",
-            queueFamilyProperties.size()
-        );
+        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+        LOG_TRACE(DEVICE, "    - {} queue families available", queueFamilyProperties.size());
 
         int64_t suitableQueueFamilyIndex = -1;
         for (uint32_t j = 0; j < queueFamilyProperties.size(); ++j) {
-            const vk::QueueFamilyProperties properties =
-                queueFamilyProperties[j];
+            const vk::QueueFamilyProperties properties = queueFamilyProperties[j];
 
             if (!(properties.queueFlags & vk::QueueFlagBits::eGraphics)) {
-                LOG_TRACE(
-                    DEVICE, "      - Queue family {} doesn't support graphics",
-                    j
-                );
+                LOG_TRACE(DEVICE, "      - Queue family {} doesn't support graphics", j);
                 continue;
             }
 
@@ -79,8 +66,7 @@ quartz::rendering::Device::getBestPhysicalDevice(
     }
 
     if (suitablePhysicalDeviceIndex == -1) {
-        LOG_CRITICAL(DEVICE, "No suitable devices found");
-        throw std::runtime_error("");
+        LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "No suitable devices found");
     }
 
     return physicalDevices[suitablePhysicalDeviceIndex];
@@ -92,31 +78,20 @@ quartz::rendering::Device::getGraphicsQueueFamilyIndex(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(DEVICE, "");
 
-    std::vector<vk::QueueFamilyProperties> queueFamilyProperties =
-        physicalDevice.getQueueFamilyProperties();
-    LOG_TRACE(
-        DEVICE, "{} queue families available for chosen physical device",
-        queueFamilyProperties.size()
-    );
+    std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+    LOG_TRACE(DEVICE, "{} queue families available for chosen physical device", queueFamilyProperties.size());
 
     for (uint32_t j = 0; j < queueFamilyProperties.size(); ++j) {
         const vk::QueueFamilyProperties properties = queueFamilyProperties[j];
 
         if (properties.queueFlags & vk::QueueFlagBits::eGraphics) {
-            LOG_TRACE(
-                DEVICE,
-                "  - queue family {} supports graphics queues", j
-            );
-            LOG_TRACE(
-                DEVICE,
-                "    - assuming implied support for present queues as well"
-            );
+            LOG_TRACE(DEVICE, "  - queue family {} supports graphics queues", j);
+            LOG_TRACE(DEVICE, "    - assuming implied support for present queues as well");
             return j;
         }
     }
 
-    LOG_CRITICAL(DEVICE, "Failed to find queue family index");
-    throw std::runtime_error("");
+    LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "Failed to find queue family index");
 }
 
 std::vector<const char*>
@@ -130,18 +105,11 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
     };
     bool swapchainExtensionFound = false;
 
-    std::vector<vk::ExtensionProperties> availablePhysicalDeviceExtensionProperties =
-        physicalDevice.enumerateDeviceExtensionProperties();
-    LOG_TRACE(
-        DEVICE, "{} physical device extensions available",
-        availablePhysicalDeviceExtensionProperties.size()
-    );
+    std::vector<vk::ExtensionProperties> availablePhysicalDeviceExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
+    LOG_TRACE(DEVICE, "{} physical device extensions available", availablePhysicalDeviceExtensionProperties.size());
 
     for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
-        LOG_TRACE(
-            DEVICE, "  - {} [ version {} ]",
-            extensionProperties.extensionName, extensionProperties.specVersion
-        );
+        LOG_TRACE(DEVICE, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
 
         if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
             LOG_TRACE(DEVICE, "    - portability subset extension found");
@@ -155,8 +123,7 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
     }
 
     if (!swapchainExtensionFound) {
-        LOG_CRITICAL(DEVICE, "{} extension not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-        throw std::runtime_error("");
+        LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "{} extension not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME);
     }
 
     return requiredPhysicalDeviceExtensionNames;
@@ -169,21 +136,12 @@ quartz::rendering::Device::createVulkanLogicalDevicePtr(
     const std::vector<const char*>& validationLayerNames,
     const std::vector<const char*>& physicalDeviceExtensionNames
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        DEVICE, "graphics queue family index = {}", graphicsQueueFamilyIndex
-    );
+    LOG_FUNCTION_SCOPE_TRACE(DEVICE, "graphics queue family index = {}", graphicsQueueFamilyIndex);
 
     std::set<uint32_t> uniqueQueueFamilyIndices = { graphicsQueueFamilyIndex };
-    std::vector<float> deviceQueuePriorities(
-        uniqueQueueFamilyIndices.size(),
-        1.0f
-    );
+    std::vector<float> deviceQueuePriorities(uniqueQueueFamilyIndices.size(), 1.0f);
 
-    LOG_TRACE(
-        DEVICE,
-        "Creating vk::DeviceQueueCreateInfo for each of the unique queue "
-        "family indices"
-    );
+    LOG_TRACE(DEVICE, "Creating vk::DeviceQueueCreateInfo for each of the unique queue family indices");
 
     std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos;
     for (const uint32_t queueFamilyIndex : uniqueQueueFamilyIndices) {
@@ -210,12 +168,10 @@ quartz::rendering::Device::createVulkanLogicalDevicePtr(
         &requestedPhysicalDeviceFeatures
     );
 
-    vk::UniqueDevice uniqueLogicalDevice =
-        physicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
+    vk::UniqueDevice uniqueLogicalDevice = physicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
 
     if (!uniqueLogicalDevice) {
-        LOG_CRITICAL(DEVICE, "Failed to create logical device");
-        throw std::runtime_error("");
+        LOG_THROW(DEVICE, util::VulkanCreationFailedError, "Failed to create logical device");
     }
 
     return uniqueLogicalDevice;

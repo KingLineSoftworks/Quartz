@@ -33,12 +33,11 @@ quartz::rendering::Texture::createTexture(
         quartz::rendering::Texture::initializeMasterList(renderingDevice);
     }
 
-    std::shared_ptr<quartz::rendering::Texture> p_texture =
-        std::make_shared<quartz::rendering::Texture>(
-            renderingDevice,
-            gltfImage,
-            gltfSampler
-        );
+    std::shared_ptr<quartz::rendering::Texture> p_texture = std::make_shared<quartz::rendering::Texture>(
+        renderingDevice,
+        gltfImage,
+        gltfSampler
+    );
 
     quartz::rendering::Texture::masterList.push_back(p_texture);
 
@@ -63,17 +62,15 @@ quartz::rendering::Texture::initializeMasterList(
 
     LOG_TRACE(TEXTURE, "Creating base color default texture");
     const std::vector<uint8_t> pixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta
-    std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault =
-        std::make_shared<quartz::rendering::Texture>(
-            renderingDevice,
-            1,
-            1,
-            4,
-            reinterpret_cast<const void*>(pixels.data())
-        );
+    std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault = std::make_shared<quartz::rendering::Texture>(
+        renderingDevice,
+        1,
+        1,
+        4,
+        reinterpret_cast<const void*>(pixels.data())
+    );
     quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
-    quartz::rendering::Texture::baseColorDefaultIndex =
-        quartz::rendering::Texture::masterList.size() - 1;
+    quartz::rendering::Texture::baseColorDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
     LOG_TRACE(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
 
     /**
@@ -126,8 +123,7 @@ quartz::rendering::Texture::createImageBufferFromFilepath(
         STBI_rgb_alpha
     );
     if (!p_texturePixels) {
-        LOG_CRITICAL(TEXTURE, "Failed to load texture from {}", filepath);
-        throw std::runtime_error("");
+        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load texture from {}", filepath);
     }
 
     // x4 for rgba (32 bits = 4 bytes)
@@ -175,10 +171,7 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
     uint8_t* p_intermediateRGBAPixels = nullptr;
     const uint8_t* p_texturePixels;
 
-    LOG_TRACE(
-        TEXTURE, "gltf image is {}x{} with {} channels",
-        textureWidth, textureHeight, textureChannelCount
-    );
+    LOG_TRACE(TEXTURE, "gltf image is {}x{} with {} channels", textureWidth, textureHeight, textureChannelCount);
 
     if (textureChannelCount == 3) {
         /// @todo 2023/11/01 Check if we actually need to convert based on device support
@@ -196,8 +189,7 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
 
             // Copy over the 3 bytes (one each for rgb) from source buffer
             for (uint32_t j = 0; j < static_cast<uint32_t>(textureChannelCount); ++j) {
-                p_intermediateRGBAPixels[baseIntermediateIndex + j] =
-                    p_sourceRGBPixels[baseSourceIndex + j];
+                p_intermediateRGBAPixels[baseIntermediateIndex + j] = p_sourceRGBPixels[baseSourceIndex + j];
             }
         }
 
@@ -207,14 +199,10 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
         p_texturePixels = &gltfImage.image[0];
         textureSizeBytes = gltfImage.image.size();
     }
-    LOG_DEBUG(
-        TEXTURE, "Got pixel data at {} with size of {} bytes",
-        static_cast<const void*>(p_texturePixels), textureSizeBytes
-    );
+    LOG_DEBUG(TEXTURE, "Got pixel data at {} with size of {} bytes", static_cast<const void*>(p_texturePixels), textureSizeBytes);
 
     if (!p_texturePixels) {
-        LOG_CRITICAL(TEXTURE, "Failed to load texture from gltfImage with name \"\"", gltfImage.name);
-        throw std::runtime_error("");
+        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load texture from gltfImage with name \"\"", gltfImage.name);
     }
 
     // x4 for rgba (32 bits = 4 bytes)
@@ -302,8 +290,7 @@ quartz::rendering::Texture::createVulkanSamplerPtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    vk::PhysicalDeviceProperties physicalDeviceProperties =
-        renderingDevice.getVulkanPhysicalDevice().getProperties();
+    vk::PhysicalDeviceProperties physicalDeviceProperties = renderingDevice.getVulkanPhysicalDevice().getProperties();
 
     vk::SamplerCreateInfo samplerCreateInfo(
         {},
@@ -324,14 +311,12 @@ quartz::rendering::Texture::createVulkanSamplerPtr(
         false
     );
 
-    vk::UniqueSampler p_sampler =
-        renderingDevice.getVulkanLogicalDevicePtr()->createSamplerUnique(
-            samplerCreateInfo
-        );
+    vk::UniqueSampler p_sampler = renderingDevice.getVulkanLogicalDevicePtr()->createSamplerUnique(
+        samplerCreateInfo
+    );
 
     if (!p_sampler) {
-        LOG_CRITICAL(TEXTURE, "Failed to create vk::Sampler");
-        throw std::runtime_error("");
+        LOG_THROW(TEXTURE, util::VulkanCreationFailedError, "Failed to create vk::Sampler");
     }
 
     return p_sampler;
