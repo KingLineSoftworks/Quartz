@@ -65,7 +65,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
 
     LOG_TRACE(INSTANCE, "{} extensions available", supportedLayerProperties.size());
 
-    for (const vk::LayerProperties& layerProperties : supportedLayerProperties) {
+    for (UNUSED const vk::LayerProperties& layerProperties : supportedLayerProperties) {
         LOG_TRACE(INSTANCE, "  - {} [ version {} ]", layerProperties.layerName, layerProperties.specVersion);
     }
 
@@ -110,7 +110,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
 
     LOG_TRACE(INSTANCE, "{} instance extensions available", availableInstanceExtensionProperties.size());
 
-    for (const vk::ExtensionProperties& extensionProperties : availableInstanceExtensionProperties) {
+    for (UNUSED const vk::ExtensionProperties& extensionProperties : availableInstanceExtensionProperties) {
         LOG_TRACE(INSTANCE, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
     }
 

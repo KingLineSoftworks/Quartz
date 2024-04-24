@@ -107,21 +107,27 @@ public: // public static functions
      */
 
     template<typename... Args>
-    static void trace(const std::string& loggerName, const std::string& format, Args&&... args) {
+    static void trace(UNUSED const std::string& loggerName, UNUSED const std::string& format, UNUSED Args&&... args) {
+        #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         assertInitialized();
         util::Logger::loggerPtrMap[loggerName]->trace(util::Logger::createIndentationString() + format, args...);
+        #endif
     }
 
     template<typename... Args>
-    static void debug(const std::string& loggerName, const std::string& format, Args&&... args) {
+    static void debug(UNUSED const std::string& loggerName, UNUSED const std::string& format, UNUSED Args&&... args) {
+        #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         assertInitialized();
         util::Logger::loggerPtrMap[loggerName]->debug(util::Logger::createIndentationString() + format, args...);
+        #endif
     }
 
     template<typename... Args>
-    static void info(const std::string& loggerName, const std::string& format, Args&&... args) {
+    static void info(UNUSED const std::string& loggerName, UNUSED const std::string& format, UNUSED Args&&... args) {
+        #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         assertInitialized();
         util::Logger::loggerPtrMap[loggerName]->info(util::Logger::createIndentationString() + format, args...);
+        #endif
     }
 
     template<typename... Args>
@@ -155,13 +161,19 @@ public: // public static functions
     static void log(const std::string& loggerName, const util::Logger::Level level, const std::string& format, Args&&... args) {
         switch (level) {
             case util::Logger::Level::trace:
+                #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
                 util::Logger::trace(loggerName, format, args...);
+                #endif
                 break;
             case util::Logger::Level::debug:
+                #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
                 util::Logger::debug(loggerName, format, args...);
+                #endif
                 break;
             case util::Logger::Level::info:
+                #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
                 util::Logger::info(loggerName, format, args...);
+                #endif
                 break;
             case util::Logger::Level::warning:
                 util::Logger::warning(loggerName, format, args...);
@@ -245,8 +257,11 @@ private: // private static variables
  * @brief Log something
  * 
  * @note the first argument of the variadic arguments must be a formatting string
+ *
+ * @todo Make the compiled away LOG_*this functions do a compile time check for if this->getLoggerRegistrationInfo() exists
  */
 
+#if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
 #define LOG_TRACE(REGISTRATION_NAME, ...) \
     util::Logger::trace(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
 #define LOG_TRACEthis(...) \
@@ -261,6 +276,22 @@ private: // private static variables
     util::Logger::info(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
 #define LOG_INFOthis(...) \
     util::Logger::info(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
+#else
+#define LOG_TRACE(REGISTRATION_NAME, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_TRACEthis(...) \
+    REQUIRE_SEMICOLON
+
+#define LOG_DEBUG(REGISTRATION_NAME, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_DEBUGthis(...) \
+    REQUIRE_SEMICOLON
+
+#define LOG_INFO(REGISTRATION_NAME, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_INFOthis(...) \
+    REQUIRE_SEMICOLON
+#endif
 
 #define LOG_WARNING(REGISTRATION_NAME, ...) \
     util::Logger::warning(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__)
@@ -288,6 +319,7 @@ private: // private static variables
  * @brief Log a scope change
  */
 
+#if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
 #define LOG_SCOPE_CHANGE_TRACE(REGISTRATION_NAME) \
     const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::trace)
 #define LOG_SCOPE_CHANGE_TRACEthis() \
@@ -302,6 +334,22 @@ private: // private static variables
     const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::info)
 #define LOG_SCOPE_CHANGE_INFOthis() \
     const util::Logger::Scoper UNIQUE_NAME(scoper)(this->getLoggerRegistrationInfo().loggerName, util::Logger::Level::info)
+#else
+#define LOG_SCOPE_CHANGE_TRACE(REGISTRATION_NAME) \
+    REQUIRE_SEMICOLON
+#define LOG_SCOPE_CHANGE_TRACEthis() \
+    REQUIRE_SEMICOLON
+
+#define LOG_SCOPE_CHANGE_DEBUG(REGISTRATION_NAME) \
+    REQUIRE_SEMICOLON
+#define LOG_SCOPE_CHANGE_DEBUGthis() \
+    REQUIRE_SEMICOLON
+
+#define LOG_SCOPE_CHANGE_INFO(REGISTRATION_NAME) \
+    REQUIRE_SEMICOLON
+#define LOG_SCOPE_CHANGE_INFOthis() \
+    REQUIRE_SEMICOLON
+#endif
 
 #define LOG_SCOPE_CHANGE_WARNING(REGISTRATION_NAME) \
     const util::Logger::Scoper UNIQUE_NAME(scoper)(quartz::loggers::REGISTRATION_NAME.loggerName, util::Logger::Level::warning)
@@ -327,6 +375,7 @@ private: // private static variables
  * so we can only output 1 space instead of 2 if there is nothing inside of them
  */
 
+#if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
 #define LOG_FUNCTION_CALL_TRACE(REGISTRATION_NAME, format, ...) \
     util::Logger::trace( \
         quartz::loggers::REGISTRATION_NAME.loggerName, \
@@ -365,6 +414,22 @@ private: // private static variables
         __PRETTY_FUNCTION__ + std::string(" [ ") + format + (std::string(format) == std::string("") ? "" : " ") + std::string("]") __VA_OPT__(,) \
         __VA_ARGS__ \
     )
+#else
+#define LOG_FUNCTION_CALL_TRACE(REGISTRATION_NAME, format, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_FUNCTION_CALL_TRACEthis(format, ...)  \
+    REQUIRE_SEMICOLON
+
+#define LOG_FUNCTION_CALL_DEBUG(REGISTRATION_NAME, format, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_FUNCTION_CALL_DEBUGthis(format, ...)  \
+    REQUIRE_SEMICOLON
+
+#define LOG_FUNCTION_CALL_INFO(REGISTRATION_NAME, format, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_FUNCTION_CALL_INFOthis(format, ...)  \
+    REQUIRE_SEMICOLON
+#endif
 
 #define LOG_FUNCTION_CALL_WARNING(REGISTRATION_NAME, format, ...) \
     util::Logger::warning( \
@@ -409,6 +474,7 @@ private: // private static variables
  * @brief log a function call and its scope change
  */
 
+#if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
 #define LOG_FUNCTION_SCOPE_TRACE(REGISTRATION_NAME, format, ...) \
     LOG_FUNCTION_CALL_TRACE(REGISTRATION_NAME, format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_TRACE(REGISTRATION_NAME)
@@ -429,6 +495,22 @@ private: // private static variables
 #define LOG_FUNCTION_SCOPE_INFOthis(format, ...) \
     LOG_FUNCTION_CALL_INFOthis(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_INFOthis()
+#else
+#define LOG_FUNCTION_SCOPE_TRACE(REGISTRATION_NAME, format, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_FUNCTION_SCOPE_TRACEthis(format, ...) \
+    REQUIRE_SEMICOLON
+
+#define LOG_FUNCTION_SCOPE_DEBUG(REGISTRATION_NAME, format, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_FUNCTION_SCOPE_DEBUGthis(format, ...) \
+    REQUIRE_SEMICOLON
+
+#define LOG_FUNCTION_SCOPE_INFO(REGISTRATION_NAME, format, ...) \
+    REQUIRE_SEMICOLON
+#define LOG_FUNCTION_SCOPE_INFOthis(format, ...) \
+    REQUIRE_SEMICOLON
+#endif
     
 #define LOG_FUNCTION_SCOPE_WARNING(REGISTRATION_NAME, format, ...) \
     LOG_FUNCTION_CALL_WARNING(REGISTRATION_NAME, format, __VA_ARGS__); \

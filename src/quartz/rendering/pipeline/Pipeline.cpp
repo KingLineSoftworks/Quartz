@@ -600,11 +600,11 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     // ----- viewport and scissor tings ----- //
 
     LOG_TRACE(PIPELINE, "Using {} viewports", viewports.size());
-    for (const vk::Viewport& viewport : viewports) {
+    for (UNUSED const vk::Viewport& viewport : viewports) {
         LOG_TRACE(PIPELINE, "  - {} x {}", viewport.width, viewport.height);
     }
     LOG_TRACE(PIPELINE, "Using {} scissor rectangles", scissorRectangles.size());
-    for (const vk::Rect2D& scissorRectangle : scissorRectangles) {
+    for (UNUSED const vk::Rect2D& scissorRectangle : scissorRectangles) {
         LOG_TRACE(PIPELINE, "  - {} , {}",scissorRectangle.offset.x, scissorRectangle.offset.y);
     }
 
@@ -670,7 +670,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     // ----- dynamic state tings ----- //
 
     LOG_TRACE(PIPELINE, "Using {} dynamic states", dynamicStates.size());
-    for (const vk::DynamicState& dynamicState : dynamicStates) {
+    for (UNUSED const vk::DynamicState& dynamicState : dynamicStates) {
         LOG_TRACE(PIPELINE, "  - {}", static_cast<uint32_t>(dynamicState));
     }
 
