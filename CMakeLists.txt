@@ -6,6 +6,7 @@ set(PROJECT_NAME "Quartz")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(QuartzVersion) # Gives us version for quartz
 include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
+include(CompileShader) # Gives us compile_shaders function
 
 cmake_minimum_required(VERSION 3.14)
 
@@ -158,6 +159,7 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/instance")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/material")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/model")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/pipeline")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/shaders")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/swapchain")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/texture")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/vulkan_util")
