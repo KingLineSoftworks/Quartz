@@ -6,6 +6,7 @@ set(PROJECT_NAME "Quartz")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(QuartzVersion) # Gives us version for quartz
 include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
+include(CompileShader) # Gives us compile_shaders function
 
 cmake_minimum_required(VERSION 3.14)
 
@@ -18,6 +19,12 @@ project(
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/spv)
+file(MAKE_DIRECTORY ${CMAKE_SHADER_OUTPUT_DIRECTORY})
 
 #====================================================================
 # Build type information
@@ -121,7 +128,14 @@ set_target_properties(
 # @todo: only add these for Quartz libraries. We don't want to be setting these for the
 #        vendor libraries. These should only be visible for Quartz and application
 
-add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions(
+    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
+    SHADER_BINARY_DIR="${CMAKE_SHADER_OUTPUT_DIRECTORY}"
+)
+
+set(MAX_NUMBER_TEXTURES 100)
+set(MAX_NUMBER_MATERIALS 100)
 
 add_compile_definitions(
     QUARTZ_NAME="${PROJECT_NAME}"
@@ -129,7 +143,8 @@ add_compile_definitions(
     QUARTZ_MAJOR_VERSION=${QUARTZ_MAJOR_VERSION}
     QUARTZ_MINOR_VERSION=${QUARTZ_MINOR_VERSION}
     QUARTZ_PATCH_VERSION=${QUARTZ_PATCH_VERSION}
-    QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES=100
+    QUARTZ_MAX_NUMBER_TEXTURES=${MAX_NUMBER_TEXTURES}
+    QUARTZ_MAX_NUMBER_MATERIALS=${MAX_NUMBER_MATERIALS}
 )
 
 #====================================================================
@@ -158,6 +173,7 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/instance")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/material")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/model")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/pipeline")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/shaders")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/swapchain")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/texture")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/vulkan_util")

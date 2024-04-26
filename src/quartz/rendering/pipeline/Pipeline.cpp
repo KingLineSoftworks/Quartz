@@ -144,7 +144,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
         4,
         vk::DescriptorType::eSampledImage,
-        QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
+        QUARTZ_MAX_NUMBER_TEXTURES,
         vk::ShaderStageFlagBits::eFragment,
         {}
     );
@@ -208,7 +208,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
 
     vk::DescriptorPoolSize baseColorTexturesPoolSize(
         vk::DescriptorType::eSampledImage,
-        numDescriptorSets * QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES
+        numDescriptorSets * QUARTZ_MAX_NUMBER_TEXTURES
     );
     LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {}", baseColorTexturesPoolSize.descriptorCount);
 
@@ -371,7 +371,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             );
         }
 
-        uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES - baseColorTextureImageInfos.size();
+        uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_TEXTURES - baseColorTextureImageInfos.size();
         LOG_TRACE(PIPELINE, "Filling remaining {} textures with texture 0", remainingTextureSpaces);
         for (uint32_t j = 0; j < remainingTextureSpaces; ++j) {
             baseColorTextureImageInfos.emplace_back(
@@ -385,7 +385,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             descriptorSets[i],
             4,
             0,
-            QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES,
+            QUARTZ_MAX_NUMBER_TEXTURES,
             vk::DescriptorType::eSampledImage,
             baseColorTextureImageInfos.data(),
             {},
@@ -600,11 +600,11 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     // ----- viewport and scissor tings ----- //
 
     LOG_TRACE(PIPELINE, "Using {} viewports", viewports.size());
-    for (const vk::Viewport& viewport : viewports) {
+    for (UNUSED const vk::Viewport& viewport : viewports) {
         LOG_TRACE(PIPELINE, "  - {} x {}", viewport.width, viewport.height);
     }
     LOG_TRACE(PIPELINE, "Using {} scissor rectangles", scissorRectangles.size());
-    for (const vk::Rect2D& scissorRectangle : scissorRectangles) {
+    for (UNUSED const vk::Rect2D& scissorRectangle : scissorRectangles) {
         LOG_TRACE(PIPELINE, "  - {} , {}",scissorRectangle.offset.x, scissorRectangle.offset.y);
     }
 
@@ -670,7 +670,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     // ----- dynamic state tings ----- //
 
     LOG_TRACE(PIPELINE, "Using {} dynamic states", dynamicStates.size());
-    for (const vk::DynamicState& dynamicState : dynamicStates) {
+    for (UNUSED const vk::DynamicState& dynamicState : dynamicStates) {
         LOG_TRACE(PIPELINE, "  - {}", static_cast<uint32_t>(dynamicState));
     }
 
@@ -765,16 +765,16 @@ quartz::rendering::Pipeline::Pipeline(
     mp_vulkanVertexShaderModule(
         quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            util::FileSystem::getAbsoluteFilepathInProject(
-                "shader.vert.spv"
+            util::FileSystem::getCompiledShaderAbsoluteFilepath(
+                "shader.vert"
             )
         )
     ),
     mp_vulkanFragmentShaderModule(
         quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            util::FileSystem::getAbsoluteFilepathInProject(
-                "shader.frag.spv"
+            util::FileSystem::getCompiledShaderAbsoluteFilepath(
+                "shader.frag"
             )
         )
     ),

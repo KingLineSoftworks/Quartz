@@ -33,3 +33,9 @@ target_link_libraries(
         QUARTZ_SCENE_Doodad
         QUARTZ_SCENE_Light
 )
+
+add_dependencies(
+        QUARTZ_RENDERING_Pipeline
+
+        QUARTZ_RENDERING_Shaders
+)

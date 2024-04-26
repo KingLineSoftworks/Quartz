@@ -52,5 +52,4 @@ void main() {
 
     out_fragmentColor = in_color;
     out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
-
 }

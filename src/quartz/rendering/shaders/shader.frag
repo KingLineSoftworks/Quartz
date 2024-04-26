@@ -1,5 +1,8 @@
 #version 450
 
+#define MAX_NUMBER_TEXTURES -1
+#define MAX_NUMBER_MATERIALS -1
+
 // -----==== Uniforms from the CPU =====----- //
 
 // ... world level things ... //

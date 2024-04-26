@@ -101,7 +101,7 @@ vk::UniqueDeviceMemory
 quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(
     const vk::PhysicalDevice& physicalDevice,
     const vk::UniqueDevice& p_logicalDevice,
-    const uint32_t sizeBytes,
+    UNUSED const uint32_t sizeBytes, /** @todo 2024/04/23 Do we need this parameter? Are we getting the size correctly from mem requirements? */
     const vk::UniqueBuffer& p_logicalBuffer,
     const vk::MemoryPropertyFlags requiredMemoryProperties
 ) {

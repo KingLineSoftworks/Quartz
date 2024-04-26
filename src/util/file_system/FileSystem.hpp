@@ -9,7 +9,9 @@ namespace util {
 
 class util::FileSystem {
 public:
-    static std::string getAbsoluteFilepathInProject(const std::string& filepathInProject);
+    static std::string getAbsoluteFilepathInProjectDirectory(const std::string& filepathInProjectDirectory);
+    static std::string getAbsoluteFilepathInBinaryDirectory(const std::string& filepathInBinaryDirectory);
+    static std::string getCompiledShaderAbsoluteFilepath(const std::string& shaderSourceFilename);
     static std::vector<char> readBytesFromFile(const std::string& filepath);
     static std::string getFileExtension(const std::string& filepath);
 

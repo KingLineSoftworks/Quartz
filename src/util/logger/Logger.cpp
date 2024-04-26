@@ -285,7 +285,7 @@ void util::Logger::assertInitialized() {
 util::Logger::Level util::Logger::getLevel(const std::string& loggerName) {
     if (util::Logger::loggerNameLevelMap.count(loggerName) <= 0) {
         std::string levelErrorMessage = "No util::Logger found with name " + loggerName;
-        #if defined(BUILD_DEBUG) || defined(BUILD_TEST)
+        #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         std::cerr << levelErrorMessage << "\n";
         #endif
         throw std::runtime_error(levelErrorMessage);
