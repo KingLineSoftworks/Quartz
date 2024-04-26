@@ -98,11 +98,15 @@
 #define UNIQUE_NAME(baseName) CONCAT(baseName, __LINE__)
 
 /**
- * @brief Macros determining the quanitity of things we can have in a scene
+ * @brief Macros determining the quanitity of things we can have in a scene. These
+ * should be defined at compile time by cmake. If these aren't defined for us at
+ * compile time then we should set these to values that should invoke errors
  */
 
-// This should be defined at compile time by cmake. If it isn't then we should
-// define this to be -1 so it causes an error wherever we use it
-#ifndef QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES
-#define QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES -1
+#ifndef QUARTZ_MAX_NUMBER_TEXTURES
+#define QUARTZ_MAX_NUMBER_TEXTURES -1
+#endif
+
+#ifndef QUARTZ_MAX_NUMBER_MATERIALS
+#define QUARTZ_MAX_NUMBER_MATERIALS -1
 #endif

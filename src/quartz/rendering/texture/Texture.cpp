@@ -58,7 +58,7 @@ quartz::rendering::Texture::initializeMasterList(
         return;
     }
 
-    quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_BASE_COLOR_TEXTURES);
+    quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_TEXTURES);
 
     LOG_TRACE(TEXTURE, "Creating base color default texture");
     const std::vector<uint8_t> pixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta
