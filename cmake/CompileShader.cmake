@@ -2,10 +2,12 @@
 # Compile a shader to SPIR-V
 #====================================================================
 
-function(compile_shaders TARGET_NAME OUTPUT_DIR INPUT_DIR)
+function(compile_shaders TARGET_NAME INPUT_DIR)
     set(SHADER_SOURCE_FILE_LIST ${ARGN}) # the rest of the arguments (beyond output dir)
 
     message(STATUS "Compiling shaders: ${SHADER_SOURCE_FILE_LIST}")
+
+    set(OUTPUT_DIR ${CMAKE_SHADER_OUTPUT_DIRECTORY})
     message(DEBUG "  Outputting compiled: shaders to ${OUTPUT_DIR}")
 
     if (NOT SHADER_SOURCE_FILE_LIST)

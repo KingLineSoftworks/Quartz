@@ -20,6 +20,12 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/spv)
+file(MAKE_DIRECTORY ${CMAKE_SHADER_OUTPUT_DIRECTORY})
+
 #====================================================================
 # Build type information
 #====================================================================
@@ -122,7 +128,11 @@ set_target_properties(
 # @todo: only add these for Quartz libraries. We don't want to be setting these for the
 #        vendor libraries. These should only be visible for Quartz and application
 
-add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+add_compile_definitions(
+    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
+    SHADER_BINARY_DIR="${CMAKE_SHADER_OUTPUT_DIRECTORY}"
+)
 
 set(MAX_NUMBER_TEXTURES 100)
 set(MAX_NUMBER_MATERIALS 100)

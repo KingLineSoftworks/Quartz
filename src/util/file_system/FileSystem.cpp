@@ -7,8 +7,18 @@
 #include "util/file_system/FileSystem.hpp"
 
 std::string
-util::FileSystem::getAbsoluteFilepathInProject(const std::string& filepathInProject) {
-    return std::string(PROJECT_ROOT_DIR) + std::string("/") + filepathInProject;
+util::FileSystem::getAbsoluteFilepathInProjectDirectory(const std::string& filepathInProjectDirectory) {
+    return std::string(PROJECT_ROOT_DIR) + std::string("/") + filepathInProjectDirectory;
+}
+
+std::string
+util::FileSystem::getAbsoluteFilepathInBinaryDirectory(const std::string& filepathInBinaryDirectory) {
+    return std::string(PROJECT_BINARY_DIR) + std::string("/") + filepathInBinaryDirectory;
+}
+
+std::string
+util::FileSystem::getCompiledShaderAbsoluteFilepath(const std::string& shaderSourceFilename) {
+    return std::string(SHADER_BINARY_DIR) + std::string("/") + shaderSourceFilename + std::string(".spv");
 }
 
 std::vector<char>

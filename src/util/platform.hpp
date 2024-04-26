@@ -26,8 +26,19 @@
 #endif
 
 /**
- * @brief 
+ * @brief Macros defining where the project's source root lives and where the
+ * compiled goods will be living.
  */
+
 #ifndef PROJECT_ROOT_DIR
 #define PROJECT_ROOT_DIR "<project root directory undefined>"
 #endif
+
+#ifndef PROJECT_BINARY_DIR
+#define PROJECT_BINARY_DIR "<project binary directory undefined>"
+#endif
+
+#ifndef SHADER_BINARY_DIR
+#define SHADER_BINARY_DIR "<shader binary directory undefined>"
+#endif
+

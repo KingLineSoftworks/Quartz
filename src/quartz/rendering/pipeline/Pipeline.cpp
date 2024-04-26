@@ -765,16 +765,16 @@ quartz::rendering::Pipeline::Pipeline(
     mp_vulkanVertexShaderModule(
         quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            util::FileSystem::getAbsoluteFilepathInProject(
-                "shader.vert.spv"
+            util::FileSystem::getCompiledShaderAbsoluteFilepath(
+                "shader.vert"
             )
         )
     ),
     mp_vulkanFragmentShaderModule(
         quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            util::FileSystem::getAbsoluteFilepathInProject(
-                "shader.frag.spv"
+            util::FileSystem::getCompiledShaderAbsoluteFilepath(
+                "shader.frag"
             )
         )
     ),
