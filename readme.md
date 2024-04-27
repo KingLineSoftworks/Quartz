@@ -1,3 +1,5 @@
+Testing with branch protection rule but no repository ruleset
+
 TESTING ONCE MORE
 
 Someone call the doctor, someone call the medic
