@@ -1,3 +1,5 @@
+Testing with a repo ruleset for master too
+
 Testing with branch protection rule but no repository ruleset
 
 TESTING ONCE MORE
