@@ -1,3 +1,5 @@
+Added restrict creations and restrict updates rules to repo ruleset
+
 Testing with a repo ruleset for master too
 
 Testing with branch protection rule but no repository ruleset
