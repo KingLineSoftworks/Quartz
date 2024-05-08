@@ -1,18 +1,1 @@
-Added restrict creations and restrict updates rules to repo ruleset
-
-Testing with a repo ruleset for master too
-
-Testing with branch protection rule but no repository ruleset
-
-TESTING ONCE MORE
-
-Someone call the doctor, someone call the medic
-Different kind of heartburn, wish I hadn't said it
-Tears come down like soft-serve, soft-serve
-Tears come down like soft-serve under my protection
-That's just muddy water, someone clean the septic
-They get sent to slaughter, need a couple seconds
-That's somebody's daughter, daughter
-That's somebody's daughter, that's somebody's best friend
-
-TESTING AGAIN
+Put on some [acid techno](https://soundcloud.com/intercell/kiki-at-intercell-acid-night-2020?si=ef2408dbdc3146369b2ea2264687329a&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing) or some [ambient dnb](https://soundcloud.com/deep-z-lost-in-heaven/lost-in-heaven-131-dnb-mix-april-2023-atmospheric-liquid-drum-and-bass?si=767ead2f66584ef2a8a62ac51ef785a2&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing) and get the fuck to work, son
