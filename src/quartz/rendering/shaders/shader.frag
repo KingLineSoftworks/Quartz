@@ -28,7 +28,7 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 // -----==== Input from vertex shader =====----- //
 
 layout(location = 0) in vec3 in_fragmentNormal;
-layout(location = 1) in vec3 in_fragmentColor;
+layout(location = 1) in vec3 in_fragmentColor; /** @todo 2024/05/07 This should be a vec4 and should be combined element-wise with the base colro we get from the texture we sample */
 layout(location = 2) in vec2 in_baseColorTextureCoordinate;
 
 // -----==== Output =====----- //

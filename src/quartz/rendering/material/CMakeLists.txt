@@ -16,6 +16,9 @@ target_link_libraries(
         QUARTZ_RENDERING_Material
 
         PUBLIC
+        glm
+
+        PUBLIC
         UTIL_Logger
 
         PUBLIC

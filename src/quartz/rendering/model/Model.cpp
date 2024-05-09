@@ -120,21 +120,26 @@ quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
     const int32_t localIndex,
     const quartz::rendering::Texture::Type textureType
 ) {
-    if (masterIndices.empty()) {
+    LOG_TRACE(MODEL, "  Getting texture with local index {} using master indices list of size {}", localIndex, masterIndices.size());
+
+    if (masterIndices.empty() || localIndex < 0) {
         switch (textureType) {
             case quartz::rendering::Texture::Type::BaseColor:
-                return quartz::rendering::Texture::getBaseColorDefaultIndex();
-            case quartz::rendering::Texture::Type::Normal:
-                return quartz::rendering::Texture::getNormalDefaultIndex();
-            case quartz::rendering::Texture::Type::Emission:
-                return quartz::rendering::Texture::getEmissionDefaultIndex();
+                LOG_TRACE(MODEL, "  Using default base color texture: {}", quartz::rendering::Texture::getBaseColorDefaultMasterIndex());
+                return quartz::rendering::Texture::getBaseColorDefaultMasterIndex();
             case quartz::rendering::Texture::Type::MetallicRoughness:
-                return quartz::rendering::Texture::getMetallicRoughnessDefaultIndex();
+                LOG_TRACE(MODEL, "  Using default metallic roughness texture: {}", quartz::rendering::Texture::getMetallicRoughnessDefaultMasterIndex());
+                return quartz::rendering::Texture::getMetallicRoughnessDefaultMasterIndex();
+            case quartz::rendering::Texture::Type::Normal:
+                LOG_TRACE(MODEL, "  Using default normal texture: {}", quartz::rendering::Texture::getNormalDefaultMasterIndex());
+                return quartz::rendering::Texture::getNormalDefaultMasterIndex();
+            case quartz::rendering::Texture::Type::Emission:
+                LOG_TRACE(MODEL, "  Using default emission texture: {}", quartz::rendering::Texture::getEmissionDefaultMasterIndex());
+                return quartz::rendering::Texture::getEmissionDefaultMasterIndex();
+            case quartz::rendering::Texture::Type::Occlusion:
+                LOG_TRACE(MODEL, "  Using default occlusion texture: {}", quartz::rendering::Texture::getOcclusionDefaultMasterIndex());
+                return quartz::rendering::Texture::getOcclusionDefaultMasterIndex();
         }
-    }
-
-    if (localIndex < 0) {
-        return masterIndices[0];
     }
 
     return masterIndices[localIndex];
@@ -156,7 +161,9 @@ quartz::rendering::Model::getTextureMasterIndex(
 
     if (iterator != gltfMaterial.values.end()) {
         localIndex = iterator->second.TextureIndex();
-        LOG_TRACE(MODEL, "  Found base color texture local index {}", localIndex);
+        LOG_TRACE(MODEL, "  Found {} texture local index {}", textureTypeString, localIndex);
+    } else {
+        LOG_TRACE(MODEL, "  Did not find local {} texture", textureTypeString);
     }
 
     const uint32_t masterIndex = quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
@@ -182,6 +189,7 @@ quartz::rendering::Model::loadMaterials(
         gltfModel
     );
 
+    LOG_TRACE(MODEL, "Creating list of materials, initialized with a default material");
     std::vector<quartz::rendering::Material> materials = {
         {} // a default material
     };
@@ -198,6 +206,11 @@ quartz::rendering::Model::loadMaterials(
             masterIndices,
             quartz::rendering::Texture::Type::BaseColor
         );
+        const uint32_t metallicRoughnessMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
+            gltfMaterial,
+            masterIndices,
+            quartz::rendering::Texture::Type::MetallicRoughness
+        );
         const uint32_t normalMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
             masterIndices,
@@ -208,17 +221,24 @@ quartz::rendering::Model::loadMaterials(
             masterIndices,
             quartz::rendering::Texture::Type::Emission
         );
-        const uint32_t metallicRoughnessMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
+        const uint32_t occlusionMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
             masterIndices,
-            quartz::rendering::Texture::Type::MetallicRoughness
+            quartz::rendering::Texture::Type::Occlusion
         );
 
         materials.emplace_back(
             baseColorMasterIndex,
+            metallicRoughnessMasterIndex,
             normalMasterIndex,
             emissionMasterIndex,
-            metallicRoughnessMasterIndex
+            occlusionMasterIndex,
+
+            /** @todo 2024/05/07 Load these from the gltf model instead of using default values */
+            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            1.0f,
+            1.0f
         );
     }
 

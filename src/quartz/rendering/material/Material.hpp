@@ -1,5 +1,8 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 #include "quartz/rendering/Loggers.hpp"
 
 namespace quartz {
@@ -16,9 +19,14 @@ public: // member functions
     Material();
     Material(
         const uint32_t baseColorTextureMasterIndex,
+        const uint32_t metallicRoughnessTextureMasterIndex,
         const uint32_t normalTextureMasterIndex,
         const uint32_t emissionTextureMasterIndex,
-        const uint32_t metallicRoughnessTextureMasterIndex
+        const uint32_t occlusionTextureMasterIndex,
+        const glm::vec4& baseColorFactor,
+        const glm::vec3& emissiveFactor,
+        const float metallicFactor,
+        const float roughnessFactor
     );
     Material(const Material& other);
     Material(Material&& other);
@@ -27,15 +35,22 @@ public: // member functions
     USE_LOGGER(MATERIAL);
 
     uint32_t getBaseColorTextureMasterIndex() const { return m_baseColorTextureMasterIndex; }
+    uint32_t getMetallicRoughnessTextureMasterIndex() const { return m_metallicRoughnessTextureMasterIndex; }
     uint32_t getNormalTextureMasterIndex() const { return m_normalTextureMasterIndex; }
     uint32_t getEmissionTextureMasterIndex() const { return m_emissionTextureMasterIndex; }
-    uint32_t getMetallicRoughnessTextureMasterIndex() const { return m_metallicRoughnessTextureMasterIndex; }
+    uint32_t getOcclusionTextureMasterIndex() const { return m_occlusionTextureMasterIndex; }
 
 private: // static functions
 
 private: // member variables
     uint32_t m_baseColorTextureMasterIndex;
+    uint32_t m_metallicRoughnessTextureMasterIndex;
     uint32_t m_normalTextureMasterIndex;
     uint32_t m_emissionTextureMasterIndex;
-    uint32_t m_metallicRoughnessTextureMasterIndex;
+    uint32_t m_occlusionTextureMasterIndex;
+
+    glm::vec4 m_baseColorFactor;
+    glm::vec3 m_emissiveFactor;
+    float m_metallicFactor;
+    float m_roughnessFactor;
 };
