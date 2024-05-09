@@ -155,16 +155,27 @@ quartz::rendering::Model::getTextureMasterIndex(
 
     LOG_TRACE(MODEL, "Looking for {}", textureTypeString);
 
-    int32_t localIndex = -1;
+    int32_t localIndex = -1; // Will still be -1 if no texture of this type was provided to material
 
-    std::map<std::string, tinygltf::Parameter>::const_iterator iterator = gltfMaterial.values.find(textureTypeString);
-
-    if (iterator != gltfMaterial.values.end()) {
-        localIndex = iterator->second.TextureIndex();
-        LOG_TRACE(MODEL, "  Found {} texture local index {}", textureTypeString, localIndex);
-    } else {
-        LOG_TRACE(MODEL, "  Did not find local {} texture", textureTypeString);
+    switch(textureType) {
+        case quartz::rendering::Texture::Type::BaseColor:
+            localIndex = gltfMaterial.pbrMetallicRoughness.baseColorTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::MetallicRoughness:
+            localIndex = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::Normal:
+            localIndex = gltfMaterial.normalTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::Emission:
+            localIndex = gltfMaterial.emissiveTexture.index;
+            break;
+        case quartz::rendering::Texture::Type::Occlusion:
+            localIndex = gltfMaterial.occlusionTexture.index;
+            break;
     }
+
+    LOG_TRACE(MODEL, "  Got {} local index of {} from gltf material", textureTypeString, localIndex);
 
     const uint32_t masterIndex = quartz::rendering::Model::getMasterTextureIndexFromLocalIndex(
         masterIndices,
@@ -227,18 +238,35 @@ quartz::rendering::Model::loadMaterials(
             quartz::rendering::Texture::Type::Occlusion
         );
 
+        const std::vector<double>& baseColorFactorVector = gltfMaterial.pbrMetallicRoughness.baseColorFactor; // assuming length == 4
+        const glm::vec4 baseColorFactor = glm::vec4(
+            baseColorFactorVector[0],
+            baseColorFactorVector[1],
+            baseColorFactorVector[2],
+            baseColorFactorVector[3]
+        );
+
+        const std::vector<double>& emissiveFactorVector = gltfMaterial.emissiveFactor; // assuming length == 3
+        const glm::vec3 emissiveFactor = glm::vec3(
+            emissiveFactorVector[0],
+            emissiveFactorVector[1],
+            emissiveFactorVector[2]
+        );
+
+        const double metallicFactor = gltfMaterial.pbrMetallicRoughness.metallicFactor;
+
+        const double roughnessFactor = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
+
         materials.emplace_back(
             baseColorMasterIndex,
             metallicRoughnessMasterIndex,
             normalMasterIndex,
             emissionMasterIndex,
             occlusionMasterIndex,
-
-            /** @todo 2024/05/07 Load these from the gltf model instead of using default values */
-            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            1.0f,
-            1.0f
+            baseColorFactor,
+            emissiveFactor,
+            metallicFactor,
+            roughnessFactor
         );
     }
 
