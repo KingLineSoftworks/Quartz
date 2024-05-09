@@ -15,6 +15,17 @@ namespace rendering {
  * @brief Based on GLTF 2.0 materials specified <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material">here</a>
  */
 class quartz::rendering::Material {
+public: // enums
+    enum class AlphaMode {
+        Opaque = 0,
+        Mask = 1,
+        Blend = 2
+    };
+
+public: // static functions
+    static std::string getAlphaModeGLTFString(const quartz::rendering::Material::AlphaMode mode);
+    static quartz::rendering::Material::AlphaMode getAlphaModeFromGLTFString(const std::string& modeString);
+
 public: // member functions
     Material();
     Material(
@@ -26,7 +37,10 @@ public: // member functions
         const glm::vec4& baseColorFactor,
         const glm::vec3& emissiveFactor,
         const float metallicFactor,
-        const float roughnessFactor
+        const float roughnessFactor,
+        const quartz::rendering::Material::AlphaMode alphaMode,
+        const double alphaCutoff,
+        const bool doubleSided
     );
     Material(const Material& other);
     Material(Material&& other);
@@ -53,4 +67,8 @@ private: // member variables
     glm::vec3 m_emissiveFactor;
     float m_metallicFactor;
     float m_roughnessFactor;
+
+    quartz::rendering::Material::AlphaMode m_alphaMode;
+    double m_alphaCutoff;
+    bool m_doubleSided;
 };

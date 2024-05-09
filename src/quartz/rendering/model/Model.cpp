@@ -257,6 +257,12 @@ quartz::rendering::Model::loadMaterials(
 
         const double roughnessFactor = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
 
+        const quartz::rendering::Material::AlphaMode alphaMode = quartz::rendering::Material::getAlphaModeFromGLTFString(gltfMaterial.alphaMode);
+
+        const double alphaCutoff = gltfMaterial.alphaCutoff;
+
+        const bool doubleSided = gltfMaterial.doubleSided;
+
         materials.emplace_back(
             baseColorMasterIndex,
             metallicRoughnessMasterIndex,
@@ -266,7 +272,10 @@ quartz::rendering::Model::loadMaterials(
             baseColorFactor,
             emissiveFactor,
             metallicFactor,
-            roughnessFactor
+            roughnessFactor,
+            alphaMode,
+            alphaCutoff,
+            doubleSided
         );
     }
 

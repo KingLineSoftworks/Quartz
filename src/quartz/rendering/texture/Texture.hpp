@@ -17,7 +17,6 @@ namespace rendering {
 
 class quartz::rendering::Texture {
 public: // enums
-    /** @todo 2024/05/07 Add occlusion texture type */
     enum class Type {
         BaseColor = 0,
         MetallicRoughness = 1,
