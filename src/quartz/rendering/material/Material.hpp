@@ -46,6 +46,8 @@ public: // member functions
     Material(Material&& other);
     ~Material();
 
+    Material& operator=(const Material& other);
+
     USE_LOGGER(MATERIAL);
 
     uint32_t getBaseColorTextureMasterIndex() const { return m_baseColorTextureMasterIndex; }

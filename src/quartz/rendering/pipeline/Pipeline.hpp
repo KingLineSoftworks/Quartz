@@ -19,11 +19,14 @@
 namespace quartz {
 namespace rendering {
     struct CameraUniformBufferObject;
-    struct ModelUniformBufferObject;
     class Pipeline;
 }
 }
 
+/**
+ * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
+ *   instead of creating a copy into this weird little struct
+ */
 struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
@@ -35,17 +38,6 @@ public: // member functions
 public: // member variables
     alignas(16) glm::mat4 viewMatrix;
     alignas(16) glm::mat4 projectionMatrix;
-};
-
-struct quartz::rendering::ModelUniformBufferObject {
-public: // member functions
-    ModelUniformBufferObject() = default;
-    ModelUniformBufferObject(
-        const glm::mat4 modelMatrix_
-    );
-
-public: // member variables
-    alignas(16) glm::mat4 modelMatrix;
 };
 
 class quartz::rendering::Pipeline {
@@ -118,7 +110,7 @@ private: // static functions
     static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-        const std::array<vk::VertexInputAttributeDescription, 4> vertexInputAttributeDescriptions,
+        const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
         const std::vector<vk::Viewport> viewports,
         const std::vector<vk::Rect2D> scissorRectangles,
         const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -133,7 +125,7 @@ private: // member variables
     const uint32_t m_maxNumFramesInFlight;
     uint32_t m_currentInFlightFrameIndex;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
-    std::array<vk::VertexInputAttributeDescription, 4> m_vulkanVertexInputAttributeDescriptions;
+    std::vector<vk::VertexInputAttributeDescription> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
     std::vector<vk::Rect2D> m_vulkanScissorRectangles;
     std::vector<vk::PipelineColorBlendAttachmentState> m_vulkanColorBlendAttachmentStates;

@@ -5,6 +5,32 @@
 #include "quartz/rendering/model/Vertex.hpp"
 
 std::string
+quartz::rendering::Vertex::getAttributeNameString(
+    const quartz::rendering::Vertex::AttributeType attributeType
+) {
+    switch (attributeType) {
+        case quartz::rendering::Vertex::AttributeType::Position:
+            return "Position";
+        case quartz::rendering::Vertex::AttributeType::Normal:
+            return "Normal";
+        case quartz::rendering::Vertex::AttributeType::Tangent:
+            return "Tangent";
+        case quartz::rendering::Vertex::AttributeType::Color:
+            return "Color";
+        case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+            return "Base Color Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
+            return "Metallic Roughness Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+            return "Normal Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
+            return "Emission Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
+            return "Occlusion Texture Coordinate";
+    }
+}
+
+std::string
 quartz::rendering::Vertex::getAttributeGLTFString(
     const quartz::rendering::Vertex::AttributeType type
 ) {
@@ -13,9 +39,15 @@ quartz::rendering::Vertex::getAttributeGLTFString(
             return "POSITION";
         case quartz::rendering::Vertex::AttributeType::Normal:
             return "NORMAL";
+        case quartz::rendering::Vertex::AttributeType::Tangent:
+            return "TANGENT";
         case quartz::rendering::Vertex::AttributeType::Color:
             return "COLOR_0";
         case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
             return "TEXCOORD_0";
     }
 }
@@ -31,12 +63,9 @@ quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
     return vertexInputBindingDescription;
 }
 
-std::array<vk::VertexInputAttributeDescription, 4>
+std::vector<vk::VertexInputAttributeDescription>
 quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
-    std::array<
-        vk::VertexInputAttributeDescription,
-        4
-    > vertexInputAttributeDescriptions = {
+    std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription(
             0,
             0,
@@ -53,13 +82,43 @@ quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
             2,
             0,
             vk::Format::eR32G32B32Sfloat,
-            offsetof(quartz::rendering::Vertex, color)
+            offsetof(quartz::rendering::Vertex, tangent)
         ),
         vk::VertexInputAttributeDescription(
             3,
             0,
+            vk::Format::eR32G32B32Sfloat,
+            offsetof(quartz::rendering::Vertex, color)
+        ),
+        vk::VertexInputAttributeDescription(
+            4,
+            0,
             vk::Format::eR32G32Sfloat,
             offsetof(quartz::rendering::Vertex, baseColorTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            5,
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, metallicRoughnessTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            6,
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, normalTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            7,
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, emissionTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            8,
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, occlusionTextureCoordinate)
         )
     };
 

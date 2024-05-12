@@ -32,6 +32,18 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
                 LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
                 break;
+            case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default metallic roughness texture");
+                break;
+            case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture");
+                break;
+            case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default emission texture");
+                break;
+            case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default occlusion texture");
+                break;
             default:
                 break;
         }
@@ -94,12 +106,36 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
                 verticesToPopulate[i].normal = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
+            case quartz::rendering::Vertex::AttributeType::Tangent: {
+                /**
+                 * @brief This should be the last one populated. We want to calculate the tangents
+                 *   using the positions and normals of all of the other vertices
+                 */
+                verticesToPopulate[i].tangent = glm::make_vec3(&p_data[i * byteStride]);
+                break;
+            }
             case quartz::rendering::Vertex::AttributeType::Color: {
                 verticesToPopulate[i].color = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate: {
                 verticesToPopulate[i].baseColorTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate: {
+                verticesToPopulate[i].metallicRoughnessTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate: {
+                verticesToPopulate[i].normalTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate: {
+                verticesToPopulate[i].emissionTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
+                break;
+            }
+            case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate: {
+                verticesToPopulate[i].occlusionTextureCoordinate = glm::make_vec2(&p_data[i * byteStride]);
                 break;
             }
         }

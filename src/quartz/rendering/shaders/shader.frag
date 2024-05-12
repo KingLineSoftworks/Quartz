@@ -22,14 +22,18 @@ layout(binding = 3) uniform sampler baseColorTextureSampler;
 layout(binding = 4) uniform texture2D baseColorTextures[100];
 
 layout(push_constant) uniform perObjectFragmentPushConstant {
-    layout(offset = 64)uint baseColorTextureID;
+    layout(offset = 64 )uint baseColorTextureID;
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
 
-layout(location = 0) in vec3 in_fragmentNormal;
-layout(location = 1) in vec3 in_fragmentColor; /** @todo 2024/05/07 This should be a vec4 and should be combined element-wise with the base colro we get from the texture we sample */
-layout(location = 2) in vec2 in_baseColorTextureCoordinate;
+layout(location = 0) in mat3 in_TBN;
+layout(location = 3) in vec3 in_color; /** @todo 2024/05/11 How do we use this with the base color and base color texture from the material??????? */
+layout(location = 4) in vec2 in_baseColorTextureCoordinate;
+layout(location = 5) in vec2 in_metallicRoughnessTextureCoordinate;
+layout(location = 6) in vec2 in_normalTextureCoordinate;
+layout(location = 7) in vec2 in_emissionTextureCoordinate;
+layout(location = 8) in vec2 in_occlusionTextureCoordinate;
 
 // -----==== Output =====----- //
 
@@ -52,10 +56,12 @@ void main() {
 
     // ... directional light ... //
 
+    vec3 fragmentNormal = in_TBN[2];
+
     vec3 fragmentToLightDirection = normalize(-directionalLight.direction);
 
     float directionalLightImpact = max(
-        dot(in_fragmentNormal, fragmentToLightDirection),
+        dot(fragmentNormal, fragmentToLightDirection),
         0.0
     );
 

@@ -166,3 +166,35 @@ quartz::rendering::Material::Material(
 quartz::rendering::Material::~Material() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
+
+quartz::rendering::Material& quartz::rendering::Material::operator=(
+    const quartz::rendering::Material& other
+) {
+    if (&other == this) {
+        return *this;
+    }
+
+    LOG_FUNCTION_CALL_TRACEthis(
+        "base color {}, metallic roughness {}, normal {}, emission {}, occlusion {}",
+        other.m_baseColorTextureMasterIndex,
+        other.m_metallicRoughnessTextureMasterIndex,
+        other.m_normalTextureMasterIndex,
+        other.m_emissionTextureMasterIndex,
+        other.m_occlusionTextureMasterIndex
+    );
+
+    m_baseColorTextureMasterIndex = other.m_baseColorTextureMasterIndex;
+    m_metallicRoughnessTextureMasterIndex = other.m_metallicRoughnessTextureMasterIndex;
+    m_normalTextureMasterIndex = other.m_normalTextureMasterIndex;
+    m_emissionTextureMasterIndex = other.m_emissionTextureMasterIndex;
+    m_occlusionTextureMasterIndex = other.m_occlusionTextureMasterIndex;
+    m_baseColorFactor = other.m_baseColorFactor;
+    m_emissiveFactor = other.m_emissiveFactor;
+    m_metallicFactor = other.m_metallicFactor;
+    m_roughnessFactor = other.m_roughnessFactor;
+    m_alphaMode = other.m_alphaMode;
+    m_alphaCutoff = other.m_alphaCutoff;
+    m_doubleSided = other.m_doubleSided;
+
+    return *this;
+}

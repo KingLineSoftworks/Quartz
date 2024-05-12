@@ -200,10 +200,12 @@ quartz::rendering::Model::loadMaterials(
         gltfModel
     );
 
-    LOG_TRACE(MODEL, "Creating list of materials, initialized with a default material");
-    std::vector<quartz::rendering::Material> materials = {
-        {} // a default material
-    };
+    LOG_TRACE(MODEL, "Creating list of materials");
+    std::vector<quartz::rendering::Material> materials;
+    LOG_TRACE(MODEL, "Reserving space for {} elements in materials list", gltfModel.materials.size());
+    materials.reserve(gltfModel.materials.size());
+    LOG_TRACE(MODEL, "Initializing materials list with a default material");
+    materials.push_back({});
 
     LOG_TRACE(MODEL, "Processing {} materials", gltfModel.materials.size());
     for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
@@ -263,7 +265,14 @@ quartz::rendering::Model::loadMaterials(
 
         const bool doubleSided = gltfMaterial.doubleSided;
 
-        materials.emplace_back(
+        LOG_TRACE(MODEL, "Using texture master indices:");
+        LOG_TRACE(MODEL, "  Base Color         : {}", baseColorMasterIndex);
+        LOG_TRACE(MODEL, "  Metallic Roughness : {}", metallicRoughnessMasterIndex);
+        LOG_TRACE(MODEL, "  Normal             : {}", normalMasterIndex);
+        LOG_TRACE(MODEL, "  Emission           : {}", emissionMasterIndex);
+        LOG_TRACE(MODEL, "  Occlusion          : {}", occlusionMasterIndex);
+
+        quartz::rendering::Material currentMaterial(
             baseColorMasterIndex,
             metallicRoughnessMasterIndex,
             normalMasterIndex,
@@ -277,6 +286,10 @@ quartz::rendering::Model::loadMaterials(
             alphaCutoff,
             doubleSided
         );
+
+        LOG_TRACE(MODEL, "Pushing material to back of the list");
+        materials.push_back(currentMaterial);
+        LOG_TRACE(MODEL, "Materials list is now of size {}", materials.size());
     }
 
     return materials;

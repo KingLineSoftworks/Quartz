@@ -11,18 +11,16 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/model/Vertex.hpp"
 
+/**
+ * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
+ *   instead of creating a copy into this weird little struct
+ */
 quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
     const glm::mat4 viewMatrix_,
     const glm::mat4 projectionMatrix_
 ) :
     viewMatrix(viewMatrix_),
     projectionMatrix(projectionMatrix_)
-{}
-
-quartz::rendering::ModelUniformBufferObject::ModelUniformBufferObject(
-    const glm::mat4 modelMatrix_
-) :
-    modelMatrix(modelMatrix_)
 {}
 
 vk::UniqueShaderModule
@@ -32,9 +30,7 @@ quartz::rendering::Pipeline::createVulkanShaderModulePtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{}", filepath);
 
-    const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(
-        filepath
-    );
+    const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(filepath);
 
     vk::ShaderModuleCreateInfo shaderModuleCreateInfo(
         {},
@@ -42,9 +38,7 @@ quartz::rendering::Pipeline::createVulkanShaderModulePtr(
         reinterpret_cast<const uint32_t*>(shaderBytes.data())
     );
 
-    vk::UniqueShaderModule p_shaderModule = p_logicalDevice->createShaderModuleUnique(
-        shaderModuleCreateInfo
-    );
+    vk::UniqueShaderModule p_shaderModule = p_logicalDevice->createShaderModuleUnique(shaderModuleCreateInfo);
 
     if (!p_shaderModule) {
         LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::ShaderModule");
@@ -547,7 +541,7 @@ vk::UniquePipeline
 quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-    const std::array<vk::VertexInputAttributeDescription, 4> vertexInputAttributeDescriptions,
+    const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
     const std::vector<vk::Viewport> viewports,
     const std::vector<vk::Rect2D> scissorRectangles,
     const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,

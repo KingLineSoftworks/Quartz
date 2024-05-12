@@ -74,7 +74,7 @@ void quartz::Application::run() {
             // =============================================
             // boxes
             // =============================================
-
+//
 //            {
 //                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
 //                {
@@ -90,7 +90,7 @@ void quartz::Application::run() {
             // =============================================
 
             // first row
-
+//
 //            {
 //                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
 //                {
@@ -109,18 +109,18 @@ void quartz::Application::run() {
 //                    {20.0f, 20.0f, 20.0f}
 //                }
 //            },
-//            {
-//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-//                {
-//                    {5.0f, 0.0f, 0.0f},
-//                    0.0f,
-//                    {0.0f, 0.0f, 1.0f},
-//                    {1.0f, 1.0f, 1.0f}
-//                }
-//            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
+                {
+                    {5.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {1.0f, 1.0f, 1.0f}
+                }
+            },
 
             // second row
-
+//
 //            {
 //                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
 //                {
@@ -130,15 +130,15 @@ void quartz::Application::run() {
 //                    {0.005f, 0.005f, 0.005f}
 //                },
 //            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-                {
-                    {-5.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
+//            {
+//                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
+//                {
+//                    {-5.0f, 0.0f, 5.0f},
+//                    0.0f,
+//                    {0.0f, 0.0f, 1.0f},
+//                    {1.0f, 1.0f, 1.0f}
+//                }
+//            },
         };
 
     LOG_INFOthis("Loading scene");
