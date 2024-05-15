@@ -84,7 +84,7 @@ quartz::rendering::Context::draw(
     m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
     m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight());
     m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight());
-    m_renderingPipeline.updateMaterialArrayUniformBuffer();
+    m_renderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment);
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,

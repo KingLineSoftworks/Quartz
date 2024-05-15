@@ -344,6 +344,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
          *   index they are for each frame
          */
 
+        // ---+++ the camera +++--- //
+
         const uint32_t cameraIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
         LOG_TRACE(PIPELINE, "Allocating space for camera UBO using buffer at index {}", cameraIndex);
         vk::DescriptorBufferInfo cameraUBOBufferInfo(
@@ -361,6 +363,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             &cameraUBOBufferInfo,
             {}
         );
+
+        // ---+++ the ambient light +++--- //
 
         const uint32_t ambientLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
         LOG_TRACE(PIPELINE, "Allocating space for ambient light using buffer at index {}", ambientLightIndex);
@@ -380,6 +384,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
+        // ---+++ the directional light +++--- //
+
         const uint32_t directionalLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
         LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
         vk::DescriptorBufferInfo directionalLightInfo(
@@ -398,6 +404,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
+        // ---+++ the texture sampler +++--- //
+
         LOG_TRACE(PIPELINE, "Allocating space for base color texture sampler");
         vk::DescriptorImageInfo baseColorTextureSamplerImageInfo(
             *(texturePtrs[0]->getVulkanSamplerPtr()),
@@ -414,6 +422,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {},
             {}
         );
+
+        // ---+++ the texture array +++--- //
 
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
         std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
@@ -446,20 +456,21 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
+        // ---+++ the dynamic material UBO +++--- //
+
         const uint32_t materialArrayIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
         LOG_TRACE(PIPELINE, "Allocating space for materials array dynamic UBO at index {}", materialArrayIndex);
 
-        uint32_t dynamicUBOAlignment = sizeof(quartz::rendering::MaterialUniformBufferObject);
-        LOG_TRACE(PIPELINE, "Using un-adjusted UBO alignment of 0x{:X} bytes", dynamicUBOAlignment);
-        if (minUniformBufferOffsetAlignment > 0) {
-            dynamicUBOAlignment = (dynamicUBOAlignment + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1);
-        }
-        LOG_TRACE(PIPELINE, "Using    adjusted UBO alignment of 0x{:X} bytes", dynamicUBOAlignment);
+        LOG_TRACE(PIPELINE, "Using un-adjusted material stride of 0x{:X} bytes", sizeof(quartz::rendering::MaterialUniformBufferObject));
+        const uint32_t materialByteStride = minUniformBufferOffsetAlignment > 0 ?
+            (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+            sizeof(quartz::rendering::MaterialUniformBufferObject);
+        LOG_TRACE(PIPELINE, "Using    adjusted material stride of 0x{:X} bytes", materialByteStride);
 
         vk::DescriptorBufferInfo materialArrayUBOBufferInfo(
             *(uniformBuffers[materialArrayIndex].getVulkanLogicalBufferPtr()),
             0,
-            dynamicUBOAlignment
+            materialByteStride
         );
 
         vk::WriteDescriptorSet materialArrayUBODescriptorWriteSet(
@@ -472,6 +483,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             &materialArrayUBOBufferInfo,
             {}
         );
+
+        // ---+++ all of the write descriptor sets used to +++--- //
 
         LOG_TRACE(PIPELINE, "Consolidating write descriptor sets");
         std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
@@ -1015,8 +1028,10 @@ quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
 }
 
 void
-quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer() {
-    std::vector<quartz::rendering::Material> materials(3);
+quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
+    const uint32_t minUniformBufferOffsetAlignment
+) {
+    std::vector<quartz::rendering::Material> materials(19);
 
     std::vector<quartz::rendering::MaterialUniformBufferObject> materialUBOs;
     for (const quartz::rendering::Material& material : materials) {
@@ -1039,9 +1054,21 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer() {
     }
 
     const uint32_t materialArrayIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
-    memcpy(
-        m_uniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr(),
-        materialUBOs.data(),
-        sizeof(quartz::rendering::MaterialUniformBufferObject) * materialUBOs.size()
-    );
+    void* p_mappedBuffer = m_uniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
+
+    for (uint32_t i = 0; i < materialUBOs.size(); ++i) {
+        uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
+            (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+            sizeof(quartz::rendering::MaterialUniformBufferObject);
+        materialByteOffset *= i;
+
+        void* p_currentMaterialSlot = reinterpret_cast<uint8_t*>(p_mappedBuffer) + materialByteOffset;
+
+        memcpy(
+             p_currentMaterialSlot,
+            &(materialUBOs[i]),
+            sizeof(quartz::rendering::MaterialUniformBufferObject)
+        );
+    }
+
 }

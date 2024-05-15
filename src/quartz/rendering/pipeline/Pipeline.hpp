@@ -108,7 +108,7 @@ public: // member functions
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
-    void updateMaterialArrayUniformBuffer();
+    void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions

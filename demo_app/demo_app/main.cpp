@@ -55,7 +55,7 @@ int main() {
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::trace},
-        {"SWAPCHAIN", util::Logger::Level::info},
+        {"SWAPCHAIN", util::Logger::Level::trace},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
         {"VULKANUTIL", util::Logger::Level::info},
