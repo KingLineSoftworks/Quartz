@@ -68,7 +68,7 @@ quartz::rendering::Texture::initializeMasterList(
      *   But magenta is very easy to spot, so this is probably fine for now.
      */
     LOG_TRACE(TEXTURE, "Creating base color default texture");
-    const std::vector<uint8_t> baseColorPixel = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta
+    const std::vector<uint8_t> baseColorPixel = { 0xFF, 0xFF, 0xFF, 0xFF }; // Default to white so when we element-wise multiply it has no effect
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault = std::make_shared<quartz::rendering::Texture>(
         renderingDevice,
         1,

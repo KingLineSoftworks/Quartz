@@ -84,6 +84,7 @@ quartz::rendering::Context::draw(
     m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
     m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight());
     m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight());
+    m_renderingPipeline.updateMaterialArrayUniformBuffer();
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
@@ -99,6 +100,7 @@ quartz::rendering::Context::draw(
 
     for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
         m_renderingSwapchain.recordDoodadToDrawingCommandBuffer(
+            m_renderingDevice,
             m_renderingPipeline,
             doodad,
             m_renderingPipeline.getCurrentInFlightFrameIndex()

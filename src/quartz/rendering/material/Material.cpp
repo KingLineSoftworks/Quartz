@@ -70,7 +70,7 @@ quartz::rendering::Material::Material(
     const float metallicFactor,
     const float roughnessFactor,
     const quartz::rendering::Material::AlphaMode alphaMode,
-    const double alphaCutoff,
+    const float alphaCutoff,
     const bool doubleSided
 ) :
     m_baseColorTextureMasterIndex(baseColorTextureMasterIndex),

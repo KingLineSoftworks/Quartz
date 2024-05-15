@@ -261,7 +261,7 @@ quartz::rendering::Model::loadMaterials(
 
         const quartz::rendering::Material::AlphaMode alphaMode = quartz::rendering::Material::getAlphaModeFromGLTFString(gltfMaterial.alphaMode);
 
-        const double alphaCutoff = gltfMaterial.alphaCutoff;
+        const float alphaCutoff = gltfMaterial.alphaCutoff;
 
         const bool doubleSided = gltfMaterial.doubleSided;
 

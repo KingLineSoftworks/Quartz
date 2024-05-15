@@ -512,19 +512,34 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
 
 void
 quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
+    const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Pipeline& renderingPipeline,
     const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
+    /** @todo 2024/05/04 We need to get the material index from the doodad directly */
+    static uint32_t doodadIndex = 0;
+    const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
+    const uint32_t preDynamicUBOAlignment = sizeof(quartz::rendering::MaterialUniformBufferObject);
+    uint32_t dynamicUBOAlignment = preDynamicUBOAlignment;
+    if (minUniformBufferOffsetAlignment > 0) {
+        dynamicUBOAlignment = (preDynamicUBOAlignment + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1);
+    }
+    dynamicUBOAlignment *= doodadIndex;
+    LOG_TRACE(PIPELINE, "Pre-adjusted UBO offset: 0x{:X} bytes | Adjusted UBO offset: 0x{:X} bytes", preDynamicUBOAlignment, dynamicUBOAlignment);
+
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *renderingPipeline.getVulkanPipelineLayoutPtr(),
         0,
         1,
         &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
-        0,
-        nullptr
+        1,
+        &dynamicUBOAlignment
     );
+
+    doodadIndex++;
+    doodadIndex = doodadIndex % QUARTZ_MAX_NUMBER_MATERIALS;
 
     std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
         std::deque(

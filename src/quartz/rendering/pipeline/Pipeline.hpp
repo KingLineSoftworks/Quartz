@@ -19,6 +19,7 @@
 namespace quartz {
 namespace rendering {
     struct CameraUniformBufferObject;
+    struct MaterialUniformBufferObject;
     class Pipeline;
 }
 }
@@ -38,6 +39,41 @@ public: // member functions
 public: // member variables
     alignas(16) glm::mat4 viewMatrix;
     alignas(16) glm::mat4 projectionMatrix;
+};
+
+struct quartz::rendering::MaterialUniformBufferObject {
+public: // member functions
+    MaterialUniformBufferObject() = default;
+    MaterialUniformBufferObject(
+        const uint32_t baseColorTextureMasterIndex_,
+        const uint32_t metallicRoughnessTextureMasterIndex_,
+        const uint32_t normalTextureMasterIndex_,
+        const uint32_t emissionTextureMasterIndex_,
+        const uint32_t occlusionTextureMasterIndex_,
+        const glm::vec4& baseColorFactor_,
+        const glm::vec3& emissiveFactor_,
+        const float metallicFactor_,
+        const float roughnessFactor_,
+        const uint32_t alphaMode_,
+        const float alphaCutoff_,
+        const bool doubleSided_
+    );
+
+public: // member variables
+    alignas(4) uint32_t baseColorTextureMasterIndex;
+    alignas(4) uint32_t metallicRoughnessTextureMasterIndex;
+    alignas(4) uint32_t normalTextureMasterIndex;
+    alignas(4) uint32_t emissionTextureMasterIndex;
+    alignas(4) uint32_t occlusionTextureMasterIndex;
+
+    alignas(16) glm::vec4 baseColorFactor;
+    alignas(16) glm::vec3 emissiveFactor;
+    alignas(4) float metallicFactor;
+    alignas(4) float roughnessFactor;
+
+    alignas(4) uint32_t alphaMode;
+    alignas(4) float alphaCutoff;
+    alignas(4) bool doubleSided;
 };
 
 class quartz::rendering::Pipeline {
@@ -72,6 +108,7 @@ public: // member functions
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
+    void updateMaterialArrayUniformBuffer();
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions
@@ -92,6 +129,7 @@ private: // static functions
     );
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
+        const uint32_t minUniformBufferOffsetAlignment,
         const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,

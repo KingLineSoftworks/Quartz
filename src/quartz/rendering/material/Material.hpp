@@ -16,7 +16,7 @@ namespace rendering {
  */
 class quartz::rendering::Material {
 public: // enums
-    enum class AlphaMode {
+    enum class AlphaMode : uint32_t {
         Opaque = 0,
         Mask = 1,
         Blend = 2
@@ -39,7 +39,7 @@ public: // member functions
         const float metallicFactor,
         const float roughnessFactor,
         const quartz::rendering::Material::AlphaMode alphaMode,
-        const double alphaCutoff,
+        const float alphaCutoff,
         const bool doubleSided
     );
     Material(const Material& other);
@@ -56,21 +56,33 @@ public: // member functions
     uint32_t getEmissionTextureMasterIndex() const { return m_emissionTextureMasterIndex; }
     uint32_t getOcclusionTextureMasterIndex() const { return m_occlusionTextureMasterIndex; }
 
+    const glm::vec4& getBaseColorFactor() const { return m_baseColorFactor; }
+    const glm::vec3& getEmissiveFactor() const { return m_emissiveFactor; }
+    float getMetallicFactor() const { return m_metallicFactor; }
+    float getRoughnessFactor() const { return m_roughnessFactor; }
+
+    quartz::rendering::Material::AlphaMode getAlphaMode() const { return m_alphaMode; }
+    float getAlphaCutoff() const { return m_alphaCutoff; }
+    float getDoubleSided() const { return m_doubleSided; }
+
 private: // static functions
 
 private: // member variables
-    uint32_t m_baseColorTextureMasterIndex;
-    uint32_t m_metallicRoughnessTextureMasterIndex;
-    uint32_t m_normalTextureMasterIndex;
-    uint32_t m_emissionTextureMasterIndex;
-    uint32_t m_occlusionTextureMasterIndex;
+    // 20 bytes of texture indices
+    alignas(4) uint32_t m_baseColorTextureMasterIndex;
+    alignas(4) uint32_t m_metallicRoughnessTextureMasterIndex;
+    alignas(4) uint32_t m_normalTextureMasterIndex;
+    alignas(4) uint32_t m_emissionTextureMasterIndex;
+    alignas(4) uint32_t m_occlusionTextureMasterIndex;
 
-    glm::vec4 m_baseColorFactor;
-    glm::vec3 m_emissiveFactor;
-    float m_metallicFactor;
-    float m_roughnessFactor;
+    // 40 bytes of factors
+    alignas(16) glm::vec4 m_baseColorFactor;
+    alignas(16) glm::vec3 m_emissiveFactor;
+    alignas(4) float m_metallicFactor;
+    alignas(4) float m_roughnessFactor;
 
-    quartz::rendering::Material::AlphaMode m_alphaMode;
-    double m_alphaCutoff;
-    bool m_doubleSided;
+    // 12 bytes of other
+    alignas(4) quartz::rendering::Material::AlphaMode m_alphaMode;
+    alignas(4) float m_alphaCutoff;
+    alignas(4) bool m_doubleSided;
 };
