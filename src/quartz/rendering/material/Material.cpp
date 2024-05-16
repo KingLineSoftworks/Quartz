@@ -262,7 +262,8 @@ quartz::rendering::Material::~Material() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-quartz::rendering::Material& quartz::rendering::Material::operator=(
+quartz::rendering::Material&
+quartz::rendering::Material::operator=(
     const quartz::rendering::Material& other
 ) {
     if (&other == this) {

@@ -248,33 +248,32 @@ quartz::rendering::Primitive::createStagedIndexBuffer(
     return stagedIndexBuffer;
 }
 
-const quartz::rendering::Material&
-quartz::rendering::Primitive::getMaterial(
+uint32_t
+quartz::rendering::Primitive::loadMaterialMasterIndex(
     const tinygltf::Primitive& gltfPrimitive,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
 
-    int32_t materialIndex = gltfPrimitive.material;
-    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material {}", materialIndex);
+    int32_t materialLocalIndex = gltfPrimitive.material;
+    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material at local index {}", materialLocalIndex);
 
-    if (materialIndex < 0) {
-        LOG_TRACE(MODEL_PRIMITIVE, "Actually using material 0 (default)");
-        return materials[0];
+    if (materialLocalIndex < 0) {
+        LOG_TRACE(MODEL_PRIMITIVE, "No material provided, so using default material");
+        return quartz::rendering::Material::getDefaultMaterialMasterIndex();
     }
 
-    materialIndex += 1;
-    LOG_TRACE(MODEL_PRIMITIVE, "Actually using material {}", materialIndex);
-    LOG_TRACE(MODEL_PRIMITIVE, "  (to account for default material at index 0)");
+    const uint32_t materialMasterIndex = materialMasterIndices[materialLocalIndex];
+    LOG_TRACE(MODEL_PRIMITIVE, "Material at local index {} gives master material {}", materialLocalIndex, materialMasterIndex);
 
-    return materials[materialIndex];
+    return materialMasterIndex;
 }
 
 quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) :
     m_indexCount(gltfModel.accessors[gltfPrimitive.indices].count),
     m_stagedVertexBuffer(
@@ -291,10 +290,10 @@ quartz::rendering::Primitive::Primitive(
             gltfPrimitive
         )
     ),
-    m_material(
-        quartz::rendering::Primitive::getMaterial(
+    m_materialMasterIndex(
+        quartz::rendering::Primitive::loadMaterialMasterIndex(
             gltfPrimitive,
-            materials
+            materialMasterIndices
         )
     )
 {
@@ -307,7 +306,7 @@ quartz::rendering::Primitive::Primitive(
     m_indexCount(other.m_indexCount),
     m_stagedVertexBuffer(std::move(other.m_stagedVertexBuffer)),
     m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer)),
-    m_material(other.m_material)
+    m_materialMasterIndex(other.m_materialMasterIndex)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

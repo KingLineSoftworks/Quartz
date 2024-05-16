@@ -20,7 +20,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Primitive& gltfPrimitive,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
     Primitive(Primitive&& other);
     ~Primitive();
@@ -30,7 +30,7 @@ public: // member functions
     uint32_t getIndexCount() const { return m_indexCount; }
     const quartz::rendering::StagedBuffer& getStagedVertexBuffer() const { return m_stagedVertexBuffer; }
     const quartz::rendering::StagedBuffer& getStagedIndexBuffer() const { return m_stagedIndexBuffer; }
-    const quartz::rendering::Material& getMaterial() const { return m_material; }
+    uint32_t getMaterialMasterIndex() const { return m_materialMasterIndex; }
 
 private: // static functions
     static void populateVerticesWithAttribute(
@@ -49,14 +49,14 @@ private: // static functions
         const tinygltf::Model& gltfModel,
         const tinygltf::Primitive& gltfPrimitive
     );
-    static const quartz::rendering::Material& getMaterial(
+    static uint32_t loadMaterialMasterIndex(
         const tinygltf::Primitive& gltfPrimitive,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
 
 private: // member variables
     uint32_t m_indexCount;
     quartz::rendering::StagedBuffer m_stagedVertexBuffer;
     quartz::rendering::StagedBuffer m_stagedIndexBuffer;
-    const quartz::rendering::Material& m_material;
+    const uint32_t m_materialMasterIndex;
 };

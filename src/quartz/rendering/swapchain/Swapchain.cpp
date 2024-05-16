@@ -548,10 +548,6 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
-            /**
-             * @todo 2024/05/04 We need to get the material index from the doodad directly via
-             *    doodad->model->scene->node->mesh->node->materialIndex
-             */
             static uint32_t primitiveIndex = 0;
             uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
                 (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
@@ -569,7 +565,8 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 &materialByteOffset
             );
 
-            uint32_t baseColorTextureIndex = primitive.getMaterial().getBaseColorTextureMasterIndex();
+            const uint32_t materialIndex = primitive.getMaterialMasterIndex();
+            uint32_t baseColorTextureIndex = quartz::rendering::Material::getMaterialPtr(materialIndex)->getBaseColorTextureMasterIndex();
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,

@@ -188,24 +188,22 @@ quartz::rendering::Model::getTextureMasterIndex(
     return masterIndex;
 }
 
-std::vector<quartz::rendering::Material>
-quartz::rendering::Model::loadMaterials(
+std::vector<uint32_t>
+quartz::rendering::Model::loadMaterialMasterIndices(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
-    std::vector<uint32_t> masterIndices = quartz::rendering::Model::loadTextures(
+    std::vector<uint32_t> masterTextureIndices = quartz::rendering::Model::loadTextures(
         renderingDevice,
         gltfModel
     );
 
     LOG_TRACE(MODEL, "Creating list of materials");
-    std::vector<quartz::rendering::Material> materials;
+    std::vector<uint32_t> masterMaterialIndices;
     LOG_TRACE(MODEL, "Reserving space for {} elements in materials list", gltfModel.materials.size());
-    materials.reserve(gltfModel.materials.size());
-    LOG_TRACE(MODEL, "Initializing materials list with a default material");
-    materials.push_back({});
+    masterMaterialIndices.reserve(gltfModel.materials.size());
 
     LOG_TRACE(MODEL, "Processing {} materials", gltfModel.materials.size());
     for (uint32_t i = 0; i < gltfModel.materials.size(); ++i) {
@@ -216,27 +214,27 @@ quartz::rendering::Model::loadMaterials(
 
         const uint32_t baseColorMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
-            masterIndices,
+            masterTextureIndices,
             quartz::rendering::Texture::Type::BaseColor
         );
         const uint32_t metallicRoughnessMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
-            masterIndices,
+            masterTextureIndices,
             quartz::rendering::Texture::Type::MetallicRoughness
         );
         const uint32_t normalMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
-            masterIndices,
+            masterTextureIndices,
             quartz::rendering::Texture::Type::Normal
         );
         const uint32_t emissionMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
-            masterIndices,
+            masterTextureIndices,
             quartz::rendering::Texture::Type::Emission
         );
         const uint32_t occlusionMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
-            masterIndices,
+            masterTextureIndices,
             quartz::rendering::Texture::Type::Occlusion
         );
 
@@ -272,7 +270,8 @@ quartz::rendering::Model::loadMaterials(
         LOG_TRACE(MODEL, "  Emission           : {}", emissionMasterIndex);
         LOG_TRACE(MODEL, "  Occlusion          : {}", occlusionMasterIndex);
 
-        quartz::rendering::Material currentMaterial(
+        uint32_t currentMaterialMasterIndex = quartz::rendering::Material::createMaterial(
+            renderingDevice,
             baseColorMasterIndex,
             metallicRoughnessMasterIndex,
             normalMasterIndex,
@@ -287,19 +286,27 @@ quartz::rendering::Model::loadMaterials(
             doubleSided
         );
 
-        LOG_TRACE(MODEL, "Pushing material to back of the list");
-        materials.push_back(currentMaterial);
-        LOG_TRACE(MODEL, "Materials list is now of size {}", materials.size());
+        LOG_TRACE(MODEL, "Pushing material with master index {} to back of the list", currentMaterialMasterIndex);
+        masterMaterialIndices.push_back(currentMaterialMasterIndex);
+        LOG_TRACE(MODEL, "Materials list is now of size {}", masterMaterialIndices.size());
+        for (uint32_t i = 0; i < masterMaterialIndices.size(); ++i) {
+            LOG_TRACE(MODEL, "  local index {} = master index {}", i, masterMaterialIndices[i]);
+        }
     }
 
-    return materials;
+    LOG_TRACE(MODEL, "Model's master material indices:");
+    for (uint32_t i = 0; i < masterMaterialIndices.size(); ++i) {
+        LOG_TRACE(MODEL, "  local index {} = master index {}", i, masterMaterialIndices[i]);
+    }
+
+    return masterMaterialIndices;
 }
 
 std::vector<quartz::rendering::Scene>
 quartz::rendering::Model::loadScenes(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
@@ -315,7 +322,7 @@ quartz::rendering::Model::loadScenes(
             renderingDevice,
             gltfModel,
             gltfScene,
-            materials
+            materialMasterIndices
         );
     }
 
@@ -326,9 +333,11 @@ quartz::rendering::Model::Model(
     const quartz::rendering::Device& renderingDevice,
     const std::string& objectFilepath
 ) :
-    m_gltfModel(quartz::rendering::Model::loadGLTFModel(objectFilepath)),
-    m_materials(
-        quartz::rendering::Model::loadMaterials(
+    m_gltfModel(
+        quartz::rendering::Model::loadGLTFModel(objectFilepath)
+    ),
+    m_materialMasterIndices(
+        quartz::rendering::Model::loadMaterialMasterIndices(
             renderingDevice,
             m_gltfModel
         )
@@ -342,7 +351,7 @@ quartz::rendering::Model::Model(
         quartz::rendering::Model::loadScenes(
             renderingDevice,
             m_gltfModel,
-            m_materials
+            m_materialMasterIndices
         )
     )
 {
@@ -351,7 +360,6 @@ quartz::rendering::Model::Model(
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
     m_gltfModel(other.m_gltfModel),
-    m_materials(std::move(other.m_materials)),
     m_defaultSceneIndex(other.m_defaultSceneIndex),
     m_scenes(std::move(other.m_scenes))
 {

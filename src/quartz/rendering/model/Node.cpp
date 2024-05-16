@@ -17,7 +17,7 @@ quartz::rendering::Node::loadChildrenNodePtrs(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Node& gltfNode,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
 
@@ -36,7 +36,7 @@ quartz::rendering::Node::loadChildrenNodePtrs(
             gltfModel,
             currentGltfNode,
             nullptr,
-            materials
+            materialMasterIndices
         ));
     }
 
@@ -95,7 +95,7 @@ quartz::rendering::Node::loadMeshPtr(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Node& gltfNode,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
 
@@ -113,7 +113,7 @@ quartz::rendering::Node::loadMeshPtr(
         renderingDevice,
         gltfModel,
         gltfMesh,
-        materials
+        materialMasterIndices
     );
 }
 
@@ -122,7 +122,7 @@ quartz::rendering::Node::Node(
     const tinygltf::Model& gltfModel,
     const tinygltf::Node& gltfNode,
     const quartz::rendering::Node* p_parent,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) :
     mp_parent(p_parent),
     m_childrenPtrs(
@@ -130,7 +130,7 @@ quartz::rendering::Node::Node(
             renderingDevice,
             gltfModel,
             gltfNode,
-            materials
+            materialMasterIndices
         )
     ),
     m_localTransformationMatrix(
@@ -143,7 +143,7 @@ quartz::rendering::Node::Node(
             renderingDevice,
             gltfModel,
             gltfNode,
-            materials
+            materialMasterIndices
         )
     )
 {

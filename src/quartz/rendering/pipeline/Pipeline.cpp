@@ -1031,25 +1031,23 @@ void
 quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
     const uint32_t minUniformBufferOffsetAlignment
 ) {
-    std::vector<quartz::rendering::Material> materials(19);
-
     std::vector<quartz::rendering::MaterialUniformBufferObject> materialUBOs;
-    for (const quartz::rendering::Material& material : materials) {
+    for (const std::shared_ptr<quartz::rendering::Material>& p_material : quartz::rendering::Material::getMasterMaterialList()) {
         materialUBOs.emplace_back(
-            material.getBaseColorTextureMasterIndex(),
-            material.getMetallicRoughnessTextureMasterIndex(),
-            material.getNormalTextureMasterIndex(),
-            material.getEmissionTextureMasterIndex(),
-            material.getOcclusionTextureMasterIndex(),
+            p_material->getBaseColorTextureMasterIndex(),
+            p_material->getMetallicRoughnessTextureMasterIndex(),
+            p_material->getNormalTextureMasterIndex(),
+            p_material->getEmissionTextureMasterIndex(),
+            p_material->getOcclusionTextureMasterIndex(),
 
-            material.getBaseColorFactor(),
-            material.getEmissiveFactor(),
-            material.getMetallicFactor(),
-            material.getRoughnessFactor(),
+            p_material->getBaseColorFactor(),
+            p_material->getEmissiveFactor(),
+            p_material->getMetallicFactor(),
+            p_material->getRoughnessFactor(),
 
-            static_cast<uint32_t>(material.getAlphaMode()),
-            material.getAlphaCutoff(),
-            material.getDoubleSided()
+            static_cast<uint32_t>(p_material->getAlphaMode()),
+            p_material->getAlphaCutoff(),
+            p_material->getDoubleSided()
         );
     }
 

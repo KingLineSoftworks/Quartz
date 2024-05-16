@@ -70,11 +70,10 @@ quartz::rendering::Context::draw(
         m_renderingPipeline.getCurrentInFlightFrameIndex()
     );
 
-    const uint32_t availableSwapchainImageIndex =
-        m_renderingSwapchain.getAvailableImageIndex(
-            m_renderingDevice,
-            m_renderingPipeline.getCurrentInFlightFrameIndex()
-        );
+    const uint32_t availableSwapchainImageIndex = m_renderingSwapchain.getAvailableImageIndex(
+        m_renderingDevice,
+        m_renderingPipeline.getCurrentInFlightFrameIndex()
+    );
 
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
         recreateSwapchain();

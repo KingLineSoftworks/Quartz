@@ -17,11 +17,17 @@ layout(push_constant) uniform perObjectVertexPushConstant {
 
 // -----==== Inputs =====----- //
 
+/**
+ *  @todo 2024/05/15 Can all of these texture coordinates be consolidated into one thing?
+ *    We'd be sending less data to GPU but we would have to enforce all textures to be of
+ *    the same dimensions, so we would have more image data, ad we wouldn't be able to
+ *    combine multiple textures into one image
+ */
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in vec3 in_tangent;
 layout(location = 3) in vec3 in_vertexColor;
-/** @todo 2024/05/14 All of these texture indices should be replaced with the material ID */
 layout(location = 4) in vec2 in_baseColorTextureCoordinate;
 layout(location = 5) in vec2 in_metallicRoughnessTextureCoordinate;
 layout(location = 6) in vec2 in_normalTextureCoordinate;
@@ -32,7 +38,6 @@ layout(location = 8) in vec2 in_occlusionTextureCoordinate;
 
 layout(location = 0) out mat3 out_TBN;
 layout(location = 3) out vec3 out_vertexColor;
-/** @todo 2024/05/14 All of these texture indices should be replaced with the material ID */
 layout(location = 4) out vec2 out_baseColorTextureCoordinate;
 layout(location = 5) out vec2 out_metallicRoughnessTextureCoordinate;
 layout(location = 6) out vec2 out_normalTextureCoordinate;

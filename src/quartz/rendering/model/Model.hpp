@@ -74,13 +74,8 @@ namespace rendering {
  */
 
 /**
- * @todo 2023/12/1 This is the master todo list
- *
- * @todo Create representations of scenes
- * @todo Create representations of nodes
- * @todo Store buffers in model and pass those to meshes (and primitives) for
+ * @todo 2023/12/1 Store buffers in model and pass those to meshes (and primitives) for
  *   them to use with their accessors and buffer views
- *
  */
 
 class quartz::rendering::Model {
@@ -112,20 +107,20 @@ private: // static functions
         const std::vector<uint32_t>& masterIndices,
         const quartz::rendering::Texture::Type textureType
     );
-    static std::vector<quartz::rendering::Material> loadMaterials(
+    static std::vector<uint32_t> loadMaterialMasterIndices(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel
     );
     static std::vector<quartz::rendering::Scene> loadScenes(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
 
 private: // member variables
     const tinygltf::Model m_gltfModel;
 
-    std::vector<quartz::rendering::Material> m_materials;
+    std::vector<uint32_t> m_materialMasterIndices;
 
     uint32_t m_defaultSceneIndex;
     std::vector<quartz::rendering::Scene> m_scenes;
