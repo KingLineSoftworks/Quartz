@@ -70,7 +70,7 @@ quartz::rendering::Model::loadTextures(
     LOG_TRACE(MODEL, "Got {} texture samplers from gltf model", gltfModel.samplers.size());
     LOG_TRACE(MODEL, "Got {} textures from gltf model", gltfModel.textures.size());
 
-    quartz::rendering::Texture::initializeMasterList(renderingDevice);
+    quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
 
     std::vector<uint32_t> masterIndices;
 

@@ -25,13 +25,15 @@ public: // enums
         Occlusion = 4
     };
 
+// -----+++++===== Static Interface =====+++++----- //
+
 public: // static functions
     static uint32_t createTexture(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Image& gltfImage,
         const tinygltf::Sampler& gltfSampler
     );
-    static void initializeMasterList(
+    static void initializeMasterTextureList(
         const quartz::rendering::Device& renderingDevice
     );
     static void cleanUpAllTextures();
@@ -44,33 +46,8 @@ public: // static functions
     static uint32_t getEmissionDefaultMasterIndex() { return quartz::rendering::Texture::emissionDefaultMasterIndex; }
     static uint32_t getOcclusionDefaultMasterIndex() { return quartz::rendering::Texture::occlusionDefaultMasterIndex; }
 
-    static std::weak_ptr<Texture> getTexture(const uint32_t index) { return quartz::rendering::Texture::masterList[index]; }
-    static const std::vector<std::shared_ptr<quartz::rendering::Texture>>& getMasterList() { return quartz::rendering::Texture::masterList; }
-
-public: // member functions
-    Texture(
-        const quartz::rendering::Device& renderingDevice,
-        const uint32_t imageWidth,
-        const uint32_t imageHeight,
-        const uint32_t channelCount,
-        const void* p_pixels
-    );
-    Texture(
-        const quartz::rendering::Device& renderingDevice,
-        const std::string& filepath
-    );
-    Texture(
-        const quartz::rendering::Device& renderingDevice,
-        const tinygltf::Image& gltfImage,
-        const tinygltf::Sampler& gltfSampler
-    );
-    Texture(Texture&& other);
-    ~Texture();
-
-    USE_LOGGER(TEXTURE);
-
-    const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
-    const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanSampler; }
+    static std::weak_ptr<Texture> getTexturePtr(const uint32_t index) { return quartz::rendering::Texture::masterTextureList[index]; }
+    static const std::vector<std::shared_ptr<quartz::rendering::Texture>>& getMasterTextureList() { return quartz::rendering::Texture::masterTextureList; }
 
 private: // static functions
     static quartz::rendering::StagedImageBuffer createImageBufferFromFilepath(
@@ -98,7 +75,34 @@ private: // static variables
     static uint32_t normalDefaultMasterIndex;
     static uint32_t emissionDefaultMasterIndex;
     static uint32_t occlusionDefaultMasterIndex;
-    static std::vector<std::shared_ptr<Texture>> masterList;
+    static std::vector<std::shared_ptr<Texture>> masterTextureList;
+
+// -----+++++===== Instance Interface =====+++++----- //
+
+public: // member functions
+    Texture(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t imageWidth,
+        const uint32_t imageHeight,
+        const uint32_t channelCount,
+        const void* p_pixels
+    );
+    Texture(
+        const quartz::rendering::Device& renderingDevice,
+        const std::string& filepath
+    );
+    Texture(
+        const quartz::rendering::Device& renderingDevice,
+        const tinygltf::Image& gltfImage,
+        const tinygltf::Sampler& gltfSampler
+    );
+    Texture(Texture&& other);
+    ~Texture();
+
+    USE_LOGGER(TEXTURE);
+
+    const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
+    const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanSampler; }
 
 private: // member variables
     /**

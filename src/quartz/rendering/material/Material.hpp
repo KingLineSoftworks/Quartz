@@ -1,9 +1,13 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
+#include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -22,9 +26,42 @@ public: // enums
         Blend = 2
     };
 
+// -----+++++===== Static Interface =====+++++----- //
+
 public: // static functions
     static std::string getAlphaModeGLTFString(const quartz::rendering::Material::AlphaMode mode);
     static quartz::rendering::Material::AlphaMode getAlphaModeFromGLTFString(const std::string& modeString);
+
+    static uint32_t createMaterial(
+        const quartz::rendering::Device& renderingDevice,
+        const uint32_t baseColorTextureMasterIndex,
+        const uint32_t metallicRoughnessTextureMasterIndex,
+        const uint32_t normalTextureMasterIndex,
+        const uint32_t emissionTextureMasterIndex,
+        const uint32_t occlusionTextureMasterIndex,
+        const glm::vec4& baseColorFactor,
+        const glm::vec3& emissiveFactor,
+        const float metallicFactor,
+        const float roughnessFactor,
+        const quartz::rendering::Material::AlphaMode alphaMode,
+        const float alphaCutoff,
+        const bool doubleSided
+    );
+    static void initializeMasterMaterialList(const quartz::rendering::Device& renderingDevice);
+    static void cleanUpAllMaterials();
+
+    static uint32_t getDefaultMaterialMasterIndex() { return quartz::rendering::Material::defaultMaterialMasterIndex; }
+
+    static std::weak_ptr<quartz::rendering::Material> getMaterialPtr(const uint32_t index) { return quartz::rendering::Material::masterMaterialList[index]; }
+    static const std::vector<std::shared_ptr<quartz::rendering::Material>>& getMasterMaterialList() { return quartz::rendering::Material::masterMaterialList; }
+
+private: // static functions
+
+private: // static variables
+    static uint32_t defaultMaterialMasterIndex;
+    static std::vector<std::shared_ptr<Material>> masterMaterialList;
+
+// -----+++++===== Instance Interface =====+++++----- //
 
 public: // member functions
     Material();
@@ -64,8 +101,6 @@ public: // member functions
     quartz::rendering::Material::AlphaMode getAlphaMode() const { return m_alphaMode; }
     float getAlphaCutoff() const { return m_alphaCutoff; }
     float getDoubleSided() const { return m_doubleSided; }
-
-private: // static functions
 
 private: // member variables
     // 20 bytes of texture indices

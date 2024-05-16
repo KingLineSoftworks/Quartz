@@ -57,7 +57,7 @@ quartz::rendering::Context::loadScene() {
     
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
-        quartz::rendering::Texture::getMasterList()
+        quartz::rendering::Texture::getMasterTextureList()
     );
 }
 

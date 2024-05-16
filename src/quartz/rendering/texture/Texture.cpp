@@ -19,7 +19,7 @@ uint32_t quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex = 0;
 uint32_t quartz::rendering::Texture::normalDefaultMasterIndex = 0;
 uint32_t quartz::rendering::Texture::emissionDefaultMasterIndex = 0;
 uint32_t quartz::rendering::Texture::occlusionDefaultMasterIndex = 0;
-std::vector<std::shared_ptr<quartz::rendering::Texture>> quartz::rendering::Texture::masterList;
+std::vector<std::shared_ptr<quartz::rendering::Texture>> quartz::rendering::Texture::masterTextureList;
 
 uint32_t
 quartz::rendering::Texture::createTexture(
@@ -29,9 +29,9 @@ quartz::rendering::Texture::createTexture(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    if (quartz::rendering::Texture::masterList.empty()) {
-        LOG_TRACE(TEXTURE, "Master list is empty, initializing");
-        quartz::rendering::Texture::initializeMasterList(renderingDevice);
+    if (quartz::rendering::Texture::masterTextureList.empty()) {
+        LOG_TRACE(TEXTURE, "Master texture list is empty, initializing");
+        quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
     }
 
     std::shared_ptr<quartz::rendering::Texture> p_texture = std::make_shared<quartz::rendering::Texture>(
@@ -40,26 +40,26 @@ quartz::rendering::Texture::createTexture(
         gltfSampler
     );
 
-    quartz::rendering::Texture::masterList.push_back(p_texture);
+    quartz::rendering::Texture::masterTextureList.push_back(p_texture);
 
-    uint32_t insertedIndex = quartz::rendering::Texture::masterList.size() - 1;
+    uint32_t insertedIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Texture was inserted into master list at index {}", insertedIndex);
 
     return insertedIndex;
 }
 
 void
-quartz::rendering::Texture::initializeMasterList(
+quartz::rendering::Texture::initializeMasterTextureList(
     const quartz::rendering::Device& renderingDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    if (!quartz::rendering::Texture::masterList.empty()) {
-        LOG_TRACE(TEXTURE, "Master list is already initialized. Not doing anything");
+    if (!quartz::rendering::Texture::masterTextureList.empty()) {
+        LOG_TRACE(TEXTURE, "Master texture list is already initialized. Not doing anything");
         return;
     }
 
-    quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_TEXTURES);
+    quartz::rendering::Texture::masterTextureList.reserve(QUARTZ_MAX_NUMBER_TEXTURES);
 
     /**
      * @todo 2024/05/07 We should probably make the default texture have a color of all 1.0,
@@ -76,8 +76,8 @@ quartz::rendering::Texture::initializeMasterList(
         4,
         reinterpret_cast<const void*>(baseColorPixel.data())
     );
-    quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
-    quartz::rendering::Texture::baseColorDefaultMasterIndex = quartz::rendering::Texture::masterList.size() - 1;
+    quartz::rendering::Texture::masterTextureList.push_back(p_baseColorDefault);
+    quartz::rendering::Texture::baseColorDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Base color default texture master index: {}", quartz::rendering::Texture::baseColorDefaultMasterIndex);
 
     LOG_TRACE(TEXTURE, "Creating metallic roughness default texture");
@@ -89,8 +89,8 @@ quartz::rendering::Texture::initializeMasterList(
         4,
         reinterpret_cast<const void*>(metallicRoughnessPixel.data())
     );
-    quartz::rendering::Texture::masterList.push_back(p_metallicRoughnessDefault);
-    quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex = quartz::rendering::Texture::masterList.size() - 1;
+    quartz::rendering::Texture::masterTextureList.push_back(p_metallicRoughnessDefault);
+    quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Metallic roughness default texture master index: {}", quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex);
 
     LOG_TRACE(TEXTURE, "Creating normal default texture");
@@ -102,8 +102,8 @@ quartz::rendering::Texture::initializeMasterList(
         4,
         reinterpret_cast<const void*>(normalPixel.data())
     );
-    quartz::rendering::Texture::masterList.push_back(p_normalDefault);
-    quartz::rendering::Texture::normalDefaultMasterIndex = quartz::rendering::Texture::masterList.size() - 1;
+    quartz::rendering::Texture::masterTextureList.push_back(p_normalDefault);
+    quartz::rendering::Texture::normalDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Normal default texture master index: {}", quartz::rendering::Texture::normalDefaultMasterIndex);
 
     LOG_TRACE(TEXTURE, "Creating emission default texture");
@@ -115,8 +115,8 @@ quartz::rendering::Texture::initializeMasterList(
         4,
         reinterpret_cast<const void*>(emissionPixel.data())
     );
-    quartz::rendering::Texture::masterList.push_back(p_emissionDefault);
-    quartz::rendering::Texture::emissionDefaultMasterIndex = quartz::rendering::Texture::masterList.size() - 1;
+    quartz::rendering::Texture::masterTextureList.push_back(p_emissionDefault);
+    quartz::rendering::Texture::emissionDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Emission default texture master index: {}", quartz::rendering::Texture::emissionDefaultMasterIndex);
 
     LOG_TRACE(TEXTURE, "Creating occlusion default texture");
@@ -128,8 +128,8 @@ quartz::rendering::Texture::initializeMasterList(
         4,
         reinterpret_cast<const void*>(occlusionPixel.data())
     );
-    quartz::rendering::Texture::masterList.push_back(p_occlusionDefault);
-    quartz::rendering::Texture::occlusionDefaultMasterIndex = quartz::rendering::Texture::masterList.size() - 1;
+    quartz::rendering::Texture::masterTextureList.push_back(p_occlusionDefault);
+    quartz::rendering::Texture::occlusionDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Occlusion default texture master index: {}", quartz::rendering::Texture::occlusionDefaultMasterIndex);
 }
 
@@ -137,7 +137,7 @@ void
 quartz::rendering::Texture::cleanUpAllTextures() {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    quartz::rendering::Texture::masterList.clear();
+    quartz::rendering::Texture::masterTextureList.clear();
 }
 
 std::string

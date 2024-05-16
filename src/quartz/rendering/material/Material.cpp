@@ -3,7 +3,11 @@
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 
-std::string quartz::rendering::Material::getAlphaModeGLTFString(const quartz::rendering::Material::AlphaMode mode) {
+uint32_t quartz::rendering::Material::defaultMaterialMasterIndex = 0;
+std::vector<std::shared_ptr<quartz::rendering::Material>> quartz::rendering::Material::masterMaterialList;
+
+std::string
+quartz::rendering::Material::getAlphaModeGLTFString(const quartz::rendering::Material::AlphaMode mode) {
     switch (mode) {
         case quartz::rendering::Material::AlphaMode::Opaque:
             return "OPAQUE";
@@ -14,7 +18,8 @@ std::string quartz::rendering::Material::getAlphaModeGLTFString(const quartz::re
     }
 }
 
-quartz::rendering::Material::AlphaMode quartz::rendering::Material::getAlphaModeFromGLTFString(const std::string& modeString) {
+quartz::rendering::Material::AlphaMode
+quartz::rendering::Material::getAlphaModeFromGLTFString(const std::string& modeString) {
     if (modeString == quartz::rendering::Material::getAlphaModeGLTFString(quartz::rendering::Material::AlphaMode::Opaque)) {
         return quartz::rendering::Material::AlphaMode::Opaque;
     }
@@ -27,6 +32,96 @@ quartz::rendering::Material::AlphaMode quartz::rendering::Material::getAlphaMode
 
     // Default to Opaque if we have no idea what we got
     return quartz::rendering::Material::AlphaMode::Opaque;
+}
+
+uint32_t
+quartz::rendering::Material::createMaterial(
+    const quartz::rendering::Device& renderingDevice,
+    const uint32_t baseColorTextureMasterIndex,
+    const uint32_t metallicRoughnessTextureMasterIndex,
+    const uint32_t normalTextureMasterIndex,
+    const uint32_t emissionTextureMasterIndex,
+    const uint32_t occlusionTextureMasterIndex,
+    const glm::vec4& baseColorFactor,
+    const glm::vec3& emissiveFactor,
+    const float metallicFactor,
+    const float roughnessFactor,
+    const quartz::rendering::Material::AlphaMode alphaMode,
+    const float alphaCutoff,
+    const bool doubleSided
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
+
+    if (quartz::rendering::Material::masterMaterialList.empty()) {
+        LOG_TRACE(MATERIAL, "Master material list is empty. Initializing it");
+        quartz::rendering::Material::initializeMasterMaterialList(renderingDevice);
+    }
+
+    std::shared_ptr<quartz::rendering::Material> p_material = std::make_shared<quartz::rendering::Material>(
+        baseColorTextureMasterIndex,
+        metallicRoughnessTextureMasterIndex,
+        normalTextureMasterIndex,
+        emissionTextureMasterIndex,
+        occlusionTextureMasterIndex,
+        baseColorFactor,
+        emissiveFactor,
+        metallicFactor,
+        roughnessFactor,
+        alphaMode,
+        alphaCutoff,
+        doubleSided
+    );
+
+    quartz::rendering::Material::masterMaterialList.push_back(p_material);
+    uint32_t insertedIndex = quartz::rendering::Material::masterMaterialList.size() - 1;
+    LOG_TRACE(MATERIAL, "Newly created material was inserted into master material list at index {}", insertedIndex);
+
+    return insertedIndex;
+}
+
+void
+quartz::rendering::Material::initializeMasterMaterialList(const quartz::rendering::Device& renderingDevice) {
+    LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
+
+    if (!quartz::rendering::Material::masterMaterialList.empty()) {
+        LOG_TRACE(MATERIAL, "Master material list is already initialized. Not doing anything");
+        return;
+    }
+
+    LOG_TRACE(MATERIAL, "Initializing master texture list");
+    quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
+
+    LOG_TRACE(MATERIAL, "Reserving space for {} materials", QUARTZ_MAX_NUMBER_MATERIALS);
+    quartz::rendering::Material::masterMaterialList.reserve(QUARTZ_MAX_NUMBER_MATERIALS);
+
+    LOG_TRACE(MATERIAL, "Creating default material");
+    std::shared_ptr<quartz::rendering::Material> p_defaultMaterial = std::make_shared<quartz::rendering::Material>(
+        quartz::rendering::Texture::getBaseColorDefaultMasterIndex(),
+        quartz::rendering::Texture::getMetallicRoughnessDefaultMasterIndex(),
+        quartz::rendering::Texture::getNormalDefaultMasterIndex(),
+        quartz::rendering::Texture::getEmissionDefaultMasterIndex(),
+        quartz::rendering::Texture::getOcclusionDefaultMasterIndex(),
+
+        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        1.0f,
+        1.0f,
+
+        quartz::rendering::Material::AlphaMode::Opaque,
+        0.5f,
+        false
+    );
+
+    quartz::rendering::Material::masterMaterialList.push_back(p_defaultMaterial);
+    quartz::rendering::Material::defaultMaterialMasterIndex = quartz::rendering::Material::masterMaterialList.size() - 1;
+    LOG_INFO(MATERIAL, "Initialized master material list. Size is now {} with default material at index {}", quartz::rendering::Material::masterMaterialList.size(), quartz::rendering::Material::defaultMaterialMasterIndex);
+}
+
+void
+quartz::rendering::Material::cleanUpAllMaterials() {
+    LOG_FUNCTION_CALL_TRACE(MATERIAL, "");
+
+    quartz::rendering::Material::masterMaterialList.clear();
 }
 
 quartz::rendering::Material::Material() :
