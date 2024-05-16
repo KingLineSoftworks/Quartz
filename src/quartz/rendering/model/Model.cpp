@@ -211,6 +211,8 @@ quartz::rendering::Model::loadMaterialMasterIndices(
         LOG_TRACE(MODEL, "Processing material {}", i);
 
         const tinygltf::Material& gltfMaterial = gltfModel.materials[i];
+        const std::string materialName = gltfMaterial.name;
+        LOG_TRACE(MODEL, "Material has name {}", materialName);
 
         const uint32_t baseColorMasterIndex = quartz::rendering::Model::getTextureMasterIndex(
             gltfMaterial,
@@ -272,6 +274,7 @@ quartz::rendering::Model::loadMaterialMasterIndices(
 
         uint32_t currentMaterialMasterIndex = quartz::rendering::Material::createMaterial(
             renderingDevice,
+            materialName,
             baseColorMasterIndex,
             metallicRoughnessMasterIndex,
             normalMasterIndex,

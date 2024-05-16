@@ -611,6 +611,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
         sizeof(glm::mat4)
     );
 
+    /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
     vk::PushConstantRange fragmentPushConstantRange(
         vk::ShaderStageFlagBits::eFragment,
         sizeof(glm::mat4),

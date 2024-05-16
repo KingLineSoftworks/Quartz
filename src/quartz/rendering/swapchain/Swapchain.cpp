@@ -548,13 +548,12 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
-            static uint32_t primitiveIndex = 0;
+            uint32_t materialMasterIndex = primitive.getMaterialMasterIndex();
             uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
                 (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
                 sizeof(quartz::rendering::MaterialUniformBufferObject);
-            materialByteOffset *= primitiveIndex;
-            primitiveIndex++;
-            primitiveIndex = primitiveIndex % QUARTZ_MAX_NUMBER_MATERIALS;
+            materialByteOffset *= materialMasterIndex;
+
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
                 vk::PipelineBindPoint::eGraphics,
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -565,14 +564,13 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 &materialByteOffset
             );
 
-            const uint32_t materialIndex = primitive.getMaterialMasterIndex();
-            uint32_t baseColorTextureIndex = quartz::rendering::Material::getMaterialPtr(materialIndex)->getBaseColorTextureMasterIndex();
+            /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,
                 sizeof(glm::mat4),
                 sizeof(uint32_t),
-                reinterpret_cast<void*>(&baseColorTextureIndex)
+                reinterpret_cast<void*>(&materialMasterIndex)
             );
 
             uint32_t offset = 0;

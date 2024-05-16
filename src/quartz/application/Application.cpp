@@ -119,7 +119,7 @@ void quartz::Application::run() {
                 }
             },
 
-             // second row
+            // second row
 
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",

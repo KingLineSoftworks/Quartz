@@ -37,6 +37,7 @@ quartz::rendering::Material::getAlphaModeFromGLTFString(const std::string& modeS
 uint32_t
 quartz::rendering::Material::createMaterial(
     const quartz::rendering::Device& renderingDevice,
+    const std::string& name,
     const uint32_t baseColorTextureMasterIndex,
     const uint32_t metallicRoughnessTextureMasterIndex,
     const uint32_t normalTextureMasterIndex,
@@ -58,6 +59,7 @@ quartz::rendering::Material::createMaterial(
     }
 
     std::shared_ptr<quartz::rendering::Material> p_material = std::make_shared<quartz::rendering::Material>(
+        name,
         baseColorTextureMasterIndex,
         metallicRoughnessTextureMasterIndex,
         normalTextureMasterIndex,
@@ -74,7 +76,7 @@ quartz::rendering::Material::createMaterial(
 
     quartz::rendering::Material::masterMaterialList.push_back(p_material);
     uint32_t insertedIndex = quartz::rendering::Material::masterMaterialList.size() - 1;
-    LOG_TRACE(MATERIAL, "Newly created material was inserted into master material list at index {}", insertedIndex);
+    LOG_TRACE(MATERIAL, "Newly created material [ {} ] was inserted into master material list at index {}", name, insertedIndex);
 
     return insertedIndex;
 }
@@ -96,6 +98,7 @@ quartz::rendering::Material::initializeMasterMaterialList(const quartz::renderin
 
     LOG_TRACE(MATERIAL, "Creating default material");
     std::shared_ptr<quartz::rendering::Material> p_defaultMaterial = std::make_shared<quartz::rendering::Material>(
+        "The_Default_Material",
         quartz::rendering::Texture::getBaseColorDefaultMasterIndex(),
         quartz::rendering::Texture::getMetallicRoughnessDefaultMasterIndex(),
         quartz::rendering::Texture::getNormalDefaultMasterIndex(),
@@ -136,10 +139,12 @@ quartz::rendering::Material::Material() :
     m_roughnessFactor(1.0f),
     m_alphaMode(quartz::rendering::Material::AlphaMode::Opaque),
     m_alphaCutoff(0.5f),
-    m_doubleSided(false)
+    m_doubleSided(false),
+    m_name("A_Default_Material")
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     LOG_TRACEthis("Using all default texture indices");
+    LOG_TRACEthis("Name: {}", m_name);
     LOG_TRACEthis("Base Color         master index: {}", m_baseColorTextureMasterIndex);
     LOG_TRACEthis("Metallic Roughness master index: {}", m_metallicRoughnessTextureMasterIndex);
     LOG_TRACEthis("Normal             master index: {}", m_normalTextureMasterIndex);
@@ -155,6 +160,7 @@ quartz::rendering::Material::Material() :
 }
 
 quartz::rendering::Material::Material(
+    const std::string& name,
     const uint32_t baseColorTextureMasterIndex,
     const uint32_t metallicRoughnessTextureMasterIndex,
     const uint32_t normalTextureMasterIndex,
@@ -179,9 +185,11 @@ quartz::rendering::Material::Material(
     m_roughnessFactor(roughnessFactor),
     m_alphaMode(alphaMode),
     m_alphaCutoff(alphaCutoff),
-    m_doubleSided(doubleSided)
+    m_doubleSided(doubleSided),
+    m_name(name)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Name: {}", m_name);
     LOG_TRACEthis("Base Color         master index: {}", m_baseColorTextureMasterIndex);
     LOG_TRACEthis("Metallic Roughness master index: {}", m_metallicRoughnessTextureMasterIndex);
     LOG_TRACEthis("Normal             master index: {}", m_normalTextureMasterIndex);
@@ -210,9 +218,11 @@ quartz::rendering::Material::Material(
     m_roughnessFactor(other.m_roughnessFactor),
     m_alphaMode(other.m_alphaMode),
     m_alphaCutoff(other.m_alphaCutoff),
-    m_doubleSided(other.m_doubleSided)
+    m_doubleSided(other.m_doubleSided),
+    m_name(other.m_name)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Name: {}", m_name);
     LOG_TRACEthis("Base Color         master index: {}", m_baseColorTextureMasterIndex);
     LOG_TRACEthis("Metallic Roughness master index: {}", m_metallicRoughnessTextureMasterIndex);
     LOG_TRACEthis("Normal             master index: {}", m_normalTextureMasterIndex);
@@ -241,9 +251,11 @@ quartz::rendering::Material::Material(
     m_roughnessFactor(other.m_roughnessFactor),
     m_alphaMode(other.m_alphaMode),
     m_alphaCutoff(other.m_alphaCutoff),
-    m_doubleSided(other.m_doubleSided)
+    m_doubleSided(other.m_doubleSided),
+    m_name(other.m_name)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Name: {}", m_name);
     LOG_TRACEthis("Base Color         master index: {}", m_baseColorTextureMasterIndex);
     LOG_TRACEthis("Metallic Roughness master index: {}", m_metallicRoughnessTextureMasterIndex);
     LOG_TRACEthis("Normal             master index: {}", m_normalTextureMasterIndex);
@@ -291,6 +303,7 @@ quartz::rendering::Material::operator=(
     m_alphaMode = other.m_alphaMode;
     m_alphaCutoff = other.m_alphaCutoff;
     m_doubleSided = other.m_doubleSided;
+    m_name = other.m_name;
 
     return *this;
 }

@@ -34,6 +34,7 @@ public: // static functions
 
     static uint32_t createMaterial(
         const quartz::rendering::Device& renderingDevice,
+        const std::string& name,
         const uint32_t baseColorTextureMasterIndex,
         const uint32_t metallicRoughnessTextureMasterIndex,
         const uint32_t normalTextureMasterIndex,
@@ -66,6 +67,7 @@ private: // static variables
 public: // member functions
     Material();
     Material(
+        const std::string& name,
         const uint32_t baseColorTextureMasterIndex,
         const uint32_t metallicRoughnessTextureMasterIndex,
         const uint32_t normalTextureMasterIndex,
@@ -102,6 +104,8 @@ public: // member functions
     float getAlphaCutoff() const { return m_alphaCutoff; }
     float getDoubleSided() const { return m_doubleSided; }
 
+    const std::string& getName() const { return m_name; }
+
 private: // member variables
     // 20 bytes of texture indices
     alignas(4) uint32_t m_baseColorTextureMasterIndex;
@@ -120,4 +124,7 @@ private: // member variables
     alignas(4) quartz::rendering::Material::AlphaMode m_alphaMode;
     alignas(4) float m_alphaCutoff;
     alignas(4) bool m_doubleSided;
+
+    // name
+    std::string m_name;
 };

@@ -36,10 +36,11 @@ layout(binding = 5) uniform Material {
     uint alphaMode;
     float alphaCutoff;
     uint doubleSided;
-} materials[MAX_NUMBER_MATERIALS];
+} material;
 
+/** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
 layout(push_constant) uniform perObjectFragmentPushConstant {
-    layout(offset = 64) uint baseColorTextureMasterID; // offset of 64 because vertex shader uses mat4 push constant for model matrix
+    layout(offset = 64) uint materialMasterIndex; // offset of 64 because vertex shader uses mat4 push constant for model matrix
 } pushConstant;
 
 // -----==== Input from vertex shader =====----- //
@@ -59,13 +60,16 @@ layout(location = 0) out vec4 out_fragmentColor;
 // -----==== Logic =====----- //
 
 void main() {
+    // ... base color ... //
+
     vec3 fragmentBaseColor = texture(
         sampler2D(
-            baseColorTextures[pushConstant.baseColorTextureMasterID],
+            baseColorTextures[material.baseColorTextureMasterIndex],
             baseColorTextureSampler
         ),
         in_baseColorTextureCoordinate
     ).rgb;
+    fragmentBaseColor *= in_vertexColor;
 
     // ... ambient light ... //
 
