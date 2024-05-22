@@ -160,6 +160,10 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
         quartz::rendering::Vertex::AttributeType::Normal,
         quartz::rendering::Vertex::AttributeType::Color,
         quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate, // needs to go last
     };
 
     for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
@@ -286,7 +290,7 @@ quartz::rendering::Primitive::Primitive(
     m_stagedIndexBuffer(
         quartz::rendering::Primitive::createStagedIndexBuffer(
             renderingDevice,
-            gltfModel,
+        gltfModel,
             gltfPrimitive
         )
     ),

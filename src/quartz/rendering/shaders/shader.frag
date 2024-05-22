@@ -18,8 +18,8 @@ layout(binding = 2) uniform DirectionalLight {
 
 // ... object level things ... //
 
-layout(binding = 3) uniform sampler baseColorTextureSampler;
-layout(binding = 4) uniform texture2D baseColorTextures[100];
+layout(binding = 3) uniform sampler rgbaTextureSampler;
+layout(binding = 4) uniform texture2D textureArray[MAX_NUMBER_TEXTURES];
 
 layout(binding = 5) uniform Material {
     uint baseColorTextureMasterIndex;
@@ -33,8 +33,8 @@ layout(binding = 5) uniform Material {
     float metallicFactor;
     float roughnessFactor;
 
-    uint alphaMode;
-    float alphaCutoff;
+    uint alphaMode;     /** 0 = Opaque , 1 = Mask , 2 = Blend | https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#alpha-coverage */
+    float alphaCutoff;   /** Only used when alpha mode is Mask */
     uint doubleSided;
 } material;
 
@@ -45,8 +45,8 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 
 // -----==== Input from vertex shader =====----- //
 
-layout(location = 0) in mat3 in_TBN;
-layout(location = 3) in vec3 in_vertexColor; /** @todo 2024/05/15 Combine this via element-wise multiplication with base color (and texture) */
+layout(location = 0) in mat3 in_TBN; /** @brief Tangent, Bi-Tangent, Normal vectors. All normalized */
+layout(location = 3) in vec3 in_vertexColor;
 layout(location = 4) in vec2 in_baseColorTextureCoordinate;
 layout(location = 5) in vec2 in_metallicRoughnessTextureCoordinate;
 layout(location = 6) in vec2 in_normalTextureCoordinate;
@@ -57,19 +57,23 @@ layout(location = 8) in vec2 in_occlusionTextureCoordinate;
 
 layout(location = 0) out vec4 out_fragmentColor;
 
-// -----==== Logic =====----- //
+// -----==== Helper Logic =====----- //
+
+// -----==== Main Logic =====----- //
 
 void main() {
+
     // ... base color ... //
 
     vec3 fragmentBaseColor = texture(
         sampler2D(
-            baseColorTextures[material.baseColorTextureMasterIndex],
-            baseColorTextureSampler
+            textureArray[material.baseColorTextureMasterIndex],
+            rgbaTextureSampler
         ),
         in_baseColorTextureCoordinate
     ).rgb;
     fragmentBaseColor *= in_vertexColor;
+    fragmentBaseColor *= material.baseColorFactor.rgb;
 
     // ... ambient light ... //
 
@@ -90,9 +94,23 @@ void main() {
         directionalLight.color *
         (directionalLightImpact * fragmentBaseColor);
 
+    // ... emissive contribution ... //
+
+    vec3 emissiveColor = texture(
+        sampler2D(
+            textureArray[material.emissionTextureMasterIndex],
+            rgbaTextureSampler
+        ),
+        in_emissionTextureCoordinate
+    ).rgb;
+
     // ... put it all together ... //
 
     out_fragmentColor = vec4(
-        ambientLightContribution + directionalLightContribution, 1.0
+        ambientLightContribution +
+        directionalLightContribution +
+        emissiveColor,
+
+        1.0
     );
 }

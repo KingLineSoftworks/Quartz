@@ -13,17 +13,17 @@ namespace rendering {
 
 struct quartz::rendering::Vertex {
 public: // enums
-    enum class AttributeType {
-        Position,
-        Normal,
-        Tangent,
-        Color,
+    enum class AttributeType : uint32_t {
+        Position    = 0,
+        Normal      = 1,
+        Tangent     = 2,
+        Color       = 3,
 
-        BaseColorTextureCoordinate,
-        MetallicRoughnessTextureCoordinate,
-        NormalTextureCoordinate,
-        EmissionTextureCoordinate,
-        OcclusionTextureCoordinate,
+        BaseColorTextureCoordinate          = 4,
+        MetallicRoughnessTextureCoordinate  = 5,
+        NormalTextureCoordinate             = 6,
+        EmissionTextureCoordinate           = 7,
+        OcclusionTextureCoordinate          = 8
     };
 
 public: // member functions
@@ -32,7 +32,11 @@ public: // member functions
         const glm::vec3& position_,
         const glm::vec3& normal_,
         const glm::vec3& color_,
-        const glm::vec2& baseColorTextureCoordinate_
+        const glm::vec2& baseColorTextureCoordinate_,
+        const glm::vec2& metallicRoughnessTextureCoordinate_,
+        const glm::vec2& normalTextureCoordinate_,
+        const glm::vec2& emissionTextureCoordinate_,
+        const glm::vec2& occlusionTextureCoordinate_
     );
     bool operator==(const Vertex& other) const;
 

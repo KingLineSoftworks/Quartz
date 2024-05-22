@@ -17,13 +17,15 @@ namespace rendering {
 
 /**
  * @brief Based on GLTF 2.0 materials specified <a href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material">here</a>
+ *
+ * @brief Default values specified here https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
  */
 class quartz::rendering::Material {
 public: // enums
     enum class AlphaMode : uint32_t {
-        Opaque = 0,
-        Mask = 1,
-        Blend = 2
+        Opaque  = 0,
+        Mask    = 1,
+        Blend   = 2
     };
 
 // -----+++++===== Static Interface =====+++++----- //

@@ -169,7 +169,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding baseColorTextureSamplerLayoutBinding(
+    vk::DescriptorSetLayoutBinding rgbaTextureSamplerLayoutBinding(
         3,
         vk::DescriptorType::eSampler,
         1,
@@ -177,7 +177,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding baseColorTexturesLayoutBinding(
+    vk::DescriptorSetLayoutBinding textureArrayLayoutBinding(
         4,
         vk::DescriptorType::eSampledImage,
         QUARTZ_MAX_NUMBER_TEXTURES,
@@ -197,8 +197,8 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         cameraUniformBufferLayoutBinding,
         ambientLightLayoutBinding,
         directionalLightLayoutBinding,
-        baseColorTextureSamplerLayoutBinding,
-        baseColorTexturesLayoutBinding,
+        rgbaTextureSamplerLayoutBinding,
+        textureArrayLayoutBinding,
         materialArrayLayoutBinding
     };
 
@@ -245,17 +245,17 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     );
     LOG_TRACE(PIPELINE, "Allowing directional light of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
 
-    vk::DescriptorPoolSize baseColorTextureSamplerPoolSize(
+    vk::DescriptorPoolSize rgbaTextureSamplerPoolSize(
         vk::DescriptorType::eSampler,
         numDescriptorSets
     );
-    LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", baseColorTextureSamplerPoolSize.descriptorCount);
+    LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", rgbaTextureSamplerPoolSize.descriptorCount);
 
-    vk::DescriptorPoolSize baseColorTexturesPoolSize(
+    vk::DescriptorPoolSize textureArrayPoolSize(
         vk::DescriptorType::eSampledImage,
         numDescriptorSets * QUARTZ_MAX_NUMBER_TEXTURES
     );
-    LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {}", baseColorTexturesPoolSize.descriptorCount);
+    LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {} (num descriptor sets {} * max number textures {}", textureArrayPoolSize.descriptorCount, numDescriptorSets, QUARTZ_MAX_NUMBER_TEXTURES);
 
     vk::DescriptorPoolSize materialArrayPoolSize(
         vk::DescriptorType::eUniformBufferDynamic,
@@ -267,8 +267,8 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         cameraUniformBufferObjectPoolSize,
         ambientLightPoolSize,
         directionalLightPoolSize,
-        baseColorTextureSamplerPoolSize,
-        baseColorTexturesPoolSize,
+        rgbaTextureSamplerPoolSize,
+        textureArrayPoolSize,
         materialArrayPoolSize
     };
 
@@ -406,19 +406,19 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         // ---+++ the texture sampler +++--- //
 
-        LOG_TRACE(PIPELINE, "Allocating space for base color texture sampler");
-        vk::DescriptorImageInfo baseColorTextureSamplerImageInfo(
-            *(texturePtrs[0]->getVulkanSamplerPtr()),
+        LOG_TRACE(PIPELINE, "Allocating space for texture sampler");
+        vk::DescriptorImageInfo rgbaTextureSamplerImageInfo(
+            *(texturePtrs[quartz::rendering::Texture::getBaseColorDefaultMasterIndex()]->getVulkanSamplerPtr()),
             {},
             {}
         );
-        vk::WriteDescriptorSet baseColorTextureSamplerWriteDescriptorSet(
+        vk::WriteDescriptorSet rgbaTextureSamplerWriteDescriptorSet(
             descriptorSets[i],
             3,
             0,
             1,
             vk::DescriptorType::eSampler,
-            &baseColorTextureSamplerImageInfo,
+            &rgbaTextureSamplerImageInfo,
             {},
             {}
         );
@@ -445,7 +445,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             );
         }
 
-        vk::WriteDescriptorSet baseColorTexturesDescriptorWriteSet(
+        vk::WriteDescriptorSet textureArrayDescriptorWriteSet(
             descriptorSets[i],
             4,
             0,
@@ -484,15 +484,15 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        // ---+++ all of the write descriptor sets used to +++--- //
+        // ---+++ all the write descriptor sets used to +++--- //
 
         LOG_TRACE(PIPELINE, "Consolidating write descriptor sets");
         std::vector<vk::WriteDescriptorSet> writeDescriptorSets = {
             cameraUBODescriptorWriteSet,
             ambientLightDescriptorWriteSet,
             directionalLightWriteDescriptorSet,
-            baseColorTextureSamplerWriteDescriptorSet,
-            baseColorTexturesDescriptorWriteSet,
+            rgbaTextureSamplerWriteDescriptorSet,
+            textureArrayDescriptorWriteSet,
             materialArrayUBODescriptorWriteSet
         };
 
