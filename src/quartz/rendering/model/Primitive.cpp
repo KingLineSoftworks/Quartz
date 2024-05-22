@@ -160,10 +160,11 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
         quartz::rendering::Vertex::AttributeType::Normal,
         quartz::rendering::Vertex::AttributeType::Color,
         quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate,
+        quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate,
-        quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate, // needs to go last
+        quartz::rendering::Vertex::AttributeType::Tangent, // needs to go last. uses other attributes in calculations
     };
 
     for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
