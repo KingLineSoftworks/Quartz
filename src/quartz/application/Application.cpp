@@ -71,7 +71,7 @@ void quartz::Application::run() {
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
 
-#define JUKEBOX_ONLY
+//#define JUKEBOX_ONLY
             // =============================================
             // boxes
             // =============================================

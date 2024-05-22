@@ -33,6 +33,26 @@ public: // member functions
     uint32_t getMaterialMasterIndex() const { return m_materialMasterIndex; }
 
 private: // static functions
+    // These are helper functions
+    static bool handleMissingVertexAttribute(
+        std::vector<quartz::rendering::Vertex>& verticesToPopulate,
+        const tinygltf::Model& gltfModel,
+        const tinygltf::Primitive& gltfPrimitive,
+        const std::vector<uint32_t>& indices,
+        const quartz::rendering::Vertex::AttributeType attributeType
+    );
+    static bool handleDefaultTextureAttribute(
+        std::vector<quartz::rendering::Vertex>& verticesToPopulate,
+        const std::shared_ptr<quartz::rendering::Material>& p_material,
+        const quartz::rendering::Vertex::AttributeType attributeType
+    );
+    static uint32_t determineGltfAccessorByteStride(
+        const quartz::rendering::Vertex::AttributeType attributeType,
+        const tinygltf::Accessor& accessor,
+        const tinygltf::BufferView& bufferView
+    );
+
+    // These functions are the actual meat and potatoes
     static uint32_t loadMaterialMasterIndex(
         const tinygltf::Primitive& gltfPrimitive,
         const std::vector<uint32_t>& materialMasterIndices
