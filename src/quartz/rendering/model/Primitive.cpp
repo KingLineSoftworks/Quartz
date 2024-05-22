@@ -9,18 +9,111 @@
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/material/Material.hpp"
-#include "quartz/rendering/model/Vertex.hpp"
 #include "quartz/rendering/model/Primitive.hpp"
+#include "quartz/rendering/model/TangentCalculator.hpp"
+#include "quartz/rendering/model/Vertex.hpp"
+#include "quartz/rendering/texture/Texture.hpp"
+
+uint32_t
+quartz::rendering::Primitive::loadMaterialMasterIndex(
+    const tinygltf::Primitive& gltfPrimitive,
+    const std::vector<uint32_t>& materialMasterIndices
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
+
+    int32_t materialLocalIndex = gltfPrimitive.material;
+    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material at local index {}", materialLocalIndex);
+
+    if (materialLocalIndex < 0) {
+        LOG_TRACE(MODEL_PRIMITIVE, "No material provided, so using default material");
+        return quartz::rendering::Material::getDefaultMaterialMasterIndex();
+    }
+
+    const uint32_t materialMasterIndex = materialMasterIndices[materialLocalIndex];
+    LOG_TRACE(MODEL_PRIMITIVE, "Material at local index {} gives master material {}", materialLocalIndex, materialMasterIndex);
+
+    return materialMasterIndex;
+}
+
+std::vector<uint32_t>
+quartz::rendering::Primitive::loadIndicesFromGltfPrimitive(
+    const tinygltf::Model& gltfModel,
+    const tinygltf::Primitive& gltfPrimitive
+) {
+    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
+
+    /** @todo 2024/05/21 We can break out this logic to get the desired start address. It is duplicated in the populateVerticesWithAttribute function */
+
+    const uint32_t indexAccessorID = gltfPrimitive.indices; // will always be >= 0
+    const tinygltf::Accessor& indexAccessor = gltfModel.accessors[indexAccessorID];
+    const uint32_t indexCount = indexAccessor.count;
+
+    const uint32_t indexBufferViewID = indexAccessor.bufferView;
+    const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexBufferViewID];
+
+    const uint32_t indexBufferID = indexBufferView.buffer;
+    const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferID];
+
+    const uint32_t indexAccessorByteOffset = indexAccessor.byteOffset;
+    const uint32_t indexBufferViewByteOffset = indexBufferView.byteOffset;
+    const std::vector<uint8_t>& indexBufferData = indexBuffer.data;
+    const uint8_t* indexBufferDataStartAddress = indexBufferData.data();
+    const uint8_t* desiredIndexDataStartAddress = indexBufferDataStartAddress + indexAccessorByteOffset + indexBufferViewByteOffset;
+
+    std::vector<uint32_t> indices(indexCount);
+
+    switch(indexAccessor.componentType) {
+        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+            LOG_TRACE(MODEL_PRIMITIVE, "Using {} indices of type uint32_t", indexCount);
+            const uint32_t* p_gltfIndices = reinterpret_cast<const uint32_t*>(desiredIndexDataStartAddress);
+            for (
+                uint32_t i = 0; i < indexCount; ++i
+                ) {
+                indices[i] = p_gltfIndices[i];
+            }
+            break;
+        }
+        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+            LOG_TRACE(MODEL_PRIMITIVE, "Using {} indices of type uint16_t", indexCount);
+            const uint16_t* p_gltfIndices = reinterpret_cast<const uint16_t*>(desiredIndexDataStartAddress);
+            for (
+                uint32_t i = 0; i < indexCount; ++i
+                ) {
+                indices[i] = p_gltfIndices[i];
+            }
+            break;
+        }
+        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+            LOG_TRACE(MODEL_PRIMITIVE, "Using {} indices of type uint8_t", indexCount);
+            const uint8_t* p_gltfIndices = reinterpret_cast<const uint8_t*>(desiredIndexDataStartAddress);
+            for (
+                uint32_t i = 0; i < indexCount; ++i
+                ) {
+                indices[i] = p_gltfIndices[i];
+            }
+            break;
+        }
+    }
+
+    LOG_TRACE(MODEL_PRIMITIVE, "Successfully loaded {} indices for primitive", indices.size());
+    return indices;
+}
+
+/** @todo 2024/05/21 Break up this function. It is far too big */
 
 void
 quartz::rendering::Primitive::populateVerticesWithAttribute(
     std::vector<quartz::rendering::Vertex>& verticesToPopulate,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
+    const std::shared_ptr<quartz::rendering::Material>& p_material,
+    const std::vector<uint32_t>& indices,
     const quartz::rendering::Vertex::AttributeType attributeType
 ) {
     const std::string attributeString = quartz::rendering::Vertex::getAttributeGLTFString(attributeType);
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "{}", attributeString);
+
+    // ----- Handle the case where the attribute is not provided ----- //
 
     if (gltfPrimitive.attributes.find(attributeString) == gltfPrimitive.attributes.end()) {
         LOG_TRACE(MODEL_PRIMITIVE, "Primitive does not contain a {} attribute", attributeString);
@@ -29,27 +122,74 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
             case quartz::rendering::Vertex::AttributeType::Position:
             case quartz::rendering::Vertex::AttributeType::Normal:
                 LOG_THROW(MODEL_PRIMITIVE, util::AssetInsufficientError, "Primitive must contain a {} attribute", attributeString);
+            case quartz::rendering::Vertex::AttributeType::Tangent:
+                LOG_TRACE(MODEL_PRIMITIVE, "Manually calculating vertex tangents. We're operating under the assumption that the other attributes are already populated");
+                quartz::rendering::TangentCalculator::populateVerticesWithTangents(
+                    gltfModel,
+                    gltfPrimitive,
+                    indices,
+                    verticesToPopulate
+                );
+                return;
+            case quartz::rendering::Vertex::AttributeType::Color:
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default vertex color of r: {}, g: {}, b: {}", verticesToPopulate[0].color.r, verticesToPopulate[0].color.g, verticesToPopulate[0].color.b);
+                return;
             case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture");
-                break;
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture coordinates of {},{}", verticesToPopulate[0].baseColorTextureCoordinate.x, verticesToPopulate[0].baseColorTextureCoordinate.y);
+                return;
             case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default metallic roughness texture");
-                break;
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default metallic roughness texture coordinates of {},{}", verticesToPopulate[0].metallicRoughnessTextureCoordinate.x, verticesToPopulate[0].metallicRoughnessTextureCoordinate.y);
+                return;
             case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture");
-                break;
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture coordinates of {},{}", verticesToPopulate[0].normalTextureCoordinate.x, verticesToPopulate[0].normalTextureCoordinate.y);
+                return;
             case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default emission texture");
-                break;
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default emission texture coordinates of {},{}", verticesToPopulate[0].emissionTextureCoordinate.x, verticesToPopulate[0].emissionTextureCoordinate.y);
+                return;
             case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
-                LOG_TRACE(MODEL_PRIMITIVE, "Using default occlusion texture");
-                break;
-            default:
-                break;
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default occlusion texture coordinates of {},{}", verticesToPopulate[0].occlusionTextureCoordinate.x, verticesToPopulate[0].occlusionTextureCoordinate.y);
+                return;
         }
-
-        return;
     }
+
+    // ----- Handle the case where the texture is the default ----- //
+
+    switch (attributeType) {
+        case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+            if (p_material->getBaseColorTextureMasterIndex() == quartz::rendering::Texture::getBaseColorDefaultMasterIndex()) {
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default base color texture, so leaving coordinates to be {},{}", verticesToPopulate[0].baseColorTextureCoordinate.x, verticesToPopulate[0].baseColorTextureCoordinate.y);
+                return;
+            }
+            break;
+        case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
+            if (p_material->getMetallicRoughnessTextureMasterIndex() == quartz::rendering::Texture::getMetallicRoughnessDefaultMasterIndex()) {
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default metallic roughness texture, so leaving coordinates to be {},{}", verticesToPopulate[0].metallicRoughnessTextureCoordinate.x, verticesToPopulate[0].metallicRoughnessTextureCoordinate.y);
+                return;
+            }
+            break;
+        case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+            if (p_material->getNormalTextureMasterIndex() == quartz::rendering::Texture::getNormalDefaultMasterIndex()) {
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default normal texture, so leaving coordinates to be {},{}", verticesToPopulate[0].normalTextureCoordinate.x, verticesToPopulate[0].normalTextureCoordinate.y);
+                return;
+            }
+            break;
+        case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
+            if (p_material->getEmissionTextureMasterIndex() == quartz::rendering::Texture::getEmissionDefaultMasterIndex()) {
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default emission texture, so leaving coordinates to be {},{}", verticesToPopulate[0].emissionTextureCoordinate.x, verticesToPopulate[0].emissionTextureCoordinate.y);
+                return;
+            }
+            break;
+        case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
+            if (p_material->getOcclusionTextureMasterIndex() == quartz::rendering::Texture::getOcclusionDefaultMasterIndex()) {
+                LOG_TRACE(MODEL_PRIMITIVE, "Using default occlusion texture, so leaving coordinates to be {},{}", verticesToPopulate[0].occlusionTextureCoordinate.x, verticesToPopulate[0].occlusionTextureCoordinate.y);
+                return;
+            }
+            break;
+        default:
+            break;
+    }
+
+    // ----- Actually load the attribute ----- //
 
     LOG_TRACE(MODEL_PRIMITIVE, "Loading {} attribute", attributeString);
 
@@ -86,7 +226,13 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
     const float* p_data = reinterpret_cast<const float*>(desiredDataStartAddress);
 
     uint32_t tinygltfVecType = TINYGLTF_TYPE_VEC3;
-    if (attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate) {
+    if (
+        attributeType == quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate ||
+        attributeType == quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate ||
+        attributeType == quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate ||
+        attributeType == quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate ||
+        attributeType == quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate
+    ) {
         LOG_TRACE(MODEL_PRIMITIVE, "{} attribute uses vector2", attributeString);
         tinygltfVecType = TINYGLTF_TYPE_VEC2;
     }
@@ -107,10 +253,6 @@ quartz::rendering::Primitive::populateVerticesWithAttribute(
                 break;
             }
             case quartz::rendering::Vertex::AttributeType::Tangent: {
-                /**
-                 * @brief This should be the last one populated. We want to calculate the tangents
-                 *   using the positions and normals of all of the other vertices
-                 */
                 verticesToPopulate[i].tangent = glm::make_vec3(&p_data[i * byteStride]);
                 break;
             }
@@ -146,7 +288,9 @@ quartz::rendering::StagedBuffer
 quartz::rendering::Primitive::createStagedVertexBuffer(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
-    const tinygltf::Primitive& gltfPrimitive
+    const tinygltf::Primitive& gltfPrimitive,
+    const std::shared_ptr<quartz::rendering::Material>& p_material,
+    const std::vector<uint32_t>& indices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
 
@@ -164,7 +308,7 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
         quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate,
         quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate,
-        quartz::rendering::Vertex::AttributeType::Tangent, // needs to go last. uses other attributes in calculations
+        quartz::rendering::Vertex::AttributeType::Tangent, // needs to go last. uses other attributes in calculations if not provided by model
     };
 
     for (const quartz::rendering::Vertex::AttributeType attributeType : attributeTypes) {
@@ -172,6 +316,8 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
             vertices,
             gltfModel,
             gltfPrimitive,
+            p_material,
+            indices,
             attributeType
         );
     }
@@ -188,117 +334,39 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
     return stagedVertexBuffer;
 }
 
-quartz::rendering::StagedBuffer
-quartz::rendering::Primitive::createStagedIndexBuffer(
-    const quartz::rendering::Device& renderingDevice,
-    const tinygltf::Model& gltfModel,
-    const tinygltf::Primitive& gltfPrimitive
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
-
-    const uint32_t indexAccessorIndex = gltfPrimitive.indices; // will always be >= 0
-    const tinygltf::Accessor& indexAccessor = gltfModel.accessors[indexAccessorIndex];
-    const uint32_t indexCount = indexAccessor.count;
-
-    const uint32_t indexBufferViewIndex = indexAccessor.bufferView;
-    const tinygltf::BufferView& indexBufferView = gltfModel.bufferViews[indexBufferViewIndex];
-
-    const uint32_t indexBufferIndex = indexBufferView.buffer;
-    const tinygltf::Buffer& indexBuffer = gltfModel.buffers[indexBufferIndex];
-
-    const uint32_t indexAccessorByteOffset = indexAccessor.byteOffset;
-    const uint32_t indexBufferViewByteOffset = indexBufferView.byteOffset;
-    const std::vector<uint8_t>& indexBufferData = indexBuffer.data;
-    const uint8_t* indexBufferDataStartAddress = indexBufferData.data();
-    const uint8_t* desiredIndexDataStartAddress = indexBufferDataStartAddress + indexAccessorByteOffset + indexBufferViewByteOffset;
-
-    std::vector<uint32_t> indices(indexCount);
-
-    switch (indexAccessor.componentType) {
-        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
-            LOG_TRACE(MODEL_PRIMITIVE, "  - using {} indices of type uint32_t", indexCount);
-            const uint32_t* p_indices = reinterpret_cast<const uint32_t*>(desiredIndexDataStartAddress);
-            for (uint32_t j = 0; j < indexCount; ++j) {
-                indices[j] = p_indices[j];
-            }
-            break;
-        }
-        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
-            LOG_TRACE(MODEL_PRIMITIVE, "  - using {} indices of type uint16_t", indexCount);
-            const uint16_t* p_indices = reinterpret_cast<const uint16_t*>(desiredIndexDataStartAddress);
-            for (uint16_t j = 0; j < indexCount; ++j) {
-                indices[j] = p_indices[j];
-            }
-            break;
-        }
-        case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-            LOG_TRACE(MODEL_PRIMITIVE, "  - using {} indices of type uint8_t", indexCount);
-            const uint8_t* p_indices = reinterpret_cast<const uint8_t*>(desiredIndexDataStartAddress);
-            for (uint8_t j = 0; j < indexCount; ++j) {
-                indices[j] = p_indices[j];
-            }
-            break;
-        }
-    }
-
-    LOG_TRACE(MODEL_PRIMITIVE, "Successfully loaded {} indices for primitive", indexCount);
-
-    quartz::rendering::StagedBuffer stagedIndexBuffer(
-        renderingDevice,
-        sizeof(uint32_t) * indices.size(),
-        vk::BufferUsageFlagBits::eIndexBuffer,
-        indices.data()
-    );
-
-    return stagedIndexBuffer;
-}
-
-uint32_t
-quartz::rendering::Primitive::loadMaterialMasterIndex(
-    const tinygltf::Primitive& gltfPrimitive,
-    const std::vector<uint32_t>& materialMasterIndices
-) {
-    LOG_FUNCTION_SCOPE_TRACE(MODEL_PRIMITIVE, "");
-
-    int32_t materialLocalIndex = gltfPrimitive.material;
-    LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material at local index {}", materialLocalIndex);
-
-    if (materialLocalIndex < 0) {
-        LOG_TRACE(MODEL_PRIMITIVE, "No material provided, so using default material");
-        return quartz::rendering::Material::getDefaultMaterialMasterIndex();
-    }
-
-    const uint32_t materialMasterIndex = materialMasterIndices[materialLocalIndex];
-    LOG_TRACE(MODEL_PRIMITIVE, "Material at local index {} gives master material {}", materialLocalIndex, materialMasterIndex);
-
-    return materialMasterIndex;
-}
-
 quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Primitive& gltfPrimitive,
     const std::vector<uint32_t>& materialMasterIndices
 ) :
-    m_indexCount(gltfModel.accessors[gltfPrimitive.indices].count),
-    m_stagedVertexBuffer(
-        quartz::rendering::Primitive::createStagedVertexBuffer(
-            renderingDevice,
-            gltfModel,
-            gltfPrimitive
-        )
-    ),
-    m_stagedIndexBuffer(
-        quartz::rendering::Primitive::createStagedIndexBuffer(
-            renderingDevice,
-        gltfModel,
-            gltfPrimitive
-        )
-    ),
     m_materialMasterIndex(
         quartz::rendering::Primitive::loadMaterialMasterIndex(
             gltfPrimitive,
             materialMasterIndices
+        )
+    ),
+    m_indices(
+        quartz::rendering::Primitive::loadIndicesFromGltfPrimitive(
+            gltfModel,
+            gltfPrimitive
+        )
+    ),
+    m_stagedVertexBuffer(
+        quartz::rendering::Primitive::createStagedVertexBuffer(
+            renderingDevice,
+            gltfModel,
+            gltfPrimitive,
+            quartz::rendering::Material::getMaterialPtr(m_materialMasterIndex),
+            m_indices
+        )
+    ),
+    m_stagedIndexBuffer(
+        quartz::rendering::StagedBuffer(
+            renderingDevice,
+            sizeof(uint32_t) * m_indices.size(),
+            vk::BufferUsageFlagBits::eIndexBuffer,
+            m_indices.data()
         )
     )
 {
@@ -308,10 +376,10 @@ quartz::rendering::Primitive::Primitive(
 quartz::rendering::Primitive::Primitive(
     quartz::rendering::Primitive&& other
 ) :
-    m_indexCount(other.m_indexCount),
+    m_materialMasterIndex(other.m_materialMasterIndex),
+    m_indices(std::move(other.m_indices)),
     m_stagedVertexBuffer(std::move(other.m_stagedVertexBuffer)),
-    m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer)),
-    m_materialMasterIndex(other.m_materialMasterIndex)
+    m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

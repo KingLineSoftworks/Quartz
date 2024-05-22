@@ -71,10 +71,12 @@ void quartz::Application::run() {
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
 
+#define JUKEBOX_ONLY
             // =============================================
             // boxes
             // =============================================
 
+#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
                 {
@@ -84,7 +86,7 @@ void quartz::Application::run() {
                     {1.0f, 1.0f, 1.0f}
                 }
             },
-
+#endif
             // =============================================
             // others
             // =============================================
@@ -100,6 +102,7 @@ void quartz::Application::run() {
                     {100.0f, 100.0f, 100.0f}
                 },
             },
+#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
                 {
@@ -139,6 +142,7 @@ void quartz::Application::run() {
                     {1.0f, 1.0f, 1.0f}
                 }
             },
+#endif
         };
 
     LOG_INFOthis("Loading scene");
