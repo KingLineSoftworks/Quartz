@@ -58,8 +58,6 @@ void main() {
 
     // ----- Calculate the TBN matrix ----- //
 
-    /** @todo 2024/05/11 Calculate the tangent vertex attribute so we can correctly populate the TBN matrix */
-
     vec3 T = normalize(vec3(
         pushConstant.modelMatrix * vec4(in_tangent, 0.0)
     ));
@@ -67,6 +65,8 @@ void main() {
     vec3 N = normalize(vec3(
         pushConstant.modelMatrix * vec4(in_normal, 0.0)
     ));
+
+    T = normalize(T - dot(T, N) * N); // Re-orthogonalize T w.r.t N
 
     vec3 B = normalize(cross(N, T));
 

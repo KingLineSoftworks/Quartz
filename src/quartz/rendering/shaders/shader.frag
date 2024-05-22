@@ -57,31 +57,35 @@ layout(location = 8) in vec2 in_occlusionTextureCoordinate;
 
 layout(location = 0) out vec4 out_fragmentColor;
 
-// -----==== Helper Logic =====----- //
-
 // -----==== Main Logic =====----- //
 
 void main() {
 
-    // ... base color ... //
+    // ---+++=== normal ===+++--- //
+
+    vec3 normalDisplacement = texture(
+        sampler2D(textureArray[material.normalTextureMasterIndex], rgbaTextureSampler),
+        in_normalTextureCoordinate
+    ).rgb;
+
+    normalDisplacement = normalize((normalDisplacement * 2.0) - 1.0); // convert it to range [-1, 1] from range [0, 1]
+
+    vec3 fragmentNormal = normalize(in_TBN * normalDisplacement); // convert the normal to tangent space
+
+    // ---+++=== base color ===+++--- //
 
     vec3 fragmentBaseColor = texture(
-        sampler2D(
-            textureArray[material.baseColorTextureMasterIndex],
-            rgbaTextureSampler
-        ),
+        sampler2D(textureArray[material.baseColorTextureMasterIndex], rgbaTextureSampler),
         in_baseColorTextureCoordinate
     ).rgb;
     fragmentBaseColor *= in_vertexColor;
     fragmentBaseColor *= material.baseColorFactor.rgb;
 
-    // ... ambient light ... //
+    // ---+++=== ambient light ===+++--- //
 
     vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor;
 
-    // ... directional light ... //
-
-    vec3 fragmentNormal = in_TBN[2];
+    // ---+++=== directional light ===+++--- //
 
     vec3 fragmentToLightDirection = normalize(-directionalLight.direction);
 
@@ -94,17 +98,14 @@ void main() {
         directionalLight.color *
         (directionalLightImpact * fragmentBaseColor);
 
-    // ... emissive contribution ... //
+    // ---+++=== emissive contribution ===+++--- //
 
     vec3 emissiveColor = texture(
-        sampler2D(
-            textureArray[material.emissionTextureMasterIndex],
-            rgbaTextureSampler
-        ),
+        sampler2D(textureArray[material.emissionTextureMasterIndex], rgbaTextureSampler),
         in_emissionTextureCoordinate
     ).rgb;
 
-    // ... put it all together ... //
+    // ---+++=== put it all together ===+++--- //
 
     out_fragmentColor = vec4(
         ambientLightContribution +
