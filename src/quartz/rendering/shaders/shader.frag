@@ -72,7 +72,22 @@ void main() {
 
     vec3 fragmentNormal = normalize(in_TBN * normalDisplacement); // convert the normal to tangent space
 
+    // ---+++=== metallic roughness information ===+++--- //
+
+    vec3 metallicRoughnessVec = texture(
+        sampler2D(textureArray[material.metallicRoughnessTextureMasterIndex], rgbaTextureSampler),
+        in_metallicRoughnessTextureCoordinate
+    ).rgb;
+    float roughnessValue = metallicRoughnessVec.g;
+    float metallicValue = metallicRoughnessVec.b;
+
     // ---+++=== base color ===+++--- //
+
+    /**
+     *  @todo 2024/05/23 The base color texture MUST contain 8-bit values encoded with the sRGB opto-electronic transfer function
+     *    so RGB values MUST be decoded to real linear values before they are used for any computations. To achieve correct filtering,
+     *    the transfer function SHOULD be decoded before performing linear interpolation.
+     */
 
     vec3 fragmentBaseColor = texture(
         sampler2D(textureArray[material.baseColorTextureMasterIndex], rgbaTextureSampler),
@@ -80,6 +95,13 @@ void main() {
     ).rgb;
     fragmentBaseColor *= in_vertexColor;
     fragmentBaseColor *= material.baseColorFactor.rgb;
+
+    if (metallicValue == 1.0) {
+        // When the material is a metal, the base color is the specific measured reflectance value at normal incidence (F0).
+    } else {
+        // For a non-metal the base color represents the reflected diffuse color of the material.
+        // In this model it is not possible to specify a F0 value for non-metals, and a linear value of 4% (0.04) is used.
+    }
 
     // ---+++=== ambient light ===+++--- //
 
