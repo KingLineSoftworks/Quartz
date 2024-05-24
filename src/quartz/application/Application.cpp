@@ -102,7 +102,6 @@ void quartz::Application::run() {
                     {100.0f, 100.0f, 100.0f}
                 },
             },
-#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
                 {
@@ -112,6 +111,7 @@ void quartz::Application::run() {
                     {20.0f, 20.0f, 20.0f}
                 }
             },
+#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
                 {

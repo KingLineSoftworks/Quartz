@@ -83,7 +83,12 @@ void main() {
 
     // ---+++=== ambient light ===+++--- //
 
-    vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor;
+    float occlusionScale = texture(
+        sampler2D(textureArray[material.occlusionTextureMasterIndex], rgbaTextureSampler),
+        in_occlusionTextureCoordinate
+    ).r;
+
+    vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor * occlusionScale;
 
     // ---+++=== directional light ===+++--- //
 

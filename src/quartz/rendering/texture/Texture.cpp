@@ -120,7 +120,7 @@ quartz::rendering::Texture::initializeMasterTextureList(
     LOG_TRACE(TEXTURE, "Emission default texture master index: {}", quartz::rendering::Texture::emissionDefaultMasterIndex);
 
     LOG_TRACE(TEXTURE, "Creating occlusion default texture");
-    const std::vector<uint8_t> occlusionPixel = { 0x00, 0x00, 0x00, 0x00}; // Default to no emission color
+    const std::vector<uint8_t> occlusionPixel = { 0xFF, 0x00, 0x00, 0x00}; // Default to no occlusion scale (don't bring down ambient light)
     std::shared_ptr<quartz::rendering::Texture> p_occlusionDefault = std::make_shared<quartz::rendering::Texture>(
         renderingDevice,
         1,
