@@ -57,6 +57,7 @@ public: // member functions
         const uint32_t availableSwapchainImageIndex
     );
     void recordDoodadToDrawingCommandBuffer(
+        const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Pipeline& renderingPipeline,
         const quartz::scene::Doodad& doodad,
         const uint32_t inFlightFrameIndex

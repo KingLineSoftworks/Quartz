@@ -19,7 +19,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Mesh& gltfMesh,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
     Mesh(Mesh&& other);
     ~Mesh();
@@ -33,7 +33,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Mesh& gltfMesh,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
 
 private: // member variables

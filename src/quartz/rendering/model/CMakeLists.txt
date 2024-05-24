@@ -9,6 +9,7 @@ add_library(
         Node.cpp
         Primitive.cpp
         Scene.cpp
+        TangentCalculator.cpp
         Vertex.cpp
 )
 
@@ -22,6 +23,7 @@ target_link_libraries(
 
         PUBLIC
         glm
+        mikktspace
         tinygltf
         vulkan
 

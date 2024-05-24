@@ -24,7 +24,7 @@ public: // member functions
         const tinygltf::Model& gltfModel,
         const tinygltf::Node& gltfNode,
         const Node* p_parent,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
     Node(Node&& other);
     ~Node();
@@ -43,7 +43,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Node& gltfNode,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
 
     glm::mat4 loadLocalTransformationMatrix(
@@ -54,7 +54,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
         const tinygltf::Node& gltfNode,
-        const std::vector<quartz::rendering::Material>& materials
+        const std::vector<uint32_t>& materialMasterIndices
     );
 
 private: // member functions

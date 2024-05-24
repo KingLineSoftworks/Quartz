@@ -44,7 +44,6 @@ void
 quartz::scene::Doodad::update(
     UNUSED const double tickTimeDelta
 ) {
-    LOG_FUNCTION_SCOPE_TRACEthis("");
     m_transformationMatrix = glm::mat4(1.0f);
 
     m_transformationMatrix = glm::translate(

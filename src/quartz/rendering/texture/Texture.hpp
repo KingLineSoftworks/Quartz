@@ -19,10 +19,13 @@ class quartz::rendering::Texture {
 public: // enums
     enum class Type {
         BaseColor = 0,
-        Normal = 1,
-        Emission = 2,
-        MetallicRoughness = 3
+        MetallicRoughness = 1,
+        Normal = 2,
+        Emission = 3,
+        Occlusion = 4
     };
+
+// -----+++++===== Static Interface =====+++++----- //
 
 public: // static functions
     static uint32_t createTexture(
@@ -30,20 +33,51 @@ public: // static functions
         const tinygltf::Image& gltfImage,
         const tinygltf::Sampler& gltfSampler
     );
-    static void initializeMasterList(
+    static void initializeMasterTextureList(
         const quartz::rendering::Device& renderingDevice
     );
     static void cleanUpAllTextures();
 
     static std::string getTextureTypeGLTFString(const quartz::rendering::Texture::Type type);
 
-    static uint32_t getBaseColorDefaultIndex() { return quartz::rendering::Texture::baseColorDefaultIndex; }
-    static uint32_t getNormalDefaultIndex() { return quartz::rendering::Texture::normalDefaultIndex; }
-    static uint32_t getEmissionDefaultIndex() { return quartz::rendering::Texture::emissionDefaultIndex; }
-    static uint32_t getMetallicRoughnessDefaultIndex() { return quartz::rendering::Texture::metallicRoughnessDefaultIndex; }
+    static uint32_t getBaseColorDefaultMasterIndex() { return quartz::rendering::Texture::baseColorDefaultMasterIndex; }
+    static uint32_t getMetallicRoughnessDefaultMasterIndex() { return quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex; }
+    static uint32_t getNormalDefaultMasterIndex() { return quartz::rendering::Texture::normalDefaultMasterIndex; }
+    static uint32_t getEmissionDefaultMasterIndex() { return quartz::rendering::Texture::emissionDefaultMasterIndex; }
+    static uint32_t getOcclusionDefaultMasterIndex() { return quartz::rendering::Texture::occlusionDefaultMasterIndex; }
 
-    static std::weak_ptr<Texture> getTexture(const uint32_t index) { return quartz::rendering::Texture::masterList[index]; }
-    static const std::vector<std::shared_ptr<quartz::rendering::Texture>>& getMasterList() { return quartz::rendering::Texture::masterList; }
+    static std::weak_ptr<Texture> getTexturePtr(const uint32_t index) { return quartz::rendering::Texture::masterTextureList[index]; }
+    static const std::vector<std::shared_ptr<quartz::rendering::Texture>>& getMasterTextureList() { return quartz::rendering::Texture::masterTextureList; }
+
+private: // static functions
+    static quartz::rendering::StagedImageBuffer createImageBufferFromFilepath(
+        const quartz::rendering::Device& renderingDevice,
+        const std::string& filepath
+    );
+    static quartz::rendering::StagedImageBuffer createImageBufferFromGLTFImage(
+        const quartz::rendering::Device& renderingDevice,
+        const tinygltf::Image& gltfImage
+    );
+    static vk::Filter getVulkanFilterMode(const int32_t filterMode);
+    static vk::SamplerAddressMode getVulkanSamplerAddressMode(const int32_t addressMode);
+    static vk::UniqueSampler createVulkanSamplerPtr(
+        const quartz::rendering::Device& renderingDevice,
+        const vk::Filter magFilter,
+        const vk::Filter minFilter,
+        const vk::SamplerAddressMode addressModeU,
+        const vk::SamplerAddressMode addressModeV,
+        const vk::SamplerAddressMode addressModeW
+    );
+
+private: // static variables
+    static uint32_t baseColorDefaultMasterIndex;
+    static uint32_t metallicRoughnessDefaultMasterIndex;
+    static uint32_t normalDefaultMasterIndex;
+    static uint32_t emissionDefaultMasterIndex;
+    static uint32_t occlusionDefaultMasterIndex;
+    static std::vector<std::shared_ptr<Texture>> masterTextureList;
+
+// -----+++++===== Instance Interface =====+++++----- //
 
 public: // member functions
     Texture(
@@ -69,33 +103,6 @@ public: // member functions
 
     const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
     const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanSampler; }
-
-private: // static functions
-    static quartz::rendering::StagedImageBuffer createImageBufferFromFilepath(
-        const quartz::rendering::Device& renderingDevice,
-        const std::string& filepath
-    );
-    static quartz::rendering::StagedImageBuffer createImageBufferFromGLTFImage(
-        const quartz::rendering::Device& renderingDevice,
-        const tinygltf::Image& gltfImage
-    );
-    static vk::Filter getVulkanFilterMode(const int32_t filterMode);
-    static vk::SamplerAddressMode getVulkanSamplerAddressMode(const int32_t addressMode);
-    static vk::UniqueSampler createVulkanSamplerPtr(
-        const quartz::rendering::Device& renderingDevice,
-        const vk::Filter magFilter,
-        const vk::Filter minFilter,
-        const vk::SamplerAddressMode addressModeU,
-        const vk::SamplerAddressMode addressModeV,
-        const vk::SamplerAddressMode addressModeW
-    );
-
-private: // static variables
-    static uint32_t baseColorDefaultIndex;
-    static uint32_t normalDefaultIndex;
-    static uint32_t emissionDefaultIndex;
-    static uint32_t metallicRoughnessDefaultIndex;
-    static std::vector<std::shared_ptr<Texture>> masterList;
 
 private: // member variables
     /**

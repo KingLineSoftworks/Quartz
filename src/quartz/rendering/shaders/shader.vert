@@ -17,16 +17,32 @@ layout(push_constant) uniform perObjectVertexPushConstant {
 
 // -----==== Inputs =====----- //
 
+/**
+ *  @todo 2024/05/15 Can all of these texture coordinates be consolidated into one thing?
+ *    We'd be sending less data to GPU but we would have to enforce all textures to be of
+ *    the same dimensions, so we would have more image data, ad we wouldn't be able to
+ *    combine multiple textures into one image
+ */
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
-layout(location = 2) in vec3 in_color;
-layout(location = 3) in vec2 in_baseColorTextureCoordinate;
+layout(location = 2) in vec3 in_tangent;
+layout(location = 3) in vec3 in_vertexColor;
+layout(location = 4) in vec2 in_baseColorTextureCoordinate;
+layout(location = 5) in vec2 in_metallicRoughnessTextureCoordinate;
+layout(location = 6) in vec2 in_normalTextureCoordinate;
+layout(location = 7) in vec2 in_emissionTextureCoordinate;
+layout(location = 8) in vec2 in_occlusionTextureCoordinate;
 
 // -----==== Outputs to fragment shader =====----- //
 
-layout(location = 0) out vec3 out_fragmentNormal;
-layout(location = 1) out vec3 out_fragmentColor;
-layout(location = 2) out vec2 out_baseColorTextureCoordinate;
+layout(location = 0) out mat3 out_TBN;
+layout(location = 3) out vec3 out_vertexColor;
+layout(location = 4) out vec2 out_baseColorTextureCoordinate;
+layout(location = 5) out vec2 out_metallicRoughnessTextureCoordinate;
+layout(location = 6) out vec2 out_normalTextureCoordinate;
+layout(location = 7) out vec2 out_emissionTextureCoordinate;
+layout(location = 8) out vec2 out_occlusionTextureCoordinate;
 
 // -----==== Logic =====----- //
 
@@ -40,16 +56,28 @@ void main() {
         pushConstant.modelMatrix *
         vec4(in_position, 1.0);
 
-    // ----- Set the normal of the vertex ----- //
+    // ----- Calculate the TBN matrix ----- //
 
-    out_fragmentNormal = normalize(
-        vec3(
-            pushConstant.modelMatrix * vec4(in_normal, 0.0)
-        )
-    );
+    vec3 T = normalize(vec3(
+        pushConstant.modelMatrix * vec4(in_tangent, 0.0)
+    ));
+
+    vec3 N = normalize(vec3(
+        pushConstant.modelMatrix * vec4(in_normal, 0.0)
+    ));
+
+    T = normalize(T - dot(T, N) * N); // Re-orthogonalize T w.r.t N
+
+    vec3 B = normalize(cross(N, T));
+
+    out_TBN = mat3(T, B, N);
 
     // ----- set output for fragment shader to use as input ----- //
 
-    out_fragmentColor = in_color;
+    out_vertexColor = in_vertexColor;
     out_baseColorTextureCoordinate = in_baseColorTextureCoordinate;
+    out_metallicRoughnessTextureCoordinate = in_metallicRoughnessTextureCoordinate;
+    out_normalTextureCoordinate = in_normalTextureCoordinate;
+    out_emissionTextureCoordinate = in_emissionTextureCoordinate;
+    out_occlusionTextureCoordinate = in_occlusionTextureCoordinate;
 }

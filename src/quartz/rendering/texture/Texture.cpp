@@ -14,11 +14,12 @@
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
-uint32_t quartz::rendering::Texture::baseColorDefaultIndex = 0;
-uint32_t quartz::rendering::Texture::normalDefaultIndex = 0;
-uint32_t quartz::rendering::Texture::emissionDefaultIndex = 0;
-uint32_t quartz::rendering::Texture::metallicRoughnessDefaultIndex = 0;
-std::vector<std::shared_ptr<quartz::rendering::Texture>> quartz::rendering::Texture::masterList;
+uint32_t quartz::rendering::Texture::baseColorDefaultMasterIndex = 0;
+uint32_t quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex = 0;
+uint32_t quartz::rendering::Texture::normalDefaultMasterIndex = 0;
+uint32_t quartz::rendering::Texture::emissionDefaultMasterIndex = 0;
+uint32_t quartz::rendering::Texture::occlusionDefaultMasterIndex = 0;
+std::vector<std::shared_ptr<quartz::rendering::Texture>> quartz::rendering::Texture::masterTextureList;
 
 uint32_t
 quartz::rendering::Texture::createTexture(
@@ -28,9 +29,9 @@ quartz::rendering::Texture::createTexture(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    if (quartz::rendering::Texture::masterList.empty()) {
-        LOG_TRACE(TEXTURE, "Master list is empty, initializing");
-        quartz::rendering::Texture::initializeMasterList(renderingDevice);
+    if (quartz::rendering::Texture::masterTextureList.empty()) {
+        LOG_TRACE(TEXTURE, "Master texture list is empty, initializing");
+        quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
     }
 
     std::shared_ptr<quartz::rendering::Texture> p_texture = std::make_shared<quartz::rendering::Texture>(
@@ -39,68 +40,121 @@ quartz::rendering::Texture::createTexture(
         gltfSampler
     );
 
-    quartz::rendering::Texture::masterList.push_back(p_texture);
+    quartz::rendering::Texture::masterTextureList.push_back(p_texture);
 
-    uint32_t insertedIndex = quartz::rendering::Texture::masterList.size() - 1;
+    uint32_t insertedIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
     LOG_TRACE(TEXTURE, "Texture was inserted into master list at index {}", insertedIndex);
 
     return insertedIndex;
 }
 
 void
-quartz::rendering::Texture::initializeMasterList(
+quartz::rendering::Texture::initializeMasterTextureList(
     const quartz::rendering::Device& renderingDevice
 ) {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    if (!quartz::rendering::Texture::masterList.empty()) {
-        LOG_TRACE(TEXTURE, "Master list is already initialized. Not doing anything");
+    if (!quartz::rendering::Texture::masterTextureList.empty()) {
+        LOG_TRACE(TEXTURE, "Master texture list is already initialized. Not doing anything");
         return;
     }
 
-    quartz::rendering::Texture::masterList.reserve(QUARTZ_MAX_NUMBER_TEXTURES);
+    quartz::rendering::Texture::masterTextureList.reserve(QUARTZ_MAX_NUMBER_TEXTURES);
 
+    /**
+     * @todo 2024/05/07 We should probably make the default texture have a color of all 1.0,
+     *   according to [section 3.9.2 of the GLTF spec](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material)
+     *   where it says "f a texture is not given, all respective texture components within this material model MUST be assumed to have a value of 1.0."
+     *   But magenta is very easy to spot, so this is probably fine for now.
+     */
     LOG_TRACE(TEXTURE, "Creating base color default texture");
-    const std::vector<uint8_t> pixels = { 0xFF, 0x00, 0xFF, 0xFF }; // Default to magenta
+    const std::vector<uint8_t> baseColorPixel = { 0xFF, 0xFF, 0xFF, 0xFF }; // Default to white so when we element-wise multiply it has no effect
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault = std::make_shared<quartz::rendering::Texture>(
         renderingDevice,
         1,
         1,
         4,
-        reinterpret_cast<const void*>(pixels.data())
+        reinterpret_cast<const void*>(baseColorPixel.data())
     );
-    quartz::rendering::Texture::masterList.push_back(p_baseColorDefault);
-    quartz::rendering::Texture::baseColorDefaultIndex = quartz::rendering::Texture::masterList.size() - 1;
-    LOG_TRACE(TEXTURE, "Base color default at index {}", quartz::rendering::Texture::baseColorDefaultIndex);
+    quartz::rendering::Texture::masterTextureList.push_back(p_baseColorDefault);
+    quartz::rendering::Texture::baseColorDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
+    LOG_TRACE(TEXTURE, "Base color default texture master index: {}", quartz::rendering::Texture::baseColorDefaultMasterIndex);
 
-    /**
-     * @todo 2023/11/19 Create default textures for each of
-     *   normal
-     *   emission
-     *   metallicRoughness
-     */
+    LOG_TRACE(TEXTURE, "Creating metallic roughness default texture");
+    const std::vector<uint8_t> metallicRoughnessPixel = { 0x00, 0xFF, 0xFF, 0xFF}; // Default to 1.0 metallic and 1.0 rough
+    std::shared_ptr<quartz::rendering::Texture> p_metallicRoughnessDefault = std::make_shared<quartz::rendering::Texture>(
+        renderingDevice,
+        1,
+        1,
+        4,
+        reinterpret_cast<const void*>(metallicRoughnessPixel.data())
+    );
+    quartz::rendering::Texture::masterTextureList.push_back(p_metallicRoughnessDefault);
+    quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
+    LOG_TRACE(TEXTURE, "Metallic roughness default texture master index: {}", quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex);
+
+    LOG_TRACE(TEXTURE, "Creating normal default texture");
+    const std::vector<uint8_t> normalPixel = { 0x7F, 0x7F, 0xFF, 0xFF}; // Default to no offset
+    std::shared_ptr<quartz::rendering::Texture> p_normalDefault = std::make_shared<quartz::rendering::Texture>(
+        renderingDevice,
+        1,
+        1,
+        4,
+        reinterpret_cast<const void*>(normalPixel.data())
+    );
+    quartz::rendering::Texture::masterTextureList.push_back(p_normalDefault);
+    quartz::rendering::Texture::normalDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
+    LOG_TRACE(TEXTURE, "Normal default texture master index: {}", quartz::rendering::Texture::normalDefaultMasterIndex);
+
+    LOG_TRACE(TEXTURE, "Creating emission default texture");
+    const std::vector<uint8_t> emissionPixel = { 0x00, 0x00, 0x00, 0x00}; // Default to no emission color
+    std::shared_ptr<quartz::rendering::Texture> p_emissionDefault = std::make_shared<quartz::rendering::Texture>(
+        renderingDevice,
+        1,
+        1,
+        4,
+        reinterpret_cast<const void*>(emissionPixel.data())
+    );
+    quartz::rendering::Texture::masterTextureList.push_back(p_emissionDefault);
+    quartz::rendering::Texture::emissionDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
+    LOG_TRACE(TEXTURE, "Emission default texture master index: {}", quartz::rendering::Texture::emissionDefaultMasterIndex);
+
+    LOG_TRACE(TEXTURE, "Creating occlusion default texture");
+    const std::vector<uint8_t> occlusionPixel = { 0xFF, 0x00, 0x00, 0x00}; // Default to no occlusion scale (don't bring down ambient light)
+    std::shared_ptr<quartz::rendering::Texture> p_occlusionDefault = std::make_shared<quartz::rendering::Texture>(
+        renderingDevice,
+        1,
+        1,
+        4,
+        reinterpret_cast<const void*>(occlusionPixel.data())
+    );
+    quartz::rendering::Texture::masterTextureList.push_back(p_occlusionDefault);
+    quartz::rendering::Texture::occlusionDefaultMasterIndex = quartz::rendering::Texture::masterTextureList.size() - 1;
+    LOG_TRACE(TEXTURE, "Occlusion default texture master index: {}", quartz::rendering::Texture::occlusionDefaultMasterIndex);
 }
 
 void
 quartz::rendering::Texture::cleanUpAllTextures() {
     LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
 
-    quartz::rendering::Texture::masterList.clear();
+    quartz::rendering::Texture::masterTextureList.clear();
 }
 
 std::string
 quartz::rendering::Texture::getTextureTypeGLTFString(
     const quartz::rendering::Texture::Type type
 ) {
-    switch(type) {
+    switch (type) {
         case quartz::rendering::Texture::Type::BaseColor:
             return "baseColorTexture";
+        case quartz::rendering::Texture::Type::MetallicRoughness:
+            return "metallicRoughnessTexture";
         case quartz::rendering::Texture::Type::Normal:
             return "normalTexture";
         case quartz::rendering::Texture::Type::Emission:
             return "emissiveTexture";
-        case quartz::rendering::Texture::Type::MetallicRoughness:
-            return "metallicRoughnessTexture";
+        case quartz::rendering::Texture::Type::Occlusion:
+            return "occlusionTexture";
     }
 }
 
@@ -363,25 +417,31 @@ quartz::rendering::Texture::Texture(
     const quartz::rendering::Device& renderingDevice,
     const std::string& filepath
 ) :
-    m_stagedImageBuffer(quartz::rendering::Texture::createImageBufferFromFilepath(
-        renderingDevice,
-        filepath
-    )),
-    mp_vulkanImageView(quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        *(m_stagedImageBuffer.getVulkanImagePtr()),
-        m_stagedImageBuffer.getVulkanFormat(),
-        {},
-        vk::ImageAspectFlagBits::eColor
-    )),
-    mp_vulkanSampler(quartz::rendering::Texture::createVulkanSamplerPtr(
-        renderingDevice,
-        vk::Filter::eLinear,
-        vk::Filter::eLinear,
-        vk::SamplerAddressMode::eRepeat,
-        vk::SamplerAddressMode::eRepeat,
-        vk::SamplerAddressMode::eRepeat
-    ))
+    m_stagedImageBuffer(
+        quartz::rendering::Texture::createImageBufferFromFilepath(
+            renderingDevice,
+            filepath
+        )
+    ),
+    mp_vulkanImageView(
+        quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            *(m_stagedImageBuffer.getVulkanImagePtr()),
+            m_stagedImageBuffer.getVulkanFormat(),
+            {},
+            vk::ImageAspectFlagBits::eColor
+        )
+    ),
+    mp_vulkanSampler(
+        quartz::rendering::Texture::createVulkanSamplerPtr(
+            renderingDevice,
+            vk::Filter::eLinear,
+            vk::Filter::eLinear,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat
+        )
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -391,25 +451,31 @@ quartz::rendering::Texture::Texture(
     const tinygltf::Image& gltfImage,
     const tinygltf::Sampler& gltfSampler
 ) :
-    m_stagedImageBuffer(quartz::rendering::Texture::createImageBufferFromGLTFImage(
-        renderingDevice,
-        gltfImage
-    )),
-    mp_vulkanImageView(quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        *(m_stagedImageBuffer.getVulkanImagePtr()),
-        m_stagedImageBuffer.getVulkanFormat(),
-        {},
-        vk::ImageAspectFlagBits::eColor
-    )),
-    mp_vulkanSampler(quartz::rendering::Texture::createVulkanSamplerPtr(
-        renderingDevice,
-        quartz::rendering::Texture::getVulkanFilterMode(gltfSampler.minFilter),
-        quartz::rendering::Texture::getVulkanFilterMode(gltfSampler.magFilter),
-        quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapS),
-        quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapT),
-        quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapT)
-    ))
+    m_stagedImageBuffer(
+        quartz::rendering::Texture::createImageBufferFromGLTFImage(
+            renderingDevice,
+            gltfImage
+        )
+    ),
+    mp_vulkanImageView(
+        quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            *(m_stagedImageBuffer.getVulkanImagePtr()),
+            m_stagedImageBuffer.getVulkanFormat(),
+            {},
+            vk::ImageAspectFlagBits::eColor
+        )
+    ),
+    mp_vulkanSampler(
+        quartz::rendering::Texture::createVulkanSamplerPtr(
+            renderingDevice,
+            quartz::rendering::Texture::getVulkanFilterMode(gltfSampler.minFilter),
+            quartz::rendering::Texture::getVulkanFilterMode(gltfSampler.magFilter),
+            quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapS),
+            quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapT),
+            quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapT)
+        )
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

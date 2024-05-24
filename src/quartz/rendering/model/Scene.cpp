@@ -11,7 +11,7 @@ quartz::rendering::Scene::loadRootNodePtrs(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Scene& gltfScene,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_SCENE, "");
 
@@ -30,7 +30,7 @@ quartz::rendering::Scene::loadRootNodePtrs(
             gltfModel,
             gltfNode,
             nullptr,
-            materials
+            materialMasterIndices
         ));
     }
 
@@ -41,14 +41,14 @@ quartz::rendering::Scene::Scene(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel,
     const tinygltf::Scene& gltfScene,
-    const std::vector<quartz::rendering::Material>& materials
+    const std::vector<uint32_t>& materialMasterIndices
 ) :
     m_rootNodePtrs(
         quartz::rendering::Scene::loadRootNodePtrs(
             renderingDevice,
             gltfModel,
             gltfScene,
-            materials
+            materialMasterIndices
         )
     )
 {

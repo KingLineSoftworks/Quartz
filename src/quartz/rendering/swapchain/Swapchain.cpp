@@ -512,19 +512,12 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
 
 void
 quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
+    const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Pipeline& renderingPipeline,
     const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics,
-        *renderingPipeline.getVulkanPipelineLayoutPtr(),
-        0,
-        1,
-        &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
-        0,
-        nullptr
-    );
+    const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
 
     std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
         std::deque(
@@ -555,13 +548,29 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
-            uint32_t baseColorTextureIndex = primitive.getMaterial().getBaseColorTextureMasterIndex();
+            uint32_t materialMasterIndex = primitive.getMaterialMasterIndex();
+            uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
+                (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+                sizeof(quartz::rendering::MaterialUniformBufferObject);
+            materialByteOffset *= materialMasterIndex;
+
+            m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+                vk::PipelineBindPoint::eGraphics,
+                *renderingPipeline.getVulkanPipelineLayoutPtr(),
+                0,
+                1,
+                &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+                1,
+                &materialByteOffset
+            );
+
+            /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *renderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,
                 sizeof(glm::mat4),
                 sizeof(uint32_t),
-                reinterpret_cast<void*>(&baseColorTextureIndex)
+                reinterpret_cast<void*>(&materialMasterIndex)
             );
 
             uint32_t offset = 0;

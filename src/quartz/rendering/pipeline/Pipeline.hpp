@@ -19,11 +19,15 @@
 namespace quartz {
 namespace rendering {
     struct CameraUniformBufferObject;
-    struct ModelUniformBufferObject;
+    struct MaterialUniformBufferObject;
     class Pipeline;
 }
 }
 
+/**
+ * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
+ *   instead of creating a copy into this weird little struct
+ */
 struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
@@ -37,15 +41,39 @@ public: // member variables
     alignas(16) glm::mat4 projectionMatrix;
 };
 
-struct quartz::rendering::ModelUniformBufferObject {
+struct quartz::rendering::MaterialUniformBufferObject {
 public: // member functions
-    ModelUniformBufferObject() = default;
-    ModelUniformBufferObject(
-        const glm::mat4 modelMatrix_
+    MaterialUniformBufferObject() = default;
+    MaterialUniformBufferObject(
+        const uint32_t baseColorTextureMasterIndex_,
+        const uint32_t metallicRoughnessTextureMasterIndex_,
+        const uint32_t normalTextureMasterIndex_,
+        const uint32_t emissionTextureMasterIndex_,
+        const uint32_t occlusionTextureMasterIndex_,
+        const glm::vec4& baseColorFactor_,
+        const glm::vec3& emissiveFactor_,
+        const float metallicFactor_,
+        const float roughnessFactor_,
+        const uint32_t alphaMode_,
+        const float alphaCutoff_,
+        const bool doubleSided_
     );
 
 public: // member variables
-    alignas(16) glm::mat4 modelMatrix;
+    alignas(4) uint32_t baseColorTextureMasterIndex;
+    alignas(4) uint32_t metallicRoughnessTextureMasterIndex;
+    alignas(4) uint32_t normalTextureMasterIndex;
+    alignas(4) uint32_t emissionTextureMasterIndex;
+    alignas(4) uint32_t occlusionTextureMasterIndex;
+
+    alignas(16) glm::vec4 baseColorFactor;
+    alignas(16) glm::vec3 emissiveFactor;
+    alignas(4) float metallicFactor;
+    alignas(4) float roughnessFactor;
+
+    alignas(4) uint32_t alphaMode;
+    alignas(4) float alphaCutoff;
+    alignas(4) bool doubleSided;
 };
 
 class quartz::rendering::Pipeline {
@@ -80,6 +108,7 @@ public: // member functions
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
+    void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 
 private: // static functions
@@ -100,6 +129,7 @@ private: // static functions
     );
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
+        const uint32_t minUniformBufferOffsetAlignment,
         const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
@@ -118,7 +148,7 @@ private: // static functions
     static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::VertexInputBindingDescription vertexInputBindingDescriptions,
-        const std::array<vk::VertexInputAttributeDescription, 4> vertexInputAttributeDescriptions,
+        const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
         const std::vector<vk::Viewport> viewports,
         const std::vector<vk::Rect2D> scissorRectangles,
         const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -133,7 +163,7 @@ private: // member variables
     const uint32_t m_maxNumFramesInFlight;
     uint32_t m_currentInFlightFrameIndex;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
-    std::array<vk::VertexInputAttributeDescription, 4> m_vulkanVertexInputAttributeDescriptions;
+    std::vector<vk::VertexInputAttributeDescription> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
     std::vector<vk::Rect2D> m_vulkanScissorRectangles;
     std::vector<vk::PipelineColorBlendAttachmentState> m_vulkanColorBlendAttachmentStates;

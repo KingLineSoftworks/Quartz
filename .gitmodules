@@ -16,3 +16,6 @@
 [submodule "vendor/tinygltf"]
 	path = vendor/tinygltf
 	url = https://github.com/syoyo/tinygltf.git
+[submodule "vendor/MikkTSpace"]
+	path = vendor/MikkTSpace
+	url = https://github.com/mmikk/MikkTSpace.git

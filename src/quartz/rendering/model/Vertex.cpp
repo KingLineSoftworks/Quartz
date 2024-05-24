@@ -5,6 +5,32 @@
 #include "quartz/rendering/model/Vertex.hpp"
 
 std::string
+quartz::rendering::Vertex::getAttributeNameString(
+    const quartz::rendering::Vertex::AttributeType attributeType
+) {
+    switch (attributeType) {
+        case quartz::rendering::Vertex::AttributeType::Position:
+            return "Position";
+        case quartz::rendering::Vertex::AttributeType::Normal:
+            return "Normal";
+        case quartz::rendering::Vertex::AttributeType::Tangent:
+            return "Tangent";
+        case quartz::rendering::Vertex::AttributeType::Color:
+            return "Color";
+        case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+            return "Base Color Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
+            return "Metallic Roughness Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+            return "Normal Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
+            return "Emission Texture Coordinate";
+        case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
+            return "Occlusion Texture Coordinate";
+    }
+}
+
+std::string
 quartz::rendering::Vertex::getAttributeGLTFString(
     const quartz::rendering::Vertex::AttributeType type
 ) {
@@ -13,9 +39,15 @@ quartz::rendering::Vertex::getAttributeGLTFString(
             return "POSITION";
         case quartz::rendering::Vertex::AttributeType::Normal:
             return "NORMAL";
+        case quartz::rendering::Vertex::AttributeType::Tangent:
+            return "TANGENT";
         case quartz::rendering::Vertex::AttributeType::Color:
             return "COLOR_0";
         case quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate:
+        case quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate:
             return "TEXCOORD_0";
     }
 }
@@ -31,35 +63,62 @@ quartz::rendering::Vertex::getVulkanVertexInputBindingDescription() {
     return vertexInputBindingDescription;
 }
 
-std::array<vk::VertexInputAttributeDescription, 4>
+std::vector<vk::VertexInputAttributeDescription>
 quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions() {
-    std::array<
-        vk::VertexInputAttributeDescription,
-        4
-    > vertexInputAttributeDescriptions = {
+    std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription(
-            0,
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::Position),
             0,
             vk::Format::eR32G32B32Sfloat,
             offsetof(quartz::rendering::Vertex, position)
         ),
         vk::VertexInputAttributeDescription(
-            1,
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::Normal),
             0,
             vk::Format::eR32G32B32Sfloat,
             offsetof(quartz::rendering::Vertex, normal)
         ),
         vk::VertexInputAttributeDescription(
-            2,
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::Tangent),
+            0,
+            vk::Format::eR32G32B32Sfloat,
+            offsetof(quartz::rendering::Vertex, tangent)
+        ),
+        vk::VertexInputAttributeDescription(
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::Color),
             0,
             vk::Format::eR32G32B32Sfloat,
             offsetof(quartz::rendering::Vertex, color)
         ),
         vk::VertexInputAttributeDescription(
-            3,
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::BaseColorTextureCoordinate),
             0,
             vk::Format::eR32G32Sfloat,
             offsetof(quartz::rendering::Vertex, baseColorTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::MetallicRoughnessTextureCoordinate),
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, metallicRoughnessTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::NormalTextureCoordinate),
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, normalTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::EmissionTextureCoordinate),
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, emissionTextureCoordinate)
+        ),
+        vk::VertexInputAttributeDescription(
+            static_cast<uint32_t>(quartz::rendering::Vertex::AttributeType::OcclusionTextureCoordinate),
+            0,
+            vk::Format::eR32G32Sfloat,
+            offsetof(quartz::rendering::Vertex, occlusionTextureCoordinate)
         )
     };
 
@@ -70,19 +129,31 @@ quartz::rendering::Vertex::Vertex() :
     position(0.0f, 0.0f, 0.0f),
     normal(0.0f, 0.0f, 0.0f),
     color(1.0f, 1.0f, 1.0f),
-    baseColorTextureCoordinate(0.0f, 0.0f)
+    baseColorTextureCoordinate(0.0f, 0.0f),
+    metallicRoughnessTextureCoordinate(0.0f, 0.0f),
+    normalTextureCoordinate(0.0f, 0.0f),
+    emissionTextureCoordinate(0.0f, 0.0f),
+    occlusionTextureCoordinate(0.0f, 0.0f)
 {}
 
 quartz::rendering::Vertex::Vertex(
     const glm::vec3& position_,
     const glm::vec3& normal_,
     const glm::vec3& color_,
-    const glm::vec2& baseColorTextureCoordinate_
+    const glm::vec2& baseColorTextureCoordinate_,
+    const glm::vec2& metallicRoughnessTextureCoordinate_,
+    const glm::vec2& normalTextureCoordinate_,
+    const glm::vec2& emissionTextureCoordinate_,
+    const glm::vec2& occlusionTextureCoordinate_
 ) :
     position(position_),
     normal(normal_),
     color(color_),
-    baseColorTextureCoordinate(baseColorTextureCoordinate_)
+    baseColorTextureCoordinate(baseColorTextureCoordinate_),
+    metallicRoughnessTextureCoordinate(metallicRoughnessTextureCoordinate_),
+    normalTextureCoordinate(normalTextureCoordinate_),
+    emissionTextureCoordinate(emissionTextureCoordinate_),
+    occlusionTextureCoordinate(occlusionTextureCoordinate_)
 {}
 
 bool
@@ -103,6 +174,18 @@ quartz::rendering::Vertex::operator==(
         color.z == other.color.z &&
 
         baseColorTextureCoordinate.x == other.baseColorTextureCoordinate.x &&
-        baseColorTextureCoordinate.y == other.baseColorTextureCoordinate.y
+        baseColorTextureCoordinate.y == other.baseColorTextureCoordinate.y &&
+
+        metallicRoughnessTextureCoordinate.x == other.metallicRoughnessTextureCoordinate.x &&
+        metallicRoughnessTextureCoordinate.y == other.metallicRoughnessTextureCoordinate.y &&
+
+        normalTextureCoordinate.x == other.normalTextureCoordinate.x &&
+        normalTextureCoordinate.y == other.normalTextureCoordinate.y &&
+
+        emissionTextureCoordinate.x == other.emissionTextureCoordinate.x &&
+        emissionTextureCoordinate.y == other.emissionTextureCoordinate.y &&
+
+        occlusionTextureCoordinate.x == other.occlusionTextureCoordinate.x &&
+        occlusionTextureCoordinate.y == other.occlusionTextureCoordinate.y
     );
 }
