@@ -33,11 +33,13 @@ struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
     CameraUniformBufferObject(
+        const glm::vec3 position_,
         const glm::mat4 viewMatrix_,
         const glm::mat4 projectionMatrix_
     );
 
 public: // member variables
+    alignas(16) glm::vec3 position;
     alignas(16) glm::mat4 viewMatrix;
     alignas(16) glm::mat4 projectionMatrix;
 };

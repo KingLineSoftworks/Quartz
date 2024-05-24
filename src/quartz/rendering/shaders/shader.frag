@@ -7,6 +7,12 @@
 
 // ... world level things ... //
 
+layout(binding = 0) uniform CameraUniformBufferObject {
+    vec3 position;
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+} camera;
+
 layout(binding = 1) uniform AmbientLight {
     vec3 color;
 } ambientLight;
@@ -53,13 +59,14 @@ layout(push_constant) uniform perObjectFragmentPushConstant {
 
 // --------------------====================================== Input from vertex shader =======================================-------------------- //
 
-layout(location = 0) in mat3 in_TBN; /** @brief Tangent, Bi-Tangent, Normal vectors. All normalized */
-layout(location = 3) in vec3 in_vertexColor;
-layout(location = 4) in vec2 in_baseColorTextureCoordinate;
-layout(location = 5) in vec2 in_metallicRoughnessTextureCoordinate;
-layout(location = 6) in vec2 in_normalTextureCoordinate;
-layout(location = 7) in vec2 in_emissionTextureCoordinate;
-layout(location = 8) in vec2 in_occlusionTextureCoordinate;
+layout(location = 0) in vec3 in_fragmentPosition;
+layout(location = 1) in mat3 in_TBN; /** @brief Tangent, Bi-Tangent, Normal vectors. All normalized */
+layout(location = 4) in vec3 in_vertexColor;
+layout(location = 5) in vec2 in_baseColorTextureCoordinate;
+layout(location = 6) in vec2 in_metallicRoughnessTextureCoordinate;
+layout(location = 7) in vec2 in_normalTextureCoordinate;
+layout(location = 8) in vec2 in_emissionTextureCoordinate;
+layout(location = 9) in vec2 in_occlusionTextureCoordinate;
 
 // --------------------====================================== Output =======================================-------------------- //
 
@@ -67,20 +74,25 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // --------------------====================================== Helper logic declarations =======================================-------------------- //
 
-/**
- *  @brief 2024/05/24 All of these functions use the global variables instead of taking variables in via parameters,
- *    just so we don't have to worry about copying data anywhere for the sake of speed :P might not actually make a difference
- */
+// The only parameters these functions take in are ones that are calculated within the main function. Everything else used is a global variable
+
+float calculateAttenuation(
+    float constantFactor,
+    float linearFactor,
+    float quadraticFactor
+);
 
 vec3 getMetallicRoughnessVector();
 vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue);
 vec3 calculateFragmentNormal();
 vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor);
 vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor);
+vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue);
 vec3 calculateEmissiveColorContribution();
 vec4 calculateFinalColor(
     vec3 ambientLightContribution,
     vec3 directionalLightContribution,
+    vec3 pointLightContribution,
     vec3 emissiveColorContribution
 );
 
@@ -88,23 +100,48 @@ vec4 calculateFinalColor(
 
 void main() {
     vec3 metallicRoughnessVector = getMetallicRoughnessVector();
-    vec3 fragmentBaseColor = calculateFragmentBaseColor(metallicRoughnessVector.g, metallicRoughnessVector.b);
+    float metallicValue = metallicRoughnessVector.b;
+    float roughnessValue = metallicRoughnessVector.g;
+    vec3 fragmentBaseColor = calculateFragmentBaseColor(roughnessValue, metallicValue);
     vec3 fragmentNormal = calculateFragmentNormal();
 
     vec3 ambientLightContribution = calculateAmbientLightContribution(fragmentBaseColor);
     vec3 directionalLightContribution = calculateDirectionalLightContribution(fragmentNormal, fragmentBaseColor);
+    vec3 pointLightContribution = calculatePointLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue);
     vec3 emissiveColorContribution = calculateEmissiveColorContribution();
 
-    out_fragmentColor = calculateFinalColor(ambientLightContribution, directionalLightContribution, emissiveColorContribution);
+    out_fragmentColor = calculateFinalColor(ambientLightContribution, directionalLightContribution, pointLightContribution, emissiveColorContribution);
 }
 
 // --------------------====================================== Helper logic definitions =======================================-------------------- //
 
-/**
- *  @brief Get the metallic and roughness values from the metallic-roughness texture.
- *    The roughness component is stored in the g value while the metallic value is stored in the b value.
- */
+// --------------------------------------------------------------------------------
+// Determine how much attenuation to apply to the fragment based on the light so we can scale the light's brightness with distance
+// --------------------------------------------------------------------------------
+
+float calculateAttenuation(
+    float constantFactor,
+    float linearFactor,
+    float quadraticFactor
+) {
+    float distance = length(in_fragmentPosition - pointLight.position);
+    float attenuation = 1.0 / (
+        (constantFactor) +
+        (linearFactor * distance) +
+        (quadraticFactor * distance * distance)
+    );
+
+    return attenuation;
+}
+
+// --------------------------------------------------------------------------------
+// Get the metallic and roughness values from the metallic-roughness texture.
+// The roughness component is stored in the g value while the metallic value is stored in the b value.
+// --------------------------------------------------------------------------------
+
 vec3 getMetallicRoughnessVector() {
+    // @todo 2024/05/24 Take into account the metallic factor and the roughness factor from the material
+
     vec3 metallicRoughnessVector = texture(
         sampler2D(textureArray[material.metallicRoughnessTextureMasterIndex], rgbaTextureSampler),
         in_metallicRoughnessTextureCoordinate
@@ -113,15 +150,14 @@ vec3 getMetallicRoughnessVector() {
     return metallicRoughnessVector;
 }
 
-/**
- *  @brief Calculate the base color of the fragment before any lighting is taken into account
- */
+// --------------------------------------------------------------------------------
+// Calculate the base color of the fragment before any lighting is taken into account
+// --------------------------------------------------------------------------------
+
 vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue) {
-    /**
-     *  @todo 2024/05/23 The base color texture MUST contain 8-bit values encoded with the sRGB opto-electronic transfer function
-     *    so RGB values MUST be decoded to real linear values before they are used for any computations. To achieve correct filtering,
-     *    the transfer function SHOULD be decoded before performing linear interpolation.
-     */
+    // @todo 2024/05/23 The base color texture MUST contain 8-bit values encoded with the sRGB opto-electronic transfer function
+    //   so RGB values MUST be decoded to real linear values before they are used for any computations. To achieve correct filtering,
+    //   the transfer function SHOULD be decoded before performing linear interpolation.
 
     vec3 fragmentBaseColor = texture(
         sampler2D(textureArray[material.baseColorTextureMasterIndex], rgbaTextureSampler),
@@ -130,7 +166,7 @@ vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue) {
     fragmentBaseColor *= in_vertexColor;
     fragmentBaseColor *= material.baseColorFactor.rgb;
 
-    /** @todo 2024/05/24 Actually use the metallic and roughness values in the calculation of the base color */
+    // @todo 2024/05/24 Actually use the metallic and roughness values in the calculation of the base color //
 
     if (metallicValue == 1.0) {
         // When the material is a metal, the base color is the specific measured reflectance value at normal incidence (F0).
@@ -142,9 +178,10 @@ vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue) {
     return fragmentBaseColor;
 }
 
-/**
- *  @brief Calculate the normal of the fragment given the normal texture and the TBN matrix
- */
+// --------------------------------------------------------------------------------
+// Calculate the normal of the fragment given the normal texture and the TBN matrix
+// --------------------------------------------------------------------------------
+
 vec3 calculateFragmentNormal() {
     vec3 normalDisplacement = texture(
         sampler2D(textureArray[material.normalTextureMasterIndex], rgbaTextureSampler),
@@ -158,9 +195,10 @@ vec3 calculateFragmentNormal() {
     return fragmentNormal;
 }
 
-/**
- *  @brief Calculate the contribution to the final color from the ambient light
- */
+// --------------------------------------------------------------------------------
+// Calculate the contribution to the final color from the ambient light
+// --------------------------------------------------------------------------------
+
 vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor) {
     float occlusionScale = texture(
         sampler2D(textureArray[material.occlusionTextureMasterIndex], rgbaTextureSampler),
@@ -172,9 +210,10 @@ vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor) {
     return ambientLightContribution;
 }
 
-/**
- *  @brief Calculate the contribution to the final color from the directional light
- */
+// --------------------------------------------------------------------------------
+// Calculate the contribution to the final color from the directional light
+// --------------------------------------------------------------------------------
+
 vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor) {
     vec3 fragmentToLightDirection = normalize(-directionalLight.direction);
 
@@ -188,10 +227,44 @@ vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBas
     return directionalLightContribution;
 }
 
-/**
- *  @brief Calculate the contribution to the final color from the emissive color
- */
+// --------------------------------------------------------------------------------
+// Calculate the contribution to the final color from the point lights
+// --------------------------------------------------------------------------------
+
+vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor, float roughnessValue) {
+    vec3 fragmentToLightDirection = normalize(pointLight.position - in_fragmentPosition);
+    vec3 fragmentToCameraDirection = normalize(camera.position - in_fragmentPosition);
+
+    float diffuseImpact = max(dot(fragmentNormal, fragmentToLightDirection), 0.0);
+    vec3 diffuseContribution = pointLight.color * (diffuseImpact * fragmentBaseColor);
+
+    vec3 reflectionDirection = reflect(-fragmentToLightDirection, fragmentNormal);
+    float specularImpact = pow(
+        max(dot(fragmentToCameraDirection, reflectionDirection), 0.0),
+        (1.0 - roughnessValue)
+    );
+    vec3 specularContribution = pointLight.color * (specularImpact * fragmentBaseColor);
+    specularContribution *= 0.0;
+
+    float attenuation = calculateAttenuation(
+        pointLight.attenuationConstantFactor,
+        pointLight.attenuationLinearFactor,
+        pointLight.attenuationQuadraticFactor
+    );
+
+    diffuseContribution *= attenuation;
+    specularContribution *= attenuation;
+
+    return diffuseContribution + specularContribution;
+}
+
+// --------------------------------------------------------------------------------
+// Calculate the contribution to the final color from the emissive color
+// --------------------------------------------------------------------------------
+
 vec3 calculateEmissiveColorContribution() {
+    // @todo 2024/05/24 Take into account the emissive factor from the material
+
     vec3 emissiveColor = texture(
         sampler2D(textureArray[material.emissionTextureMasterIndex], rgbaTextureSampler),
         in_emissionTextureCoordinate
@@ -200,18 +273,21 @@ vec3 calculateEmissiveColorContribution() {
     return emissiveColor;
 }
 
-/**
- *  @brief Calculate the final output color
- */
+// --------------------------------------------------------------------------------
+// Calculate the final output color
+// --------------------------------------------------------------------------------
+
 vec4 calculateFinalColor(
     vec3 ambientLightContribution,
     vec3 directionalLightContribution,
+    vec3 pointLightContribution,
     vec3 emissiveColorContribution
 ) {
     return vec4(
         (
             ambientLightContribution +
             directionalLightContribution +
+            pointLightContribution +
             emissiveColorContribution
         ),
         1.0

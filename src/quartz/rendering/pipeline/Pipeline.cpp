@@ -18,9 +18,11 @@ constexpr uint32_t NUM_UNIQUE_UNIFORM_BUFFERS = 5;
  *   instead of creating a copy into this weird little struct
  */
 quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
+    const glm::vec3 position_,
     const glm::mat4 viewMatrix_,
     const glm::mat4 projectionMatrix_
 ) :
+    position(position_),
     viewMatrix(viewMatrix_),
     projectionMatrix(projectionMatrix_)
 {}
@@ -160,7 +162,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         0,
         vk::DescriptorType::eUniformBuffer,
         1,
-        vk::ShaderStageFlagBits::eVertex,
+        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         {}
     );
 
@@ -1040,6 +1042,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
     const quartz::scene::Camera& camera
 ) {
     quartz::rendering::CameraUniformBufferObject cameraUBO(
+        camera.getWorldPosition(),
         camera.getViewMatrix(),
         camera.getProjectionMatrix()
     );
