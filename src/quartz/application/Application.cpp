@@ -77,6 +77,22 @@ void quartz::Application::run() {
             // =============================================
 
 #ifndef JUKEBOX_ONLY
+#endif
+            // =============================================
+            // others
+            // =============================================
+
+            // first row
+
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+                {
+                    {-5.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {20.0f, 20.0f, 20.0f}
+                }
+            },
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
                 {
@@ -86,13 +102,6 @@ void quartz::Application::run() {
                     {1.0f, 1.0f, 1.0f}
                 }
             },
-#endif
-            // =============================================
-            // others
-            // =============================================
-
-            // first row
-
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
                 {
@@ -101,15 +110,6 @@ void quartz::Application::run() {
                     {0.0f, 0.0f, 1.0f},
                     {100.0f, 100.0f, 100.0f}
                 },
-            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-                {
-                    {-5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {20.0f, 20.0f, 20.0f}
-                }
             },
 #ifndef JUKEBOX_ONLY
             {
@@ -125,15 +125,6 @@ void quartz::Application::run() {
             // second row
 
             {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
-                {
-                    {0.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {0.005f, 0.005f, 0.005f}
-                },
-            },
-            {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
                 {
                     {-5.0f, 0.0f, 5.0f},
@@ -141,6 +132,15 @@ void quartz::Application::run() {
                     {0.0f, 0.0f, 1.0f},
                     {1.0f, 1.0f, 1.0f}
                 }
+            },
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
+                {
+                    {0.0f, 0.0f, 5.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {0.005f, 0.005f, 0.005f}
+                },
             },
 #endif
         };
@@ -159,6 +159,13 @@ void quartz::Application::run() {
         {
             { 0.65f, 0.65f, 0.65f },
             { 3.0f, -2.0f, 1.0f }
+        },
+        {
+            {1.0f, 0.0f, 0.0f},
+            {3.0f, 5.0f, -5.0f},
+            1.0f,
+            0.7f,
+            1.8f
         },
         doodadInformations
     );

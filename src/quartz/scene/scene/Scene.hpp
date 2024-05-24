@@ -13,6 +13,7 @@
 #include "quartz/scene/doodad/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
+#include "quartz/scene/light/PointLight.hpp"
 
 namespace quartz {
 namespace scene {
@@ -31,12 +32,14 @@ public: // member functions
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
+    const quartz::scene::PointLight& getPointLight() const { return m_pointLight; }
 
     void load(
         const quartz::rendering::Device& renderingDevice,
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
+        const quartz::scene::PointLight& pointLight,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
@@ -57,4 +60,5 @@ private: // member variables
     std::vector<quartz::scene::Doodad> m_doodads;
     quartz::scene::AmbientLight m_ambientLight;
     quartz::scene::DirectionalLight m_directionalLight;
+    quartz::scene::PointLight m_pointLight;
 };

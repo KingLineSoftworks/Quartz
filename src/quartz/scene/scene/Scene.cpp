@@ -61,6 +61,7 @@ quartz::scene::Scene::load(
     const quartz::scene::Camera& camera,
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
+    const quartz::scene::PointLight& pointLight,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
@@ -78,7 +79,10 @@ quartz::scene::Scene::load(
     LOG_TRACEthis("Loaded ambient light with color {}", glm::to_string(m_ambientLight.color));
 
     m_directionalLight = directionalLight;
-    LOG_TRACEthis("Loaded direction light with color {} and direction", glm::to_string(m_directionalLight.color), glm::to_string(m_directionalLight.direction));
+    LOG_TRACEthis("Loaded directional light with color {} and direction {}", glm::to_string(m_directionalLight.color), glm::to_string(m_directionalLight.direction));
+
+    m_pointLight = pointLight;
+    LOG_TRACEthis("Loaded point light with color {} and position {}", glm::to_string(m_pointLight.color), glm::to_string(m_pointLight.position));
 }
 
 void
