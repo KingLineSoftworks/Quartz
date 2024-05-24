@@ -140,14 +140,16 @@ float calculateAttenuation(
 // --------------------------------------------------------------------------------
 
 vec3 getMetallicRoughnessVector() {
-    // @todo 2024/05/24 Take into account the metallic factor and the roughness factor from the material
-
     vec3 metallicRoughnessVector = texture(
         sampler2D(textureArray[material.metallicRoughnessTextureMasterIndex], rgbaTextureSampler),
         in_metallicRoughnessTextureCoordinate
     ).rgb; // roughness in g, metallic in b
 
-    return metallicRoughnessVector;
+    return vec3(
+        metallicRoughnessVector.r,
+        metallicRoughnessVector.g * material.roughnessFactor,
+        metallicRoughnessVector.b * material.metallicFactor
+    );
 }
 
 // --------------------------------------------------------------------------------
@@ -263,14 +265,16 @@ vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor
 // --------------------------------------------------------------------------------
 
 vec3 calculateEmissiveColorContribution() {
-    // @todo 2024/05/24 Take into account the emissive factor from the material
-
     vec3 emissiveColor = texture(
         sampler2D(textureArray[material.emissionTextureMasterIndex], rgbaTextureSampler),
         in_emissionTextureCoordinate
     ).rgb;
 
-    return emissiveColor;
+    return vec3(
+        material.emissiveFactor.r * emissiveColor.r,
+        material.emissiveFactor.g * emissiveColor.g,
+        material.emissiveFactor.b * emissiveColor.b
+    );
 }
 
 // --------------------------------------------------------------------------------
