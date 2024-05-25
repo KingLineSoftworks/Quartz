@@ -1,7 +1,13 @@
 #version 450
 
+// ... quartz constants ... //
+
 #define MAX_NUMBER_TEXTURES -1
 #define MAX_NUMBER_MATERIALS -1
+
+// .. math constants ... //
+
+#define M_PI 3.1415926535897932384626433832795
 
 // --------------------====================================== Uniforms from CPU =======================================-------------------- //
 
@@ -82,6 +88,33 @@ float calculateAttenuation(
     float quadraticFactor
 );
 
+vec3 specularBRDF(
+    vec3 V, // normalized vector from fragment to camera
+    vec3 L, // normalized vector from fragment to light
+    vec3 N, // surface normal
+    vec3 H, // half vector = normalize(L + V)
+    float a // alpha = roughness
+);
+
+vec3 diffuseBRDF(vec3 color);
+
+vec3 schlickConductorFresnel(
+    vec3 V,   // normalized vector from fragment to camera
+    vec3 L,   // normalized vector from fragment to light
+    vec3 H,   // half vector = normalize(L + V)
+    vec3 f0,  // the fragment's base color
+    vec3 bsdf // the result of the specular brdf
+);
+
+vec3 fresnelMix(
+    vec3 V,    // normalized vector from fragment to camera
+    vec3 L,    // normalized vector from fragment to light
+    vec3 H,    // half vector = normalize(L + V)
+    float ior, // index of refraction (set to a fixed value of 1.5, a good compromise for most opaque, dielectric materials)
+    vec3 base, // the result of the diffuse brdf
+    vec3 layer // the result of the specular brdf
+);
+
 vec3 getMetallicRoughnessVector();
 vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue);
 vec3 calculateFragmentNormal();
@@ -133,6 +166,103 @@ float calculateAttenuation(
 
     return attenuation;
 }
+
+// --------------------------------------------------------------------------------
+// The specular brdf function.
+// This implementation was based on the explanation at https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specular-brdf
+// --------------------------------------------------------------------------------
+
+vec3 specularBRDF(
+    vec3 V, // normalized vector from fragment to camera
+    vec3 L, // normalized vector from fragment to light
+    vec3 N, // surface normal
+    vec3 H, // half vector = normalize(L + V)
+    float a // alpha = roughness
+) {
+    // ----- Calculate D ----- //
+
+    float NdotH = dot(N, H);
+
+    if (NdotH <= 0) {
+        return vec3(0.0, 0.0, 0.0);
+    }
+
+    float a2 = a * a;
+    float NdotH2 = NdotH * NdotH;
+
+    float mainDenominator = (NdotH2 * (a2 - 1)) + 1;
+
+    float D = (a2 * NdotH) / (M_PI * mainDenominator * mainDenominator);
+
+    // ----- Calculate V ??? ----- //
+
+    // ----- return ----- //
+
+     return V * D;
+}
+
+// --------------------------------------------------------------------------------
+// The lambertian diffuse brdf function.
+// Taken from https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#diffuse-brdf
+// --------------------------------------------------------------------------------
+
+vec3 diffuseBRDF(vec3 color) {
+    return (1/M_PI) * color;
+}
+
+// --------------------------------------------------------------------------------
+// The fresnel effect for metallic materials.
+// Described here: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metals
+// Implementation taken from: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#fresnel
+// --------------------------------------------------------------------------------
+
+vec3 schlickConductorFresnel(
+    vec3 V,   // normalized vector from fragment to camera
+    vec3 L,   // normalized vector from fragment to light
+    vec3 H,   // half vector = normalize(L + V)
+    vec3 f0,  // the fragment's base color
+    vec3 bsdf // the result of the specular brdf
+) {
+    float VdotH = dot(V, H);
+    float absVdotH = abs(VdotH);
+    float fixedAbsVdotH = 1 - absVdotH;
+    float fixedAbsVdotH5 = fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH;
+
+    return bsdf * (
+        f0 + (
+            (1 - f0) *
+            fixedAbsVdotH5
+        )
+    );
+}
+
+// --------------------------------------------------------------------------------
+// The fresnel mix for dielectric materials.
+// Described here: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#dielectrics
+// Implementation taken from: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#fresnel
+// --------------------------------------------------------------------------------
+
+vec3 fresnelMix(
+    vec3 V,    // normalized vector from fragment to camera
+    vec3 L,    // normalized vector from fragment to light
+    vec3 H,    // half vector = normalize(L + V)
+    float ior, // index of refraction (set to a fixed value of 1.5, a good compromise for most opaque, dielectric materials)
+    vec3 base, // the result of the diffuse brdf
+    vec3 layer // the result of the specular brdf
+) {
+    float VdotH = dot(V, H);
+    float absVdotH = abs(VdotH);
+    float fixedAbsVdotH = 1 - absVdotH;
+    float fixedAbsVdotH5 = fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH;
+
+    float f0Base = (1 - ior) / (1 + ior);
+    float f0 = f0Base * f0Base;
+
+    float fr = f0 + ((1 - f0) * fixedAbsVdotH5);
+
+    return mix(base, layer, fr);
+}
+
 
 // --------------------------------------------------------------------------------
 // Get the metallic and roughness values from the metallic-roughness texture.
@@ -234,6 +364,7 @@ vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBas
 // --------------------------------------------------------------------------------
 
 vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor, float roughnessValue) {
+#if false
     vec3 fragmentToLightDirection = normalize(pointLight.position - in_fragmentPosition);
     vec3 fragmentToCameraDirection = normalize(camera.position - in_fragmentPosition);
 
@@ -258,6 +389,9 @@ vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor
     specularContribution *= attenuation;
 
     return diffuseContribution + specularContribution;
+#endif
+
+    return vec3(0.0, 0.0, 0.0);
 }
 
 // --------------------------------------------------------------------------------
