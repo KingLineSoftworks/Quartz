@@ -355,6 +355,8 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
         vertices.data()
     );
 
+    LOG_INFO(MODEL_PRIMITIVE, "Successfully created staged vertex buffer for {} vertices", vertexCount);
+
     return stagedVertexBuffer;
 }
 

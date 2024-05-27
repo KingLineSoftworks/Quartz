@@ -15,7 +15,7 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
-    constexpr bool shouldLogPreamble = true;
+    constexpr bool shouldLogPreamble = false;
 
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();

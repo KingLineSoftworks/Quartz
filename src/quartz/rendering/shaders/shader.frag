@@ -82,13 +82,7 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // The only parameters these functions take in are ones that are calculated within the main function. Everything else used is a global variable
 
-float calculateAttenuation(
-    float constantFactor,
-    float linearFactor,
-    float quadraticFactor
-);
-
-vec3 specularBRDF(
+float specularBRDF(
     vec3 V, // normalized vector from fragment to camera
     vec3 L, // normalized vector from fragment to light
     vec3 N, // surface normal
@@ -96,23 +90,23 @@ vec3 specularBRDF(
     float a // alpha = roughness
 );
 
-vec3 diffuseBRDF(vec3 color);
+float diffuseBRDF();
 
-vec3 schlickConductorFresnel(
+vec3 conductorFresnel(
     vec3 V,   // normalized vector from fragment to camera
     vec3 L,   // normalized vector from fragment to light
     vec3 H,   // half vector = normalize(L + V)
     vec3 f0,  // the fragment's base color
-    vec3 bsdf // the result of the specular brdf
+    float bsdf // the result of the specular brdf
 );
 
-vec3 fresnelMix(
+float fresnelMix(
     vec3 V,    // normalized vector from fragment to camera
     vec3 L,    // normalized vector from fragment to light
     vec3 H,    // half vector = normalize(L + V)
     float ior, // index of refraction (set to a fixed value of 1.5, a good compromise for most opaque, dielectric materials)
     vec3 base, // the result of the diffuse brdf
-    vec3 layer // the result of the specular brdf
+    float layer // the result of the specular brdf
 );
 
 vec3 getMetallicRoughnessVector();
@@ -120,7 +114,7 @@ vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue);
 vec3 calculateFragmentNormal();
 vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor);
 vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor);
-vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue);
+vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue, float metallicValue);
 vec3 calculateEmissiveColorContribution();
 vec4 calculateFinalColor(
     vec3 ambientLightContribution,
@@ -133,14 +127,14 @@ vec4 calculateFinalColor(
 
 void main() {
     vec3 metallicRoughnessVector = getMetallicRoughnessVector();
-    float metallicValue = metallicRoughnessVector.b;
     float roughnessValue = metallicRoughnessVector.g;
+    float metallicValue = metallicRoughnessVector.b;
     vec3 fragmentBaseColor = calculateFragmentBaseColor(roughnessValue, metallicValue);
     vec3 fragmentNormal = calculateFragmentNormal();
 
     vec3 ambientLightContribution = calculateAmbientLightContribution(fragmentBaseColor);
     vec3 directionalLightContribution = calculateDirectionalLightContribution(fragmentNormal, fragmentBaseColor);
-    vec3 pointLightContribution = calculatePointLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue);
+    vec3 pointLightContribution = calculatePointLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue, metallicValue);
     vec3 emissiveColorContribution = calculateEmissiveColorContribution();
 
     out_fragmentColor = calculateFinalColor(ambientLightContribution, directionalLightContribution, pointLightContribution, emissiveColorContribution);
@@ -149,56 +143,47 @@ void main() {
 // --------------------====================================== Helper logic definitions =======================================-------------------- //
 
 // --------------------------------------------------------------------------------
-// Determine how much attenuation to apply to the fragment based on the light so we can scale the light's brightness with distance
-// --------------------------------------------------------------------------------
-
-float calculateAttenuation(
-    float constantFactor,
-    float linearFactor,
-    float quadraticFactor
-) {
-    float distance = length(in_fragmentPosition - pointLight.position);
-    float attenuation = 1.0 / (
-        (constantFactor) +
-        (linearFactor * distance) +
-        (quadraticFactor * distance * distance)
-    );
-
-    return attenuation;
-}
-
-// --------------------------------------------------------------------------------
 // The specular brdf function.
 // This implementation was based on the explanation at https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specular-brdf
 // --------------------------------------------------------------------------------
 
-vec3 specularBRDF(
+float specularBRDF(
     vec3 V, // normalized vector from fragment to camera
     vec3 L, // normalized vector from fragment to light
     vec3 N, // surface normal
     vec3 H, // half vector = normalize(L + V)
-    float a // alpha = roughness
+    float a // roughness ^ 2
 ) {
-    // ----- Calculate D ----- //
-
+    // @todo 2024/05/25 Should we be using a clamped dot function here instead of regular dot? //
+    float a2 = a * a;
+    float VdotH = dot(V, H);
+    float NdotV = dot(N, V);
+    float NdotL = dot(N, L);
     float NdotH = dot(N, H);
+    float HdotL = dot(H, L);
+    float HdotV = dot(H, V);
 
-    if (NdotH <= 0) {
-        return vec3(0.0, 0.0, 0.0);
+    if (NdotH <= 0.0 || HdotL <= 0.0 || HdotV <= 0.0) {
+        return 0.0;
     }
 
-    float a2 = a * a;
-    float NdotH2 = NdotH * NdotH;
+    // ----- Calculate D ----- //
 
-    float mainDenominator = (NdotH2 * (a2 - 1)) + 1;
+    float f = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
 
-    float D = (a2 * NdotH) / (M_PI * mainDenominator * mainDenominator);
+    float D_GGX = a2 / (M_PI * f * f);
 
-    // ----- Calculate V ??? ----- //
+    // ----- Calculate Vis ----- //
+
+    // @todo 2024/05/25 Quake fast square root algorithm //
+    float denomL = NdotL + sqrt(a2 + (1.0 - a2) * (NdotL * NdotL));
+    float denomV = NdotV + sqrt(a2 + (1.0 - a2) * (NdotV * NdotV));
+
+    float V_GGX = (1.0 / denomL) * (1.0 / denomV);
 
     // ----- return ----- //
 
-     return V * D;
+     return V_GGX * D_GGX;
 }
 
 // --------------------------------------------------------------------------------
@@ -206,8 +191,8 @@ vec3 specularBRDF(
 // Taken from https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#diffuse-brdf
 // --------------------------------------------------------------------------------
 
-vec3 diffuseBRDF(vec3 color) {
-    return (1/M_PI) * color;
+float diffuseBRDF() {
+    return 1.0 / M_PI;
 }
 
 // --------------------------------------------------------------------------------
@@ -216,24 +201,24 @@ vec3 diffuseBRDF(vec3 color) {
 // Implementation taken from: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#fresnel
 // --------------------------------------------------------------------------------
 
-vec3 schlickConductorFresnel(
+vec3 conductorFresnel(
     vec3 V,   // normalized vector from fragment to camera
     vec3 L,   // normalized vector from fragment to light
     vec3 H,   // half vector = normalize(L + V)
     vec3 f0,  // the fragment's base color
-    vec3 bsdf // the result of the specular brdf
+    float bsdf // the result of the specular brdf
 ) {
     float VdotH = dot(V, H);
     float absVdotH = abs(VdotH);
-    float fixedAbsVdotH = 1 - absVdotH;
-    float fixedAbsVdotH5 = fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH;
 
-    return bsdf * (
-        f0 + (
-            (1 - f0) *
-            fixedAbsVdotH5
-        )
-    );
+    vec3 fr = f0 + (1.0 - f0) *
+        (1.0 - absVdotH) * // ^1
+        (1.0 - absVdotH) * // ^2
+        (1.0 - absVdotH) * // ^3
+        (1.0 - absVdotH) * // ^4
+        (1.0 - absVdotH);  // ^5
+
+    return bsdf * fr;
 }
 
 // --------------------------------------------------------------------------------
@@ -242,23 +227,26 @@ vec3 schlickConductorFresnel(
 // Implementation taken from: https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#fresnel
 // --------------------------------------------------------------------------------
 
-vec3 fresnelMix(
+float fresnelMix(
     vec3 V,    // normalized vector from fragment to camera
     vec3 L,    // normalized vector from fragment to light
     vec3 H,    // half vector = normalize(L + V)
-    float ior, // index of refraction (set to a fixed value of 1.5, a good compromise for most opaque, dielectric materials)
-    vec3 base, // the result of the diffuse brdf
-    vec3 layer // the result of the specular brdf
+    float ior, // index of refraction (set to a fixed value of 1.5 = a good compromise for most opaque, dielectric materials = gives f0 of 0.04)
+    float base, // the result of the diffuse brdf
+    float layer // the result of the specular brdf
 ) {
     float VdotH = dot(V, H);
     float absVdotH = abs(VdotH);
-    float fixedAbsVdotH = 1 - absVdotH;
-    float fixedAbsVdotH5 = fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH * fixedAbsVdotH;
 
     float f0Base = (1 - ior) / (1 + ior);
-    float f0 = f0Base * f0Base;
+    float f0 = f0Base * f0Base; // 0.04
 
-    float fr = f0 + ((1 - f0) * fixedAbsVdotH5);
+    float fr = f0 + (1 - f0) *
+        (1.0 - absVdotH) * // ^1
+        (1.0 - absVdotH) * // ^2
+        (1.0 - absVdotH) * // ^3
+        (1.0 - absVdotH) * // ^4
+        (1.0 - absVdotH);  // ^5
 
     return mix(base, layer, fr);
 }
@@ -363,35 +351,32 @@ vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBas
 // Calculate the contribution to the final color from the point lights
 // --------------------------------------------------------------------------------
 
-vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor, float roughnessValue) {
-#if false
-    vec3 fragmentToLightDirection = normalize(pointLight.position - in_fragmentPosition);
-    vec3 fragmentToCameraDirection = normalize(camera.position - in_fragmentPosition);
+vec3 calculatePointLightContribution(
+    vec3 fragmentNormal,
+    vec3 fragmentBaseColor,
+    float roughnessValue,
+    float metallicValue
+) {
+    vec3 V = normalize(camera.position - in_fragmentPosition);
+    vec3 L = normalize(pointLight.position - in_fragmentPosition);
+    vec3 N = fragmentNormal;
+    vec3 H = normalize(L + V);
 
-    float diffuseImpact = max(dot(fragmentNormal, fragmentToLightDirection), 0.0);
-    vec3 diffuseContribution = pointLight.color * (diffuseImpact * fragmentBaseColor);
+    // ... Calculate the metallic portion ... //
 
-    vec3 reflectionDirection = reflect(-fragmentToLightDirection, fragmentNormal);
-    float specularImpact = pow(
-        max(dot(fragmentToCameraDirection, reflectionDirection), 0.0),
-        (1.0 - roughnessValue)
-    );
-    vec3 specularContribution = pointLight.color * (specularImpact * fragmentBaseColor);
-    specularContribution *= 0.0;
+    float specular = specularBRDF(V, L, N, H, roughnessValue * roughnessValue);
+    vec3 metallicBRDF = conductorFresnel(V, L, H, fragmentBaseColor, specular) * fragmentBaseColor;
 
-    float attenuation = calculateAttenuation(
-        pointLight.attenuationConstantFactor,
-        pointLight.attenuationLinearFactor,
-        pointLight.attenuationQuadraticFactor
-    );
+    // ... Calculate the dielectrict portion ... //
 
-    diffuseContribution *= attenuation;
-    specularContribution *= attenuation;
+    float ior = 1.5;
+    float base = diffuseBRDF();
+    float layer = specular;
+    vec3 dielectricBRDF = fresnelMix(V, L, H, ior, base, layer) * fragmentBaseColor;
 
-    return diffuseContribution + specularContribution;
-#endif
+    // ... Mix the metallic and dielectric portions ... //
 
-    return vec3(0.0, 0.0, 0.0);
+    return mix(dielectricBRDF, metallicBRDF, metallicValue);
 }
 
 // --------------------------------------------------------------------------------

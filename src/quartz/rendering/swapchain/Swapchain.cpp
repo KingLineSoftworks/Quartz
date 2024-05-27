@@ -450,7 +450,12 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
         // Screen color clear
         vk::ClearValue(
             vk::ClearColorValue(
-                std::array<float, 4>{ 0.0f, 0.0f, 0.0f, 0.0f }
+                std::array<float, 4>{
+                    101.0f / 255.0f,
+                    126.0f / 255.0f,
+                    166.0f / 255.0f,
+                    0.0f
+                }
             )
         ),
 

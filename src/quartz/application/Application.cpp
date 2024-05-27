@@ -71,19 +71,15 @@ void quartz::Application::run() {
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
 
-//#define JUKEBOX_ONLY
-            // =============================================
-            // boxes
-            // =============================================
+#define JUKEBOX_ONLY
 
-#ifndef JUKEBOX_ONLY
-#endif
             // =============================================
             // others
             // =============================================
 
             // first row
 
+#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
                 {
@@ -102,6 +98,17 @@ void quartz::Application::run() {
                     {1.0f, 1.0f, 1.0f}
                 }
             },
+#endif
+            {
+                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf",
+                {
+                    {0.0f, 0.0f, 0.0f},
+                    0.0f,
+                    {0.0f, 0.0f, 1.0f},
+                    {10.0f, 10.0f, 10.0f}
+                }
+            },
+#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
                 {
@@ -111,7 +118,6 @@ void quartz::Application::run() {
                     {100.0f, 100.0f, 100.0f}
                 },
             },
-#ifndef JUKEBOX_ONLY
             {
                 "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
                 {
@@ -155,11 +161,10 @@ void quartz::Application::run() {
             75.0f,
             { -5.0f, 0.0f, 0.0f }
         },
-
-            {{ 0.005f, 0.005f, 0.005f }
+        {
+            { 0.005f, 0.005f, 0.005f }
         },
         {
-//            { 0.65f, 0.65f, 0.65f },
             { 0.01f, 0.01f, 0.01f },
             { 3.0f, -2.0f, 1.0f }
         },
