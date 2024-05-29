@@ -1,23 +1,30 @@
 #version 450
 
-// ... quartz constants ... //
+// ........ quartz constants ........ //
 
 #define MAX_NUMBER_TEXTURES -1
 #define MAX_NUMBER_MATERIALS -1
 
-// .. math constants ... //
+#define MAX_NUMBER_POINT_LIGHTS -1
+#define MAX_NUMBER_SPOT_LIGHTS -1
+
+// ........ math constants ........ //
 
 #define M_PI 3.1415926535897932384626433832795
 
 // --------------------====================================== Uniforms from CPU =======================================-------------------- //
 
-// ... world level things ... //
+// ........ world level things ........ //
+
+// camera //
 
 layout(binding = 0) uniform CameraUniformBufferObject {
     vec3 position;
     mat4 viewMatrix;
     mat4 projectionMatrix;
 } camera;
+
+// ambient and directional lights //
 
 layout(binding = 1) uniform AmbientLight {
     vec3 color;
@@ -28,20 +35,30 @@ layout(binding = 2) uniform DirectionalLight {
     vec3 direction;
 } directionalLight;
 
-layout(binding = 3) uniform PointLight {
+// point lights //
+
+layout(binding = 3) uniform PointLightMetadata {
+    uint count;
+} pointLightMetadata;
+
+struct PointLight {
     vec3 color;
     vec3 position;
     float attenuationConstantFactor;
     float attenuationLinearFactor;
     float attenuationQuadraticFactor;
-} pointLight;
+};
 
-// ... object level things ... //
+layout(binding = 4) uniform PointLights {
+    PointLight array[MAX_NUMBER_POINT_LIGHTS];
+} pointLights;
 
-layout(binding = 4) uniform sampler rgbaTextureSampler;
-layout(binding = 5) uniform texture2D textureArray[MAX_NUMBER_TEXTURES];
+// ........ object level things ........ //
 
-layout(binding = 6) uniform Material {
+layout(binding = 5) uniform sampler rgbaTextureSampler;
+layout(binding = 6) uniform texture2D textureArray[MAX_NUMBER_TEXTURES];
+
+layout(binding = 7) uniform Material {
     uint baseColorTextureMasterIndex;
     uint metallicRoughnessTextureMasterIndex;
     uint normalTextureMasterIndex;
@@ -82,7 +99,7 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // Functions for the brdf
 
-vec3 calculatePointLightIntensity(vec3 lightColor, float distance);
+vec3 calculatePointLightIntensity(vec3 lightColor, float distance, float attenuationConstantFactor, float attenuationLinearFactor, float attenuationQuadraticFactor);
 vec3 schlickFresnel(vec3 f0, vec3 f90, vec3 l, vec3 h);
 float microfacetDistributionGGX(float a, vec3 n, vec3 h);
 float geometryVisibilityProbability(float ndotv, float ndotl, float roughnessValue);
@@ -126,7 +143,10 @@ void main() {
 
 vec3 calculatePointLightIntensity(
     vec3 lightColor,
-    float distance
+    float distance,
+    float attenuationConstantFactor,
+    float attenuationLinearFactor,
+    float attenuationQuadraticFactor
 ) {
     return lightColor;
 }
@@ -184,14 +204,14 @@ float geometryVisibilityProbability(
 // --------------------------------------------------------------------------------
 // Lambertian Diffuse
 // @todo 2024/05/28 Look into using the Disney Diffuse formula
+// @todo 2024/05/28 determine if we should be using pi or not
 // --------------------------------------------------------------------------------
 
 vec3 diffuseBRDF(vec3 baseColor, float metallicValue) {
-    // If we have a metallic material   (1.0) then we want this to output (0.0, 0.0, 0.0)
+    // If we have a metallic   material (1.0) then we want this to output (0.0, 0.0, 0.0)
     // If we have a dielectric material (0.0) then we want this to output (1.0, 1.0, 1.0)
     vec3 adjustedColor = mix(baseColor, vec3(0.0, 0.0, 0.0), metallicValue);
 
-    // @todo 2024/05/28 determine if we should be using pi or not //
     return adjustedColor / M_PI;
 }
 
@@ -324,20 +344,35 @@ vec3 calculatePointLightContribution(
     float metallicValue
 ) {
     vec3 v = normalize(camera.position - in_fragmentPosition);
-    vec3 l = normalize(pointLight.position - in_fragmentPosition);
     vec3 n = fragmentNormal;
-    vec3 h = normalize(l + v);
-    float d = length(pointLight.position - in_fragmentPosition);
 
-    vec3 intensity = calculatePointLightIntensity(pointLight.color, d);
+    vec3 result = vec3(0.0, 0.0, 0.0);
+    uint pointLightCount = min(pointLightMetadata.count, MAX_NUMBER_POINT_LIGHTS);
+    for (uint i = 0; i < pointLightCount; ++i) {
+        PointLight pointLight = pointLights.array[i];
+        vec3 l = normalize(pointLight.position - in_fragmentPosition);
+        vec3 h = normalize(l + v);
+        float d = length(pointLight.position - in_fragmentPosition);
 
-    vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);
+        // @todo 2024/05/29 Just give the whole point light to the function //
+        vec3 intensity = calculatePointLightIntensity(
+            pointLight.color,
+            d,
+            pointLight.attenuationConstantFactor,
+            pointLight.attenuationLinearFactor,
+            pointLight.attenuationQuadraticFactor
+        );
 
-    vec3 specularColor = specularBRDF(fragmentBaseColor, v, l, n, h, metallicValue, roughnessValue);
+        vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);
 
-    float ndotl = clamp(dot(n, l), 0.0, 1.0);
+        vec3 specularColor = specularBRDF(fragmentBaseColor, v, l, n, h, metallicValue, roughnessValue);
 
-    return intensity * (diffuseColor + specularColor) * ndotl;
+        float ndotl = clamp(dot(n, l), 0.0, 1.0);
+
+        result += intensity * (diffuseColor + specularColor) * ndotl;
+    }
+
+    return result;
 }
 
 // --------------------------------------------------------------------------------

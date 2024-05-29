@@ -120,8 +120,8 @@ void quartz::Application::run() {
             {0.6500f, 0.6500f, 0.6500f},
             {0.0f, 2.0f, 3.0f},
             1.0f,
-            0.975f,
-            50.0f
+            0.999999999,
+            9999999.0f
         },
         {0.25f, 0.4f, 0.6f},
         doodadInformations
