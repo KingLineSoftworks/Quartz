@@ -25,7 +25,7 @@ namespace scene {
 
 class quartz::scene::Scene {
 public: // member functions
-    Scene();
+    Scene() = default;
     ~Scene();
 
     USE_LOGGER(SCENE);
@@ -34,7 +34,7 @@ public: // member functions
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
-    const quartz::scene::PointLight& getPointLight() const { return m_pointLight; }
+    const std::vector<quartz::scene::PointLight>& getPointLights() const { return m_pointLights; }
     const glm::vec3& getScreenClearColor() const { return m_screenClearColor; }
 
     void load(
@@ -42,7 +42,7 @@ public: // member functions
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
-        const quartz::scene::PointLight& pointLight,
+        const std::vector<quartz::scene::PointLight>& pointLights,
         const glm::vec3& screenClearColor,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
@@ -61,9 +61,12 @@ private: // static functions
 
 private: // member variables
     quartz::scene::Camera m_camera;
+
     std::vector<quartz::scene::Doodad> m_doodads;
+
     quartz::scene::AmbientLight m_ambientLight;
     quartz::scene::DirectionalLight m_directionalLight;
-    quartz::scene::PointLight m_pointLight;
+    std::vector<quartz::scene::PointLight> m_pointLights;
+
     glm::vec3 m_screenClearColor;
 };

@@ -42,13 +42,6 @@ quartz::scene::Scene::loadDoodads(
     return doodads;
 }
 
-quartz::scene::Scene::Scene() :
-    m_camera(),
-    m_doodads()
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
-
 quartz::scene::Scene::~Scene() {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Cleaning up all textures");
@@ -61,7 +54,7 @@ quartz::scene::Scene::load(
     const quartz::scene::Camera& camera,
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
-    const quartz::scene::PointLight& pointLight,
+    const std::vector<quartz::scene::PointLight>& pointLights,
     const glm::vec3& screenClearColor,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
@@ -82,8 +75,8 @@ quartz::scene::Scene::load(
     m_directionalLight = directionalLight;
     LOG_TRACEthis("Loaded directional light with color {} and direction {}", glm::to_string(m_directionalLight.color), glm::to_string(m_directionalLight.direction));
 
-    m_pointLight = pointLight;
-    LOG_TRACEthis("Loaded point light with color {} and position {}", glm::to_string(m_pointLight.color), glm::to_string(m_pointLight.position));
+    m_pointLights = pointLights;
+    LOG_TRACEthis("Loaded {} point lights", m_pointLights.size());
 
     m_screenClearColor = screenClearColor;
 }

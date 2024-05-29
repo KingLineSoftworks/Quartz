@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <vulkan/vulkan.hpp>
 
 #include "util/macros.hpp"
@@ -1129,9 +1131,9 @@ quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
 
 void
 quartz::rendering::Pipeline::updatePointLightUniformBuffer(
-    const quartz::scene::PointLight& pointLight
+    const std::vector<quartz::scene::PointLight>& pointLights
 ) {
-    uint32_t pointLightCount = 2;
+    uint32_t pointLightCount = std::min<uint32_t>(pointLights.size(), QUARTZ_MAX_NUMBER_POINT_LIGHTS);
     const uint32_t pointLightCountIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
     memcpy(
         m_uniformBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
@@ -1139,19 +1141,11 @@ quartz::rendering::Pipeline::updatePointLightUniformBuffer(
         sizeof(uint32_t)
     );
 
-    std::array<quartz::scene::PointLight, QUARTZ_MAX_NUMBER_POINT_LIGHTS> pointLights;
-    pointLights[0] = pointLight;
-    pointLights[1] = quartz::scene::PointLight(
-        {1.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, -3.0f},
-        1.0f, 0.9f, 9.9f
-    );
-
     const uint32_t pointLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
     memcpy(
         m_uniformBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
         pointLights.data(),
-        sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS
+        sizeof(quartz::scene::PointLight) * pointLightCount
     );
 }
 

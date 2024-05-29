@@ -99,6 +99,23 @@ void quartz::Application::run() {
         },
     };
 
+    std::vector<quartz::scene::PointLight> pointLights = {
+        {
+            {0.6500f, 0.6500f, 0.6500f},
+            {0.0f, 2.0f, 3.0f},
+            1.0f,
+            0.999999999,
+            9999999.0f
+        },
+        {
+            {1.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, -3.0f},
+            1.0f,
+            0.9f,
+            9.9f
+        },
+    };
+
     LOG_INFOthis("Loading scene");
     m_scene.load(
         m_renderingContext.getRenderingDevice(),
@@ -116,13 +133,7 @@ void quartz::Application::run() {
             { 0.0750f, 0.0750f, 0.0750f },
             { 3.0f, -2.0f, 0.0f }
         },
-        {
-            {0.6500f, 0.6500f, 0.6500f},
-            {0.0f, 2.0f, 3.0f},
-            1.0f,
-            0.999999999,
-            9999999.0f
-        },
+        pointLights,
         {0.25f, 0.4f, 0.6f},
         doodadInformations
     );
