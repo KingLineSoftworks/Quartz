@@ -120,7 +120,8 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // Functions for the brdf
 
-vec3 calculatePointLightIntensity(vec3 lightColor, float distance, float attenuationConstantFactor, float attenuationLinearFactor, float attenuationQuadraticFactor);
+vec3 calculatePointLightIntensity(PointLight pointLight);
+vec3 calculateSpotLightIntensity(SpotLight spotLight);
 vec3 schlickFresnel(vec3 f0, vec3 f90, vec3 l, vec3 h);
 float microfacetDistributionGGX(float a, vec3 n, vec3 h);
 float geometryVisibilityProbability(float ndotv, float ndotl, float roughnessValue);
@@ -165,13 +166,29 @@ void main() {
 // --------------------------------------------------------------------------------
 
 vec3 calculatePointLightIntensity(
-    vec3 lightColor,
-    float distance,
-    float attenuationConstantFactor,
-    float attenuationLinearFactor,
-    float attenuationQuadraticFactor
+    PointLight pointLight
 ) {
-    return lightColor;
+    float distance = length(in_fragmentPosition - pointLight.position);
+    return pointLight.color;
+}
+
+vec3 calculateSpotLightIntensity(
+    SpotLight spotLight
+) {
+    vec3 l = normalize(spotLight.position - in_fragmentPosition);
+    float theta = dot(l, normalize(-spotLight.direction));
+
+    float innerCutOffTheta = cos(radians(spotLight.innerRadiusDegrees));
+    float outerCutOffTheta = cos(radians(spotLight.outerRadiusDegrees));
+    float cutOffEpsilon = innerCutOffTheta - outerCutOffTheta;
+
+    float intensity = clamp(
+        (theta - outerCutOffTheta) / cutOffEpsilon,
+        0.0,
+        1.0
+    );
+
+    return spotLight.color * intensity;
 }
 
 // --------------------------------------------------------------------------------
@@ -375,16 +392,9 @@ vec3 calculatePointLightContribution(
         PointLight pointLight = pointLights.array[i];
         vec3 l = normalize(pointLight.position - in_fragmentPosition);
         vec3 h = normalize(l + v);
-        float d = length(pointLight.position - in_fragmentPosition);
 
         // @todo 2024/05/29 Just give the whole point light to the function //
-        vec3 intensity = calculatePointLightIntensity(
-            pointLight.color,
-            d,
-            pointLight.attenuationConstantFactor,
-            pointLight.attenuationLinearFactor,
-            pointLight.attenuationQuadraticFactor
-        );
+        vec3 intensity = calculatePointLightIntensity(pointLight);
 
         vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);
 
@@ -417,16 +427,8 @@ vec3 calculateSpotLightContribution(
         SpotLight spotLight = spotLights.array[i];
         vec3 l = normalize(spotLight.position - in_fragmentPosition);
         vec3 h = normalize(l + v);
-        float d = length(spotLight.position - in_fragmentPosition);
 
-        // @todo 2024/05/29 Just give the whole spot light to the function //
-        vec3 intensity = calculatePointLightIntensity(
-            spotLight.color,
-            d,
-            spotLight.attenuationConstantFactor,
-            spotLight.attenuationLinearFactor,
-            spotLight.attenuationQuadraticFactor
-        );
+        vec3 intensity = calculateSpotLightIntensity(spotLight);
 
         vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);
 
