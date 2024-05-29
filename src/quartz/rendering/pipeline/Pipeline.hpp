@@ -16,6 +16,7 @@
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
+#include "quartz/scene/light/SpotLight.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -112,6 +113,7 @@ public: // member functions
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
     void updatePointLightUniformBuffer(const std::vector<quartz::scene::PointLight>& pointLights);
+    void updateSpotLightUniformBuffer(const std::vector<quartz::scene::SpotLight>& spotLights);
     void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 

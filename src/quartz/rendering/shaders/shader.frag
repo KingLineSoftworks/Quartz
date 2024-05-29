@@ -38,7 +38,7 @@ layout(binding = 2) uniform DirectionalLight {
 // point lights //
 
 layout(binding = 3) uniform PointLightMetadata {
-    uint count;
+    uint count; // @todo 2024/05/29 We can probably put this in the PointLights uniform? //
 } pointLightMetadata;
 
 struct PointLight {
@@ -53,12 +53,33 @@ layout(binding = 4) uniform PointLights {
     PointLight array[MAX_NUMBER_POINT_LIGHTS];
 } pointLights;
 
+// spot lights //
+
+layout(binding = 5) uniform SpotLightMetadata {
+    uint count;
+} spotLightMetadata;
+
+struct SpotLight {
+    vec3 color;
+    vec3 position;
+    vec3 direction;
+    float innerRadiusDegrees;
+    float outerRadiusDegrees;
+    float attenuationConstantFactor;
+    float attenuationLinearFactor;
+    float attenuationQuadraticFactor;
+};
+
+layout(binding = 6) uniform SpotLights {
+    SpotLight array[MAX_NUMBER_SPOT_LIGHTS];
+} spotLights;
+
 // ........ object level things ........ //
 
-layout(binding = 5) uniform sampler rgbaTextureSampler;
-layout(binding = 6) uniform texture2D textureArray[MAX_NUMBER_TEXTURES];
+layout(binding = 7) uniform sampler rgbaTextureSampler;
+layout(binding = 8) uniform texture2D textureArray[MAX_NUMBER_TEXTURES];
 
-layout(binding = 7) uniform Material {
+layout(binding = 9) uniform Material {
     uint baseColorTextureMasterIndex;
     uint metallicRoughnessTextureMasterIndex;
     uint normalTextureMasterIndex;

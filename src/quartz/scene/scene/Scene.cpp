@@ -55,6 +55,7 @@ quartz::scene::Scene::load(
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
     const std::vector<quartz::scene::PointLight>& pointLights,
+    const std::vector<quartz::scene::SpotLight>& spotLights,
     const glm::vec3& screenClearColor,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
@@ -78,7 +79,11 @@ quartz::scene::Scene::load(
     m_pointLights = pointLights;
     LOG_TRACEthis("Loaded {} point lights", m_pointLights.size());
 
+    m_spotLights = spotLights;
+    LOG_TRACEthis("Loaded {} spot lights", m_spotLights.size());
+
     m_screenClearColor = screenClearColor;
+    LOG_TRACEthis("Loaded screen clear color {}", glm::to_string(m_screenClearColor));
 }
 
 void

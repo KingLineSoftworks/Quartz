@@ -16,6 +16,7 @@
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
+#include "quartz/scene/light/SpotLight.hpp"
 
 namespace quartz {
 namespace scene {
@@ -35,6 +36,7 @@ public: // member functions
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
     const std::vector<quartz::scene::PointLight>& getPointLights() const { return m_pointLights; }
+    const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
     const glm::vec3& getScreenClearColor() const { return m_screenClearColor; }
 
     void load(
@@ -43,6 +45,7 @@ public: // member functions
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
         const std::vector<quartz::scene::PointLight>& pointLights,
+        const std::vector<quartz::scene::SpotLight>& spotLights,
         const glm::vec3& screenClearColor,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
@@ -67,6 +70,7 @@ private: // member variables
     quartz::scene::AmbientLight m_ambientLight;
     quartz::scene::DirectionalLight m_directionalLight;
     std::vector<quartz::scene::PointLight> m_pointLights;
+    std::vector<quartz::scene::SpotLight> m_spotLights;
 
     glm::vec3 m_screenClearColor;
 };
