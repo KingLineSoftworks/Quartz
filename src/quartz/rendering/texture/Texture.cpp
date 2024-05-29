@@ -107,7 +107,7 @@ quartz::rendering::Texture::initializeMasterTextureList(
     LOG_TRACE(TEXTURE, "Normal default texture master index: {}", quartz::rendering::Texture::normalDefaultMasterIndex);
 
     LOG_TRACE(TEXTURE, "Creating emission default texture");
-    const std::vector<uint8_t> emissionPixel = { 0xFF, 0xFF, 0xFF, 0xFF}; // Default to all white emission color (so the blending doesn't change the factor)
+    const std::vector<uint8_t> emissionPixel = { 0xFF, 0xFF, 0xFF, 0xFF}; // Default to all white emission color (so the blending doesn't change the factor if the factor is present)
     std::shared_ptr<quartz::rendering::Texture> p_emissionDefault = std::make_shared<quartz::rendering::Texture>(
         renderingDevice,
         1,

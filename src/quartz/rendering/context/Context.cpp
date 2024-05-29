@@ -52,13 +52,15 @@ quartz::rendering::Context::~Context() {
 }
 
 void
-quartz::rendering::Context::loadScene() {
+quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
         quartz::rendering::Texture::getMasterTextureList()
     );
+
+    m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
 }
 
 void

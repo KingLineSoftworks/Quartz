@@ -70,114 +70,63 @@ void quartz::Application::run() {
      */
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
-
-#define JUKEBOX_ONLY
-
-            // =============================================
-            // others
-            // =============================================
-
-            // first row
-
-#ifndef JUKEBOX_ONLY
+        {
+            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
             {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
-                {
-                    {-5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {20.0f, 20.0f, 20.0f}
-                }
-            },
+                {-2.5f, 0.0f, 0.0f},
+                0.0f,
+                {0.0f, 0.0f, 1.0f},
+                {20.0f, 20.0f, 20.0f}
+            }
+        },
+        {
+            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
             {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Box/glTF/Box.gltf",
-                {
-                    {-3.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
+                {0.0f, 0.0f, 0.0f},
+                0.0f,
+                {0.0f, 0.0f, 1.0f},
+                {100.0f, 100.0f, 100.0f}
             },
-#endif
+        },
+        {
+            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf",
             {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf",
-                {
-                    {0.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {10.0f, 10.0f, 10.0f}
-                }
-            },
-#ifndef JUKEBOX_ONLY
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
-                {
-                    {0.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {100.0f, 100.0f, 100.0f}
-                },
-            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/CesiumMilkTruck/glTF/CesiumMilkTruck.gltf",
-                {
-                    {5.0f, 0.0f, 0.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
-
-            // second row
-
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxTextured/glTF/BoxTextured.gltf",
-                {
-                    {-5.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {1.0f, 1.0f, 1.0f}
-                }
-            },
-            {
-                "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/2CylinderEngine/glTF/2CylinderEngine.gltf",
-                {
-                    {0.0f, 0.0f, 5.0f},
-                    0.0f,
-                    {0.0f, 0.0f, 1.0f},
-                    {0.005f, 0.005f, 0.005f}
-                },
-            },
-#endif
-        };
+                {2.5f, 0.0f, 0.0f},
+                0.0f,
+                {0.0f, 0.0f, 1.0f},
+                {10.0f, 10.0f, 10.0f}
+            }
+        },
+    };
 
     LOG_INFOthis("Loading scene");
     m_scene.load(
         m_renderingContext.getRenderingDevice(),
         {
-            0.0f, // rotation around x axis (up down)
-            0.0f, // rotation around y axis (left right)
+            0.0f, // rotation around x-axis (up down)
+            0.0f, // rotation around y-axis (left right)
             0.0f,
             75.0f,
             { -5.0f, 0.0f, 0.0f }
         },
         {
-            { 0.005f, 0.005f, 0.005f }
+            { 0.0050f, 0.0050f, 0.0050f }
         },
         {
-            { 0.01f, 0.01f, 0.01f },
-            { 3.0f, -2.0f, 1.0f }
+            { 0.0750f, 0.0750f, 0.0750f },
+            { 3.0f, -2.0f, 0.0f }
         },
         {
-            {0.7f, 0.7f, 0.7f},
-            {0.0f, 1.0f, 2.0f},
+            {0.6500f, 0.6500f, 0.6500f},
+            {0.0f, 2.0f, 3.0f},
             1.0f,
             0.975f,
             50.0f
         },
+        {0.25f, 0.4f, 0.6f},
         doodadInformations
     );
-    m_renderingContext.loadScene();
+    m_renderingContext.loadScene(m_scene);
 
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {

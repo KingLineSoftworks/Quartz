@@ -239,6 +239,7 @@ quartz::rendering::Swapchain::Swapchain(
             renderingPipeline.getVulkanRenderPassPtr()
         )
     ),
+    m_screenClearColor(0.0, 0.0, 0.0),
     mp_vulkanDrawingCommandPool(
         quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
             renderingDevice.getGraphicsQueueFamilyIndex(),
@@ -277,6 +278,11 @@ quartz::rendering::Swapchain::Swapchain(
 
 quartz::rendering::Swapchain::~Swapchain() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+void
+quartz::rendering::Swapchain::setScreenClearColor(const glm::vec3& screenClearColor) {
+    m_screenClearColor = screenClearColor;
 }
 
 void
@@ -447,13 +453,13 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     // ----- start a render pass ----- //
 
     std::array<vk::ClearValue, 2> clearValues = {
-        // Screen color clear
+        // Screen clear color
         vk::ClearValue(
             vk::ClearColorValue(
                 std::array<float, 4>{
-                    101.0f / 255.0f,
-                    126.0f / 255.0f,
-                    166.0f / 255.0f,
+                    m_screenClearColor.r,
+                    m_screenClearColor.g,
+                    m_screenClearColor.b,
                     0.0f
                 }
             )
