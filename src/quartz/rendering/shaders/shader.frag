@@ -80,6 +80,15 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // --------------------====================================== Helper logic declarations =======================================-------------------- //
 
+// Functions for the brdf
+
+vec3 calculatePointLightIntensity(vec3 lightColor, float distance);
+vec3 schlickFresnel(vec3 f0, vec3 f90, vec3 l, vec3 h);
+float microfacetDistributionGGX(float a, vec3 n, vec3 h);
+float geometryVisibilityProbability(float ndotv, float ndotl, float roughnessValue);
+vec3 diffuseBRDF(vec3 baseColor, float metallicValue);
+vec3 specularBRDF(vec3 baseColor, vec3 v, vec3 l, vec3 n, vec3 h, float metallicValue, float roughnessValue);
+
 // The only parameters these functions take in are ones that are calculated within the main function. Everything else used is a global variable
 
 vec3 getMetallicRoughnessVector();
@@ -89,12 +98,7 @@ vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor);
 vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor);
 vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue, float metallicValue);
 vec3 calculateEmissiveColorContribution();
-vec4 calculateFinalColor(
-    vec3 ambientLightContribution,
-    vec3 directionalLightContribution,
-    vec3 pointLightContribution,
-    vec3 emissiveColorContribution
-);
+vec4 calculateFinalColor(vec3 ambientLightContribution,  vec3 directionalLightContribution,  vec3 pointLightContribution,  vec3 emissiveColorContribution);
 
 // --------------------====================================== Main logic =======================================-------------------- //
 
@@ -114,6 +118,114 @@ void main() {
 }
 
 // --------------------====================================== Helper logic definitions =======================================-------------------- //
+
+// --------------------------------------------------------------------------------
+// Calculate the intensity of the light
+// @todo 2024/05/28 Determine which model to use here. Divide lightColor by distance squared? Use attenuation factors?
+// --------------------------------------------------------------------------------
+
+vec3 calculatePointLightIntensity(
+    vec3 lightColor,
+    float distance
+) {
+    return lightColor;
+}
+
+// --------------------------------------------------------------------------------
+// Schlick approximation of the Fresnel effect
+// --------------------------------------------------------------------------------
+
+vec3 schlickFresnel(
+    vec3 f0,
+    vec3 f90,
+    vec3 l,
+    vec3 h
+) {
+    float ldoth = dot(l, h);
+
+    return f0 + (f90 - f0) * pow(1 - ldoth, 5);
+}
+
+// --------------------------------------------------------------------------------
+// Determine the distribution of the microfacets with normals parallel to the halfway vector, h
+// --------------------------------------------------------------------------------
+
+float microfacetDistributionGGX(
+    float a,
+    vec3 n,
+    vec3 h
+) {
+    float a2 = a * a;
+
+    float ndoth = dot(n, h);
+    float base = (ndoth * ndoth) * (a2 - 1.0) + 1.0;
+
+    return a2 / (M_PI * base * base);
+}
+
+// --------------------------------------------------------------------------------
+// The probability that a given microfacet is visible by both the light and the camera
+// --------------------------------------------------------------------------------
+
+float geometryVisibilityProbability(
+    float ndotv,
+    float ndotl,
+    float roughnessValue
+) {
+    float k = (roughnessValue + 1.0) * (roughnessValue + 1.0) / 8;
+
+    float GV = ndotv / (ndotv * (1.0 - k) + k);
+
+    float GL = ndotl / (ndotl * (1.0 - k) + k);
+
+    return GV * GL;
+}
+
+// --------------------------------------------------------------------------------
+// Lambertian Diffuse
+// @todo 2024/05/28 Look into using the Disney Diffuse formula
+// --------------------------------------------------------------------------------
+
+vec3 diffuseBRDF(vec3 baseColor, float metallicValue) {
+    // If we have a metallic material   (1.0) then we want this to output (0.0, 0.0, 0.0)
+    // If we have a dielectric material (0.0) then we want this to output (1.0, 1.0, 1.0)
+    vec3 adjustedColor = mix(baseColor, vec3(0.0, 0.0, 0.0), metallicValue);
+
+    // @todo 2024/05/28 determine if we should be using pi or not //
+    return adjustedColor / M_PI;
+}
+
+// --------------------------------------------------------------------------------
+// The specular BRDF
+// --------------------------------------------------------------------------------
+
+vec3 specularBRDF(
+    vec3 baseColor,
+    vec3 v,
+    vec3 l,
+    vec3 n,
+    vec3 h,
+    float metallicValue,
+    float roughnessValue
+) {
+    float ndotv = dot(n, v);
+    float ndotl = dot(n, l);
+
+    // calculate schlick fresnel approximation
+    vec3 f0 = mix(vec3(0.04, 0.04, 0.04), baseColor, metallicValue);
+    vec3 f90 = vec3(1.0, 1.0, 1.0);
+    vec3 F = schlickFresnel(f0, f90, l, h);
+
+    // calculate microfacet distribution
+    float D = microfacetDistributionGGX(roughnessValue * roughnessValue, n, h);
+
+    // calculate geometric occlusion probability
+    float G = geometryVisibilityProbability(ndotv, ndotl, roughnessValue);
+
+    float denominator = 4 * ndotv * ndotl;
+
+    return (F * D * G) / denominator;
+}
 
 // --------------------------------------------------------------------------------
 // Get the metallic and roughness values from the metallic-roughness texture.
@@ -148,15 +260,6 @@ vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue) {
     ).rgb;
     fragmentBaseColor *= in_vertexColor;
     fragmentBaseColor *= material.baseColorFactor.rgb;
-
-    // @todo 2024/05/24 Actually use the metallic and roughness values in the calculation of the base color //
-
-    if (metallicValue == 1.0) {
-        // When the material is a metal, the base color is the specific measured reflectance value at normal incidence (F0).
-    } else {
-        // For a non-metal the base color represents the reflected diffuse color of the material.
-        // In this model it is not possible to specify a F0 value for non-metals, and a linear value of 4% (0.04) is used.
-    }
 
     return fragmentBaseColor;
 }
@@ -214,104 +317,6 @@ vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBas
 // Calculate the contribution to the final color from the point lights
 // --------------------------------------------------------------------------------
 
-vec3 calculateLightIntensity(
-    vec3 lightColor,
-    float distance
-) {
-    // @todo 2024/05/28 Determine which model to use here. Divide lightColor by distance squared? Use attenuation factors? //
-    return lightColor;
-}
-
-vec3 diffuseBRDF(
-    vec3 baseColor,
-    float metallicValue
-) {
-    // @todo 2024/05/28 Interpolate between the base color and (0.0, 0.0, 0.0) based on the metallic value //
-    // If we have a metallic material   (1.0) then we want this to output (0.0, 0.0, 0.0)
-    // If we have a dielectric material (0.0) then we want this to output (1.0, 1.0, 1.0)
-    vec3 adjustedColor = mix(baseColor, vec3(0.0, 0.0, 0.0), metallicValue);
-
-    // @todo 2024/05/28 determine if we should be using pi or not //
-    return adjustedColor / M_PI;
-}
-
-vec3 schlickFresnel(
-    vec3 f0,
-    vec3 f90,
-    vec3 l,
-    vec3 h
-) {
-    // @todo 2024/05/28 Use this in our diffuse BRDF as well for dielectrics according to the Disney Diffuse formula //
-    float ldoth = dot(l, h);
-
-    return f0 + (f90 - f0) * pow(1 - ldoth, 5);
-}
-
-float microfacetDistributionGGX(
-    float a,
-    vec3 n,
-    vec3 h
-) {
-    float a2 = a * a;
-
-    float ndoth = dot(n, h);
-
-    return a2 / (M_PI * ((ndoth * ndoth) * (a2 - 1.0) + 1.0) * ((ndoth * ndoth) * (a2 - 1.0) + 1.0));
-}
-
-float G1(
-    vec3 g,
-    vec3 n,
-    float k
-) {
-    float ndotg = dot(n, g);
-
-    return ndotg / (ndotg * (1.0 - k) + k);
-}
-
-float geometryVisibilityProbability(
-    vec3 v,
-    vec3 l,
-    vec3 n,
-    float roughnessValue
-) {
-    float k = (roughnessValue + 1.0) * (roughnessValue + 1.0) / 8;
-
-    return G1(v, n, k) * G1(l, n, k);
-}
-
-vec3 specularBRDF(
-    vec3 baseColor,
-    vec3 v,
-    vec3 l,
-    vec3 n,
-    vec3 h,
-    float metallicValue,
-    float roughnessValue
-) {
-    float ndoth = dot(n, h);
-    float hdotl = dot(h, l);
-    float hdotv = dot(h, v);
-
-    // calculate schlick fresnel approximation
-    // @todo 2024/05/28 Interpolate between the dielectric f0 and the metallic f0 based on the metallic value
-    vec3 f0 = mix(vec3(0.04, 0.04, 0.04), baseColor, metallicValue);
-    vec3 f90 = vec3(1.0, 1.0, 1.0);
-    vec3 F = schlickFresnel(f0, f90, l, h);
-
-    // calculate microfacet distribution
-    float D = microfacetDistributionGGX(roughnessValue * roughnessValue, n, h);
-
-    // calculate geometric occlusion probability
-    float G = geometryVisibilityProbability(v, l, n, roughnessValue);
-
-    float ndotl = dot(n, l);
-    float ndotv = dot(n, v);
-    float denominator = 4 * ndotl * ndotv;
-
-    return (F * D * G) / denominator;
-}
-
 vec3 calculatePointLightContribution(
     vec3 fragmentNormal,
     vec3 fragmentBaseColor,
@@ -324,16 +329,14 @@ vec3 calculatePointLightContribution(
     vec3 h = normalize(l + v);
     float d = length(pointLight.position - in_fragmentPosition);
 
-    // calculate intensity of light
-    vec3 intensity = calculateLightIntensity(pointLight.color, d);
+    vec3 intensity = calculatePointLightIntensity(pointLight.color, d);
 
-    // calculate diffuse brdf
     vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);
 
-    // calculate specular brdf
     vec3 specularColor = specularBRDF(fragmentBaseColor, v, l, n, h, metallicValue, roughnessValue);
 
     float ndotl = clamp(dot(n, l), 0.0, 1.0);
+
     return intensity * (diffuseColor + specularColor) * ndotl;
 }
 
