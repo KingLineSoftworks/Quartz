@@ -135,8 +135,9 @@ vec3 calculateFragmentNormal();
 vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor);
 vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor);
 vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue, float metallicValue);
+vec3 calculateSpotLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue, float metallicValue);
 vec3 calculateEmissiveColorContribution();
-vec4 calculateFinalColor(vec3 ambientLightContribution,  vec3 directionalLightContribution,  vec3 pointLightContribution,  vec3 emissiveColorContribution);
+vec4 calculateFinalColor(vec3 ambientLightContribution,  vec3 directionalLightContribution, vec3 pointLightContribution, vec3 spotLightContribution,  vec3 emissiveColorContribution);
 
 // --------------------====================================== Main logic =======================================-------------------- //
 
@@ -150,9 +151,10 @@ void main() {
     vec3 ambientLightContribution = calculateAmbientLightContribution(fragmentBaseColor);
     vec3 directionalLightContribution = calculateDirectionalLightContribution(fragmentNormal, fragmentBaseColor);
     vec3 pointLightContribution = calculatePointLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue, metallicValue);
+    vec3 spotLightContribution = calculateSpotLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue, metallicValue);
     vec3 emissiveColorContribution = calculateEmissiveColorContribution();
 
-    out_fragmentColor = calculateFinalColor(ambientLightContribution, directionalLightContribution, pointLightContribution, emissiveColorContribution);
+    out_fragmentColor = calculateFinalColor(ambientLightContribution, directionalLightContribution, pointLightContribution, spotLightContribution, emissiveColorContribution);
 }
 
 // --------------------====================================== Helper logic definitions =======================================-------------------- //
@@ -397,6 +399,48 @@ vec3 calculatePointLightContribution(
 }
 
 // --------------------------------------------------------------------------------
+// Calculate the contribution to the final color from the spot lights
+// --------------------------------------------------------------------------------
+
+vec3 calculateSpotLightContribution(
+    vec3 fragmentNormal,
+    vec3 fragmentBaseColor,
+    float roughnessValue,
+    float metallicValue
+) {
+    vec3 v = normalize(camera.position - in_fragmentPosition);
+    vec3 n = fragmentNormal;
+
+    vec3 result = vec3(0.0, 0.0, 0.0);
+    uint spotLightCount = min(spotLightMetadata.count, MAX_NUMBER_SPOT_LIGHTS);
+    for (uint i = 0; i < spotLightCount; ++i) {
+        SpotLight spotLight = spotLights.array[i];
+        vec3 l = normalize(spotLight.position - in_fragmentPosition);
+        vec3 h = normalize(l + v);
+        float d = length(spotLight.position - in_fragmentPosition);
+
+        // @todo 2024/05/29 Just give the whole spot light to the function //
+        vec3 intensity = calculatePointLightIntensity(
+            spotLight.color,
+            d,
+            spotLight.attenuationConstantFactor,
+            spotLight.attenuationLinearFactor,
+            spotLight.attenuationQuadraticFactor
+        );
+
+        vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);
+
+        vec3 specularColor = specularBRDF(fragmentBaseColor, v, l, n, h, metallicValue, roughnessValue);
+
+        float ndotl = clamp(dot(n, l), 0.0, 1.0);
+
+        result += intensity * (diffuseColor + specularColor) * ndotl;
+    }
+
+    return result;
+}
+
+// --------------------------------------------------------------------------------
 // Calculate the contribution to the final color from the emissive color
 // --------------------------------------------------------------------------------
 
@@ -421,6 +465,7 @@ vec4 calculateFinalColor(
     vec3 ambientLightContribution,
     vec3 directionalLightContribution,
     vec3 pointLightContribution,
+    vec3 spotLightContribution,
     vec3 emissiveColorContribution
 ) {
     return vec4(
@@ -428,6 +473,7 @@ vec4 calculateFinalColor(
             ambientLightContribution +
             directionalLightContribution +
             pointLightContribution +
+            spotLightContribution +
             emissiveColorContribution
         ),
         1.0
