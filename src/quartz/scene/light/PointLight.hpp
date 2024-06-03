@@ -14,7 +14,6 @@ public: // member functions
     PointLight(
         const glm::vec3& color_,
         const glm::vec3& position_,
-        const float attenuationConstantFactor_,
         const float attenuationLinearFactor_,
         const float attenuationQuadraticFactor_
     );
@@ -23,7 +22,6 @@ public: // member functions
 public: // member variables
     alignas(16) glm::vec3 color;
     alignas(16) glm::vec3 position;
-    alignas(4) float attenuationConstantFactor;
     alignas(4) float attenuationLinearFactor;
     alignas(4) float attenuationQuadraticFactor;
 };

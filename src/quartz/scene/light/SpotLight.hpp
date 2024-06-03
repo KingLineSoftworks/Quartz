@@ -17,7 +17,6 @@ public: // member functions
         const glm::vec3& direction_,
         const float innerRadiusDegrees_,
         const float outerRadiusDegrees_,
-        const float attenuationConstantFactor_,
         const float attenuationLinearFactor_,
         const float attenuationQuadraticFactor_
     );
@@ -29,7 +28,6 @@ public: // member variables
     alignas(16) glm::vec3 direction;
     alignas(4) float innerRadiusDegrees;
     alignas(4) float outerRadiusDegrees;
-    alignas(4) float attenuationConstantFactor;
     alignas(4) float attenuationLinearFactor;
     alignas(4) float attenuationQuadraticFactor;
 };

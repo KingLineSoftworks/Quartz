@@ -44,7 +44,6 @@ layout(binding = 3) uniform PointLightMetadata {
 struct PointLight {
     vec3 color;
     vec3 position;
-    float attenuationConstantFactor;
     float attenuationLinearFactor;
     float attenuationQuadraticFactor;
 };
@@ -65,7 +64,6 @@ struct SpotLight {
     vec3 direction;
     float innerRadiusDegrees;
     float outerRadiusDegrees;
-    float attenuationConstantFactor;
     float attenuationLinearFactor;
     float attenuationQuadraticFactor;
 };
@@ -120,6 +118,7 @@ layout(location = 0) out vec4 out_fragmentColor;
 
 // Functions for the brdf
 
+float calculateAttenuation(float distance, float linear, float quadratic);
 vec3 calculatePointLightIntensity(PointLight pointLight);
 vec3 calculateSpotLightIntensity(SpotLight spotLight);
 vec3 schlickFresnel(vec3 f0, vec3 f90, vec3 l, vec3 h);
@@ -165,30 +164,46 @@ void main() {
 // @todo 2024/05/28 Determine which model to use here. Divide lightColor by distance squared? Use attenuation factors?
 // --------------------------------------------------------------------------------
 
+float calculateAttenuation(
+    float d,
+    float linearFactor,
+    float quadraticFactor
+) {
+    return 1.0 / (
+        1.0 + (linearFactor * d) + (quadraticFactor * d * d)
+    );
+}
+
 vec3 calculatePointLightIntensity(
     PointLight pointLight
 ) {
-    float distance = length(in_fragmentPosition - pointLight.position);
-    return pointLight.color;
+    float d = length(in_fragmentPosition - pointLight.position);
+
+    float attenuation = calculateAttenuation(d, pointLight.attenuationLinearFactor, pointLight.attenuationQuadraticFactor);
+
+    return pointLight.color * attenuation;
 }
 
 vec3 calculateSpotLightIntensity(
     SpotLight spotLight
 ) {
     vec3 l = normalize(spotLight.position - in_fragmentPosition);
+    float d = length(in_fragmentPosition - spotLight.position);
     float theta = dot(l, normalize(-spotLight.direction));
 
     float innerCutOffTheta = cos(radians(spotLight.innerRadiusDegrees));
     float outerCutOffTheta = cos(radians(spotLight.outerRadiusDegrees));
     float cutOffEpsilon = innerCutOffTheta - outerCutOffTheta;
 
-    float intensity = clamp(
+    float radialIntensity = clamp(
         (theta - outerCutOffTheta) / cutOffEpsilon,
         0.0,
         1.0
     );
 
-    return spotLight.color * intensity;
+    float attenuation = calculateAttenuation(d, spotLight.attenuationLinearFactor, spotLight.attenuationQuadraticFactor);
+
+    return spotLight.color * radialIntensity * attenuation;
 }
 
 // --------------------------------------------------------------------------------

@@ -8,7 +8,6 @@ quartz::scene::SpotLight::SpotLight(
     const glm::vec3& direction_,
     const float innerRadiusDegrees_,
     const float outerRadiusDegrees_,
-    const float attenuationConstantFactor_,
     const float attenuationLinearFactor_,
     const float attenuationQuadraticFactor_
 ) :
@@ -17,7 +16,6 @@ quartz::scene::SpotLight::SpotLight(
     direction(direction_),
     innerRadiusDegrees(innerRadiusDegrees_),
     outerRadiusDegrees(outerRadiusDegrees_),
-    attenuationConstantFactor(attenuationConstantFactor_),
     attenuationLinearFactor(attenuationLinearFactor_),
     attenuationQuadraticFactor(attenuationQuadraticFactor_)
 {}
@@ -37,7 +35,6 @@ quartz::scene::SpotLight::SpotLight::operator=(
     innerRadiusDegrees = other.innerRadiusDegrees;
     outerRadiusDegrees = other.outerRadiusDegrees;
 
-    attenuationConstantFactor = other.attenuationConstantFactor;
     attenuationLinearFactor = other.attenuationLinearFactor;
     attenuationQuadraticFactor = other.attenuationQuadraticFactor;
 
