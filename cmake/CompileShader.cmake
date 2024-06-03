@@ -36,6 +36,8 @@ function(compile_shaders TARGET_NAME INPUT_DIR)
                 cp ${SHADER_SOURCE_FULL_FILE} ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 sed -i.bkp "s/#define MAX_NUMBER_TEXTURES -1/#define MAX_NUMBER_TEXTURES ${MAX_NUMBER_TEXTURES}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 sed -i.bkp "s/#define MAX_NUMBER_MATERIALS -1/#define MAX_NUMBER_MATERIALS ${MAX_NUMBER_MATERIALS}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
+                sed -i.bkp "s/#define MAX_NUMBER_POINT_LIGHTS -1/#define MAX_NUMBER_POINT_LIGHTS ${MAX_NUMBER_POINT_LIGHTS}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
+                sed -i.bkp "s/#define MAX_NUMBER_SPOT_LIGHTS -1/#define MAX_NUMBER_SPOT_LIGHTS ${MAX_NUMBER_SPOT_LIGHTS}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 ${PROJECT_SOURCE_DIR}/vendor/vulkan/bin/glslc ${SHADER_SOURCE_FULL_TEMPFILE} -o ${SHADER_OUTPUT_FULL_FILE} &&
                 rm ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 rm ${SHADER_SOURCE_FULL_TEMPFILE}.bkp

@@ -41,7 +41,7 @@ public: // member functions
 
     quartz::rendering::Window& getRenderingWindow() { return m_renderingWindow; }
 
-    void loadScene();
+    void loadScene(const quartz::scene::Scene& scene);
 
     void draw(const quartz::scene::Scene& scene);
     void finish();

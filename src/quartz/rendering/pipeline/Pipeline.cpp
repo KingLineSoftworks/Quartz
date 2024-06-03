@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <vulkan/vulkan.hpp>
 
 #include "util/macros.hpp"
@@ -11,16 +13,18 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/model/Vertex.hpp"
 
-constexpr uint32_t NUM_UNIQUE_UNIFORM_BUFFERS = 4;
+constexpr uint32_t NUM_UNIQUE_UNIFORM_BUFFERS = 8;
 
 /**
  * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
  *   instead of creating a copy into this weird little struct
  */
 quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
+    const glm::vec3 position_,
     const glm::mat4 viewMatrix_,
     const glm::mat4 projectionMatrix_
 ) :
+    position(position_),
     viewMatrix(viewMatrix_),
     projectionMatrix(projectionMatrix_)
 {}
@@ -123,6 +127,50 @@ quartz::rendering::Pipeline::createUniformBuffers(
             )
         );
 
+        LOG_TRACE(PIPELINE, "Creating point light count buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(uint32_t),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating point light buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating spot light count buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(uint32_t),
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
+
+        LOG_TRACE(PIPELINE, "Creating spot light buffer {} at buffer index {}", i, buffers.size());
+        buffers.emplace_back(
+            renderingDevice,
+            sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
+            vk::BufferUsageFlagBits::eUniformBuffer,
+            (
+                vk::MemoryPropertyFlagBits::eHostVisible |
+                vk::MemoryPropertyFlagBits::eHostCoherent
+            )
+        );
+
         const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
         const uint32_t materialByteStride = minUniformBufferOffsetAlignment > 0 ?
             (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
@@ -149,7 +197,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         0,
         vk::DescriptorType::eUniformBuffer,
         1,
-        vk::ShaderStageFlagBits::eVertex,
+        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
         {}
     );
 
@@ -169,8 +217,40 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         {}
     );
 
-    vk::DescriptorSetLayoutBinding rgbaTextureSamplerLayoutBinding(
+    vk::DescriptorSetLayoutBinding pointLightCountLayoutBinding(
         3,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding pointLightLayoutBinding(
+        4,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding spotLightCountLayoutBinding(
+        5,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding spotLightLayoutBinding(
+        6,
+        vk::DescriptorType::eUniformBuffer,
+        1,
+        vk::ShaderStageFlagBits::eFragment,
+        {}
+    );
+
+    vk::DescriptorSetLayoutBinding rgbaTextureSamplerLayoutBinding(
+        7,
         vk::DescriptorType::eSampler,
         1,
         vk::ShaderStageFlagBits::eFragment,
@@ -178,7 +258,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     );
 
     vk::DescriptorSetLayoutBinding textureArrayLayoutBinding(
-        4,
+        8,
         vk::DescriptorType::eSampledImage,
         QUARTZ_MAX_NUMBER_TEXTURES,
         vk::ShaderStageFlagBits::eFragment,
@@ -186,7 +266,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     );
 
     vk::DescriptorSetLayoutBinding materialArrayLayoutBinding(
-        5,
+        9,
         vk::DescriptorType::eUniformBufferDynamic,
         1,
         vk::ShaderStageFlagBits::eFragment,
@@ -197,6 +277,10 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         cameraUniformBufferLayoutBinding,
         ambientLightLayoutBinding,
         directionalLightLayoutBinding,
+        pointLightCountLayoutBinding,
+        pointLightLayoutBinding,
+        spotLightCountLayoutBinding,
+        spotLightLayoutBinding,
         rgbaTextureSamplerLayoutBinding,
         textureArrayLayoutBinding,
         materialArrayLayoutBinding
@@ -245,6 +329,30 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     );
     LOG_TRACE(PIPELINE, "Allowing directional light of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
 
+    vk::DescriptorPoolSize pointLightCountPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing point light count of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
+
+    vk::DescriptorPoolSize pointLightPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing point light array of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
+
+    vk::DescriptorPoolSize spotLightCountPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing spot light count of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
+
+    vk::DescriptorPoolSize spotLightPoolSize(
+        vk::DescriptorType::eUniformBuffer,
+        numDescriptorSets
+    );
+    LOG_TRACE(PIPELINE, "Allowing spot light array of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
+
     vk::DescriptorPoolSize rgbaTextureSamplerPoolSize(
         vk::DescriptorType::eSampler,
         numDescriptorSets
@@ -267,6 +375,10 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         cameraUniformBufferObjectPoolSize,
         ambientLightPoolSize,
         directionalLightPoolSize,
+        pointLightCountPoolSize,
+        pointLightPoolSize,
+        spotLightCountPoolSize,
+        spotLightPoolSize,
         rgbaTextureSamplerPoolSize,
         textureArrayPoolSize,
         materialArrayPoolSize
@@ -404,6 +516,86 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
+        // ---+++ the number of point lights +++--- //
+
+        const uint32_t pointLightCountIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
+        LOG_TRACE(PIPELINE, "Allocating space for the uint32_t number of point lights");
+        vk::DescriptorBufferInfo pointLightCountInfo(
+            *(uniformBuffers[pointLightCountIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(uint32_t)
+        );
+        vk::WriteDescriptorSet pointLightCountWriteDescriptorSet(
+            descriptorSets[i],
+            3,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &pointLightCountInfo,
+            {}
+        );
+
+        // ---+++ the point lights +++--- //
+
+        const uint32_t pointLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
+        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        vk::DescriptorBufferInfo pointLightInfo(
+            *(uniformBuffers[pointLightIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::scene::PointLight)
+        );
+        vk::WriteDescriptorSet pointLightWriteDescriptorSet(
+            descriptorSets[i],
+            4,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &pointLightInfo,
+            {}
+        );
+
+        // ---+++ the number of spot lights +++--- //
+
+        const uint32_t spotLightCountIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
+        LOG_TRACE(PIPELINE, "Allocating space for the uint32_t number of spot lights");
+        vk::DescriptorBufferInfo spotLightCountInfo(
+            *(uniformBuffers[spotLightCountIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(uint32_t)
+        );
+        vk::WriteDescriptorSet spotLightCountWriteDescriptorSet(
+            descriptorSets[i],
+            5,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &spotLightCountInfo,
+            {}
+        );
+
+        // ---+++ the spot lights +++--- //
+
+        const uint32_t spotLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
+        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        vk::DescriptorBufferInfo spotLightInfo(
+            *(uniformBuffers[spotLightIndex].getVulkanLogicalBufferPtr()),
+            0,
+            sizeof(quartz::scene::SpotLight)
+        );
+        vk::WriteDescriptorSet spotLightWriteDescriptorSet(
+            descriptorSets[i],
+            6,
+            0,
+            1,
+            vk::DescriptorType::eUniformBuffer,
+            {},
+            &spotLightInfo,
+            {}
+        );
+
         // ---+++ the texture sampler +++--- //
 
         LOG_TRACE(PIPELINE, "Allocating space for texture sampler");
@@ -414,7 +606,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         );
         vk::WriteDescriptorSet rgbaTextureSamplerWriteDescriptorSet(
             descriptorSets[i],
-            3,
+            7,
             0,
             1,
             vk::DescriptorType::eSampler,
@@ -447,7 +639,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         vk::WriteDescriptorSet textureArrayDescriptorWriteSet(
             descriptorSets[i],
-            4,
+            8,
             0,
             QUARTZ_MAX_NUMBER_TEXTURES,
             vk::DescriptorType::eSampledImage,
@@ -458,7 +650,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         // ---+++ the dynamic material UBO +++--- //
 
-        const uint32_t materialArrayIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
+        const uint32_t materialArrayIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
         LOG_TRACE(PIPELINE, "Allocating space for materials array dynamic UBO at index {}", materialArrayIndex);
 
         LOG_TRACE(PIPELINE, "Using un-adjusted material stride of 0x{:X} bytes", sizeof(quartz::rendering::MaterialUniformBufferObject));
@@ -475,7 +667,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         vk::WriteDescriptorSet materialArrayUBODescriptorWriteSet(
             descriptorSets[i],
-            5,
+            9,
             0,
             1,
             vk::DescriptorType::eUniformBufferDynamic,
@@ -491,6 +683,10 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             cameraUBODescriptorWriteSet,
             ambientLightDescriptorWriteSet,
             directionalLightWriteDescriptorSet,
+            pointLightCountWriteDescriptorSet,
+            pointLightWriteDescriptorSet,
+            spotLightCountWriteDescriptorSet,
+            spotLightWriteDescriptorSet,
             rgbaTextureSamplerWriteDescriptorSet,
             textureArrayDescriptorWriteSet,
             materialArrayUBODescriptorWriteSet
@@ -992,6 +1188,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
     const quartz::scene::Camera& camera
 ) {
     quartz::rendering::CameraUniformBufferObject cameraUBO(
+        camera.getWorldPosition(),
         camera.getViewMatrix(),
         camera.getProjectionMatrix()
     );
@@ -1029,6 +1226,47 @@ quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
 }
 
 void
+quartz::rendering::Pipeline::updatePointLightUniformBuffer(
+    const std::vector<quartz::scene::PointLight>& pointLights
+) {
+    uint32_t pointLightCount = std::min<uint32_t>(pointLights.size(), QUARTZ_MAX_NUMBER_POINT_LIGHTS);
+    const uint32_t pointLightCountIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
+    memcpy(
+        m_uniformBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
+        &pointLightCount,
+        sizeof(uint32_t)
+    );
+
+    const uint32_t pointLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
+    memcpy(
+        m_uniformBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
+        pointLights.data(),
+        sizeof(quartz::scene::PointLight) * pointLightCount
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateSpotLightUniformBuffer(
+    const std::vector<quartz::scene::SpotLight>& spotLights
+) {
+    uint32_t spotLightCount = std::min<uint32_t>(spotLights.size(), QUARTZ_MAX_NUMBER_SPOT_LIGHTS);
+    const uint32_t spotLightCountIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
+    memcpy(
+        m_uniformBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
+        &spotLightCount,
+        sizeof(uint32_t)
+    );
+
+    const uint32_t spotLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
+    memcpy(
+        m_uniformBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
+        spotLights.data(),
+        sizeof(quartz::scene::SpotLight) * spotLightCount
+    );
+
+}
+
+void
 quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
     const uint32_t minUniformBufferOffsetAlignment
 ) {
@@ -1052,7 +1290,7 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
         );
     }
 
-    const uint32_t materialArrayIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
+    const uint32_t materialArrayIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
     void* p_mappedBuffer = m_uniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
 
     for (uint32_t i = 0; i < materialUBOs.size(); ++i) {

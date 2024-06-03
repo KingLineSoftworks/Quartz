@@ -15,6 +15,8 @@
 #include "quartz/scene/doodad/Doodad.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
+#include "quartz/scene/light/PointLight.hpp"
+#include "quartz/scene/light/SpotLight.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -32,11 +34,13 @@ struct quartz::rendering::CameraUniformBufferObject {
 public: // member functions
     CameraUniformBufferObject() = default;
     CameraUniformBufferObject(
+        const glm::vec3 position_,
         const glm::mat4 viewMatrix_,
         const glm::mat4 projectionMatrix_
     );
 
 public: // member variables
+    alignas(16) glm::vec3 position;
     alignas(16) glm::mat4 viewMatrix;
     alignas(16) glm::mat4 projectionMatrix;
 };
@@ -108,6 +112,8 @@ public: // member functions
     void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
     void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
     void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
+    void updatePointLightUniformBuffer(const std::vector<quartz::scene::PointLight>& pointLights);
+    void updateSpotLightUniformBuffer(const std::vector<quartz::scene::SpotLight>& spotLights);
     void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment);
     void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
 

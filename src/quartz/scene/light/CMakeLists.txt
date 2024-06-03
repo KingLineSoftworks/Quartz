@@ -6,6 +6,8 @@ add_library(
         SHARED
         AmbientLight.cpp
         DirectionalLight.cpp
+        PointLight.cpp
+        SpotLight.cpp
 )
 
 target_compile_options(

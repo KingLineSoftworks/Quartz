@@ -52,13 +52,15 @@ quartz::rendering::Context::~Context() {
 }
 
 void
-quartz::rendering::Context::loadScene() {
+quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
         quartz::rendering::Texture::getMasterTextureList()
     );
+
+    m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
 }
 
 void
@@ -83,6 +85,8 @@ quartz::rendering::Context::draw(
     m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
     m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight());
     m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight());
+    m_renderingPipeline.updatePointLightUniformBuffer(scene.getPointLights());
+    m_renderingPipeline.updateSpotLightUniformBuffer(scene.getSpotLights());
     m_renderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment);
 
     m_renderingSwapchain.resetInFlightFence(

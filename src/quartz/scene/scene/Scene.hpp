@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include <glm/vec3.hpp>
+
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -13,6 +15,8 @@
 #include "quartz/scene/doodad/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
+#include "quartz/scene/light/PointLight.hpp"
+#include "quartz/scene/light/SpotLight.hpp"
 
 namespace quartz {
 namespace scene {
@@ -22,7 +26,7 @@ namespace scene {
 
 class quartz::scene::Scene {
 public: // member functions
-    Scene();
+    Scene() = default;
     ~Scene();
 
     USE_LOGGER(SCENE);
@@ -31,12 +35,18 @@ public: // member functions
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
+    const std::vector<quartz::scene::PointLight>& getPointLights() const { return m_pointLights; }
+    const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
+    const glm::vec3& getScreenClearColor() const { return m_screenClearColor; }
 
     void load(
         const quartz::rendering::Device& renderingDevice,
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
+        const std::vector<quartz::scene::PointLight>& pointLights,
+        const std::vector<quartz::scene::SpotLight>& spotLights,
+        const glm::vec3& screenClearColor,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
@@ -54,7 +64,13 @@ private: // static functions
 
 private: // member variables
     quartz::scene::Camera m_camera;
+
     std::vector<quartz::scene::Doodad> m_doodads;
+
     quartz::scene::AmbientLight m_ambientLight;
     quartz::scene::DirectionalLight m_directionalLight;
+    std::vector<quartz::scene::PointLight> m_pointLights;
+    std::vector<quartz::scene::SpotLight> m_spotLights;
+
+    glm::vec3 m_screenClearColor;
 };

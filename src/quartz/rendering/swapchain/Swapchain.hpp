@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <glm/vec3.hpp>
+
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
@@ -37,6 +39,8 @@ public: // member functions
     USE_LOGGER(SWAPCHAIN);
 
     bool getShouldRecreate() const { return m_shouldRecreate; }
+
+    void setScreenClearColor(const glm::vec3& screenClearColor);
 
     void waitForInFlightFence(
         const quartz::rendering::Device& renderingDevice,
@@ -114,6 +118,7 @@ private: // member variables
 
     std::vector<vk::UniqueFramebuffer> m_vulkanFramebufferPtrs;
 
+    glm::vec3 m_screenClearColor;
     vk::UniqueCommandPool mp_vulkanDrawingCommandPool;
     std::vector<vk::UniqueCommandBuffer> m_vulkanDrawingCommandBufferPtrs;
     std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphorePtrs;
