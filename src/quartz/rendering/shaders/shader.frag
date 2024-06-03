@@ -129,29 +129,31 @@ vec3 specularBRDF(vec3 baseColor, vec3 v, vec3 l, vec3 n, vec3 h, float metallic
 
 // The only parameters these functions take in are ones that are calculated within the main function. Everything else used is a global variable
 
+float getOcclusionScale();
 vec3 getMetallicRoughnessVector();
 vec3 calculateFragmentBaseColor(float roughnessValue, float metallicValue);
 vec3 calculateFragmentNormal();
-vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor);
-vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor);
-vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue, float metallicValue);
-vec3 calculateSpotLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float roughnessValue, float metallicValue);
+vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor, float occlusionScale);
+vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor, float occlusionScale);
+vec3 calculatePointLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float occlusionScale, float roughnessValue, float metallicValue);
+vec3 calculateSpotLightContribution(vec3 fragmentNormal, vec3 framentBaseColor, float occlusionScale, float roughnessValue, float metallicValue);
 vec3 calculateEmissiveColorContribution();
 vec4 calculateFinalColor(vec3 ambientLightContribution,  vec3 directionalLightContribution, vec3 pointLightContribution, vec3 spotLightContribution,  vec3 emissiveColorContribution);
 
 // --------------------====================================== Main logic =======================================-------------------- //
 
 void main() {
+    float occlusionScale = getOcclusionScale();
     vec3 metallicRoughnessVector = getMetallicRoughnessVector();
     float roughnessValue = metallicRoughnessVector.g;
     float metallicValue = metallicRoughnessVector.b;
     vec3 fragmentBaseColor = calculateFragmentBaseColor(roughnessValue, metallicValue);
     vec3 fragmentNormal = calculateFragmentNormal();
 
-    vec3 ambientLightContribution = calculateAmbientLightContribution(fragmentBaseColor);
-    vec3 directionalLightContribution = calculateDirectionalLightContribution(fragmentNormal, fragmentBaseColor);
-    vec3 pointLightContribution = calculatePointLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue, metallicValue);
-    vec3 spotLightContribution = calculateSpotLightContribution(fragmentNormal, fragmentBaseColor, roughnessValue, metallicValue);
+    vec3 ambientLightContribution = calculateAmbientLightContribution(fragmentBaseColor, occlusionScale);
+    vec3 directionalLightContribution = calculateDirectionalLightContribution(fragmentNormal, fragmentBaseColor, occlusionScale);
+    vec3 pointLightContribution = calculatePointLightContribution(fragmentNormal, fragmentBaseColor, occlusionScale, roughnessValue, metallicValue);
+    vec3 spotLightContribution = calculateSpotLightContribution(fragmentNormal, fragmentBaseColor, occlusionScale, roughnessValue, metallicValue);
     vec3 emissiveColorContribution = calculateEmissiveColorContribution();
 
     out_fragmentColor = calculateFinalColor(ambientLightContribution, directionalLightContribution, pointLightContribution, spotLightContribution, emissiveColorContribution);
@@ -303,6 +305,20 @@ vec3 specularBRDF(
 }
 
 // --------------------------------------------------------------------------------
+// Get the diffuse occlusion scale (0.0 to 1.0)
+// --------------------------------------------------------------------------------
+
+float getOcclusionScale() {
+    float occlusionScale = texture(
+        sampler2D(textureArray[material.occlusionTextureMasterIndex], rgbaTextureSampler),
+        in_occlusionTextureCoordinate
+    ).r;
+
+    return occlusionScale;
+}
+
+
+// --------------------------------------------------------------------------------
 // Get the metallic and roughness values from the metallic-roughness texture.
 // The roughness component is stored in the g value while the metallic value is stored in the b value.
 // --------------------------------------------------------------------------------
@@ -360,12 +376,10 @@ vec3 calculateFragmentNormal() {
 // Calculate the contribution to the final color from the ambient light
 // --------------------------------------------------------------------------------
 
-vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor) {
-    float occlusionScale = texture(
-        sampler2D(textureArray[material.occlusionTextureMasterIndex], rgbaTextureSampler),
-        in_occlusionTextureCoordinate
-    ).r;
-
+vec3 calculateAmbientLightContribution(
+    vec3 fragmentBaseColor,
+    float occlusionScale
+) {
     vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor * occlusionScale;
 
     return ambientLightContribution;
@@ -375,7 +389,11 @@ vec3 calculateAmbientLightContribution(vec3 fragmentBaseColor) {
 // Calculate the contribution to the final color from the directional light
 // --------------------------------------------------------------------------------
 
-vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBaseColor) {
+vec3 calculateDirectionalLightContribution(
+    vec3 fragmentNormal,
+    vec3 fragmentBaseColor,
+    float occlusionScale
+) {
     vec3 fragmentToLightDirection = normalize(-directionalLight.direction);
 
     float directionalLightImpact = max(
@@ -383,7 +401,7 @@ vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBas
         0.0
     );
 
-    vec3 directionalLightContribution = directionalLight.color * (directionalLightImpact * fragmentBaseColor);
+    vec3 directionalLightContribution = directionalLight.color * (directionalLightImpact * fragmentBaseColor) * occlusionScale;
 
     return directionalLightContribution;
 }
@@ -395,6 +413,7 @@ vec3 calculateDirectionalLightContribution(vec3 fragmentNormal, vec3 fragmentBas
 vec3 calculatePointLightContribution(
     vec3 fragmentNormal,
     vec3 fragmentBaseColor,
+    float occlusionScale,
     float roughnessValue,
     float metallicValue
 ) {
@@ -417,7 +436,7 @@ vec3 calculatePointLightContribution(
 
         float ndotl = clamp(dot(n, l), 0.0, 1.0);
 
-        result += intensity * (diffuseColor + specularColor) * ndotl;
+        result += intensity * ((diffuseColor * occlusionScale) + specularColor) * ndotl;
     }
 
     return result;
@@ -430,6 +449,7 @@ vec3 calculatePointLightContribution(
 vec3 calculateSpotLightContribution(
     vec3 fragmentNormal,
     vec3 fragmentBaseColor,
+    float occlusionScale,
     float roughnessValue,
     float metallicValue
 ) {
@@ -451,7 +471,7 @@ vec3 calculateSpotLightContribution(
 
         float ndotl = clamp(dot(n, l), 0.0, 1.0);
 
-        result += intensity * (diffuseColor + specularColor) * ndotl;
+        result += intensity * ((diffuseColor * occlusionScale) + specularColor) * ndotl;
     }
 
     return result;
