@@ -15,48 +15,6 @@
 
 constexpr uint32_t NUM_UNIQUE_UNIFORM_BUFFERS = 8;
 
-/**
- * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
- *   instead of creating a copy into this weird little struct
- */
-quartz::rendering::CameraUniformBufferObject::CameraUniformBufferObject(
-    const glm::vec3 position_,
-    const glm::mat4 viewMatrix_,
-    const glm::mat4 projectionMatrix_
-) :
-    position(position_),
-    viewMatrix(viewMatrix_),
-    projectionMatrix(projectionMatrix_)
-{}
-
-quartz::rendering::MaterialUniformBufferObject::MaterialUniformBufferObject(
-    const uint32_t baseColorTextureMasterIndex_,
-    const uint32_t metallicRoughnessTextureMasterIndex_,
-    const uint32_t normalTextureMasterIndex_,
-    const uint32_t emissionTextureMasterIndex_,
-    const uint32_t occlusionTextureMasterIndex_,
-    const glm::vec4& baseColorFactor_,
-    const glm::vec3& emissiveFactor_,
-    const float metallicFactor_,
-    const float roughnessFactor_,
-    const uint32_t alphaMode_,
-    const float alphaCutoff_,
-    const bool doubleSided_
-) :
-    baseColorTextureMasterIndex(baseColorTextureMasterIndex_),
-    metallicRoughnessTextureMasterIndex(metallicRoughnessTextureMasterIndex_),
-    normalTextureMasterIndex(normalTextureMasterIndex_),
-    emissionTextureMasterIndex(emissionTextureMasterIndex_),
-    occlusionTextureMasterIndex(occlusionTextureMasterIndex_),
-    baseColorFactor(baseColorFactor_),
-    emissiveFactor(emissiveFactor_),
-    metallicFactor(metallicFactor_),
-    roughnessFactor(roughnessFactor_),
-    alphaMode(alphaMode_),
-    alphaCutoff(alphaCutoff_),
-    doubleSided(doubleSided_)
-{}
-
 vk::UniqueShaderModule
 quartz::rendering::Pipeline::createVulkanShaderModulePtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -97,7 +55,7 @@ quartz::rendering::Pipeline::createUniformBuffers(
         LOG_TRACE(PIPELINE, "Creating camera buffer {} at buffer index {}", i, buffers.size());
         buffers.emplace_back(
             renderingDevice,
-            sizeof(quartz::rendering::CameraUniformBufferObject),
+            sizeof(quartz::scene::Camera::UniformBufferObject),
             vk::BufferUsageFlagBits::eUniformBuffer,
             (
                 vk::MemoryPropertyFlagBits::eHostVisible |
@@ -173,8 +131,8 @@ quartz::rendering::Pipeline::createUniformBuffers(
 
         const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
         const uint32_t materialByteStride = minUniformBufferOffsetAlignment > 0 ?
-            (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-            sizeof(quartz::rendering::MaterialUniformBufferObject);
+            (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+            sizeof(quartz::rendering::Material::UniformBufferObject);
         LOG_TRACE(PIPELINE, "Creating material uniform buffer array {} at buffer index {}", i, buffers.size());
         buffers.emplace_back(
             renderingDevice,
@@ -463,7 +421,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         vk::DescriptorBufferInfo cameraUBOBufferInfo(
             *(uniformBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::rendering::CameraUniformBufferObject)
+            sizeof(quartz::scene::Camera::UniformBufferObject)
         );
         vk::WriteDescriptorSet cameraUBODescriptorWriteSet(
             descriptorSets[i],
@@ -653,10 +611,10 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         const uint32_t materialArrayIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
         LOG_TRACE(PIPELINE, "Allocating space for materials array dynamic UBO at index {}", materialArrayIndex);
 
-        LOG_TRACE(PIPELINE, "Using un-adjusted material stride of 0x{:X} bytes", sizeof(quartz::rendering::MaterialUniformBufferObject));
+        LOG_TRACE(PIPELINE, "Using un-adjusted material stride of 0x{:X} bytes", sizeof(quartz::rendering::Material::UniformBufferObject));
         const uint32_t materialByteStride = minUniformBufferOffsetAlignment > 0 ?
-            (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-            sizeof(quartz::rendering::MaterialUniformBufferObject);
+            (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+            sizeof(quartz::rendering::Material::UniformBufferObject);
         LOG_TRACE(PIPELINE, "Using    adjusted material stride of 0x{:X} bytes", materialByteStride);
 
         vk::DescriptorBufferInfo materialArrayUBOBufferInfo(
@@ -1187,7 +1145,7 @@ void
 quartz::rendering::Pipeline::updateCameraUniformBuffer(
     const quartz::scene::Camera& camera
 ) {
-    quartz::rendering::CameraUniformBufferObject cameraUBO(
+    quartz::scene::Camera::UniformBufferObject cameraUBO(
         camera.getWorldPosition(),
         camera.getViewMatrix(),
         camera.getProjectionMatrix()
@@ -1197,7 +1155,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
     memcpy(
         m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
-        sizeof(quartz::rendering::CameraUniformBufferObject)
+        sizeof(quartz::scene::Camera::UniformBufferObject)
     );
 }
 
@@ -1270,7 +1228,7 @@ void
 quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
     const uint32_t minUniformBufferOffsetAlignment
 ) {
-    std::vector<quartz::rendering::MaterialUniformBufferObject> materialUBOs;
+    std::vector<quartz::rendering::Material::UniformBufferObject> materialUBOs;
     for (const std::shared_ptr<quartz::rendering::Material>& p_material : quartz::rendering::Material::getMasterMaterialList()) {
         materialUBOs.emplace_back(
             p_material->getBaseColorTextureMasterIndex(),
@@ -1295,8 +1253,8 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
 
     for (uint32_t i = 0; i < materialUBOs.size(); ++i) {
         uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
-            (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-            sizeof(quartz::rendering::MaterialUniformBufferObject);
+            (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+            sizeof(quartz::rendering::Material::UniformBufferObject);
         materialByteOffset *= i;
 
         void* p_currentMaterialSlot = reinterpret_cast<uint8_t*>(p_mappedBuffer) + materialByteOffset;
@@ -1304,7 +1262,7 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
         memcpy(
              p_currentMaterialSlot,
             &(materialUBOs[i]),
-            sizeof(quartz::rendering::MaterialUniformBufferObject)
+            sizeof(quartz::rendering::Material::UniformBufferObject)
         );
     }
 

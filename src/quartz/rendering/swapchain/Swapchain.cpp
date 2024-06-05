@@ -561,8 +561,8 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
             uint32_t materialMasterIndex = primitive.getMaterialMasterIndex();
             uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
-                (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-                sizeof(quartz::rendering::MaterialUniformBufferObject);
+                (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+                sizeof(quartz::rendering::Material::UniformBufferObject);
             materialByteOffset *= materialMasterIndex;
 
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(

@@ -20,65 +20,9 @@
 
 namespace quartz {
 namespace rendering {
-    struct CameraUniformBufferObject;
-    struct MaterialUniformBufferObject;
     class Pipeline;
 }
 }
-
-/**
- * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
- *   instead of creating a copy into this weird little struct
- */
-struct quartz::rendering::CameraUniformBufferObject {
-public: // member functions
-    CameraUniformBufferObject() = default;
-    CameraUniformBufferObject(
-        const glm::vec3 position_,
-        const glm::mat4 viewMatrix_,
-        const glm::mat4 projectionMatrix_
-    );
-
-public: // member variables
-    alignas(16) glm::vec3 position;
-    alignas(16) glm::mat4 viewMatrix;
-    alignas(16) glm::mat4 projectionMatrix;
-};
-
-struct quartz::rendering::MaterialUniformBufferObject {
-public: // member functions
-    MaterialUniformBufferObject() = default;
-    MaterialUniformBufferObject(
-        const uint32_t baseColorTextureMasterIndex_,
-        const uint32_t metallicRoughnessTextureMasterIndex_,
-        const uint32_t normalTextureMasterIndex_,
-        const uint32_t emissionTextureMasterIndex_,
-        const uint32_t occlusionTextureMasterIndex_,
-        const glm::vec4& baseColorFactor_,
-        const glm::vec3& emissiveFactor_,
-        const float metallicFactor_,
-        const float roughnessFactor_,
-        const uint32_t alphaMode_,
-        const float alphaCutoff_,
-        const bool doubleSided_
-    );
-
-public: // member variables
-    alignas(4) uint32_t baseColorTextureMasterIndex;
-    alignas(4) uint32_t metallicRoughnessTextureMasterIndex;
-    alignas(4) uint32_t normalTextureMasterIndex;
-    alignas(4) uint32_t emissionTextureMasterIndex;
-    alignas(4) uint32_t occlusionTextureMasterIndex;
-
-    alignas(16) glm::vec4 baseColorFactor;
-    alignas(16) glm::vec3 emissiveFactor;
-    alignas(4) float metallicFactor;
-    alignas(4) float roughnessFactor;
-
-    alignas(4) uint32_t alphaMode;
-    alignas(4) float alphaCutoff;
-    alignas(4) bool doubleSided;
-};
 
 class quartz::rendering::Pipeline {
 public: // member functions
