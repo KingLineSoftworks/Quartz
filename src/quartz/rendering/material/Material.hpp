@@ -22,6 +22,11 @@ namespace rendering {
  */
 class quartz::rendering::Material {
 public: // classes
+    /**
+     * @brief So we don't need to pass all of the information stored in the material (don't pass the name string)
+     *
+     * @todo 2024/06/04 Can we copy the material into the GPU's memory but only copy 72 bytes so we slice off the name variable?
+     */
     struct UniformBufferObject {
     public: // member functions
         UniformBufferObject() = default;

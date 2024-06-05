@@ -1,13 +1,8 @@
 #include <string>
-#include <vector>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/instance/Instance.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
-#include "quartz/rendering/swapchain/Swapchain.hpp"
-#include "quartz/rendering/window/Window.hpp"
 
 quartz::rendering::Context::Context(
     const std::string& applicationName,
@@ -18,6 +13,8 @@ quartz::rendering::Context::Context(
     const uint32_t windowHeightPixels,
     const bool validationLayersEnabled
 ) :
+    m_maxNumFramesInFlight(2),
+    m_currentInFlightFrameIndex(0),
     m_renderingInstance(
         applicationName,
         applicationMajorVersion,
@@ -33,15 +30,21 @@ quartz::rendering::Context::Context(
         m_renderingInstance,
         m_renderingDevice
     ),
+    m_renderingRenderPass(
+        m_renderingDevice,
+        m_renderingWindow
+    ),
     m_renderingPipeline(
         m_renderingDevice,
         m_renderingWindow,
-        2
+        m_renderingRenderPass,
+        m_maxNumFramesInFlight
     ),
     m_renderingSwapchain(
         m_renderingDevice,
         m_renderingWindow,
-        m_renderingPipeline
+        m_renderingRenderPass,
+        m_maxNumFramesInFlight
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -57,7 +60,8 @@ quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     
     m_renderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
-        quartz::rendering::Texture::getMasterTextureList()
+        quartz::rendering::Texture::getMasterTextureList(),
+        m_maxNumFramesInFlight
     );
 
     m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
@@ -69,12 +73,12 @@ quartz::rendering::Context::draw(
 ) {
     m_renderingSwapchain.waitForInFlightFence(
         m_renderingDevice,
-        m_renderingPipeline.getCurrentInFlightFrameIndex()
+        m_currentInFlightFrameIndex
     );
 
     const uint32_t availableSwapchainImageIndex = m_renderingSwapchain.getAvailableImageIndex(
         m_renderingDevice,
-        m_renderingPipeline.getCurrentInFlightFrameIndex()
+        m_currentInFlightFrameIndex
     );
 
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
@@ -82,22 +86,23 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera());
-    m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight());
-    m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight());
-    m_renderingPipeline.updatePointLightUniformBuffer(scene.getPointLights());
-    m_renderingPipeline.updateSpotLightUniformBuffer(scene.getSpotLights());
-    m_renderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment);
+    m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera(), m_currentInFlightFrameIndex);
+    m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight(), m_currentInFlightFrameIndex);
+    m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight(), m_currentInFlightFrameIndex);
+    m_renderingPipeline.updatePointLightUniformBuffer(scene.getPointLights(), m_currentInFlightFrameIndex);
+    m_renderingPipeline.updateSpotLightUniformBuffer(scene.getSpotLights(), m_currentInFlightFrameIndex);
+    m_renderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment, m_currentInFlightFrameIndex);
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
-        m_renderingPipeline.getCurrentInFlightFrameIndex()
+        m_currentInFlightFrameIndex
     );
 
     m_renderingSwapchain.resetAndBeginDrawingCommandBuffer(
         m_renderingWindow,
+        m_renderingRenderPass,
         m_renderingPipeline,
-        m_renderingPipeline.getCurrentInFlightFrameIndex(),
+        m_currentInFlightFrameIndex,
         availableSwapchainImageIndex
     );
 
@@ -106,18 +111,18 @@ quartz::rendering::Context::draw(
             m_renderingDevice,
             m_renderingPipeline,
             doodad,
-            m_renderingPipeline.getCurrentInFlightFrameIndex()
+            m_currentInFlightFrameIndex
         );
     }
 
     m_renderingSwapchain.endAndSubmitDrawingCommandBuffer(
         m_renderingDevice,
-        m_renderingPipeline.getCurrentInFlightFrameIndex()
+        m_currentInFlightFrameIndex
     );
 
     m_renderingSwapchain.presentImage(
         m_renderingDevice,
-        m_renderingPipeline.getCurrentInFlightFrameIndex(),
+        m_currentInFlightFrameIndex,
         availableSwapchainImageIndex
     );
 
@@ -126,7 +131,7 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.incrementCurrentInFlightFrameIndex();
+    m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight;
 }
 
 void
@@ -136,20 +141,26 @@ quartz::rendering::Context::recreateSwapchain() {
 
     m_renderingSwapchain.reset();
     m_renderingPipeline.reset();
+    m_renderingRenderPass.reset();
     m_renderingWindow.reset();
 
     m_renderingWindow.recreate(
         m_renderingInstance,
         m_renderingDevice
     );
-    m_renderingPipeline.recreate(
+    m_renderingRenderPass.recreate(
         m_renderingDevice,
         m_renderingWindow
+    );
+    m_renderingPipeline.recreate(
+        m_renderingDevice,
+        m_renderingRenderPass
     );
     m_renderingSwapchain.recreate(
         m_renderingDevice,
         m_renderingWindow,
-        m_renderingPipeline
+        m_renderingRenderPass,
+        m_maxNumFramesInFlight
     );
 }
 

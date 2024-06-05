@@ -663,95 +663,6 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     return descriptorSets;
 }
 
-vk::UniqueRenderPass
-quartz::rendering::Pipeline::createVulkanRenderPassPtr(
-    const vk::UniqueDevice& p_logicalDevice,
-    const vk::SurfaceFormatKHR& surfaceFormat,
-    const vk::Format& depthFormat
-) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
-
-    vk::AttachmentDescription colorAttachment(
-        {},
-        surfaceFormat.format,
-        vk::SampleCountFlagBits::e1,
-        vk::AttachmentLoadOp::eClear,
-        vk::AttachmentStoreOp::eStore,
-        vk::AttachmentLoadOp::eDontCare,
-        vk::AttachmentStoreOp::eDontCare,
-        vk::ImageLayout::eUndefined,
-        vk::ImageLayout::ePresentSrcKHR
-    );
-    vk::AttachmentReference colorAttachmentRef(
-        0,
-        vk::ImageLayout::eColorAttachmentOptimal
-    );
-
-    vk::AttachmentDescription depthAttachment(
-        {},
-        depthFormat,
-        vk::SampleCountFlagBits::e1,
-        vk::AttachmentLoadOp::eClear,
-        vk::AttachmentStoreOp::eDontCare,
-        vk::AttachmentLoadOp::eDontCare,
-        vk::AttachmentStoreOp::eDontCare,
-        vk::ImageLayout::eUndefined,
-        vk::ImageLayout::eDepthStencilAttachmentOptimal
-    );
-    vk::AttachmentReference depthAttachmentRef(
-        1,
-        vk::ImageLayout::eDepthStencilAttachmentOptimal
-    );
-
-    vk::SubpassDescription subpassDescription(
-        {},
-        vk::PipelineBindPoint::eGraphics,
-        {},
-        colorAttachmentRef,
-        {},
-        &depthAttachmentRef,
-        {}
-    );
-
-    vk::SubpassDependency subpassDependency(
-        VK_SUBPASS_EXTERNAL,
-        0,
-        (
-            vk::PipelineStageFlagBits::eColorAttachmentOutput |
-            vk::PipelineStageFlagBits::eEarlyFragmentTests
-        ),
-        (
-            vk::PipelineStageFlagBits::eColorAttachmentOutput |
-            vk::PipelineStageFlagBits::eEarlyFragmentTests
-        ),
-        {},
-        (
-            vk::AccessFlagBits::eColorAttachmentWrite |
-            vk::AccessFlagBits::eDepthStencilAttachmentWrite
-        ),
-        {}
-    );
-
-    std::vector<vk::AttachmentDescription> attachments = {
-        colorAttachment,
-        depthAttachment
-    };
-    vk::RenderPassCreateInfo renderPassCreateInfo(
-        {},
-        attachments,
-        subpassDescription,
-        subpassDependency
-    );
-
-    vk::UniqueRenderPass p_renderPass = p_logicalDevice->createRenderPassUnique(renderPassCreateInfo);
-
-    if (!p_renderPass) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::RenderPass");
-    }
-
-    return p_renderPass;
-}
-
 vk::UniquePipelineLayout
 quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -964,10 +875,9 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
 quartz::rendering::Pipeline::Pipeline(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::RenderPass& renderingRenderPass,
     const uint32_t maxNumFramesInFlight
 ) :
-    m_maxNumFramesInFlight(maxNumFramesInFlight),
-    m_currentInFlightFrameIndex(0),
     m_vulkanVertexInputBindingDescriptions(
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()
     ),
@@ -1030,7 +940,7 @@ quartz::rendering::Pipeline::Pipeline(
     m_uniformBuffers(
         quartz::rendering::Pipeline::createUniformBuffers(
             renderingDevice,
-            m_maxNumFramesInFlight
+            maxNumFramesInFlight
         )
     ),
     mp_vulkanDescriptorSetLayout(
@@ -1041,17 +951,10 @@ quartz::rendering::Pipeline::Pipeline(
     m_vulkanDescriptorPoolPtr(
         quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            m_maxNumFramesInFlight
+            maxNumFramesInFlight
         )
     ),
     m_vulkanDescriptorSets(),
-    mp_vulkanRenderPass(
-        quartz::rendering::Pipeline::createVulkanRenderPassPtr(
-            renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingWindow.getVulkanSurfaceFormat(),
-            renderingWindow.getVulkanDepthBufferFormat()
-        )
-    ),
     mp_vulkanPipelineLayout(
         quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
@@ -1070,7 +973,7 @@ quartz::rendering::Pipeline::Pipeline(
             mp_vulkanVertexShaderModule,
             mp_vulkanFragmentShaderModule,
             mp_vulkanPipelineLayout,
-            mp_vulkanRenderPass
+            renderingRenderPass.getVulkanRenderPassPtr()
         )
     )
 {
@@ -1087,21 +990,15 @@ quartz::rendering::Pipeline::reset() {
 
     mp_vulkanGraphicsPipeline.reset();
     mp_vulkanPipelineLayout.reset();
-    mp_vulkanRenderPass.reset();
 }
 
 void
 quartz::rendering::Pipeline::recreate(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Window& renderingWindow
+    const quartz::rendering::RenderPass& renderingRenderPass
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    mp_vulkanRenderPass = quartz::rendering::Pipeline::createVulkanRenderPassPtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingWindow.getVulkanSurfaceFormat(),
-        renderingWindow.getVulkanDepthBufferFormat()
-    );
     mp_vulkanPipelineLayout = quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         mp_vulkanDescriptorSetLayout
@@ -1117,14 +1014,15 @@ quartz::rendering::Pipeline::recreate(
         mp_vulkanVertexShaderModule,
         mp_vulkanFragmentShaderModule,
         mp_vulkanPipelineLayout,
-        mp_vulkanRenderPass
+        renderingRenderPass.getVulkanRenderPassPtr()
     );
 }
 
 void
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const quartz::rendering::Device& renderingDevice,
-    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
+    const uint32_t maxNumFramesInFlight
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -1133,7 +1031,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     m_vulkanDescriptorSets = quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         renderingDevice.getVulkanLogicalDevicePtr(),
         renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment,
-        m_maxNumFramesInFlight,
+        maxNumFramesInFlight,
         m_uniformBuffers,
         mp_vulkanDescriptorSetLayout,
         m_vulkanDescriptorPoolPtr,
@@ -1143,7 +1041,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
 void
 quartz::rendering::Pipeline::updateCameraUniformBuffer(
-    const quartz::scene::Camera& camera
+    const quartz::scene::Camera& camera,
+    const uint32_t currentInFlightFrameIndex
 ) {
     quartz::scene::Camera::UniformBufferObject cameraUBO(
         camera.getWorldPosition(),
@@ -1151,7 +1050,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
         camera.getProjectionMatrix()
     );
 
-    const uint32_t cameraIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
+    const uint32_t cameraIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
     memcpy(
         m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
@@ -1161,9 +1060,10 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
 
 void
 quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
-    const quartz::scene::AmbientLight& ambientLight
+    const quartz::scene::AmbientLight& ambientLight,
+    const uint32_t currentInFlightFrameIndex
 ) {
-    const uint32_t ambientLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
+    const uint32_t ambientLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
     memcpy(
         m_uniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
         &ambientLight,
@@ -1173,9 +1073,10 @@ quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
 
 void
 quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
-    const quartz::scene::DirectionalLight& directionalLight
+    const quartz::scene::DirectionalLight& directionalLight,
+    const uint32_t currentInFlightFrameIndex
 ) {
-    const uint32_t directionalLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
+    const uint32_t directionalLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
     memcpy(
         m_uniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
         &directionalLight,
@@ -1185,17 +1086,18 @@ quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
 
 void
 quartz::rendering::Pipeline::updatePointLightUniformBuffer(
-    const std::vector<quartz::scene::PointLight>& pointLights
+    const std::vector<quartz::scene::PointLight>& pointLights,
+    const uint32_t currentInFlightFrameIndex
 ) {
     uint32_t pointLightCount = std::min<uint32_t>(pointLights.size(), QUARTZ_MAX_NUMBER_POINT_LIGHTS);
-    const uint32_t pointLightCountIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
+    const uint32_t pointLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
     memcpy(
         m_uniformBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
         &pointLightCount,
         sizeof(uint32_t)
     );
 
-    const uint32_t pointLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
+    const uint32_t pointLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
     memcpy(
         m_uniformBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
         pointLights.data(),
@@ -1205,17 +1107,18 @@ quartz::rendering::Pipeline::updatePointLightUniformBuffer(
 
 void
 quartz::rendering::Pipeline::updateSpotLightUniformBuffer(
-    const std::vector<quartz::scene::SpotLight>& spotLights
+    const std::vector<quartz::scene::SpotLight>& spotLights,
+    const uint32_t currentInFlightFrameIndex
 ) {
     uint32_t spotLightCount = std::min<uint32_t>(spotLights.size(), QUARTZ_MAX_NUMBER_SPOT_LIGHTS);
-    const uint32_t spotLightCountIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
+    const uint32_t spotLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
     memcpy(
         m_uniformBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
         &spotLightCount,
         sizeof(uint32_t)
     );
 
-    const uint32_t spotLightIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
+    const uint32_t spotLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
     memcpy(
         m_uniformBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
         spotLights.data(),
@@ -1226,7 +1129,8 @@ quartz::rendering::Pipeline::updateSpotLightUniformBuffer(
 
 void
 quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
-    const uint32_t minUniformBufferOffsetAlignment
+    const uint32_t minUniformBufferOffsetAlignment,
+    const uint32_t currentInFlightFrameIndex
 ) {
     std::vector<quartz::rendering::Material::UniformBufferObject> materialUBOs;
     for (const std::shared_ptr<quartz::rendering::Material>& p_material : quartz::rendering::Material::getMasterMaterialList()) {
@@ -1248,7 +1152,7 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
         );
     }
 
-    const uint32_t materialArrayIndex = m_currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
+    const uint32_t materialArrayIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
     void* p_mappedBuffer = m_uniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
 
     for (uint32_t i = 0; i < materialUBOs.size(); ++i) {

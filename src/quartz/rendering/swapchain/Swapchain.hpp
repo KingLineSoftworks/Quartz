@@ -25,7 +25,8 @@ public: // member functions
     Swapchain(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
-        const quartz::rendering::Pipeline& renderingPipeline
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
     );
     ~Swapchain();
 
@@ -33,7 +34,8 @@ public: // member functions
     void recreate(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
-        const quartz::rendering::Pipeline& renderingPipeline
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
     );
 
     USE_LOGGER(SWAPCHAIN);
@@ -56,6 +58,7 @@ public: // member functions
     );
     void resetAndBeginDrawingCommandBuffer(
         const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
         const quartz::rendering::Pipeline& renderingPipeline,
         const uint32_t inFlightFrameIndex,
         const uint32_t availableSwapchainImageIndex

@@ -9,6 +9,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/render_pass/RenderPass.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
@@ -29,6 +30,7 @@ public: // member functions
     Pipeline(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
         const uint32_t maxNumFramesInFlight
     );
     ~Pipeline();
@@ -36,30 +38,27 @@ public: // member functions
     void reset();
     void recreate(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window& renderingWindow
+        const quartz::rendering::RenderPass& renderingRenderPass
     );
 
     void allocateVulkanDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
-        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
+        const uint32_t maxNumFramesInFlight
     );
 
     USE_LOGGER(PIPELINE);
 
-    uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
-    uint32_t getCurrentInFlightFrameIndex() const { return m_currentInFlightFrameIndex; }
     const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
-    const vk::UniqueRenderPass& getVulkanRenderPassPtr() const { return mp_vulkanRenderPass; }
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
-    void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
-    void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
-    void updatePointLightUniformBuffer(const std::vector<quartz::scene::PointLight>& pointLights);
-    void updateSpotLightUniformBuffer(const std::vector<quartz::scene::SpotLight>& spotLights);
-    void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment);
-    void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
+    void updateCameraUniformBuffer(const quartz::scene::Camera& camera, const uint32_t currentInFlightFrameIndex);
+    void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight, const uint32_t currentInFlightFrameIndex);
+    void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight, const uint32_t currentInFlightFrameIndex);
+    void updatePointLightUniformBuffer(const std::vector<quartz::scene::PointLight>& pointLights, const uint32_t currentInFlightFrameIndex);
+    void updateSpotLightUniformBuffer(const std::vector<quartz::scene::SpotLight>& spotLights, const uint32_t currentInFlightFrameIndex);
+    void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment, const uint32_t currentInFlightFrameIndex);
 
 private: // static functions
     static vk::UniqueShaderModule createVulkanShaderModulePtr(
@@ -86,11 +85,6 @@ private: // static functions
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
-    static vk::UniqueRenderPass createVulkanRenderPassPtr(
-        const vk::UniqueDevice& p_logicalDevice,
-        const vk::SurfaceFormatKHR& surfaceFormat,
-        const vk::Format& depthFormat
-    );
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
@@ -110,8 +104,6 @@ private: // static functions
     );
 
 private: // member variables
-    const uint32_t m_maxNumFramesInFlight;
-    uint32_t m_currentInFlightFrameIndex;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
     std::vector<vk::VertexInputAttributeDescription> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
@@ -126,8 +118,6 @@ private: // member variables
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
     vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
     std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;
-
-    vk::UniqueRenderPass mp_vulkanRenderPass;
 
     vk::UniquePipelineLayout mp_vulkanPipelineLayout;
     vk::UniquePipeline mp_vulkanGraphicsPipeline;

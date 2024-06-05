@@ -8,6 +8,7 @@
 #include "quartz/rendering/instance/Instance.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/render_pass/RenderPass.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -50,9 +51,12 @@ private: // member functions
     void recreateSwapchain();
 
 private: // member variables
+    const uint32_t m_maxNumFramesInFlight;
+    uint32_t m_currentInFlightFrameIndex;
     quartz::rendering::Instance m_renderingInstance;
     quartz::rendering::Device m_renderingDevice;
     quartz::rendering::Window m_renderingWindow;
+    quartz::rendering::RenderPass m_renderingRenderPass;
     quartz::rendering::Pipeline m_renderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };

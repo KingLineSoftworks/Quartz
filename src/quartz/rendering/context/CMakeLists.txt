@@ -31,6 +31,7 @@ target_link_libraries(
         QUARTZ_RENDERING_Instance
         QUARTZ_RENDERING_Model
         QUARTZ_RENDERING_Pipeline
+        QUARTZ_RENDERING_RenderPass
         QUARTZ_RENDERING_Swapchain
         QUARTZ_RENDERING_Texture
         QUARTZ_RENDERING_Window

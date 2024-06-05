@@ -197,7 +197,8 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
 quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
-    const quartz::rendering::Pipeline& renderingPipeline
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
 ):
     m_shouldRecreate(false),
     mp_vulkanSwapchain(
@@ -236,7 +237,7 @@ quartz::rendering::Swapchain::Swapchain(
             renderingWindow.getVulkanExtent(),
             m_vulkanImageViewPtrs,
             m_depthBuffer.getVulkanImageViewPtr(),
-            renderingPipeline.getVulkanRenderPassPtr()
+            renderingRenderPass.getVulkanRenderPassPtr()
         )
     ),
     m_screenClearColor(0.0, 0.0, 0.0),
@@ -251,25 +252,25 @@ quartz::rendering::Swapchain::Swapchain(
         quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDrawingCommandPool,
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     ),
     m_vulkanImageAvailableSemaphorePtrs(
         quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     ),
     m_vulkanRenderFinishedSemaphorePtrs(
         quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     ),
     m_vulkanInFlightFencePtrs(
         quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     )
 {
@@ -312,7 +313,8 @@ void
 quartz::rendering::Swapchain::recreate(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
-    const quartz::rendering::Pipeline& renderingPipeline
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -346,7 +348,7 @@ quartz::rendering::Swapchain::recreate(
         renderingWindow.getVulkanExtent(),
         m_vulkanImageViewPtrs,
         m_depthBuffer.getVulkanImageViewPtr(),
-        renderingPipeline.getVulkanRenderPassPtr()
+        renderingRenderPass.getVulkanRenderPassPtr()
     );
     mp_vulkanDrawingCommandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
         renderingDevice.getGraphicsQueueFamilyIndex(),
@@ -356,19 +358,19 @@ quartz::rendering::Swapchain::recreate(
     m_vulkanDrawingCommandBufferPtrs = quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         mp_vulkanDrawingCommandPool,
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
     m_vulkanImageAvailableSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
     m_vulkanRenderFinishedSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
     m_vulkanInFlightFencePtrs = quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
 
     LOG_TRACEthis("Clearing the \"should recreate\" flag");
@@ -431,6 +433,7 @@ quartz::rendering::Swapchain::resetInFlightFence(
 void
 quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::RenderPass& renderingRenderPass,
     const quartz::rendering::Pipeline& renderingPipeline,
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
@@ -480,7 +483,7 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     );
 
     vk::RenderPassBeginInfo renderPassBeginInfo(
-        *renderingPipeline.getVulkanRenderPassPtr(),
+        *renderingRenderPass.getVulkanRenderPassPtr(),
         *(m_vulkanFramebufferPtrs[availableSwapchainImageIndex]),
         renderPassRenderArea,
         clearValues
