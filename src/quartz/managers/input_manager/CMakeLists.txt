@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_MANAGERS_InputManager
         SHARED
+        InputManager.hpp
         InputManager.cpp
 )
 

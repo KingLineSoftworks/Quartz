@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_SCENE_Scene
         SHARED
+        Scene.hpp
         Scene.cpp
 )
 

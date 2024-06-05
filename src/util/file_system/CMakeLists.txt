@@ -4,6 +4,7 @@
 add_library(
     UTIL_FileSystem
     SHARED
+    FileSystem.hpp
     FileSystem.cpp
 )
 

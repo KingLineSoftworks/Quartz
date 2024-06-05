@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Swapchain
         SHARED
+        Swapchain.hpp
         Swapchain.cpp
 )
 

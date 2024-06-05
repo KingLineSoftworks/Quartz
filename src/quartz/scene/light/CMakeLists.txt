@@ -4,10 +4,18 @@
 add_library(
         QUARTZ_SCENE_Light
         SHARED
+        AmbientLight.hpp
         AmbientLight.cpp
+
+        DirectionalLight.hpp
         DirectionalLight.cpp
+
+        PointLight.hpp
         PointLight.cpp
+
+        SpotLight.hpp
         SpotLight.cpp
+
 )
 
 target_compile_options(

@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Material
         SHARED
+        Material.hpp
         Material.cpp
 )
 

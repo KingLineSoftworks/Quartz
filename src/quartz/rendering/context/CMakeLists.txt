@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Context
         SHARED
+        Context.hpp
         Context.cpp
 )
 

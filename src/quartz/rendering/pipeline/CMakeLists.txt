@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Pipeline
         SHARED
+        Pipeline.hpp
         Pipeline.cpp
 )
 
