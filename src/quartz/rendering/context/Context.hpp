@@ -57,6 +57,6 @@ private: // member variables
     quartz::rendering::Device m_renderingDevice;
     quartz::rendering::Window m_renderingWindow;
     quartz::rendering::RenderPass m_renderingRenderPass;
-    quartz::rendering::Pipeline m_renderingPipeline;
+    quartz::rendering::Pipeline m_doodadRenderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };

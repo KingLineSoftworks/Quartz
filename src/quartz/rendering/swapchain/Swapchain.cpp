@@ -434,7 +434,6 @@ void
 quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::RenderPass& renderingRenderPass,
-    const quartz::rendering::Pipeline& renderingPipeline,
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
 ) {
@@ -493,7 +492,14 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
         renderPassBeginInfo,
         vk::SubpassContents::eInline
     );
+}
 
+void
+quartz::rendering::Swapchain::bindPipelineToDrawingCommandBuffer(
+    const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::Pipeline& renderingPipeline,
+    const uint32_t inFlightFrameIndex
+) {
     // ----- draw (bind graphics pipeline, set up viewport & scissor) ----- //
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindPipeline(
@@ -527,7 +533,7 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
 void
 quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Pipeline& renderingPipeline,
+    const quartz::rendering::Pipeline& doodadRenderingPipeline,
     const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
@@ -554,7 +560,7 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 
         glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-            *renderingPipeline.getVulkanPipelineLayoutPtr(),
+            *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
             vk::ShaderStageFlagBits::eVertex,
             0,
             sizeof(glm::mat4),
@@ -570,17 +576,17 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
                 vk::PipelineBindPoint::eGraphics,
-                *renderingPipeline.getVulkanPipelineLayoutPtr(),
+                *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
                 0,
                 1,
-                &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+                &(doodadRenderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
                 1,
                 &materialByteOffset
             );
 
             /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-                *renderingPipeline.getVulkanPipelineLayoutPtr(),
+                *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
                 vk::ShaderStageFlagBits::eFragment,
                 sizeof(glm::mat4),
                 sizeof(uint32_t),

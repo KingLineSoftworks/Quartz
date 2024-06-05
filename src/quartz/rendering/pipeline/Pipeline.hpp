@@ -31,6 +31,8 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::RenderPass& renderingRenderPass,
+        const std::string& compiledVertexShaderFilepath,
+        const std::string& compiledFragmentShaderFilepath,
         const uint32_t maxNumFramesInFlight
     );
     ~Pipeline();
@@ -49,6 +51,8 @@ public: // member functions
 
     USE_LOGGER(PIPELINE);
 
+    const std::vector<vk::Viewport>& getVulkanViewports() const { return m_vulkanViewports; }
+    const std::vector<vk::Rect2D>& getVulkanScissorRectangles() const { return m_vulkanScissorRectangles; }
     const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }

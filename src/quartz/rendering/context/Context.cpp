@@ -1,5 +1,7 @@
 #include <string>
 
+#include "util/file_system/FileSystem.hpp"
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Context.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
@@ -34,10 +36,12 @@ quartz::rendering::Context::Context(
         m_renderingDevice,
         m_renderingWindow
     ),
-    m_renderingPipeline(
+    m_doodadRenderingPipeline(
         m_renderingDevice,
         m_renderingWindow,
         m_renderingRenderPass,
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.vert"),
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.frag"),
         m_maxNumFramesInFlight
     ),
     m_renderingSwapchain(
@@ -58,7 +62,7 @@ void
 quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     
-    m_renderingPipeline.allocateVulkanDescriptorSets(
+    m_doodadRenderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
         quartz::rendering::Texture::getMasterTextureList(),
         m_maxNumFramesInFlight
@@ -86,12 +90,18 @@ quartz::rendering::Context::draw(
         return;
     }
 
-    m_renderingPipeline.updateCameraUniformBuffer(scene.getCamera(), m_currentInFlightFrameIndex);
-    m_renderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight(), m_currentInFlightFrameIndex);
-    m_renderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight(), m_currentInFlightFrameIndex);
-    m_renderingPipeline.updatePointLightUniformBuffer(scene.getPointLights(), m_currentInFlightFrameIndex);
-    m_renderingPipeline.updateSpotLightUniformBuffer(scene.getSpotLights(), m_currentInFlightFrameIndex);
-    m_renderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment, m_currentInFlightFrameIndex);
+    // update skybox pipeline //
+
+    // update doodad drawing pipeline //
+
+    m_doodadRenderingPipeline.updateCameraUniformBuffer(scene.getCamera(), m_currentInFlightFrameIndex);
+    m_doodadRenderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight(), m_currentInFlightFrameIndex);
+    m_doodadRenderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight(), m_currentInFlightFrameIndex);
+    m_doodadRenderingPipeline.updatePointLightUniformBuffer(scene.getPointLights(), m_currentInFlightFrameIndex);
+    m_doodadRenderingPipeline.updateSpotLightUniformBuffer(scene.getSpotLights(), m_currentInFlightFrameIndex);
+    m_doodadRenderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment, m_currentInFlightFrameIndex);
+
+    // reset //
 
     m_renderingSwapchain.resetInFlightFence(
         m_renderingDevice,
@@ -101,19 +111,30 @@ quartz::rendering::Context::draw(
     m_renderingSwapchain.resetAndBeginDrawingCommandBuffer(
         m_renderingWindow,
         m_renderingRenderPass,
-        m_renderingPipeline,
         m_currentInFlightFrameIndex,
         availableSwapchainImageIndex
+    );
+
+    // skybox pipeline //
+
+    // doodad drawing pipeline //
+
+    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
+        m_renderingWindow,
+        m_doodadRenderingPipeline,
+        m_currentInFlightFrameIndex
     );
 
     for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
         m_renderingSwapchain.recordDoodadToDrawingCommandBuffer(
             m_renderingDevice,
-            m_renderingPipeline,
+            m_doodadRenderingPipeline,
             doodad,
             m_currentInFlightFrameIndex
         );
     }
+
+    // submit //
 
     m_renderingSwapchain.endAndSubmitDrawingCommandBuffer(
         m_renderingDevice,
@@ -140,7 +161,7 @@ quartz::rendering::Context::recreateSwapchain() {
     m_renderingDevice.waitIdle();
 
     m_renderingSwapchain.reset();
-    m_renderingPipeline.reset();
+    m_doodadRenderingPipeline.reset();
     m_renderingRenderPass.reset();
     m_renderingWindow.reset();
 
@@ -152,7 +173,7 @@ quartz::rendering::Context::recreateSwapchain() {
         m_renderingDevice,
         m_renderingWindow
     );
-    m_renderingPipeline.recreate(
+    m_doodadRenderingPipeline.recreate(
         m_renderingDevice,
         m_renderingRenderPass
     );

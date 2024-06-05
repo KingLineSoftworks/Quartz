@@ -575,20 +575,24 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
         // ---+++ the texture array +++--- //
 
+        /** @todo 2024/06/04 Populate the textures when we load the scene instead of when we create the pipeline. This is probably going
+         *    to be more difficult than we think it ought to be
+         */
+
         LOG_TRACE(PIPELINE, "Allocating space for {} textures", texturePtrs.size());
-        std::vector<vk::DescriptorImageInfo> baseColorTextureImageInfos;
+        std::vector<vk::DescriptorImageInfo> textureImageInfos;
         for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
-            baseColorTextureImageInfos.emplace_back(
+            textureImageInfos.emplace_back(
                 nullptr,
                 *(texturePtrs[j]->getVulkanImageViewPtr()),
                 vk::ImageLayout::eShaderReadOnlyOptimal
             );
         }
 
-        uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_TEXTURES - baseColorTextureImageInfos.size();
+        uint32_t remainingTextureSpaces = QUARTZ_MAX_NUMBER_TEXTURES - textureImageInfos.size();
         LOG_TRACE(PIPELINE, "Filling remaining {} textures with texture 0", remainingTextureSpaces);
         for (uint32_t j = 0; j < remainingTextureSpaces; ++j) {
-            baseColorTextureImageInfos.emplace_back(
+            textureImageInfos.emplace_back(
                 nullptr,
                 *(texturePtrs[0]->getVulkanImageViewPtr()),
                 vk::ImageLayout::eShaderReadOnlyOptimal
@@ -601,7 +605,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             0,
             QUARTZ_MAX_NUMBER_TEXTURES,
             vk::DescriptorType::eSampledImage,
-            baseColorTextureImageInfos.data(),
+            textureImageInfos.data(),
             {},
             {}
         );
@@ -876,6 +880,8 @@ quartz::rendering::Pipeline::Pipeline(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::RenderPass& renderingRenderPass,
+    const std::string& compiledVertexShaderFilepath,
+    const std::string& compiledFragmentShaderFilepath,
     const uint32_t maxNumFramesInFlight
 ) :
     m_vulkanVertexInputBindingDescriptions(
@@ -924,17 +930,13 @@ quartz::rendering::Pipeline::Pipeline(
     mp_vulkanVertexShaderModule(
         quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            util::FileSystem::getCompiledShaderAbsoluteFilepath(
-                "shader.vert"
-            )
+            compiledVertexShaderFilepath
         )
     ),
     mp_vulkanFragmentShaderModule(
         quartz::rendering::Pipeline::createVulkanShaderModulePtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            util::FileSystem::getCompiledShaderAbsoluteFilepath(
-                "shader.frag"
-            )
+            compiledFragmentShaderFilepath
         )
     ),
     m_uniformBuffers(
