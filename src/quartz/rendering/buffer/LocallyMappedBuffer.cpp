@@ -87,3 +87,23 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
 quartz::rendering::LocallyMappedBuffer::~LocallyMappedBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
+
+quartz::rendering::LocallyMappedBuffer&
+quartz::rendering::LocallyMappedBuffer::operator=(
+    quartz::rendering::LocallyMappedBuffer&& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    m_sizeBytes = other.m_sizeBytes;
+    m_usageFlags = other.m_usageFlags;
+    m_requiredMemoryProperties = other.m_requiredMemoryProperties;
+    mp_vulkanLogicalBuffer = std::move(other.mp_vulkanLogicalBuffer);
+    mp_vulkanPhysicalDeviceMemory = std::move(other.mp_vulkanPhysicalDeviceMemory);
+    mp_mappedLocalMemory = std::move(other.mp_mappedLocalMemory);
+
+    return *this;
+}

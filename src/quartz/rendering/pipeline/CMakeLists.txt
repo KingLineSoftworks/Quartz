@@ -6,6 +6,9 @@ add_library(
         SHARED
         Pipeline.hpp
         Pipeline.cpp
+
+        UniformBufferInfo.hpp
+        UniformBufferInfo.cpp
 )
 
 target_compile_options(

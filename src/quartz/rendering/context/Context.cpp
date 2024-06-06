@@ -4,7 +4,131 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Context.hpp"
+#include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
+#include "quartz/scene/camera/Camera.hpp"
+#include "quartz/scene/light/AmbientLight.hpp"
+#include "quartz/scene/light/DirectionalLight.hpp"
+#include "quartz/scene/light/PointLight.hpp"
+#include "quartz/scene/light/SpotLight.hpp"
+
+quartz::rendering::Pipeline
+quartz::rendering::Context::createDoodadRenderingPipeline(
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
+) {
+    std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos;
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(quartz::scene::Camera::UniformBufferObject),
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        0,
+        1,
+        sizeof(quartz::scene::Camera::UniformBufferObject),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+    );
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(quartz::scene::AmbientLight),
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        1,
+        1,
+        sizeof(quartz::scene::AmbientLight),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(quartz::scene::DirectionalLight),
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        2,
+        1,
+        sizeof(quartz::scene::DirectionalLight),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(uint32_t),
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        3,
+        1,
+        sizeof(uint32_t),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        4,
+        1,
+        sizeof(quartz::scene::PointLight),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(uint32_t),
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        5,
+        1,
+        sizeof(uint32_t),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        6,
+        1,
+        sizeof(quartz::scene::SpotLight),
+        vk::DescriptorType::eUniformBuffer,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(renderingDevice, sizeof(quartz::rendering::Material::UniformBufferObject));
+    uniformBufferInfos.emplace_back(
+        renderingDevice,
+        materialByteStride * QUARTZ_MAX_NUMBER_MATERIALS,
+        vk::BufferUsageFlagBits::eUniformBuffer,
+        vk::MemoryPropertyFlagBits::eHostVisible,
+        9,
+        1,
+        materialByteStride,
+        vk::DescriptorType::eUniformBufferDynamic,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    return {
+        renderingDevice,
+        renderingWindow,
+        renderingRenderPass,
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.vert"),
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.frag"),
+        maxNumFramesInFlight,
+        std::move(uniformBufferInfos)
+    };
+}
 
 quartz::rendering::Context::Context(
     const std::string& applicationName,
@@ -37,12 +161,12 @@ quartz::rendering::Context::Context(
         m_renderingWindow
     ),
     m_doodadRenderingPipeline(
-        m_renderingDevice,
-        m_renderingWindow,
-        m_renderingRenderPass,
-        util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.vert"),
-        util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.frag"),
-        m_maxNumFramesInFlight
+        quartz::rendering::Context::createDoodadRenderingPipeline(
+            m_renderingDevice,
+            m_renderingWindow,
+            m_renderingRenderPass,
+            m_maxNumFramesInFlight
+        )
     ),
     m_renderingSwapchain(
         m_renderingDevice,

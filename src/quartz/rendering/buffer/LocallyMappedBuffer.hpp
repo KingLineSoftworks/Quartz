@@ -23,6 +23,8 @@ public: // member functions
     LocallyMappedBuffer(LocallyMappedBuffer&& other);
     ~LocallyMappedBuffer();
 
+    LocallyMappedBuffer& operator=(LocallyMappedBuffer&& other);
+
     USE_LOGGER(BUFFER);
 
     const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }

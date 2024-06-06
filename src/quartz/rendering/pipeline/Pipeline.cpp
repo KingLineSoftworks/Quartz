@@ -626,7 +626,6 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             0,
             materialByteStride
         );
-
         vk::WriteDescriptorSet materialArrayUBODescriptorWriteSet(
             descriptorSets[i],
             9,
@@ -882,7 +881,8 @@ quartz::rendering::Pipeline::Pipeline(
     const quartz::rendering::RenderPass& renderingRenderPass,
     const std::string& compiledVertexShaderFilepath,
     const std::string& compiledFragmentShaderFilepath,
-    const uint32_t maxNumFramesInFlight
+    const uint32_t maxNumFramesInFlight,
+    std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos
 ) :
     m_vulkanVertexInputBindingDescriptions(
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()
@@ -939,6 +939,7 @@ quartz::rendering::Pipeline::Pipeline(
             compiledFragmentShaderFilepath
         )
     ),
+    m_uniformBufferInfos(std::move(uniformBufferInfos)),
     m_uniformBuffers(
         quartz::rendering::Pipeline::createUniformBuffers(
             renderingDevice,

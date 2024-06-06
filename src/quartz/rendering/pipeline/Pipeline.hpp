@@ -9,6 +9,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
 #include "quartz/rendering/render_pass/RenderPass.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -27,13 +28,22 @@ namespace rendering {
 
 class quartz::rendering::Pipeline {
 public: // member functions
+    /**
+     * @brief This takes an r value to the vector of uniform buffer infos so we don't have to be copying the locally mapped buffers around,
+     *    but instead just move them around
+     * @todo 2024/06/06 Make the UniformBufferInfo class just be a POD and not contain the actually locally mapped buffer.
+     *    We could have the pipeline manage the locally mapped buffers directly?
+     *    We could have a custom UniformBuffer class that contains the locally mapped buffers and is constructed within the pipeline
+     *       when we give the UniformBufferInfo POD?
+     */
     Pipeline(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::RenderPass& renderingRenderPass,
         const std::string& compiledVertexShaderFilepath,
         const std::string& compiledFragmentShaderFilepath,
-        const uint32_t maxNumFramesInFlight
+        const uint32_t maxNumFramesInFlight,
+        std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos
     );
     ~Pipeline();
 
@@ -117,6 +127,8 @@ private: // member variables
 
     vk::UniqueShaderModule mp_vulkanVertexShaderModule;
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
+
+    std::vector<quartz::rendering::UniformBufferInfo> m_uniformBufferInfos;
 
     std::vector<quartz::rendering::LocallyMappedBuffer> m_uniformBuffers;
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;

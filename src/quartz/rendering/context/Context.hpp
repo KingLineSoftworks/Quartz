@@ -47,6 +47,14 @@ public: // member functions
     void draw(const quartz::scene::Scene& scene);
     void finish();
 
+private: // static functions
+    static quartz::rendering::Pipeline createDoodadRenderingPipeline(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
+    );
+
 private: // member functions
     void recreateSwapchain();
 
