@@ -7,7 +7,7 @@ quartz::rendering::RenderPass::createVulkanRenderPassPtr(
     const vk::SurfaceFormatKHR& surfaceFormat,
     const vk::Format& depthFormat
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(RENDERPASS, "");
+    LOG_FUNCTION_CALL_TRACE(RENDERPASS, "");
 
     vk::AttachmentDescription colorAttachment(
         {},

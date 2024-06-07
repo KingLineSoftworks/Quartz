@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
@@ -15,6 +16,10 @@ public: // member functions
     VulkanUtil() = delete;
 
 public: // static functions
+
+    // ----- stringifying things ----- //
+
+    static std::string toString(const vk::DescriptorType descriptorType);
 
     // ----- image and image view things ----- //
 

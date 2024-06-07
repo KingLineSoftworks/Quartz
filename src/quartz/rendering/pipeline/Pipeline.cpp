@@ -12,6 +12,7 @@
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/rendering/model/Vertex.hpp"
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
 constexpr uint32_t NUM_UNIQUE_UNIFORM_BUFFERS = 8;
 
@@ -20,7 +21,7 @@ quartz::rendering::Pipeline::createVulkanShaderModulePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::string& filepath
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{}", filepath);
+    LOG_FUNCTION_CALL_TRACE(PIPELINE, "{}", filepath);
 
     const std::vector<char> shaderBytes = util::FileSystem::readBytesFromFile(filepath);
 
@@ -182,9 +183,12 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
 std::vector<vk::DescriptorSet>
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
-    const uint32_t minUniformBufferOffsetAlignment,
+    UNUSED const uint32_t minUniformBufferOffsetAlignment,
     const uint32_t maxNumFramesInFlight,
-    const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
+    UNUSED const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    UNUSED const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    UNUSED const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+    const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool,
     const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
@@ -213,6 +217,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     LOG_TRACE(PIPELINE, "Successfully allocated {} vk::DescriptorSet(s)", descriptorSets.size());
 
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
+        LOG_TRACE(PIPELINE, "Allocating vk::DescriptorSet {}", i);
         LOG_SCOPE_CHANGE_TRACE(PIPELINE);
 
         if (!descriptorSets[i]) {
@@ -226,145 +231,256 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
          *   index they are for each frame
          */
 
+        std::vector<vk::WriteDescriptorSet> writeDescriptorSets;
+
+        LOG_TRACE(PIPELINE, "Iterating through {} uniform buffer infos", uniformBufferInfos.size());
+#define temp_version 1
+#if temp_version == 1
+        for (uint32_t j = 0; j < uniformBufferInfos.size(); ++j) {
+            const uint32_t locallyMappedBufferIndex = i * uniformBufferInfos.size() + j;
+            LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+            LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+            LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+            LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+            LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+            LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", locallyMappedBufferIndex);
+
+            vk::DescriptorBufferInfo descriptorBufferInfo(
+                *(locallyMappedBuffers[locallyMappedBufferIndex].getVulkanLogicalBufferPtr()),
+                0,
+                uniformBufferInfos[j].getObjectStrideBytes()
+            );
+            vk::WriteDescriptorSet writeDescriptorSet(
+                descriptorSets[i],
+                uniformBufferInfos[j].getBindingLocation(),
+                0,
+                uniformBufferInfos[j].getDescriptorCount(),
+                uniformBufferInfos[j].getVulkanDescriptorType(),
+                {},
+                &descriptorBufferInfo,
+                {}
+            );
+            writeDescriptorSets.push_back(writeDescriptorSet);
+        }
+#else
+        uint32_t j = 0;
+
         // ---+++ the camera +++--- //
 
-        const uint32_t cameraIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
-        LOG_TRACE(PIPELINE, "Allocating space for camera UBO using buffer at index {}", cameraIndex);
+        const uint32_t cameraIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", cameraIndex);
         vk::DescriptorBufferInfo cameraUBOBufferInfo(
-            *(uniformBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[cameraIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::scene::Camera::UniformBufferObject)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet cameraUBODescriptorWriteSet(
             descriptorSets[i],
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &cameraUBOBufferInfo,
             {}
         );
+        writeDescriptorSets.push_back(cameraUBODescriptorWriteSet);
+        j++;
 
         // ---+++ the ambient light +++--- //
 
-        const uint32_t ambientLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
-        LOG_TRACE(PIPELINE, "Allocating space for ambient light using buffer at index {}", ambientLightIndex);
+        const uint32_t ambientLightIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", ambientLightIndex);
         vk::DescriptorBufferInfo ambientLightBufferInfo(
-            *(uniformBuffers[ambientLightIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[ambientLightIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::scene::AmbientLight)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet ambientLightDescriptorWriteSet(
             descriptorSets[i],
-            1,
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &ambientLightBufferInfo,
             {}
         );
+        writeDescriptorSets.push_back(ambientLightDescriptorWriteSet);
+        j++;
 
         // ---+++ the directional light +++--- //
 
-        const uint32_t directionalLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
-        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        const uint32_t directionalLightIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", directionalLightIndex);
         vk::DescriptorBufferInfo directionalLightInfo(
-            *(uniformBuffers[directionalLightIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[directionalLightIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::scene::DirectionalLight)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet directionalLightWriteDescriptorSet(
             descriptorSets[i],
-            2,
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &directionalLightInfo,
             {}
         );
+        writeDescriptorSets.push_back(directionalLightWriteDescriptorSet);
+        j++;
 
         // ---+++ the number of point lights +++--- //
 
-        const uint32_t pointLightCountIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
-        LOG_TRACE(PIPELINE, "Allocating space for the uint32_t number of point lights");
+        const uint32_t pointLightCountIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", pointLightCountIndex);
         vk::DescriptorBufferInfo pointLightCountInfo(
-            *(uniformBuffers[pointLightCountIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[pointLightCountIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(uint32_t)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet pointLightCountWriteDescriptorSet(
             descriptorSets[i],
-            3,
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &pointLightCountInfo,
             {}
         );
+        writeDescriptorSets.push_back(pointLightCountWriteDescriptorSet);
+        j++;
 
         // ---+++ the point lights +++--- //
 
-        const uint32_t pointLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
-        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        const uint32_t pointLightIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", pointLightIndex);
         vk::DescriptorBufferInfo pointLightInfo(
-            *(uniformBuffers[pointLightIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[pointLightIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::scene::PointLight)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet pointLightWriteDescriptorSet(
             descriptorSets[i],
-            4,
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &pointLightInfo,
             {}
         );
+        writeDescriptorSets.push_back(pointLightWriteDescriptorSet);
+        j++;
 
         // ---+++ the number of spot lights +++--- //
 
-        const uint32_t spotLightCountIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
-        LOG_TRACE(PIPELINE, "Allocating space for the uint32_t number of spot lights");
+        const uint32_t spotLightCountIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", spotLightCountIndex);
         vk::DescriptorBufferInfo spotLightCountInfo(
-            *(uniformBuffers[spotLightCountIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[spotLightCountIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(uint32_t)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet spotLightCountWriteDescriptorSet(
             descriptorSets[i],
-            5,
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &spotLightCountInfo,
             {}
         );
+        writeDescriptorSets.push_back(spotLightCountWriteDescriptorSet);
+        j++;
 
         // ---+++ the spot lights +++--- //
 
-        const uint32_t spotLightIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
-        LOG_TRACE(PIPELINE, "Allocating space for directional light using buffer at index {}", directionalLightIndex);
+        const uint32_t spotLightIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", spotLightIndex);
         vk::DescriptorBufferInfo spotLightInfo(
-            *(uniformBuffers[spotLightIndex].getVulkanLogicalBufferPtr()),
+            *(locallyMappedBuffers[spotLightIndex].getVulkanLogicalBufferPtr()),
             0,
-            sizeof(quartz::scene::SpotLight)
+            uniformBufferInfos[j].getObjectStrideBytes()
         );
         vk::WriteDescriptorSet spotLightWriteDescriptorSet(
             descriptorSets[i],
-            6,
+            uniformBufferInfos[j].getBindingLocation(),
             0,
-            1,
-            vk::DescriptorType::eUniformBuffer,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
             {},
             &spotLightInfo,
             {}
         );
+        writeDescriptorSets.push_back(spotLightWriteDescriptorSet);
+        j++;
+
+        // ---+++ the dynamic material UBO +++--- //
+
+        const uint32_t materialArrayIndex = i * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    using locally mapped buffer at index {}", materialArrayIndex);
+        vk::DescriptorBufferInfo materialArrayUBOBufferInfo(
+            *(locallyMappedBuffers[materialArrayIndex].getVulkanLogicalBufferPtr()),
+            0,
+            uniformBufferInfos[j].getObjectStrideBytes()
+        );
+        vk::WriteDescriptorSet materialArrayUBODescriptorWriteSet(
+            descriptorSets[i],
+            uniformBufferInfos[j].getBindingLocation(),
+            0,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
+            {},
+            &materialArrayUBOBufferInfo,
+            {}
+        );
+        writeDescriptorSets.push_back(materialArrayUBODescriptorWriteSet);
+        j++;
+#endif
 
         // ---+++ the texture sampler +++--- //
 
@@ -384,6 +500,8 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {},
             {}
         );
+
+        writeDescriptorSets.push_back(rgbaTextureSamplerWriteDescriptorSet);
 
         // ---+++ the texture array +++--- //
 
@@ -422,33 +540,9 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             {}
         );
 
-        // ---+++ the dynamic material UBO +++--- //
+        writeDescriptorSets.push_back(textureArrayDescriptorWriteSet);
 
-        const uint32_t materialArrayIndex = i * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
-        LOG_TRACE(PIPELINE, "Allocating space for materials array dynamic UBO at index {}", materialArrayIndex);
-
-        LOG_TRACE(PIPELINE, "Using un-adjusted material stride of 0x{:X} bytes", sizeof(quartz::rendering::Material::UniformBufferObject));
-        const uint32_t materialByteStride = minUniformBufferOffsetAlignment > 0 ?
-            (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-            sizeof(quartz::rendering::Material::UniformBufferObject);
-        LOG_TRACE(PIPELINE, "Using    adjusted material stride of 0x{:X} bytes", materialByteStride);
-
-        vk::DescriptorBufferInfo materialArrayUBOBufferInfo(
-            *(uniformBuffers[materialArrayIndex].getVulkanLogicalBufferPtr()),
-            0,
-            materialByteStride
-        );
-        vk::WriteDescriptorSet materialArrayUBODescriptorWriteSet(
-            descriptorSets[i],
-            9,
-            0,
-            1,
-            vk::DescriptorType::eUniformBufferDynamic,
-            {},
-            &materialArrayUBOBufferInfo,
-            {}
-        );
-
+#if false
         // ---+++ all the write descriptor sets used to +++--- //
 
         LOG_TRACE(PIPELINE, "Consolidating write descriptor sets");
@@ -460,10 +554,11 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
             pointLightWriteDescriptorSet,
             spotLightCountWriteDescriptorSet,
             spotLightWriteDescriptorSet,
+            materialArrayUBODescriptorWriteSet,
             rgbaTextureSamplerWriteDescriptorSet,
-            textureArrayDescriptorWriteSet,
-            materialArrayUBODescriptorWriteSet
+            textureArrayDescriptorWriteSet
         };
+#endif
 
         LOG_TRACE(PIPELINE, "Updating descriptor sets with {} descriptor writes", writeDescriptorSets.size());
 
@@ -483,7 +578,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
+    LOG_FUNCTION_CALL_TRACE(PIPELINE, "");
 
     vk::PushConstantRange vertexPushConstantRange(
         vk::ShaderStageFlagBits::eVertex,
@@ -858,6 +953,9 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         renderingDevice.getVulkanLogicalDevicePtr(),
         renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment,
         maxNumFramesInFlight,
+        m_uniformBufferInfos,
+        m_uniformSamplerInfo,
+        m_uniformTextureArrayInfo,
         m_locallyMappedUniformBuffers,
         mp_vulkanDescriptorSetLayout,
         m_vulkanDescriptorPoolPtr,
