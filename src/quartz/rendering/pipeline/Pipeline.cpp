@@ -116,14 +116,9 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
 
     LOG_TRACE(PIPELINE, "Using {} layout bindings", layoutBindings.size());
 
-    vk::DescriptorSetLayoutCreateInfo layoutCreateInfo(
-        {},
-        layoutBindings
-    );
+    vk::DescriptorSetLayoutCreateInfo layoutCreateInfo({}, layoutBindings);
 
-    vk::UniqueDescriptorSetLayout p_descriptorSetLayout = p_logicalDevice->createDescriptorSetLayoutUnique(
-        layoutCreateInfo
-    );
+    vk::UniqueDescriptorSetLayout p_descriptorSetLayout = p_logicalDevice->createDescriptorSetLayoutUnique(layoutCreateInfo);
 
     if (!p_descriptorSetLayout) {
         LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::DescriptorSetLayout");
@@ -135,96 +130,43 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
 vk::UniqueDescriptorPool
 quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     const vk::UniqueDevice& p_logicalDevice,
+    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
     const uint32_t numDescriptorSets /** should be the maximum number of frames in flight */
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} descriptor sets", numDescriptorSets);
 
-    vk::DescriptorPoolSize cameraUniformBufferObjectPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing camera ubo of type uniform buffer with count {}", cameraUniformBufferObjectPoolSize.descriptorCount);
+    std::vector<vk::DescriptorPoolSize> descriptorPoolSizes;
 
-    vk::DescriptorPoolSize ambientLightPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing ambient light of type uniform buffer with count {}", ambientLightPoolSize.descriptorCount);
+    for (const quartz::rendering::UniformBufferInfo& uniformBufferInfo : uniformBufferInfos) {
+        vk::DescriptorPoolSize uniformBufferPoolSize(
+            uniformBufferInfo.getVulkanDescriptorType(),
+            numDescriptorSets * uniformBufferInfo.getDescriptorCount()
+        );
+        descriptorPoolSizes.push_back(uniformBufferPoolSize);
+    }
 
-    vk::DescriptorPoolSize directionalLightPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
+    vk::DescriptorPoolSize samplerPoolSize(
+        uniformSamplerInfo.getVulkanDescriptorType(),
+        numDescriptorSets * uniformSamplerInfo.getDescriptorCount()
     );
-    LOG_TRACE(PIPELINE, "Allowing directional light of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
-
-    vk::DescriptorPoolSize pointLightCountPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing point light count of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
-
-    vk::DescriptorPoolSize pointLightPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing point light array of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
-
-    vk::DescriptorPoolSize spotLightCountPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing spot light count of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
-
-    vk::DescriptorPoolSize spotLightPoolSize(
-        vk::DescriptorType::eUniformBuffer,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing spot light array of type uniform buffer with count {}", directionalLightPoolSize.descriptorCount);
-
-    vk::DescriptorPoolSize rgbaTextureSamplerPoolSize(
-        vk::DescriptorType::eSampler,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing texture sampler of type combined image sampler with count {}", rgbaTextureSamplerPoolSize.descriptorCount);
+    descriptorPoolSizes.push_back(samplerPoolSize);
 
     vk::DescriptorPoolSize textureArrayPoolSize(
-        vk::DescriptorType::eSampledImage,
-        numDescriptorSets * QUARTZ_MAX_NUMBER_TEXTURES
+        uniformTextureArrayInfo.getVulkanDescriptorType(),
+        numDescriptorSets * uniformTextureArrayInfo.getDescriptorCount()
     );
-    LOG_TRACE(PIPELINE, "Allowing textures of type sampled image with count {} (num descriptor sets {} * max number textures {}", textureArrayPoolSize.descriptorCount, numDescriptorSets, QUARTZ_MAX_NUMBER_TEXTURES);
-
-    vk::DescriptorPoolSize materialArrayPoolSize(
-        vk::DescriptorType::eUniformBufferDynamic,
-        numDescriptorSets
-    );
-    LOG_TRACE(PIPELINE, "Allowing materials of type uniform buffer with count {}", materialArrayPoolSize.descriptorCount);
-
-    std::vector<vk::DescriptorPoolSize> descriptorPoolSizes = {
-        cameraUniformBufferObjectPoolSize,
-        ambientLightPoolSize,
-        directionalLightPoolSize,
-        pointLightCountPoolSize,
-        pointLightPoolSize,
-        spotLightCountPoolSize,
-        spotLightPoolSize,
-        rgbaTextureSamplerPoolSize,
-        textureArrayPoolSize,
-        materialArrayPoolSize
-    };
+    descriptorPoolSizes.push_back(textureArrayPoolSize);
 
     LOG_TRACE(PIPELINE, "Using {} pool sizes", descriptorPoolSizes.size());
     LOG_TRACE(PIPELINE, "Using maximum of {} descriptor sets", numDescriptorSets);
 
     vk::DescriptorPoolCreateInfo poolCreateInfo(
         {},
-        /**
-         * @brief how many descriptor sets in total can be allocated from this pool
-         */
+        /** @brief how many descriptor sets in total can be allocated from this pool */
         numDescriptorSets,
-        /**
-         * @brief the descriptors that will be allocated (not in a single descriptor set,
-         *   but in total) from this pool
-         */
+        /** @brief the descriptors that will be allocated (not in a single descriptor set, but in total) from this pool */
         descriptorPoolSizes
     );
 
@@ -832,6 +774,9 @@ quartz::rendering::Pipeline::Pipeline(
     m_vulkanDescriptorPoolPtr(
         quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
+            m_uniformBufferInfos,
+            m_uniformSamplerInfo,
+            m_uniformTextureArrayInfo,
             maxNumFramesInFlight
         )
     ),

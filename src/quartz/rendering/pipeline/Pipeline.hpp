@@ -96,6 +96,9 @@ private: // static functions
     );
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
         const uint32_t numDescriptorSets
     );
     /**
