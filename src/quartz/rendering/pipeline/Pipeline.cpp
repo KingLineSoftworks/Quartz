@@ -55,12 +55,12 @@ quartz::rendering::Pipeline::createLocallyMappedUniformBuffers(
     std::vector<quartz::rendering::LocallyMappedBuffer> buffers;
 
     for (uint32_t i = 0; i < maxNumFramesInFlight; ++i) {
-        for (const quartz::rendering::UniformBufferInfo& info : uniformBufferInfos) {
+        for (const quartz::rendering::UniformBufferInfo& uniformBufferInfo : uniformBufferInfos) {
             buffers.emplace_back(
                 renderingDevice,
-                info.getLocallyMappedBufferSize(),
-                info.getLocallyMappedBufferUsageFlags(),
-                info.getLocallyMappedBufferPropertyFlags()
+                uniformBufferInfo.getLocallyMappedBufferSize(),
+                uniformBufferInfo.getLocallyMappedBufferVulkanUsageFlags(),
+                uniformBufferInfo.getLocallyMappedBufferVulkanPropertyFlags()
             );
         }
     }
@@ -76,102 +76,43 @@ quartz::rendering::Pipeline::createLocallyMappedUniformBuffers(
 
 vk::UniqueDescriptorSetLayout
 quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
-    const vk::UniqueDevice& p_logicalDevice
+    const vk::UniqueDevice& p_logicalDevice,
+    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
-    vk::DescriptorSetLayoutBinding cameraUniformBufferLayoutBinding(
-        0,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
+    std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
 
-    vk::DescriptorSetLayoutBinding ambientLightLayoutBinding(
-        1,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
+    for (const quartz::rendering::UniformBufferInfo& uniformBufferInfo : uniformBufferInfos) {
+        vk::DescriptorSetLayoutBinding uniformBufferLayoutBinding(
+            uniformBufferInfo.getBindingLocation(),
+            uniformBufferInfo.getVulkanDescriptorType(),
+            uniformBufferInfo.getDescriptorCount(),
+            uniformBufferInfo.getVulkanShaderStageFlags(),
+            {}
+        );
+        layoutBindings.push_back(uniformBufferLayoutBinding);
+    }
 
-    vk::DescriptorSetLayoutBinding directionalLightLayoutBinding(
-        2,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
+    vk::DescriptorSetLayoutBinding samplerLayoutBinding(
+        uniformSamplerInfo.getBindingLocation(),
+        uniformSamplerInfo.getVulkanDescriptorType(),
+        uniformSamplerInfo.getDescriptorCount(),
+        uniformSamplerInfo.getVulkanShaderStageFlags(),
         {}
     );
-
-    vk::DescriptorSetLayoutBinding pointLightCountLayoutBinding(
-        3,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
-
-    vk::DescriptorSetLayoutBinding pointLightLayoutBinding(
-        4,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
-
-    vk::DescriptorSetLayoutBinding spotLightCountLayoutBinding(
-        5,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
-
-    vk::DescriptorSetLayoutBinding spotLightLayoutBinding(
-        6,
-        vk::DescriptorType::eUniformBuffer,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
-
-    vk::DescriptorSetLayoutBinding rgbaTextureSamplerLayoutBinding(
-        7,
-        vk::DescriptorType::eSampler,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
+    layoutBindings.push_back(samplerLayoutBinding);
 
     vk::DescriptorSetLayoutBinding textureArrayLayoutBinding(
-        8,
-        vk::DescriptorType::eSampledImage,
-        QUARTZ_MAX_NUMBER_TEXTURES,
-        vk::ShaderStageFlagBits::eFragment,
+        uniformTextureArrayInfo.getBindingLocation(),
+        uniformTextureArrayInfo.getVulkanDescriptorType(),
+        uniformTextureArrayInfo.getDescriptorCount(),
+        uniformTextureArrayInfo.getVulkanShaderStageFlags(),
         {}
     );
-
-    vk::DescriptorSetLayoutBinding materialArrayLayoutBinding(
-        9,
-        vk::DescriptorType::eUniformBufferDynamic,
-        1,
-        vk::ShaderStageFlagBits::eFragment,
-        {}
-    );
-
-    std::vector<vk::DescriptorSetLayoutBinding> layoutBindings = {
-        cameraUniformBufferLayoutBinding,
-        ambientLightLayoutBinding,
-        directionalLightLayoutBinding,
-        pointLightCountLayoutBinding,
-        pointLightLayoutBinding,
-        spotLightCountLayoutBinding,
-        spotLightLayoutBinding,
-        rgbaTextureSamplerLayoutBinding,
-        textureArrayLayoutBinding,
-        materialArrayLayoutBinding
-    };
+    layoutBindings.push_back(textureArrayLayoutBinding);
 
     LOG_TRACE(PIPELINE, "Using {} layout bindings", layoutBindings.size());
 
@@ -882,7 +823,10 @@ quartz::rendering::Pipeline::Pipeline(
     ),
     mp_vulkanDescriptorSetLayout(
         quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
-            renderingDevice.getVulkanLogicalDevicePtr()
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            m_uniformBufferInfos,
+            m_uniformSamplerInfo,
+            m_uniformTextureArrayInfo
         )
     ),
     m_vulkanDescriptorPoolPtr(

@@ -27,8 +27,8 @@ quartz::rendering::UniformBufferInfo::UniformBufferInfo(
     const vk::ShaderStageFlags shaderStageFlags
 ) :
     m_locallyMappedBufferSize(locallyMappedBufferSizeBytes),
-    m_locallyMappedBufferUsageFlags(vk::BufferUsageFlagBits::eUniformBuffer),
-    m_locallyMappedBufferPropertyFlags(locallyMappedBufferPropertyFlags),
+    m_locallyMappedBufferVulkanUsageFlags(vk::BufferUsageFlagBits::eUniformBuffer),
+    m_locallyMappedBufferVulkanPropertyFlags(locallyMappedBufferPropertyFlags),
     m_bindingLocation(bindingLocation),
     m_descriptorCount(descriptorCount),
     m_objectStrideBytes(objectStrideBytes),
@@ -40,8 +40,8 @@ quartz::rendering::UniformBufferInfo::UniformBufferInfo(
     const quartz::rendering::UniformBufferInfo& other
 ) :
     m_locallyMappedBufferSize(other.m_locallyMappedBufferSize),
-    m_locallyMappedBufferUsageFlags(other.m_locallyMappedBufferUsageFlags),
-    m_locallyMappedBufferPropertyFlags(other.m_locallyMappedBufferPropertyFlags),
+    m_locallyMappedBufferVulkanUsageFlags(other.m_locallyMappedBufferVulkanUsageFlags),
+    m_locallyMappedBufferVulkanPropertyFlags(other.m_locallyMappedBufferVulkanPropertyFlags),
     m_bindingLocation(other.m_bindingLocation),
     m_descriptorCount(other.m_descriptorCount),
     m_objectStrideBytes(other.m_objectStrideBytes),
@@ -53,8 +53,8 @@ quartz::rendering::UniformBufferInfo::UniformBufferInfo(
     quartz::rendering::UniformBufferInfo&& other
 ) :
     m_locallyMappedBufferSize(other.m_locallyMappedBufferSize),
-    m_locallyMappedBufferUsageFlags(other.m_locallyMappedBufferUsageFlags),
-    m_locallyMappedBufferPropertyFlags(other.m_locallyMappedBufferPropertyFlags),
+    m_locallyMappedBufferVulkanUsageFlags(other.m_locallyMappedBufferVulkanUsageFlags),
+    m_locallyMappedBufferVulkanPropertyFlags(other.m_locallyMappedBufferVulkanPropertyFlags),
     m_bindingLocation(other.m_bindingLocation),
     m_descriptorCount(other.m_descriptorCount),
     m_objectStrideBytes(other.m_objectStrideBytes),
@@ -73,8 +73,8 @@ quartz::rendering::UniformBufferInfo::operator=(
     }
 
     m_locallyMappedBufferSize = other.m_locallyMappedBufferSize;
-    m_locallyMappedBufferUsageFlags = other.m_locallyMappedBufferUsageFlags;
-    m_locallyMappedBufferPropertyFlags = other.m_locallyMappedBufferPropertyFlags;
+    m_locallyMappedBufferVulkanUsageFlags = other.m_locallyMappedBufferVulkanUsageFlags;
+    m_locallyMappedBufferVulkanPropertyFlags = other.m_locallyMappedBufferVulkanPropertyFlags;
     m_bindingLocation = other.m_bindingLocation;
     m_descriptorCount = other.m_descriptorCount;
     m_objectStrideBytes = other.m_objectStrideBytes;
@@ -93,8 +93,8 @@ quartz::rendering::UniformBufferInfo::operator=(
     }
 
     m_locallyMappedBufferSize = other.m_locallyMappedBufferSize;
-    m_locallyMappedBufferUsageFlags = other.m_locallyMappedBufferUsageFlags;
-    m_locallyMappedBufferPropertyFlags = other.m_locallyMappedBufferPropertyFlags;
+    m_locallyMappedBufferVulkanUsageFlags = other.m_locallyMappedBufferVulkanUsageFlags;
+    m_locallyMappedBufferVulkanPropertyFlags = other.m_locallyMappedBufferVulkanPropertyFlags;
     m_bindingLocation = other.m_bindingLocation;
     m_descriptorCount = other.m_descriptorCount;
     m_objectStrideBytes = other.m_objectStrideBytes;

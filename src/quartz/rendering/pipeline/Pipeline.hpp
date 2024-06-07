@@ -89,7 +89,10 @@ private: // static functions
         const uint32_t maxNumFramesInFlight
     );
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
-        const vk::UniqueDevice& p_logicalDevice
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
     );
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,

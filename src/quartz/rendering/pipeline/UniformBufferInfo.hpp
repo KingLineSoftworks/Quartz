@@ -34,8 +34,8 @@ public: // member functions
     USE_LOGGER(PIPELINE);
 
     uint32_t getLocallyMappedBufferSize() const { return m_locallyMappedBufferSize; }
-    vk::BufferUsageFlags getLocallyMappedBufferUsageFlags() const { return m_locallyMappedBufferUsageFlags; }
-    vk::MemoryPropertyFlags getLocallyMappedBufferPropertyFlags() const { return m_locallyMappedBufferPropertyFlags; }
+    vk::BufferUsageFlags getLocallyMappedBufferVulkanUsageFlags() const { return m_locallyMappedBufferVulkanUsageFlags; }
+    vk::MemoryPropertyFlags getLocallyMappedBufferVulkanPropertyFlags() const { return m_locallyMappedBufferVulkanPropertyFlags; }
     uint32_t getBindingLocation() const { return m_bindingLocation; }
     uint32_t getDescriptorCount() const { return m_descriptorCount; }
     uint32_t getObjectStrideBytes() const { return m_objectStrideBytes; }
@@ -50,8 +50,8 @@ public: // static functions
 
 private: // member variables
     uint32_t m_locallyMappedBufferSize;
-    vk::BufferUsageFlags m_locallyMappedBufferUsageFlags;
-    vk::MemoryPropertyFlags m_locallyMappedBufferPropertyFlags;
+    vk::BufferUsageFlags m_locallyMappedBufferVulkanUsageFlags;
+    vk::MemoryPropertyFlags m_locallyMappedBufferVulkanPropertyFlags;
 
     uint32_t m_bindingLocation;
     uint32_t m_descriptorCount;
