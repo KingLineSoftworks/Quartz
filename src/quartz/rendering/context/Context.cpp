@@ -7,6 +7,8 @@
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
+#include "quartz/rendering/pipeline/UniformSamplerInfo.hpp"
+#include "quartz/rendering/pipeline/UniformTextureArrayInfo.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
@@ -119,6 +121,18 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         vk::ShaderStageFlagBits::eFragment
     );
 
+    quartz::rendering::UniformSamplerInfo uniformSamplerInfo(
+        7,
+        1,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
+    quartz::rendering::UniformTextureArrayInfo uniformTextureArrayInfo(
+        8,
+        QUARTZ_MAX_NUMBER_TEXTURES,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
     return {
         renderingDevice,
         renderingWindow,
@@ -126,7 +140,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.vert"),
         util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.frag"),
         maxNumFramesInFlight,
-        std::move(uniformBufferInfos)
+        std::move(uniformBufferInfos),
+        uniformSamplerInfo,
+        uniformTextureArrayInfo
     };
 }
 

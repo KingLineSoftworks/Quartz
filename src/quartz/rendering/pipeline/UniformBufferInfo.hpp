@@ -17,12 +17,12 @@ public: // member functions
     UniformBufferInfo(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t locallyMappedBufferSizeBytes,
-        const vk::BufferUsageFlags locallyMappedBufferUsageFlags,
+        const vk::BufferUsageFlags locallyMappedBufferUsageFlags, /** @todo 2024/06/06 Can remove this. All instances use eUniformBuffer */
         const vk::MemoryPropertyFlags locallyMappedBufferPropertyFlags,
         const uint32_t bindingLocation,
         const uint32_t descriptorCount,
         const uint32_t objectStrideBytes,
-        const vk::DescriptorType descriptorType,
+        const vk::DescriptorType descriptorType, /** @todo 2024/06/06 Make this a boolean flag for whether or not the buffer is dynamic */
         const vk::ShaderStageFlags shaderStageFlags
     );
     UniformBufferInfo(UniformBufferInfo&& other);

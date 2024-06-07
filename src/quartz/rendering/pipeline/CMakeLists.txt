@@ -9,6 +9,12 @@ add_library(
 
         UniformBufferInfo.hpp
         UniformBufferInfo.cpp
+
+        UniformSamplerInfo.hpp
+        UniformSamplerInfo.cpp
+
+        UniformTextureArrayInfo.hpp
+        UniformTextureArrayInfo.cpp
 )
 
 target_compile_options(

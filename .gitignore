@@ -64,3 +64,4 @@ build/
 *.old.*
 *.external
 *.external.*
+*scratch.md*

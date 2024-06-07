@@ -882,7 +882,9 @@ quartz::rendering::Pipeline::Pipeline(
     const std::string& compiledVertexShaderFilepath,
     const std::string& compiledFragmentShaderFilepath,
     const uint32_t maxNumFramesInFlight,
-    std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos
+    std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos,
+    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
 ) :
     m_vulkanVertexInputBindingDescriptions(
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()
@@ -940,6 +942,8 @@ quartz::rendering::Pipeline::Pipeline(
         )
     ),
     m_uniformBufferInfos(std::move(uniformBufferInfos)),
+    m_uniformSamplerInfo(uniformSamplerInfo),
+    m_uniformTextureArrayInfo(uniformTextureArrayInfo),
     m_uniformBuffers(
         quartz::rendering::Pipeline::createUniformBuffers(
             renderingDevice,

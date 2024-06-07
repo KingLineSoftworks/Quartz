@@ -10,6 +10,8 @@
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
+#include "quartz/rendering/pipeline/UniformSamplerInfo.hpp"
+#include "quartz/rendering/pipeline/UniformTextureArrayInfo.hpp"
 #include "quartz/rendering/render_pass/RenderPass.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -43,7 +45,9 @@ public: // member functions
         const std::string& compiledVertexShaderFilepath,
         const std::string& compiledFragmentShaderFilepath,
         const uint32_t maxNumFramesInFlight,
-        std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos
+        std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos,
+        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
     );
     ~Pipeline();
 
@@ -90,10 +94,17 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t numDescriptorSets
     );
+    /**
+     * @todo 2024/06/06 Break this out into multiple functions:
+     *    - allocateUniformBuffers
+     *    - allocateTextureSampler
+     *    - allocateTextures
+     *    so we can be specific about what we're allocating on a per pipeline basis
+     */
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t minUniformBufferOffsetAlignment,
-        const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
+        const uint32_t maxNumFramesInFlight,
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
@@ -129,6 +140,8 @@ private: // member variables
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
 
     std::vector<quartz::rendering::UniformBufferInfo> m_uniformBufferInfos;
+    quartz::rendering::UniformSamplerInfo m_uniformSamplerInfo;
+    quartz::rendering::UniformTextureArrayInfo m_uniformTextureArrayInfo;
 
     std::vector<quartz::rendering::LocallyMappedBuffer> m_uniformBuffers;
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
