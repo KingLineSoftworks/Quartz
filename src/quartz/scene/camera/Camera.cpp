@@ -15,6 +15,14 @@ quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
     projectionMatrix(projectionMatrix_)
 {}
 
+quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
+    const quartz::scene::Camera& camera
+) :
+    position(camera.m_worldPosition),
+    viewMatrix(camera.m_viewMatrix),
+    projectionMatrix(camera.m_projectionMatrix)
+{}
+
 quartz::scene::Camera::Camera() :
     m_pitch(0.0f),
     m_yaw(0.0f),

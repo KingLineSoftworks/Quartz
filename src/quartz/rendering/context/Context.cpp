@@ -226,12 +226,35 @@ quartz::rendering::Context::draw(
 
     // update doodad drawing pipeline //
 
-    m_doodadRenderingPipeline.updateCameraUniformBuffer(scene.getCamera(), m_currentInFlightFrameIndex);
-    m_doodadRenderingPipeline.updateAmbientLightUniformBuffer(scene.getAmbientLight(), m_currentInFlightFrameIndex);
-    m_doodadRenderingPipeline.updateDirectionalLightUniformBuffer(scene.getDirectionalLight(), m_currentInFlightFrameIndex);
-    m_doodadRenderingPipeline.updatePointLightUniformBuffer(scene.getPointLights(), m_currentInFlightFrameIndex);
-    m_doodadRenderingPipeline.updateSpotLightUniformBuffer(scene.getSpotLights(), m_currentInFlightFrameIndex);
-    m_doodadRenderingPipeline.updateMaterialArrayUniformBuffer(m_renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment, m_currentInFlightFrameIndex);
+    quartz::scene::Camera::UniformBufferObject cameraUBO(scene.getCamera());
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
+
+    quartz::scene::AmbientLight ambientLight(scene.getAmbientLight());
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 1, &ambientLight);
+
+    quartz::scene::DirectionalLight directionalLight(scene.getDirectionalLight());
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 2, &directionalLight);
+
+    uint32_t pointLightCount = scene.getPointLights().size();
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 3, &pointLightCount);
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 4, const_cast<quartz::scene::PointLight*>(scene.getPointLights().data()));
+
+    uint32_t spotLightCount = scene.getSpotLights().size();
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 5, &spotLightCount);
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 6, const_cast<quartz::scene::SpotLight*>(scene.getSpotLights().data()));
+
+    std::vector<uint8_t> alignedMaterialUBOBytes(m_doodadRenderingPipeline.getUniformBufferInfo(7).getLocallyMappedBufferSize(), 0x00);
+    const uint32_t numBytesToCopy = sizeof(quartz::rendering::Material::UniformBufferObject);
+    const uint32_t objectStride = m_doodadRenderingPipeline.getUniformBufferInfo(7).getObjectStrideBytes();
+    uint8_t* p_bufferStart = alignedMaterialUBOBytes.data();
+    for (uint32_t i = 0; i < quartz::rendering::Material::getMasterMaterialList().size(); ++i) {
+        quartz::rendering::Material::UniformBufferObject materialUBO(*(quartz::rendering::Material::getMasterMaterialList()[i]));
+        const uint32_t addressOffsetBytes = objectStride * i;
+        uint8_t* p_UBODestination = p_bufferStart + addressOffsetBytes;
+
+        memcpy(p_UBODestination, &materialUBO, numBytesToCopy);
+    }
+    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 7, alignedMaterialUBOBytes.data());
 
     // reset //
 

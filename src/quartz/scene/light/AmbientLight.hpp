@@ -12,6 +12,7 @@ struct quartz::scene::AmbientLight {
 public: // member functions
     AmbientLight() = default;
     AmbientLight(const glm::vec3& color_);
+    AmbientLight(const AmbientLight& other);
     AmbientLight& operator=(const AmbientLight& other);
 
 public: // member variables

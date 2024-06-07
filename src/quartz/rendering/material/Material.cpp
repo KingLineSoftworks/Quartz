@@ -34,6 +34,23 @@ quartz::rendering::Material::UniformBufferObject::UniformBufferObject(
     doubleSided(doubleSided_)
 {}
 
+quartz::rendering::Material::UniformBufferObject::UniformBufferObject(
+    const quartz::rendering::Material& material
+) :
+    baseColorTextureMasterIndex(material.m_baseColorTextureMasterIndex),
+    metallicRoughnessTextureMasterIndex(material.m_metallicRoughnessTextureMasterIndex),
+    normalTextureMasterIndex(material.m_normalTextureMasterIndex),
+    emissionTextureMasterIndex(material.m_emissionTextureMasterIndex),
+    occlusionTextureMasterIndex(material.m_occlusionTextureMasterIndex),
+    baseColorFactor(material.m_baseColorFactor),
+    emissiveFactor(material.m_emissiveFactor),
+    metallicFactor(material.m_metallicFactor),
+    roughnessFactor(material.m_roughnessFactor),
+    alphaMode(static_cast<uint32_t>(material.m_alphaMode)),
+    alphaCutoff(material.m_alphaCutoff),
+    doubleSided(material.m_doubleSided)
+{}
+
 std::string
 quartz::rendering::Material::getAlphaModeGLTFString(const quartz::rendering::Material::AlphaMode mode) {
     switch (mode) {

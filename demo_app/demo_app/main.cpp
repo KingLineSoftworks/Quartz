@@ -44,11 +44,11 @@ int main() {
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
-        {"CONTEXT", util::Logger::Level::info},
+        {"CONTEXT", util::Logger::Level::trace},
         {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
-        {"MATERIAL", util::Logger::Level::info},
+        {"MATERIAL", util::Logger::Level::trace},
         {"MODEL", util::Logger::Level::info},
         {"MODEL_MESH", util::Logger::Level::info},
         {"MODEL_PRIMITIVE", util::Logger::Level::info},

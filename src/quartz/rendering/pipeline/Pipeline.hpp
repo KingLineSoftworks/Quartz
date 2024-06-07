@@ -66,18 +66,20 @@ public: // member functions
 
     USE_LOGGER(PIPELINE);
 
+    const std::vector<quartz::rendering::UniformBufferInfo>& getUniformBufferInfos() const { return m_uniformBufferInfos; }
+    const quartz::rendering::UniformBufferInfo& getUniformBufferInfo(const uint32_t index) const { return m_uniformBufferInfos[index]; }
+
     const std::vector<vk::Viewport>& getVulkanViewports() const { return m_vulkanViewports; }
     const std::vector<vk::Rect2D>& getVulkanScissorRectangles() const { return m_vulkanScissorRectangles; }
     const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateCameraUniformBuffer(const quartz::scene::Camera& camera, const uint32_t currentInFlightFrameIndex);
-    void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight, const uint32_t currentInFlightFrameIndex);
-    void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight, const uint32_t currentInFlightFrameIndex);
-    void updatePointLightUniformBuffer(const std::vector<quartz::scene::PointLight>& pointLights, const uint32_t currentInFlightFrameIndex);
-    void updateSpotLightUniformBuffer(const std::vector<quartz::scene::SpotLight>& spotLights, const uint32_t currentInFlightFrameIndex);
-    void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment, const uint32_t currentInFlightFrameIndex);
+    void updateUniformBuffer(
+        const uint32_t currentInFlightFrameIndex,
+        const uint32_t uniformIndex,
+        void* p_dataToCopy
+    );
 
 private: // static functions
     static vk::UniqueShaderModule createVulkanShaderModulePtr(

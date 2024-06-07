@@ -15,6 +15,7 @@ public: // member functions
         const glm::vec3& color_,
         const glm::vec3& direction_
     );
+    DirectionalLight(const DirectionalLight& other);
     DirectionalLight& operator=(const DirectionalLight& other);
 
 public: // member variables

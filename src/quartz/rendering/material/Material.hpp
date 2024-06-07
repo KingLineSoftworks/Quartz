@@ -44,6 +44,7 @@ public: // classes
             const float alphaCutoff_,
             const bool doubleSided_
         );
+        UniformBufferObject(const Material& material);
 
     public: // member variables
         alignas(4) uint32_t baseColorTextureMasterIndex;

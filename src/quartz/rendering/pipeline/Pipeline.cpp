@@ -14,8 +14,6 @@
 #include "quartz/rendering/model/Vertex.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
-constexpr uint32_t NUM_UNIQUE_UNIFORM_BUFFERS = 8;
-
 vk::UniqueShaderModule
 quartz::rendering::Pipeline::createVulkanShaderModulePtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -836,134 +834,18 @@ quartz::rendering::Pipeline::updateVulkanDescriptorSets(
 }
 
 void
-quartz::rendering::Pipeline::updateCameraUniformBuffer(
-    const quartz::scene::Camera& camera,
-    const uint32_t currentInFlightFrameIndex
+quartz::rendering::Pipeline::updateUniformBuffer(
+    const uint32_t currentInFlightFrameIndex,
+    const uint32_t uniformIndex,
+    void* p_dataToCopy
 ) {
-    quartz::scene::Camera::UniformBufferObject cameraUBO(
-        camera.getWorldPosition(),
-        camera.getViewMatrix(),
-        camera.getProjectionMatrix()
-    );
+    const quartz::rendering::UniformBufferInfo& uniformBufferInfo = m_uniformBufferInfos[uniformIndex];
 
-    const uint32_t cameraIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
+    const uint32_t locallyMappedBufferIndex = currentInFlightFrameIndex * m_uniformBufferInfos.size() + uniformIndex;
+
     memcpy(
-        m_locallyMappedBuffers[cameraIndex].getMappedLocalMemoryPtr(),
-        &cameraUBO,
-        sizeof(quartz::scene::Camera::UniformBufferObject)
+        m_locallyMappedBuffers[locallyMappedBufferIndex].getMappedLocalMemoryPtr(),
+        p_dataToCopy,
+        uniformBufferInfo.getLocallyMappedBufferSize()
     );
-}
-
-void
-quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
-    const quartz::scene::AmbientLight& ambientLight,
-    const uint32_t currentInFlightFrameIndex
-) {
-    const uint32_t ambientLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
-    memcpy(
-        m_locallyMappedBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
-        &ambientLight,
-        sizeof(quartz::scene::AmbientLight)
-    );
-}
-
-void
-quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
-    const quartz::scene::DirectionalLight& directionalLight,
-    const uint32_t currentInFlightFrameIndex
-) {
-    const uint32_t directionalLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
-    memcpy(
-        m_locallyMappedBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
-        &directionalLight,
-        sizeof(quartz::scene::DirectionalLight)
-    );
-}
-
-void
-quartz::rendering::Pipeline::updatePointLightUniformBuffer(
-    const std::vector<quartz::scene::PointLight>& pointLights,
-    const uint32_t currentInFlightFrameIndex
-) {
-    uint32_t pointLightCount = std::min<uint32_t>(pointLights.size(), QUARTZ_MAX_NUMBER_POINT_LIGHTS);
-    const uint32_t pointLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
-    memcpy(
-        m_locallyMappedBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
-        &pointLightCount,
-        sizeof(uint32_t)
-    );
-
-    const uint32_t pointLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
-    memcpy(
-        m_locallyMappedBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
-        pointLights.data(),
-        sizeof(quartz::scene::PointLight) * pointLightCount
-    );
-}
-
-void
-quartz::rendering::Pipeline::updateSpotLightUniformBuffer(
-    const std::vector<quartz::scene::SpotLight>& spotLights,
-    const uint32_t currentInFlightFrameIndex
-) {
-    uint32_t spotLightCount = std::min<uint32_t>(spotLights.size(), QUARTZ_MAX_NUMBER_SPOT_LIGHTS);
-    const uint32_t spotLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
-    memcpy(
-        m_locallyMappedBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
-        &spotLightCount,
-        sizeof(uint32_t)
-    );
-
-    const uint32_t spotLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
-    memcpy(
-        m_locallyMappedBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
-        spotLights.data(),
-        sizeof(quartz::scene::SpotLight) * spotLightCount
-    );
-
-}
-
-void
-quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
-    const uint32_t minUniformBufferOffsetAlignment,
-    const uint32_t currentInFlightFrameIndex
-) {
-    std::vector<quartz::rendering::Material::UniformBufferObject> materialUBOs;
-    for (const std::shared_ptr<quartz::rendering::Material>& p_material : quartz::rendering::Material::getMasterMaterialList()) {
-        materialUBOs.emplace_back(
-            p_material->getBaseColorTextureMasterIndex(),
-            p_material->getMetallicRoughnessTextureMasterIndex(),
-            p_material->getNormalTextureMasterIndex(),
-            p_material->getEmissionTextureMasterIndex(),
-            p_material->getOcclusionTextureMasterIndex(),
-
-            p_material->getBaseColorFactor(),
-            p_material->getEmissiveFactor(),
-            p_material->getMetallicFactor(),
-            p_material->getRoughnessFactor(),
-
-            static_cast<uint32_t>(p_material->getAlphaMode()),
-            p_material->getAlphaCutoff(),
-            p_material->getDoubleSided()
-        );
-    }
-
-    const uint32_t materialArrayIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
-    void* p_mappedBuffer = m_locallyMappedBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
-
-    for (uint32_t i = 0; i < materialUBOs.size(); ++i) {
-        uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
-            (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-            sizeof(quartz::rendering::Material::UniformBufferObject);
-        materialByteOffset *= i;
-
-        void* p_currentMaterialSlot = reinterpret_cast<uint8_t*>(p_mappedBuffer) + materialByteOffset;
-
-        memcpy(
-             p_currentMaterialSlot,
-            &(materialUBOs[i]),
-            sizeof(quartz::rendering::Material::UniformBufferObject)
-        );
-    }
-
 }
