@@ -45,7 +45,7 @@ public: // member functions
         const std::string& compiledVertexShaderFilepath,
         const std::string& compiledFragmentShaderFilepath,
         const uint32_t maxNumFramesInFlight,
-        std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
         const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
     );
@@ -83,9 +83,10 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
-    static std::vector<quartz::rendering::LocallyMappedBuffer> createUniformBuffers(
+    static std::vector<quartz::rendering::LocallyMappedBuffer> createLocallyMappedUniformBuffers(
         const quartz::rendering::Device& renderingDevice,
-        const uint32_t numBuffers
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const uint32_t maxNumFramesInFlight
     );
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice
@@ -143,7 +144,7 @@ private: // member variables
     quartz::rendering::UniformSamplerInfo m_uniformSamplerInfo;
     quartz::rendering::UniformTextureArrayInfo m_uniformTextureArrayInfo;
 
-    std::vector<quartz::rendering::LocallyMappedBuffer> m_uniformBuffers;
+    std::vector<quartz::rendering::LocallyMappedBuffer> m_locallyMappedUniformBuffers;
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
     vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
     std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;

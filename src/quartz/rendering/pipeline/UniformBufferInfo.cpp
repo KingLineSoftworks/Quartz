@@ -17,9 +17,8 @@ quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(
 }
 
 quartz::rendering::UniformBufferInfo::UniformBufferInfo(
-    const quartz::rendering::Device& renderingDevice,
+    UNUSED const quartz::rendering::Device& renderingDevice,
     const uint32_t locallyMappedBufferSizeBytes,
-    const vk::BufferUsageFlags locallyMappedBufferUsageFlags,
     const vk::MemoryPropertyFlags locallyMappedBufferPropertyFlags,
     const uint32_t bindingLocation,
     const uint32_t descriptorCount,
@@ -27,54 +26,80 @@ quartz::rendering::UniformBufferInfo::UniformBufferInfo(
     const vk::DescriptorType descriptorType,
     const vk::ShaderStageFlags shaderStageFlags
 ) :
+    m_locallyMappedBufferSize(locallyMappedBufferSizeBytes),
+    m_locallyMappedBufferUsageFlags(vk::BufferUsageFlagBits::eUniformBuffer),
+    m_locallyMappedBufferPropertyFlags(locallyMappedBufferPropertyFlags),
     m_bindingLocation(bindingLocation),
     m_descriptorCount(descriptorCount),
     m_objectStrideBytes(objectStrideBytes),
     m_vulkanDescriptorType(descriptorType),
-    m_vulkanShaderStageFlags(shaderStageFlags),
-    m_locallyMappedBuffer(
-        renderingDevice,
-        locallyMappedBufferSizeBytes,
-        locallyMappedBufferUsageFlags,
-        locallyMappedBufferPropertyFlags
-    )
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
+    m_vulkanShaderStageFlags(shaderStageFlags)
+{}
 
 quartz::rendering::UniformBufferInfo::UniformBufferInfo(
-    quartz::rendering::UniformBufferInfo &&other
+    const quartz::rendering::UniformBufferInfo& other
 ) :
+    m_locallyMappedBufferSize(other.m_locallyMappedBufferSize),
+    m_locallyMappedBufferUsageFlags(other.m_locallyMappedBufferUsageFlags),
+    m_locallyMappedBufferPropertyFlags(other.m_locallyMappedBufferPropertyFlags),
     m_bindingLocation(other.m_bindingLocation),
     m_descriptorCount(other.m_descriptorCount),
     m_objectStrideBytes(other.m_objectStrideBytes),
     m_vulkanDescriptorType(other.m_vulkanDescriptorType),
-    m_vulkanShaderStageFlags(other.m_vulkanShaderStageFlags),
-    m_locallyMappedBuffer(std::move(other.m_locallyMappedBuffer))
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
+    m_vulkanShaderStageFlags(other.m_vulkanShaderStageFlags)
+{}
 
-quartz::rendering::UniformBufferInfo::~UniformBufferInfo() {
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
+quartz::rendering::UniformBufferInfo::UniformBufferInfo(
+    quartz::rendering::UniformBufferInfo&& other
+) :
+    m_locallyMappedBufferSize(other.m_locallyMappedBufferSize),
+    m_locallyMappedBufferUsageFlags(other.m_locallyMappedBufferUsageFlags),
+    m_locallyMappedBufferPropertyFlags(other.m_locallyMappedBufferPropertyFlags),
+    m_bindingLocation(other.m_bindingLocation),
+    m_descriptorCount(other.m_descriptorCount),
+    m_objectStrideBytes(other.m_objectStrideBytes),
+    m_vulkanDescriptorType(other.m_vulkanDescriptorType),
+    m_vulkanShaderStageFlags(other.m_vulkanShaderStageFlags)
+{}
+
+quartz::rendering::UniformBufferInfo::~UniformBufferInfo() {}
 
 quartz::rendering::UniformBufferInfo&
 quartz::rendering::UniformBufferInfo::operator=(
-    quartz::rendering::UniformBufferInfo &&other
+    const quartz::rendering::UniformBufferInfo& other
 ) {
-    LOG_FUNCTION_CALL_TRACEthis("");
-
     if (this == &other) {
         return *this;
     }
 
+    m_locallyMappedBufferSize = other.m_locallyMappedBufferSize;
+    m_locallyMappedBufferUsageFlags = other.m_locallyMappedBufferUsageFlags;
+    m_locallyMappedBufferPropertyFlags = other.m_locallyMappedBufferPropertyFlags;
     m_bindingLocation = other.m_bindingLocation;
     m_descriptorCount = other.m_descriptorCount;
     m_objectStrideBytes = other.m_objectStrideBytes;
     m_vulkanDescriptorType = other.m_vulkanDescriptorType;
     m_vulkanShaderStageFlags = other.m_vulkanShaderStageFlags;
-    m_locallyMappedBuffer = std::move(other.m_locallyMappedBuffer);
+
+    return *this;
+}
+
+quartz::rendering::UniformBufferInfo&
+quartz::rendering::UniformBufferInfo::operator=(
+    quartz::rendering::UniformBufferInfo&& other
+) {
+    if (this == &other) {
+        return *this;
+    }
+
+    m_locallyMappedBufferSize = other.m_locallyMappedBufferSize;
+    m_locallyMappedBufferUsageFlags = other.m_locallyMappedBufferUsageFlags;
+    m_locallyMappedBufferPropertyFlags = other.m_locallyMappedBufferPropertyFlags;
+    m_bindingLocation = other.m_bindingLocation;
+    m_descriptorCount = other.m_descriptorCount;
+    m_objectStrideBytes = other.m_objectStrideBytes;
+    m_vulkanDescriptorType = other.m_vulkanDescriptorType;
+    m_vulkanShaderStageFlags = other.m_vulkanShaderStageFlags;
 
     return *this;
 }

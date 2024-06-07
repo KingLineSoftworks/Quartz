@@ -40,106 +40,35 @@ quartz::rendering::Pipeline::createVulkanShaderModulePtr(
 }
 
 std::vector<quartz::rendering::LocallyMappedBuffer>
-quartz::rendering::Pipeline::createUniformBuffers(
+quartz::rendering::Pipeline::createLocallyMappedUniformBuffers(
     const quartz::rendering::Device& renderingDevice,
-    const uint32_t numBuffers
+    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    UNUSED const uint32_t maxNumFramesInFlight
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} buffers", numBuffers);
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight, {} buffer infos", maxNumFramesInFlight, uniformBufferInfos.size());
+
+    LOG_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
+    LOG_TRACE(PIPELINE, "{} buffer infos", uniformBufferInfos.size());
+    LOG_TRACE(PIPELINE, "{} total locally mapped buffers", maxNumFramesInFlight * uniformBufferInfos.size());
+    LOG_TRACE(PIPELINE, "because we need one buffer per uniform buffer per frame in flight");
 
     std::vector<quartz::rendering::LocallyMappedBuffer> buffers;
 
-    for (uint32_t i = 0; i < numBuffers; ++i) {
-        LOG_SCOPE_CHANGE_TRACE(PIPELINE);
-        LOG_TRACE(PIPELINE, "Creating buffers for frame {}", i);
+    for (uint32_t i = 0; i < maxNumFramesInFlight; ++i) {
+        for (const quartz::rendering::UniformBufferInfo& info : uniformBufferInfos) {
+            buffers.emplace_back(
+                renderingDevice,
+                info.getLocallyMappedBufferSize(),
+                info.getLocallyMappedBufferUsageFlags(),
+                info.getLocallyMappedBufferPropertyFlags()
+            );
+        }
+    }
 
-        LOG_TRACE(PIPELINE, "Creating camera buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(quartz::scene::Camera::UniformBufferObject),
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
+    LOG_TRACE(PIPELINE, "Created {} locally mapped buffers", buffers.size());
 
-        LOG_TRACE(PIPELINE, "Creating ambient light buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(quartz::scene::AmbientLight),
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
-
-        LOG_TRACE(PIPELINE, "Creating directional light buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(quartz::scene::DirectionalLight),
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
-
-        LOG_TRACE(PIPELINE, "Creating point light count buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(uint32_t),
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
-
-        LOG_TRACE(PIPELINE, "Creating point light buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
-
-        LOG_TRACE(PIPELINE, "Creating spot light count buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(uint32_t),
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
-
-        LOG_TRACE(PIPELINE, "Creating spot light buffer {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            (
-                vk::MemoryPropertyFlagBits::eHostVisible |
-                vk::MemoryPropertyFlagBits::eHostCoherent
-            )
-        );
-
-        const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
-        const uint32_t materialByteStride = minUniformBufferOffsetAlignment > 0 ?
-            (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-            sizeof(quartz::rendering::Material::UniformBufferObject);
-        LOG_TRACE(PIPELINE, "Creating material uniform buffer array {} at buffer index {}", i, buffers.size());
-        buffers.emplace_back(
-            renderingDevice,
-            materialByteStride * QUARTZ_MAX_NUMBER_MATERIALS,
-            vk::BufferUsageFlagBits::eUniformBuffer,
-            vk::MemoryPropertyFlagBits::eHostVisible
-        );
+    if (buffers.size() != maxNumFramesInFlight * uniformBufferInfos.size()) {
+        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Created {} locally mapped buffers instead of expected {}", buffers.size(), maxNumFramesInFlight * uniformBufferInfos.size());
     }
 
     return buffers;
@@ -882,7 +811,7 @@ quartz::rendering::Pipeline::Pipeline(
     const std::string& compiledVertexShaderFilepath,
     const std::string& compiledFragmentShaderFilepath,
     const uint32_t maxNumFramesInFlight,
-    std::vector<quartz::rendering::UniformBufferInfo>&& uniformBufferInfos,
+    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
     const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
     const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
 ) :
@@ -941,12 +870,13 @@ quartz::rendering::Pipeline::Pipeline(
             compiledFragmentShaderFilepath
         )
     ),
-    m_uniformBufferInfos(std::move(uniformBufferInfos)),
+    m_uniformBufferInfos(uniformBufferInfos),
     m_uniformSamplerInfo(uniformSamplerInfo),
     m_uniformTextureArrayInfo(uniformTextureArrayInfo),
-    m_uniformBuffers(
-        quartz::rendering::Pipeline::createUniformBuffers(
+    m_locallyMappedUniformBuffers(
+        quartz::rendering::Pipeline::createLocallyMappedUniformBuffers(
             renderingDevice,
+            m_uniformBufferInfos,
             maxNumFramesInFlight
         )
     ),
@@ -1039,7 +969,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         renderingDevice.getVulkanLogicalDevicePtr(),
         renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment,
         maxNumFramesInFlight,
-        m_uniformBuffers,
+        m_locallyMappedUniformBuffers,
         mp_vulkanDescriptorSetLayout,
         m_vulkanDescriptorPoolPtr,
         texturePtrs
@@ -1059,7 +989,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
 
     const uint32_t cameraIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
     memcpy(
-        m_uniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
         sizeof(quartz::scene::Camera::UniformBufferObject)
     );
@@ -1072,7 +1002,7 @@ quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
 ) {
     const uint32_t ambientLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
     memcpy(
-        m_uniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
         &ambientLight,
         sizeof(quartz::scene::AmbientLight)
     );
@@ -1085,7 +1015,7 @@ quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
 ) {
     const uint32_t directionalLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
     memcpy(
-        m_uniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
         &directionalLight,
         sizeof(quartz::scene::DirectionalLight)
     );
@@ -1099,14 +1029,14 @@ quartz::rendering::Pipeline::updatePointLightUniformBuffer(
     uint32_t pointLightCount = std::min<uint32_t>(pointLights.size(), QUARTZ_MAX_NUMBER_POINT_LIGHTS);
     const uint32_t pointLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
     memcpy(
-        m_uniformBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
         &pointLightCount,
         sizeof(uint32_t)
     );
 
     const uint32_t pointLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
     memcpy(
-        m_uniformBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
         pointLights.data(),
         sizeof(quartz::scene::PointLight) * pointLightCount
     );
@@ -1120,14 +1050,14 @@ quartz::rendering::Pipeline::updateSpotLightUniformBuffer(
     uint32_t spotLightCount = std::min<uint32_t>(spotLights.size(), QUARTZ_MAX_NUMBER_SPOT_LIGHTS);
     const uint32_t spotLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
     memcpy(
-        m_uniformBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
         &spotLightCount,
         sizeof(uint32_t)
     );
 
     const uint32_t spotLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
     memcpy(
-        m_uniformBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedUniformBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
         spotLights.data(),
         sizeof(quartz::scene::SpotLight) * spotLightCount
     );
@@ -1160,7 +1090,7 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
     }
 
     const uint32_t materialArrayIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
-    void* p_mappedBuffer = m_uniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
+    void* p_mappedBuffer = m_locallyMappedUniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
 
     for (uint32_t i = 0; i < materialUBOs.size(); ++i) {
         uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
