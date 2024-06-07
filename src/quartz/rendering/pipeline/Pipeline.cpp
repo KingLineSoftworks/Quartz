@@ -180,14 +180,149 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     return uniqueDescriptorPool;
 }
 
+void
+quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
+    const vk::UniqueDevice& p_logicalDevice,
+    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
+    const vk::DescriptorSet& descriptorSet,
+    const uint32_t descriptorSetIndex
+) {
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
+
+    std::vector<vk::WriteDescriptorSet> writeDescriptorSets;
+
+    LOG_TRACE(PIPELINE, "Using {} uniform buffer infos", uniformBufferInfos.size());
+    std::vector<vk::DescriptorBufferInfo> uniformBufferDescriptorInfos;
+    uniformBufferDescriptorInfos.reserve(uniformBufferInfos.size()); // Everything breaks if we don't reserve the space ahead of time
+
+    for (uint32_t j = 0; j < uniformBufferInfos.size(); ++j) {
+        const uint32_t locallyMappedBufferIndex = descriptorSetIndex * uniformBufferInfos.size() + j;
+        LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
+
+        uniformBufferDescriptorInfos.emplace_back(
+            *(locallyMappedBuffers[locallyMappedBufferIndex].getVulkanLogicalBufferPtr()),
+            0,
+            uniformBufferInfos[j].getObjectStrideBytes()
+        );
+        vk::WriteDescriptorSet writeDescriptorSet(
+            descriptorSet,
+            uniformBufferInfos[j].getBindingLocation(),
+            0,
+            uniformBufferInfos[j].getDescriptorCount(),
+            uniformBufferInfos[j].getVulkanDescriptorType(),
+            {},
+            &uniformBufferDescriptorInfos.back(),
+            {}
+        );
+        writeDescriptorSets.push_back(writeDescriptorSet);
+
+        LOG_TRACE(PIPELINE, "Updating descriptor sets with {} descriptor writes", writeDescriptorSets.size());
+
+        p_logicalDevice->updateDescriptorSets(
+            writeDescriptorSets.size(),
+            writeDescriptorSets.data(),
+            0,
+            nullptr
+        );
+    }
+}
+
+void
+quartz::rendering::Pipeline::updateUniformSamplerDescriptorSet(
+    const vk::UniqueDevice& p_logicalDevice,
+    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    const vk::UniqueSampler& p_sampler,
+    const vk::DescriptorSet& descriptorSet
+) {
+    LOG_TRACE(PIPELINE, "Using uniform sampler info");
+    LOG_TRACE(PIPELINE, "  destination binding    = {}", uniformSamplerInfo.getBindingLocation());
+    LOG_TRACE(PIPELINE, "  descriptor count       = {}", uniformSamplerInfo.getDescriptorCount());
+    LOG_TRACE(PIPELINE, "  vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformSamplerInfo.getVulkanDescriptorType()));
+    vk::DescriptorImageInfo samplerImageInfo(
+        *(p_sampler),
+        {},
+        {}
+    );
+    vk::WriteDescriptorSet writeDescriptorSet(
+        descriptorSet,
+        uniformSamplerInfo.getBindingLocation(),
+        0,
+        uniformSamplerInfo.getDescriptorCount(),
+        uniformSamplerInfo.getVulkanDescriptorType(),
+        &samplerImageInfo,
+        {},
+        {}
+    );
+
+    LOG_TRACE(PIPELINE, "Updating descriptor set with 1 descriptor writes");
+
+    p_logicalDevice->updateDescriptorSets(
+        1,
+        &writeDescriptorSet,
+        0,
+        nullptr
+    );
+}
+
+void quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSet(
+    const vk::UniqueDevice& p_logicalDevice,
+    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
+    const vk::DescriptorSet& descriptorSet
+) {
+    const uint32_t numTexturesToUse = std::min<uint32_t>(uniformTextureArrayInfo.getDescriptorCount(), texturePtrs.size());
+    LOG_TRACE(PIPELINE, "Using texture array sampler info");
+    LOG_TRACE(PIPELINE, "  destination binding    = {}", uniformTextureArrayInfo.getBindingLocation());
+    LOG_TRACE(PIPELINE, "  descriptor count       = {}", uniformTextureArrayInfo.getDescriptorCount());
+    LOG_TRACE(PIPELINE, "  vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformTextureArrayInfo.getVulkanDescriptorType()));
+    LOG_TRACE(PIPELINE, "  given       {} textures", texturePtrs.size());
+    LOG_TRACE(PIPELINE, "  allocating  {} textures", uniformTextureArrayInfo.getDescriptorCount());
+    LOG_TRACE(PIPELINE, "  using       {} textures", numTexturesToUse);
+    std::vector<vk::DescriptorImageInfo> textureImageInfos(uniformTextureArrayInfo.getDescriptorCount(), {
+        nullptr,
+        *(texturePtrs[0]->getVulkanImageViewPtr()),
+        vk::ImageLayout::eShaderReadOnlyOptimal
+    });
+    for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
+        textureImageInfos[j] = vk::DescriptorImageInfo(
+            nullptr,
+            *(texturePtrs[j]->getVulkanImageViewPtr()),
+            vk::ImageLayout::eShaderReadOnlyOptimal
+        );
+    }
+    vk::WriteDescriptorSet writeDescriptorSet(
+        descriptorSet,
+        uniformTextureArrayInfo.getBindingLocation(),
+        0,
+        uniformTextureArrayInfo.getDescriptorCount(),
+        uniformTextureArrayInfo.getVulkanDescriptorType(),
+        textureImageInfos.data(),
+        {},
+        {}
+    );
+
+    LOG_TRACE(PIPELINE, "Updating descriptor sets with 1 descriptor writes");
+
+    p_logicalDevice->updateDescriptorSets(
+        1,
+        &writeDescriptorSet,
+        0,
+        nullptr
+    );
+}
+
 std::vector<vk::DescriptorSet>
 quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
-    UNUSED const uint32_t minUniformBufferOffsetAlignment,
     const uint32_t maxNumFramesInFlight,
-    UNUSED const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    UNUSED const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-    UNUSED const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
     const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
     const vk::UniqueDescriptorPool& p_descriptorPool,
@@ -226,97 +361,26 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         }
         LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
 
-        std::vector<vk::WriteDescriptorSet> writeDescriptorSets;
-
-        LOG_TRACE(PIPELINE, "Using {} uniform buffer infos", uniformBufferInfos.size());
-        std::vector<vk::DescriptorBufferInfo> uniformBufferDescriptorInfos;
-        uniformBufferDescriptorInfos.reserve(uniformBufferInfos.size()); // Everything breaks if we don't reserve the space ahead of time
-
-        for (uint32_t j = 0; j < uniformBufferInfos.size(); ++j) {
-            const uint32_t locallyMappedBufferIndex = i * uniformBufferInfos.size() + j;
-            LOG_TRACE(PIPELINE, "  Using uniform buffer info {}", j);
-            LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformBufferInfos[j].getBindingLocation());
-            LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformBufferInfos[j].getDescriptorCount());
-            LOG_TRACE(PIPELINE, "    object stride in bytes = {}", uniformBufferInfos[j].getObjectStrideBytes());
-            LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformBufferInfos[j].getVulkanDescriptorType()));
-
-            uniformBufferDescriptorInfos.emplace_back(
-                *(locallyMappedBuffers[locallyMappedBufferIndex].getVulkanLogicalBufferPtr()),
-                0,
-                uniformBufferInfos[j].getObjectStrideBytes()
-            );
-            vk::WriteDescriptorSet writeDescriptorSet(
-                descriptorSets[i],
-                uniformBufferInfos[j].getBindingLocation(),
-                0,
-                uniformBufferInfos[j].getDescriptorCount(),
-                uniformBufferInfos[j].getVulkanDescriptorType(),
-                {},
-                &uniformBufferDescriptorInfos.back(),
-                {}
-            );
-            writeDescriptorSets.push_back(writeDescriptorSet);
-        }
-
-        LOG_TRACE(PIPELINE, "Using uniform sampler info");
-        LOG_TRACE(PIPELINE, "  destination binding    = {}", uniformSamplerInfo.getBindingLocation());
-        LOG_TRACE(PIPELINE, "  descriptor count       = {}", uniformSamplerInfo.getDescriptorCount());
-        LOG_TRACE(PIPELINE, "  vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformSamplerInfo.getVulkanDescriptorType()));
-        vk::DescriptorImageInfo rgbaTextureSamplerImageInfo(
-            *(p_sampler),
-            {},
-            {}
-        );
-        vk::WriteDescriptorSet rgbaTextureSamplerWriteDescriptorSet(
+        quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
+            p_logicalDevice,
+            uniformBufferInfos,
+            locallyMappedBuffers,
             descriptorSets[i],
-            uniformSamplerInfo.getBindingLocation(),
-            0,
-            uniformSamplerInfo.getDescriptorCount(),
-            uniformSamplerInfo.getVulkanDescriptorType(),
-            &rgbaTextureSamplerImageInfo,
-            {},
-            {}
+            i
         );
-        writeDescriptorSets.push_back(rgbaTextureSamplerWriteDescriptorSet);
 
-        const uint32_t numTexturesToUse = std::min<uint32_t>(uniformTextureArrayInfo.getDescriptorCount(), QUARTZ_MAX_NUMBER_TEXTURES);
-        LOG_TRACE(PIPELINE, "Using texture array sampler info");
-        LOG_TRACE(PIPELINE, "  destination binding    = {}", uniformTextureArrayInfo.getBindingLocation());
-        LOG_TRACE(PIPELINE, "  descriptor count       = {}", uniformTextureArrayInfo.getDescriptorCount());
-        LOG_TRACE(PIPELINE, "  vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformTextureArrayInfo.getVulkanDescriptorType()));
-        LOG_TRACE(PIPELINE, "  given {} textures", texturePtrs.size());
-        LOG_TRACE(PIPELINE, "  using {} textures", numTexturesToUse);
-        std::vector<vk::DescriptorImageInfo> textureImageInfos(numTexturesToUse, {
-            nullptr,
-            *(texturePtrs[0]->getVulkanImageViewPtr()),
-            vk::ImageLayout::eShaderReadOnlyOptimal
-        });
-        for (uint32_t j = 0; j < texturePtrs.size(); ++j) {
-            textureImageInfos[j] = vk::DescriptorImageInfo(
-                nullptr,
-                *(texturePtrs[j]->getVulkanImageViewPtr()),
-                vk::ImageLayout::eShaderReadOnlyOptimal
-            );
-        }
-        vk::WriteDescriptorSet textureArrayDescriptorWriteSet(
-            descriptorSets[i],
-            uniformTextureArrayInfo.getBindingLocation(),
-            0,
-            uniformTextureArrayInfo.getDescriptorCount(),
-            uniformTextureArrayInfo.getVulkanDescriptorType(),
-            textureImageInfos.data(),
-            {},
-            {}
+        quartz::rendering::Pipeline::updateUniformSamplerDescriptorSet(
+            p_logicalDevice,
+            uniformSamplerInfo,
+            p_sampler,
+            descriptorSets[i]
         );
-        writeDescriptorSets.push_back(textureArrayDescriptorWriteSet);
 
-        LOG_TRACE(PIPELINE, "Updating descriptor sets with {} descriptor writes", writeDescriptorSets.size());
-
-        p_logicalDevice->updateDescriptorSets(
-            writeDescriptorSets.size(),
-            writeDescriptorSets.data(),
-            0,
-            nullptr
+        quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSet(
+            p_logicalDevice,
+            uniformTextureArrayInfo,
+            texturePtrs,
+            descriptorSets[i]
         );
     }
 
@@ -702,7 +766,6 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 
     m_vulkanDescriptorSets = quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment,
         maxNumFramesInFlight,
         m_uniformBufferInfos,
         m_uniformSamplerInfo,

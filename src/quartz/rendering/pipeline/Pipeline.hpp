@@ -109,9 +109,27 @@ private: // static functions
      *    - allocateTextures
      *    so we can be specific about what we're allocating on a per pipeline basis
      */
+    static void updateUniformBufferDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
+        const vk::DescriptorSet& descriptorSet,
+        const uint32_t descriptorSetIndex
+    );
+    static void updateUniformSamplerDescriptorSet(
+        const vk::UniqueDevice& p_logicalDevice,
+        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+        const vk::UniqueSampler& p_sampler,
+        const vk::DescriptorSet& descriptorSet
+    );
+    static void updateUniformTextureArrayDescriptorSet(
+        const vk::UniqueDevice& p_logicalDevice,
+        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
+        const vk::DescriptorSet& descriptorSet
+    );
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t minUniformBufferOffsetAlignment,
         const uint32_t maxNumFramesInFlight,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
