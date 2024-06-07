@@ -59,6 +59,7 @@ public: // member functions
 
     void allocateVulkanDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
+        const vk::UniqueSampler& p_sampler,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
         const uint32_t maxNumFramesInFlight
     );
@@ -118,6 +119,7 @@ private: // static functions
         const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
         const vk::UniqueDescriptorPool& uniqueDescriptorPool,
+        const vk::UniqueSampler& p_sampler,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(

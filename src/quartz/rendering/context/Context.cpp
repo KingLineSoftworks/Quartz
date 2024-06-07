@@ -197,6 +197,7 @@ quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     /** @todo 2024/06/06 Break this out into multiple functions */
     m_doodadRenderingPipeline.allocateVulkanDescriptorSets(
         m_renderingDevice,
+        quartz::rendering::Texture::getDefaultVulkanSamplerPtr(),
         quartz::rendering::Texture::getMasterTextureList(),
         m_maxNumFramesInFlight
     );
