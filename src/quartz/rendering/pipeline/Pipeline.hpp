@@ -57,11 +57,10 @@ public: // member functions
         const quartz::rendering::RenderPass& renderingRenderPass
     );
 
-    void allocateVulkanDescriptorSets(
+    void updateVulkanDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
         const vk::UniqueSampler& p_sampler,
-        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
-        const uint32_t maxNumFramesInFlight
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
     USE_LOGGER(PIPELINE);
@@ -102,43 +101,39 @@ private: // static functions
         const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
         const uint32_t numDescriptorSets
     );
-    /**
-     * @todo 2024/06/06 Break this out into multiple functions:
-     *    - allocateUniformBuffers
-     *    - allocateTextureSampler
-     *    - allocateTextures
-     *    so we can be specific about what we're allocating on a per pipeline basis
-     */
+    static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const uint32_t maxNumFramesInFlight,
+        const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
+        const vk::UniqueDescriptorPool& p_descriptorPool
+    );
     static void updateUniformBufferDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
-        const vk::DescriptorSet& descriptorSet,
-        const uint32_t descriptorSetIndex
+        const std::vector<vk::DescriptorSet>& descriptorSets
     );
-    static void updateUniformSamplerDescriptorSet(
+    static void updateUniformSamplerDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
         const vk::UniqueSampler& p_sampler,
-        const vk::DescriptorSet& descriptorSet
+        const std::vector<vk::DescriptorSet>& descriptorSets
     );
-    static void updateUniformTextureArrayDescriptorSet(
+    static void updateUniformTextureArrayDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
-        const vk::DescriptorSet& descriptorSet
+        const std::vector<vk::DescriptorSet>& descriptorSets
     );
-    static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
+    static void updateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t maxNumFramesInFlight,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
         const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
-        const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
-        const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
-        const vk::UniqueDescriptorPool& uniqueDescriptorPool,
+        const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
         const vk::UniqueSampler& p_sampler,
-        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
+        const std::vector<vk::DescriptorSet>& descriptorSets
     );
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
@@ -175,7 +170,7 @@ private: // member variables
 
     std::vector<quartz::rendering::LocallyMappedBuffer> m_locallyMappedUniformBuffers;
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
-    vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
+    vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr; /** @todo 2024/06/07 Do we need to track this? It is only used when allocating descriptor sets */
     std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;
 
     vk::UniquePipelineLayout mp_vulkanPipelineLayout;

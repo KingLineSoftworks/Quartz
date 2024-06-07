@@ -21,7 +21,7 @@ public: // member functions
         const uint32_t bindingLocation,
         const uint32_t descriptorCount,
         const uint32_t objectStrideBytes,
-        const vk::DescriptorType descriptorType, /** @todo 2024/06/06 Make this a boolean flag for whether or not the buffer is dynamic */
+        const bool isDynamic,
         const vk::ShaderStageFlags shaderStageFlags
     );
     UniformBufferInfo(const UniformBufferInfo& other);

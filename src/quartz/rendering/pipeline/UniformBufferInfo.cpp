@@ -23,7 +23,7 @@ quartz::rendering::UniformBufferInfo::UniformBufferInfo(
     const uint32_t bindingLocation,
     const uint32_t descriptorCount,
     const uint32_t objectStrideBytes,
-    const vk::DescriptorType descriptorType,
+    const bool isDynamic,
     const vk::ShaderStageFlags shaderStageFlags
 ) :
     m_locallyMappedBufferSize(locallyMappedBufferSizeBytes),
@@ -32,7 +32,7 @@ quartz::rendering::UniformBufferInfo::UniformBufferInfo(
     m_bindingLocation(bindingLocation),
     m_descriptorCount(descriptorCount),
     m_objectStrideBytes(objectStrideBytes),
-    m_vulkanDescriptorType(descriptorType),
+    m_vulkanDescriptorType(isDynamic ? vk::DescriptorType::eUniformBufferDynamic : vk::DescriptorType::eUniformBuffer),
     m_vulkanShaderStageFlags(shaderStageFlags)
 {}
 

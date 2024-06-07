@@ -31,7 +31,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         0,
         1,
         sizeof(quartz::scene::Camera::UniformBufferObject),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
     );
 
@@ -42,7 +42,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         1,
         1,
         sizeof(quartz::scene::AmbientLight),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -53,7 +53,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         2,
         1,
         sizeof(quartz::scene::DirectionalLight),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -64,7 +64,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         3,
         1,
         sizeof(uint32_t),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -75,7 +75,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         4,
         1,
         sizeof(quartz::scene::PointLight),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -86,7 +86,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         5,
         1,
         sizeof(uint32_t),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -97,7 +97,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         6,
         1,
         sizeof(quartz::scene::SpotLight),
-        vk::DescriptorType::eUniformBuffer,
+        false,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -109,7 +109,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         9,
         1,
         materialByteStride,
-        vk::DescriptorType::eUniformBufferDynamic,
+        true,
         vk::ShaderStageFlagBits::eFragment
     );
 
@@ -194,12 +194,10 @@ void
 quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    /** @todo 2024/06/06 Break this out into multiple functions */
-    m_doodadRenderingPipeline.allocateVulkanDescriptorSets(
+    m_doodadRenderingPipeline.updateVulkanDescriptorSets(
         m_renderingDevice,
         quartz::rendering::Texture::getDefaultVulkanSamplerPtr(),
-        quartz::rendering::Texture::getMasterTextureList(),
-        m_maxNumFramesInFlight
+        quartz::rendering::Texture::getMasterTextureList()
     );
 
     m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
