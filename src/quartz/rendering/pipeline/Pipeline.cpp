@@ -443,27 +443,20 @@ quartz::rendering::Pipeline::updateVulkanDescriptorSets(
 vk::UniquePipelineLayout
 quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice,
+    UNUSED const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
 ) {
     LOG_FUNCTION_CALL_TRACE(PIPELINE, "");
 
-    vk::PushConstantRange vertexPushConstantRange(
-        vk::ShaderStageFlagBits::eVertex,
-        0,
-        sizeof(glm::mat4)
-    );
+    std::vector<vk::PushConstantRange> pushConstantRanges;
 
-    /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
-    vk::PushConstantRange fragmentPushConstantRange(
-        vk::ShaderStageFlagBits::eFragment,
-        sizeof(glm::mat4),
-        sizeof(uint32_t)
-    );
-
-    std::vector<vk::PushConstantRange> pushConstantRanges = {
-        vertexPushConstantRange,
-        fragmentPushConstantRange
-    };
+    for (const quartz::rendering::PushConstantInfo& pushConstantInfo : pushConstantInfos) {
+        pushConstantRanges.emplace_back(
+            pushConstantInfo.getVulkanShaderStageFlags(),
+            pushConstantInfo.getOffset(),
+            pushConstantInfo.getSize()
+        );
+    }
 
     vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo(
         {},
@@ -656,6 +649,7 @@ quartz::rendering::Pipeline::Pipeline(
     const std::string& compiledVertexShaderFilepath,
     const std::string& compiledFragmentShaderFilepath,
     const uint32_t maxNumFramesInFlight,
+    const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
     const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
     const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
@@ -715,6 +709,7 @@ quartz::rendering::Pipeline::Pipeline(
             compiledFragmentShaderFilepath
         )
     ),
+    m_pushConstantInfos(pushConstantInfos),
     m_uniformBufferInfos(uniformBufferInfos),
     mo_uniformSamplerInfo(o_uniformSamplerInfo),
     mo_uniformTextureArrayInfo(o_uniformTextureArrayInfo),
@@ -753,6 +748,7 @@ quartz::rendering::Pipeline::Pipeline(
     mp_vulkanPipelineLayout(
         quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
+            m_pushConstantInfos,
             mp_vulkanDescriptorSetLayout
         )
     ),
@@ -796,6 +792,7 @@ quartz::rendering::Pipeline::recreate(
 
     mp_vulkanPipelineLayout = quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
+        m_pushConstantInfos,
         mp_vulkanDescriptorSetLayout
     );
     mp_vulkanGraphicsPipeline = quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(

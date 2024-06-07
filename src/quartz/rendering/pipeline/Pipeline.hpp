@@ -10,6 +10,7 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
 #include "quartz/rendering/pipeline/UniformSamplerInfo.hpp"
 #include "quartz/rendering/pipeline/UniformTextureArrayInfo.hpp"
@@ -46,6 +47,7 @@ public: // member functions
         const std::string& compiledVertexShaderFilepath,
         const std::string& compiledFragmentShaderFilepath,
         const uint32_t maxNumFramesInFlight,
+        const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
         const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
@@ -66,6 +68,7 @@ public: // member functions
 
     USE_LOGGER(PIPELINE);
 
+    const std::vector<quartz::rendering::PushConstantInfo>& getPushConstantInfos() const { return m_pushConstantInfos; }
     const std::vector<quartz::rendering::UniformBufferInfo>& getUniformBufferInfos() const { return m_uniformBufferInfos; }
     const quartz::rendering::UniformBufferInfo& getUniformBufferInfo(const uint32_t index) const { return m_uniformBufferInfos[index]; }
 
@@ -140,6 +143,7 @@ private: // static functions
     );
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
     );
     static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
@@ -167,6 +171,7 @@ private: // member variables
     vk::UniqueShaderModule mp_vulkanVertexShaderModule;
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
 
+    std::vector<quartz::rendering::PushConstantInfo> m_pushConstantInfos;
     std::vector<quartz::rendering::UniformBufferInfo> m_uniformBufferInfos;
     std::optional<quartz::rendering::UniformSamplerInfo> mo_uniformSamplerInfo;
     std::optional<quartz::rendering::UniformTextureArrayInfo> mo_uniformTextureArrayInfo;

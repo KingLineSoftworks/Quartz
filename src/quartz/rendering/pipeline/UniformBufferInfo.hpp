@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
-#include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
 
 namespace quartz {
@@ -15,7 +14,6 @@ namespace rendering {
 class quartz::rendering::UniformBufferInfo {
 public: // member functions
     UniformBufferInfo(
-        const quartz::rendering::Device& renderingDevice,
         const uint32_t locallyMappedBufferSizeBytes,
         const vk::MemoryPropertyFlags locallyMappedBufferPropertyFlags,
         const uint32_t bindingLocation,

@@ -1,10 +1,11 @@
-#include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
-
 #include "util/macros.hpp"
+
+#include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
 
 uint32_t
 quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(
-    const quartz::rendering::Device &renderingDevice,
+    const quartz::rendering::Device& renderingDevice,
     const uint32_t uniformBufferObjectSizeBytes
 ) {
     const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
@@ -17,7 +18,6 @@ quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(
 }
 
 quartz::rendering::UniformBufferInfo::UniformBufferInfo(
-    UNUSED const quartz::rendering::Device& renderingDevice,
     const uint32_t locallyMappedBufferSizeBytes,
     const vk::MemoryPropertyFlags locallyMappedBufferPropertyFlags,
     const uint32_t bindingLocation,

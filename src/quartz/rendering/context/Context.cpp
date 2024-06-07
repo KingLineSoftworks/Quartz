@@ -6,6 +6,7 @@
 #include "quartz/rendering/context/Context.hpp"
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
 #include "quartz/rendering/pipeline/UniformSamplerInfo.hpp"
 #include "quartz/rendering/pipeline/UniformTextureArrayInfo.hpp"
@@ -22,10 +23,22 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     const quartz::rendering::RenderPass& renderingRenderPass,
     const uint32_t maxNumFramesInFlight
 ) {
+    std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos = {
+        {
+            vk::ShaderStageFlagBits::eVertex,
+            0,
+            sizeof(glm::mat4)
+        },
+        {
+            vk::ShaderStageFlagBits::eFragment,
+            sizeof(glm::mat4),
+            sizeof(uint32_t)
+        }
+    };
+
     std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos;
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(quartz::scene::Camera::UniformBufferObject),
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         0,
@@ -36,7 +49,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     );
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(quartz::scene::AmbientLight),
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         1,
@@ -47,7 +59,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     );
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(quartz::scene::DirectionalLight),
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         2,
@@ -58,7 +69,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     );
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(uint32_t),
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         3,
@@ -69,7 +79,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     );
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         4,
@@ -80,7 +89,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     );
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(uint32_t),
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         5,
@@ -91,7 +99,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
     );
 
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         6,
@@ -103,7 +110,6 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
 
     const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(renderingDevice, sizeof(quartz::rendering::Material::UniformBufferObject));
     uniformBufferInfos.emplace_back(
-        renderingDevice,
         materialByteStride * QUARTZ_MAX_NUMBER_MATERIALS,
         vk::MemoryPropertyFlagBits::eHostVisible,
         9,
@@ -132,6 +138,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.vert"),
         util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.frag"),
         maxNumFramesInFlight,
+        pushConstantInfos,
         uniformBufferInfos,
         uniformSamplerInfo,
         uniformTextureArrayInfo

@@ -15,6 +15,9 @@ add_library(
 
         UniformTextureArrayInfo.hpp
         UniformTextureArrayInfo.cpp
+
+        PushConstantInfo.cpp
+        PushConstantInfo.hpp
 )
 
 target_compile_options(
