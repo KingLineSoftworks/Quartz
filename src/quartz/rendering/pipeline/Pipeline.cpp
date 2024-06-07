@@ -41,10 +41,10 @@ quartz::rendering::Pipeline::createVulkanShaderModulePtr(
 }
 
 std::vector<quartz::rendering::LocallyMappedBuffer>
-quartz::rendering::Pipeline::createLocallyMappedUniformBuffers(
+quartz::rendering::Pipeline::createLocallyMappedBuffers(
     const quartz::rendering::Device& renderingDevice,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    UNUSED const uint32_t maxNumFramesInFlight
+    const uint32_t maxNumFramesInFlight
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight, {} buffer infos", maxNumFramesInFlight, uniformBufferInfos.size());
 
@@ -79,13 +79,14 @@ vk::UniqueDescriptorSetLayout
 quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
+    const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+    const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
 
+    LOG_TRACE(PIPELINE, "Creating {} layout bindings for uniform buffers", uniformBufferInfos.size());
     for (const quartz::rendering::UniformBufferInfo& uniformBufferInfo : uniformBufferInfos) {
         vk::DescriptorSetLayoutBinding uniformBufferLayoutBinding(
             uniformBufferInfo.getBindingLocation(),
@@ -97,23 +98,29 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
         layoutBindings.push_back(uniformBufferLayoutBinding);
     }
 
-    vk::DescriptorSetLayoutBinding samplerLayoutBinding(
-        uniformSamplerInfo.getBindingLocation(),
-        uniformSamplerInfo.getVulkanDescriptorType(),
-        uniformSamplerInfo.getDescriptorCount(),
-        uniformSamplerInfo.getVulkanShaderStageFlags(),
-        {}
-    );
-    layoutBindings.push_back(samplerLayoutBinding);
+    LOG_TRACE(PIPELINE, "{}reating layout binding for uniform sampler", o_uniformSamplerInfo ? "C" : "Not c");
+    if (o_uniformSamplerInfo) {
+        vk::DescriptorSetLayoutBinding samplerLayoutBinding(
+            o_uniformSamplerInfo->getBindingLocation(),
+            o_uniformSamplerInfo->getVulkanDescriptorType(),
+            o_uniformSamplerInfo->getDescriptorCount(),
+            o_uniformSamplerInfo->getVulkanShaderStageFlags(),
+            {}
+        );
+        layoutBindings.push_back(samplerLayoutBinding);
+    }
 
-    vk::DescriptorSetLayoutBinding textureArrayLayoutBinding(
-        uniformTextureArrayInfo.getBindingLocation(),
-        uniformTextureArrayInfo.getVulkanDescriptorType(),
-        uniformTextureArrayInfo.getDescriptorCount(),
-        uniformTextureArrayInfo.getVulkanShaderStageFlags(),
-        {}
-    );
-    layoutBindings.push_back(textureArrayLayoutBinding);
+    LOG_TRACE(PIPELINE, "{}reating layout binding for uniform texture array", o_uniformTextureArrayInfo ? "C" : "Not c");
+    if (o_uniformTextureArrayInfo) {
+        vk::DescriptorSetLayoutBinding textureArrayLayoutBinding(
+            o_uniformTextureArrayInfo->getBindingLocation(),
+            o_uniformTextureArrayInfo->getVulkanDescriptorType(),
+            o_uniformTextureArrayInfo->getDescriptorCount(),
+            o_uniformTextureArrayInfo->getVulkanShaderStageFlags(),
+            {}
+        );
+        layoutBindings.push_back(textureArrayLayoutBinding);
+    }
 
     LOG_TRACE(PIPELINE, "Using {} layout bindings", layoutBindings.size());
 
@@ -132,14 +139,15 @@ vk::UniqueDescriptorPool
 quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+    const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+    const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
     const uint32_t numDescriptorSets /** should be the maximum number of frames in flight */
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} descriptor sets", numDescriptorSets);
 
     std::vector<vk::DescriptorPoolSize> descriptorPoolSizes;
 
+    LOG_TRACE(PIPELINE, "Creating {} descriptor pool sizes for uniform buffers", uniformBufferInfos.size());
     for (const quartz::rendering::UniformBufferInfo& uniformBufferInfo : uniformBufferInfos) {
         vk::DescriptorPoolSize uniformBufferPoolSize(
             uniformBufferInfo.getVulkanDescriptorType(),
@@ -148,17 +156,23 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
         descriptorPoolSizes.push_back(uniformBufferPoolSize);
     }
 
-    vk::DescriptorPoolSize samplerPoolSize(
-        uniformSamplerInfo.getVulkanDescriptorType(),
-        numDescriptorSets * uniformSamplerInfo.getDescriptorCount()
-    );
-    descriptorPoolSizes.push_back(samplerPoolSize);
+    LOG_TRACE(PIPELINE, "{}reating descriptor pool size for uniform sampler", o_uniformSamplerInfo ? "C" : "Not c");
+    if (o_uniformSamplerInfo) {
+        vk::DescriptorPoolSize samplerPoolSize(
+            o_uniformSamplerInfo->getVulkanDescriptorType(),
+            numDescriptorSets * o_uniformSamplerInfo->getDescriptorCount()
+        );
+        descriptorPoolSizes.push_back(samplerPoolSize);
+    }
 
-    vk::DescriptorPoolSize textureArrayPoolSize(
-        uniformTextureArrayInfo.getVulkanDescriptorType(),
-        numDescriptorSets * uniformTextureArrayInfo.getDescriptorCount()
-    );
-    descriptorPoolSizes.push_back(textureArrayPoolSize);
+    LOG_TRACE(PIPELINE, "{}reating descriptor pool size for uniform texture array", o_uniformTextureArrayInfo ? "C" : "Not c");
+    if (o_uniformTextureArrayInfo) {
+        vk::DescriptorPoolSize textureArrayPoolSize(
+            o_uniformTextureArrayInfo->getVulkanDescriptorType(),
+            numDescriptorSets * o_uniformTextureArrayInfo->getDescriptorCount()
+        );
+        descriptorPoolSizes.push_back(textureArrayPoolSize);
+    }
 
     LOG_TRACE(PIPELINE, "Using {} pool sizes", descriptorPoolSizes.size());
     LOG_TRACE(PIPELINE, "Using maximum of {} descriptor sets", numDescriptorSets);
@@ -267,6 +281,12 @@ quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
 
         LOG_TRACE(PIPELINE, "  Updating descriptor set {} with {} descriptor writes", i, writeDescriptorSets.size());
 
+        /**
+         * @todo 2024/06/07 What happens when writeDescriptorSets is empty and we give 0 as the count to this function?
+         *    Best case - it handles 0 gracefully and just does not do anything
+         *    Worst case - it dies screaming
+         *      We might need to put a gate at the beginning of this function that ensures uniformBufferInfos is not empty
+         */
         p_logicalDevice->updateDescriptorSets(
             writeDescriptorSets.size(),
             writeDescriptorSets.data(),
@@ -279,20 +299,25 @@ quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
 void
 quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
-    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+    const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
     const vk::UniqueSampler& p_sampler,
     const std::vector<vk::DescriptorSet>& descriptorSets
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
+
+    if (!o_uniformSamplerInfo) {
+        LOG_TRACE(PIPELINE, "No uniform sampler info. Not updating descriptor sets for it");
+        return;
+    }
 
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         LOG_TRACE(PIPELINE, "Updating descriptor set {}", i);
         const vk::DescriptorSet& descriptorSet = descriptorSets[i];
 
         LOG_TRACE(PIPELINE, "  Using uniform sampler info");
-        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformSamplerInfo.getBindingLocation());
-        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformSamplerInfo.getDescriptorCount());
-        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformSamplerInfo.getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", o_uniformSamplerInfo->getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", o_uniformSamplerInfo->getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(o_uniformSamplerInfo->getVulkanDescriptorType()));
         vk::DescriptorImageInfo samplerImageInfo(
             *(p_sampler),
             {},
@@ -300,10 +325,10 @@ quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
         );
         vk::WriteDescriptorSet writeDescriptorSet(
             descriptorSet,
-            uniformSamplerInfo.getBindingLocation(),
+            o_uniformSamplerInfo->getBindingLocation(),
             0,
-            uniformSamplerInfo.getDescriptorCount(),
-            uniformSamplerInfo.getVulkanDescriptorType(),
+            o_uniformSamplerInfo->getDescriptorCount(),
+            o_uniformSamplerInfo->getVulkanDescriptorType(),
             &samplerImageInfo,
             {},
             {}
@@ -322,26 +347,31 @@ quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
 
 void quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
-    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+    const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
     const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
     const std::vector<vk::DescriptorSet>& descriptorSets
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
+    if (!o_uniformTextureArrayInfo) {
+        LOG_TRACE(PIPELINE, "No uniform texture array info. Not updating descriptor sets for it");
+        return;
+    }
+
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         LOG_TRACE(PIPELINE, "Updating descriptor set {}", i);
         const vk::DescriptorSet& descriptorSet = descriptorSets[i];
 
-        const uint32_t numTexturesToUse = std::min<uint32_t>(uniformTextureArrayInfo.getDescriptorCount(), texturePtrs.size());
+        const uint32_t numTexturesToUse = std::min<uint32_t>(o_uniformTextureArrayInfo->getDescriptorCount(), texturePtrs.size());
         LOG_TRACE(PIPELINE, "  Using texture array sampler info");
-        LOG_TRACE(PIPELINE, "    destination binding    = {}", uniformTextureArrayInfo.getBindingLocation());
-        LOG_TRACE(PIPELINE, "    descriptor count       = {}", uniformTextureArrayInfo.getDescriptorCount());
-        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(uniformTextureArrayInfo.getVulkanDescriptorType()));
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", o_uniformTextureArrayInfo->getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", o_uniformTextureArrayInfo->getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(o_uniformTextureArrayInfo->getVulkanDescriptorType()));
         LOG_TRACE(PIPELINE, "    given       {} textures", texturePtrs.size());
-        LOG_TRACE(PIPELINE, "    allocating  {} textures", uniformTextureArrayInfo.getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    allocating  {} textures", o_uniformTextureArrayInfo->getDescriptorCount());
         LOG_TRACE(PIPELINE, "    using       {} textures", numTexturesToUse);
         std::vector<vk::DescriptorImageInfo> textureImageInfos(
-            uniformTextureArrayInfo.getDescriptorCount(),
+            o_uniformTextureArrayInfo->getDescriptorCount(),
             {
                 nullptr,
                 *(texturePtrs[0]->getVulkanImageViewPtr()),
@@ -357,10 +387,10 @@ void quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
         }
         vk::WriteDescriptorSet writeDescriptorSet(
             descriptorSet,
-            uniformTextureArrayInfo.getBindingLocation(),
+            o_uniformTextureArrayInfo->getBindingLocation(),
             0,
-            uniformTextureArrayInfo.getDescriptorCount(),
-            uniformTextureArrayInfo.getVulkanDescriptorType(),
+            o_uniformTextureArrayInfo->getDescriptorCount(),
+            o_uniformTextureArrayInfo->getVulkanDescriptorType(),
             textureImageInfos.data(),
             {},
             {}
@@ -381,8 +411,8 @@ void
 quartz::rendering::Pipeline::updateVulkanDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+    const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+    const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
     const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
     const vk::UniqueSampler& p_sampler,
     const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
@@ -399,14 +429,14 @@ quartz::rendering::Pipeline::updateVulkanDescriptorSets(
 
     quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
         p_logicalDevice,
-        uniformSamplerInfo,
+        o_uniformSamplerInfo,
         p_sampler,
         descriptorSets
     );
 
     quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
         p_logicalDevice,
-        uniformTextureArrayInfo,
+        o_uniformTextureArrayInfo,
         texturePtrs,
         descriptorSets
     );
@@ -629,8 +659,8 @@ quartz::rendering::Pipeline::Pipeline(
     const std::string& compiledFragmentShaderFilepath,
     const uint32_t maxNumFramesInFlight,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-    const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
+    const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+    const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
 ) :
     m_vulkanVertexInputBindingDescriptions(
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription()
@@ -688,10 +718,10 @@ quartz::rendering::Pipeline::Pipeline(
         )
     ),
     m_uniformBufferInfos(uniformBufferInfos),
-    m_uniformSamplerInfo(uniformSamplerInfo),
-    m_uniformTextureArrayInfo(uniformTextureArrayInfo),
-    m_locallyMappedUniformBuffers(
-        quartz::rendering::Pipeline::createLocallyMappedUniformBuffers(
+    mo_uniformSamplerInfo(o_uniformSamplerInfo),
+    mo_uniformTextureArrayInfo(o_uniformTextureArrayInfo),
+    m_locallyMappedBuffers(
+        quartz::rendering::Pipeline::createLocallyMappedBuffers(
             renderingDevice,
             m_uniformBufferInfos,
             maxNumFramesInFlight
@@ -701,16 +731,16 @@ quartz::rendering::Pipeline::Pipeline(
         quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_uniformBufferInfos,
-            m_uniformSamplerInfo,
-            m_uniformTextureArrayInfo
+            mo_uniformSamplerInfo,
+            mo_uniformTextureArrayInfo
         )
     ),
     m_vulkanDescriptorPoolPtr(
         quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_uniformBufferInfos,
-            m_uniformSamplerInfo,
-            m_uniformTextureArrayInfo,
+            mo_uniformSamplerInfo,
+            mo_uniformTextureArrayInfo,
             maxNumFramesInFlight
         )
     ),
@@ -796,9 +826,9 @@ quartz::rendering::Pipeline::updateVulkanDescriptorSets(
     quartz::rendering::Pipeline::updateVulkanDescriptorSets(
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_uniformBufferInfos,
-        m_uniformSamplerInfo,
-        m_uniformTextureArrayInfo,
-        m_locallyMappedUniformBuffers,
+        mo_uniformSamplerInfo,
+        mo_uniformTextureArrayInfo,
+        m_locallyMappedBuffers,
         p_sampler,
         texturePtrs,
         m_vulkanDescriptorSets
@@ -818,7 +848,7 @@ quartz::rendering::Pipeline::updateCameraUniformBuffer(
 
     const uint32_t cameraIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 0;
     memcpy(
-        m_locallyMappedUniformBuffers[cameraIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[cameraIndex].getMappedLocalMemoryPtr(),
         &cameraUBO,
         sizeof(quartz::scene::Camera::UniformBufferObject)
     );
@@ -831,7 +861,7 @@ quartz::rendering::Pipeline::updateAmbientLightUniformBuffer(
 ) {
     const uint32_t ambientLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 1;
     memcpy(
-        m_locallyMappedUniformBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[ambientLightIndex].getMappedLocalMemoryPtr(),
         &ambientLight,
         sizeof(quartz::scene::AmbientLight)
     );
@@ -844,7 +874,7 @@ quartz::rendering::Pipeline::updateDirectionalLightUniformBuffer(
 ) {
     const uint32_t directionalLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 2;
     memcpy(
-        m_locallyMappedUniformBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[directionalLightIndex].getMappedLocalMemoryPtr(),
         &directionalLight,
         sizeof(quartz::scene::DirectionalLight)
     );
@@ -858,14 +888,14 @@ quartz::rendering::Pipeline::updatePointLightUniformBuffer(
     uint32_t pointLightCount = std::min<uint32_t>(pointLights.size(), QUARTZ_MAX_NUMBER_POINT_LIGHTS);
     const uint32_t pointLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 3;
     memcpy(
-        m_locallyMappedUniformBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[pointLightCountIndex].getMappedLocalMemoryPtr(),
         &pointLightCount,
         sizeof(uint32_t)
     );
 
     const uint32_t pointLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 4;
     memcpy(
-        m_locallyMappedUniformBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[pointLightIndex].getMappedLocalMemoryPtr(),
         pointLights.data(),
         sizeof(quartz::scene::PointLight) * pointLightCount
     );
@@ -879,14 +909,14 @@ quartz::rendering::Pipeline::updateSpotLightUniformBuffer(
     uint32_t spotLightCount = std::min<uint32_t>(spotLights.size(), QUARTZ_MAX_NUMBER_SPOT_LIGHTS);
     const uint32_t spotLightCountIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 5;
     memcpy(
-        m_locallyMappedUniformBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[spotLightCountIndex].getMappedLocalMemoryPtr(),
         &spotLightCount,
         sizeof(uint32_t)
     );
 
     const uint32_t spotLightIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 6;
     memcpy(
-        m_locallyMappedUniformBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
+        m_locallyMappedBuffers[spotLightIndex].getMappedLocalMemoryPtr(),
         spotLights.data(),
         sizeof(quartz::scene::SpotLight) * spotLightCount
     );
@@ -919,7 +949,7 @@ quartz::rendering::Pipeline::updateMaterialArrayUniformBuffer(
     }
 
     const uint32_t materialArrayIndex = currentInFlightFrameIndex * NUM_UNIQUE_UNIFORM_BUFFERS + 7;
-    void* p_mappedBuffer = m_locallyMappedUniformBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
+    void* p_mappedBuffer = m_locallyMappedBuffers[materialArrayIndex].getMappedLocalMemoryPtr();
 
     for (uint32_t i = 0; i < materialUBOs.size(); ++i) {
         uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?

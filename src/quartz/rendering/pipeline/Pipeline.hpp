@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <optional>
 
 #include <glm/mat4x4.hpp>
 
@@ -46,8 +47,8 @@ public: // member functions
         const std::string& compiledFragmentShaderFilepath,
         const uint32_t maxNumFramesInFlight,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
     );
     ~Pipeline();
 
@@ -83,7 +84,7 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
-    static std::vector<quartz::rendering::LocallyMappedBuffer> createLocallyMappedUniformBuffers(
+    static std::vector<quartz::rendering::LocallyMappedBuffer> createLocallyMappedBuffers(
         const quartz::rendering::Device& renderingDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const uint32_t maxNumFramesInFlight
@@ -91,14 +92,14 @@ private: // static functions
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
     );
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
         const uint32_t numDescriptorSets
     );
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
@@ -115,21 +116,21 @@ private: // static functions
     );
     static void updateUniformSamplerDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
         const vk::UniqueSampler& p_sampler,
         const std::vector<vk::DescriptorSet>& descriptorSets
     );
     static void updateUniformTextureArrayDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
         const std::vector<vk::DescriptorSet>& descriptorSets
     );
     static void updateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-        const quartz::rendering::UniformSamplerInfo& uniformSamplerInfo,
-        const quartz::rendering::UniformTextureArrayInfo& uniformTextureArrayInfo,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
         const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
         const vk::UniqueSampler& p_sampler,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
@@ -165,10 +166,10 @@ private: // member variables
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
 
     std::vector<quartz::rendering::UniformBufferInfo> m_uniformBufferInfos;
-    quartz::rendering::UniformSamplerInfo m_uniformSamplerInfo;
-    quartz::rendering::UniformTextureArrayInfo m_uniformTextureArrayInfo;
+    std::optional<quartz::rendering::UniformSamplerInfo> mo_uniformSamplerInfo;
+    std::optional<quartz::rendering::UniformTextureArrayInfo> mo_uniformTextureArrayInfo;
 
-    std::vector<quartz::rendering::LocallyMappedBuffer> m_locallyMappedUniformBuffers;
+    std::vector<quartz::rendering::LocallyMappedBuffer> m_locallyMappedBuffers;
     vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
     vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr; /** @todo 2024/06/07 Do we need to track this? It is only used when allocating descriptor sets */
     std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;
