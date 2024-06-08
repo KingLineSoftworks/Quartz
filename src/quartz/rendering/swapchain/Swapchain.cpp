@@ -559,11 +559,12 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         }
 
         glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
+        const quartz::rendering::PushConstantInfo& transformMatrixPushConstantInfo = doodadRenderingPipeline.getPushConstantInfos()[0];
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
             *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
-            vk::ShaderStageFlagBits::eVertex,
-            0,
-            sizeof(glm::mat4),
+            transformMatrixPushConstantInfo.getVulkanShaderStageFlags(),
+            transformMatrixPushConstantInfo.getOffset(),
+            transformMatrixPushConstantInfo.getSize(),
             reinterpret_cast<void*>(&currentTransformationMatrix)
         );
 
@@ -585,11 +586,12 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
             );
 
             /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
+            const quartz::rendering::PushConstantInfo& dummyPushConstantInfo = doodadRenderingPipeline.getPushConstantInfos()[1];
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
                 *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
-                vk::ShaderStageFlagBits::eFragment,
-                sizeof(glm::mat4),
-                sizeof(uint32_t),
+                dummyPushConstantInfo.getVulkanShaderStageFlags(),
+                dummyPushConstantInfo.getOffset(),
+                dummyPushConstantInfo.getSize(),
                 reinterpret_cast<void*>(&materialMasterIndex)
             );
 

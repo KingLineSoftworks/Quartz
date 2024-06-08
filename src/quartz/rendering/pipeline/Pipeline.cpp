@@ -446,11 +446,18 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     UNUSED const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
     const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
 ) {
-    LOG_FUNCTION_CALL_TRACE(PIPELINE, "");
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
 
     std::vector<vk::PushConstantRange> pushConstantRanges;
 
-    for (const quartz::rendering::PushConstantInfo& pushConstantInfo : pushConstantInfos) {
+    LOG_TRACE(PIPELINE, "Creating {} push constant ranges", pushConstantInfos.size());
+
+    for (uint32_t i = 0; i < pushConstantInfos.size(); ++i) {
+        LOG_TRACE(PIPELINE, "  Push constant info {}", i);
+        const quartz::rendering::PushConstantInfo& pushConstantInfo = pushConstantInfos[i];
+        LOG_TRACE(PIPELINE, "    offset = {} bytes", pushConstantInfo.getOffset());
+        LOG_TRACE(PIPELINE, "    size   = {} bytes", pushConstantInfo.getSize());
+
         pushConstantRanges.emplace_back(
             pushConstantInfo.getVulkanShaderStageFlags(),
             pushConstantInfo.getOffset(),
