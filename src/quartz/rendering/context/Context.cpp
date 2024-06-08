@@ -4,6 +4,7 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Context.hpp"
+#include "quartz/rendering/cube_map/CubeMap.hpp"
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/pipeline/PushConstantInfo.hpp"
@@ -17,18 +18,67 @@
 #include "quartz/scene/light/SpotLight.hpp"
 
 quartz::rendering::Pipeline
+quartz::rendering::Context::createSkyboxRenderingPipeline(
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
+) {
+    LOG_FUNCTION_SCOPE_DEBUG(CONTEXT, "");
+
+    std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos;
+
+    std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
+        // camera
+        {
+            sizeof(quartz::scene::Camera::UniformBufferObject),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            0,
+            1,
+            sizeof(quartz::scene::Camera::UniformBufferObject),
+            false,
+            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+        }
+    };
+
+    LOG_DEBUG(PIPELINE, "Using {} push constants", pushConstantInfos.size());
+    LOG_DEBUG(PIPELINE, "Using {} uniform buffers", uniformBufferInfos.size());
+    LOG_DEBUG(PIPELINE, "Using no uniform sampler");
+    LOG_DEBUG(PIPELINE, "Using no uniform texture array");
+
+    return {
+        renderingDevice,
+        renderingWindow,
+        renderingRenderPass,
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("skybox.vert"),
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("skybox.frag"),
+        maxNumFramesInFlight,
+        quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription(),
+        quartz::rendering::CubeMap::getVulkanVertexInputAttributeDescriptions(),
+        pushConstantInfos,
+        uniformBufferInfos,
+        std::nullopt,
+        std::nullopt
+    };
+}
+
+quartz::rendering::Pipeline
 quartz::rendering::Context::createDoodadRenderingPipeline(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::RenderPass& renderingRenderPass,
     const uint32_t maxNumFramesInFlight
 ) {
+    LOG_FUNCTION_SCOPE_DEBUG(CONTEXT, "");
+
     std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos = {
+        // perObjectVertexPushConstant (for model matrix)
         {
             vk::ShaderStageFlagBits::eVertex,
             0,
             sizeof(glm::mat4)
         },
+        // dummy
         {
             vk::ShaderStageFlagBits::eFragment,
             sizeof(glm::mat4),
@@ -36,88 +86,89 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         }
     };
 
-    std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos;
-
-    uniformBufferInfos.emplace_back(
-        sizeof(quartz::scene::Camera::UniformBufferObject),
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        0,
-        1,
-        sizeof(quartz::scene::Camera::UniformBufferObject),
-        false,
-        vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
-    );
-
-    uniformBufferInfos.emplace_back(
-        sizeof(quartz::scene::AmbientLight),
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        1,
-        1,
-        sizeof(quartz::scene::AmbientLight),
-        false,
-        vk::ShaderStageFlagBits::eFragment
-    );
-
-    uniformBufferInfos.emplace_back(
-        sizeof(quartz::scene::DirectionalLight),
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        2,
-        1,
-        sizeof(quartz::scene::DirectionalLight),
-        false,
-        vk::ShaderStageFlagBits::eFragment
-    );
-
-    uniformBufferInfos.emplace_back(
-        sizeof(uint32_t),
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        3,
-        1,
-        sizeof(uint32_t),
-        false,
-        vk::ShaderStageFlagBits::eFragment
-    );
-
-    uniformBufferInfos.emplace_back(
-        sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        4,
-        1,
-        sizeof(quartz::scene::PointLight),
-        false,
-        vk::ShaderStageFlagBits::eFragment
-    );
-
-    uniformBufferInfos.emplace_back(
-        sizeof(uint32_t),
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        5,
-        1,
-        sizeof(uint32_t),
-        false,
-        vk::ShaderStageFlagBits::eFragment
-    );
-
-    uniformBufferInfos.emplace_back(
-        sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
-        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-        6,
-        1,
-        sizeof(quartz::scene::SpotLight),
-        false,
-        vk::ShaderStageFlagBits::eFragment
-    );
-
     const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(renderingDevice, sizeof(quartz::rendering::Material::UniformBufferObject));
-    uniformBufferInfos.emplace_back(
-        materialByteStride * QUARTZ_MAX_NUMBER_MATERIALS,
-        vk::MemoryPropertyFlagBits::eHostVisible,
-        9,
-        1,
-        materialByteStride,
-        true,
-        vk::ShaderStageFlagBits::eFragment
-    );
+    std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
+        // the camera
+        {
+            sizeof(quartz::scene::Camera::UniformBufferObject),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            0,
+            1,
+            sizeof(quartz::scene::Camera::UniformBufferObject),
+            false,
+            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+        },
+        // the ambient light
+        {
+            sizeof(quartz::scene::AmbientLight),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            1,
+            1,
+            sizeof(quartz::scene::AmbientLight),
+            false,
+            vk::ShaderStageFlagBits::eFragment
+        },
+        // the directional light
+        {
+            sizeof(quartz::scene::DirectionalLight),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            2,
+            1,
+            sizeof(quartz::scene::DirectionalLight),
+            false,
+            vk::ShaderStageFlagBits::eFragment
+        },
+        // the number of point lights
+        {
+            sizeof(uint32_t),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            3,
+            1,
+            sizeof(uint32_t),
+            false,
+            vk::ShaderStageFlagBits::eFragment
+        },
+        // the point lights
+        {
+            sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            4,
+            1,
+            sizeof(quartz::scene::PointLight),
+            false,
+            vk::ShaderStageFlagBits::eFragment
+        },
+        // the number of spot lights
+        {
+            sizeof(uint32_t),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            5,
+            1,
+            sizeof(uint32_t),
+            false,
+            vk::ShaderStageFlagBits::eFragment
+        },
+        // the spot lights
+        {
+            sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            6,
+            1,
+            sizeof(quartz::scene::SpotLight),
+            false,
+            vk::ShaderStageFlagBits::eFragment
+        },
+        // the materials
+        {
+            materialByteStride * QUARTZ_MAX_NUMBER_MATERIALS,
+            vk::MemoryPropertyFlagBits::eHostVisible,
+            9,
+            1,
+            materialByteStride,
+            true,
+            vk::ShaderStageFlagBits::eFragment
+        },
+    };
 
     quartz::rendering::UniformSamplerInfo uniformSamplerInfo(
         7,
@@ -131,6 +182,11 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         vk::ShaderStageFlagBits::eFragment
     );
 
+    LOG_DEBUG(PIPELINE, "Using {} push constants", pushConstantInfos.size());
+    LOG_DEBUG(PIPELINE, "Using {} uniform buffers", uniformBufferInfos.size());
+    LOG_DEBUG(PIPELINE, "Using a uniform sampler");
+    LOG_DEBUG(PIPELINE, "Using a uniform texture array");
+
     return {
         renderingDevice,
         renderingWindow,
@@ -138,6 +194,8 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.vert"),
         util::FileSystem::getCompiledShaderAbsoluteFilepath("shader.frag"),
         maxNumFramesInFlight,
+        quartz::rendering::Vertex::getVulkanVertexInputBindingDescription(),
+        quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions(),
         pushConstantInfos,
         uniformBufferInfos,
         uniformSamplerInfo,
@@ -174,6 +232,14 @@ quartz::rendering::Context::Context(
     m_renderingRenderPass(
         m_renderingDevice,
         m_renderingWindow
+    ),
+    m_skyboxRenderingPipeline(
+        quartz::rendering::Context::createSkyboxRenderingPipeline(
+            m_renderingDevice,
+            m_renderingWindow,
+            m_renderingRenderPass,
+            m_maxNumFramesInFlight
+        )
     ),
     m_doodadRenderingPipeline(
         quartz::rendering::Context::createDoodadRenderingPipeline(

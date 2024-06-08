@@ -47,6 +47,8 @@ public: // member functions
         const std::string& compiledVertexShaderFilepath,
         const std::string& compiledFragmentShaderFilepath,
         const uint32_t maxNumFramesInFlight,
+        const vk::VertexInputBindingDescription& vertexInputBindingDescription,
+        const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
         const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,

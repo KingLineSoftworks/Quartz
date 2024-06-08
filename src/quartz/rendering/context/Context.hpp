@@ -48,6 +48,12 @@ public: // member functions
     void finish();
 
 private: // static functions
+    static quartz::rendering::Pipeline createSkyboxRenderingPipeline(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
+    );
     static quartz::rendering::Pipeline createDoodadRenderingPipeline(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
@@ -65,6 +71,7 @@ private: // member variables
     quartz::rendering::Device m_renderingDevice;
     quartz::rendering::Window m_renderingWindow;
     quartz::rendering::RenderPass m_renderingRenderPass;
+    quartz::rendering::Pipeline m_skyboxRenderingPipeline;
     quartz::rendering::Pipeline m_doodadRenderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };

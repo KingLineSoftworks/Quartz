@@ -27,6 +27,7 @@ target_link_libraries(
 
         PUBLIC
         QUARTZ_RENDERING_Buffer
+        QUARTZ_RENDERING_CubeMap
         QUARTZ_RENDERING_Device
         QUARTZ_RENDERING_Instance
         QUARTZ_RENDERING_Model
