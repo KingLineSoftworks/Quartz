@@ -97,6 +97,7 @@ public: // static functions
 
     static uint32_t getDefaultMaterialMasterIndex() { return quartz::rendering::Material::defaultMaterialMasterIndex; }
 
+    static uint32_t getNumCreatedMaterials() { return quartz::rendering::Material::masterMaterialList.size(); }
     static std::shared_ptr<quartz::rendering::Material> getMaterialPtr(const uint32_t index) { return quartz::rendering::Material::masterMaterialList[index]; }
     static const std::vector<std::shared_ptr<quartz::rendering::Material>>& getMasterMaterialList() { return quartz::rendering::Material::masterMaterialList; }
 

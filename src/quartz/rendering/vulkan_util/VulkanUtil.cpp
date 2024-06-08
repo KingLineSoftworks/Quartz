@@ -56,7 +56,7 @@ quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
     vk::ImageViewCreateInfo imageViewCreateInfo(
         {},
         image,
-        vk::ImageViewType::e2D,
+        vk::ImageViewType::e2D, /** @todo 2024/06/08 Set to vk::ImageViewType::eCube for cube maps */
         format,
         components,
         {
@@ -76,7 +76,6 @@ quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
 
     return p_imageView;
 }
-
 
 vk::UniqueCommandPool
 quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(

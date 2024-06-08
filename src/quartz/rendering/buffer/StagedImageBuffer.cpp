@@ -79,7 +79,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
             0,
             1,
             0,
-            1
+            1 /** @todo 2024/06/08 Set to 6 for cube maps */
         }
     );
 
@@ -143,7 +143,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
             vk::ImageAspectFlagBits::eColor,
             0,
             0,
-            1
+            1 /** @todo 2024/06/08 Set to 6 for cube maps */
         },
         {
             0,

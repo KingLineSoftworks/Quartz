@@ -230,7 +230,7 @@ quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
     LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
 
     vk::ImageCreateInfo imageCreateInfo(
-        {},
+        {}, /** @todo 2024/06/08 Set vk::ImageCreateFlagBits::eCubeCompatible bit for cube maps */
         vk::ImageType::e2D,
         format,
         {
@@ -239,7 +239,7 @@ quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
             1
         },
         1,
-        1,
+        1, /** @todo 2024/06/08 Set to 6 for cube maps */
         vk::SampleCountFlagBits::e1,
         tiling,
         usageFlags,
