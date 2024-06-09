@@ -1,31 +1,28 @@
 #====================================================================
-# The Rendering Cube Map library
+# The Scene SkyBox library
 #====================================================================
 add_library(
-        QUARTZ_RENDERING_CubeMap
+        QUARTZ_SCENE_SkyBox
         SHARED
-        CubeMap.hpp
-        CubeMap.cpp
+        SkyBox.hpp
+        SkyBox.cpp
 )
 
 target_compile_options(
-        QUARTZ_RENDERING_CubeMap
+        QUARTZ_SCENE_SkyBox
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_link_libraries(
-        QUARTZ_RENDERING_CubeMap
+        QUARTZ_SCENE_SkyBox
 
         PUBLIC
-        # stb # don't need to link against stb because it's header only
-        glm
-        vulkan
+        # some vendor lib
 
         PUBLIC
         UTIL_Logger
 
         PUBLIC
+        QUARTZ_RENDERING_CubeMap
         QUARTZ_RENDERING_Device
-        QUARTZ_RENDERING_Texture
-        QUARTZ_RENDERING_VulkanUtil
 )

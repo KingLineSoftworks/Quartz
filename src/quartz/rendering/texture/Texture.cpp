@@ -61,12 +61,6 @@ quartz::rendering::Texture::initializeMasterTextureList(
 
     quartz::rendering::Texture::masterTextureList.reserve(QUARTZ_MAX_NUMBER_TEXTURES);
 
-    /**
-     * @todo 2024/05/07 We should probably make the default texture have a color of all 1.0,
-     *   according to [section 3.9.2 of the GLTF spec](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material)
-     *   where it says "f a texture is not given, all respective texture components within this material model MUST be assumed to have a value of 1.0."
-     *   But magenta is very easy to spot, so this is probably fine for now.
-     */
     LOG_TRACE(TEXTURE, "Creating base color default texture");
     const std::vector<uint8_t> baseColorPixel = { 0xFF, 0xFF, 0xFF, 0xFF }; // Default to white so when we element-wise multiply it has no effect
     std::shared_ptr<quartz::rendering::Texture> p_baseColorDefault = std::make_shared<quartz::rendering::Texture>(
@@ -177,20 +171,12 @@ quartz::rendering::Texture::createImageBufferFromFilepath(
         STBI_rgb_alpha
     );
     if (!p_texturePixels) {
-        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load texture from {}", filepath);
+        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load image from {}", filepath);
     }
 
     // x4 for rgba (32 bits = 4 bytes)
     uint32_t textureSizeBytes = textureWidth * textureHeight * 4;
-    LOG_TRACE(
-        TEXTURE,
-        "Successfully loaded {}x{} texture with {} channels ( {} bytes ) from {}",
-        textureWidth,
-        textureHeight,
-        textureChannelCount,
-        textureSizeBytes,
-        filepath
-    );
+    LOG_TRACE(TEXTURE, "Successfully loaded {}x{} image with {} channels ( {} bytes ) from {}", textureWidth, textureHeight, textureChannelCount, textureSizeBytes, filepath);
 
     quartz::rendering::StagedImageBuffer stagedImageBuffer(
         renderingDevice,
@@ -198,13 +184,15 @@ quartz::rendering::Texture::createImageBufferFromFilepath(
         static_cast<uint32_t>(textureHeight),
         static_cast<uint32_t>(textureChannelCount),
         textureSizeBytes,
+        1,
         vk::ImageUsageFlagBits::eSampled,
+        {},
         vk::Format::eR8G8B8A8Srgb,
         vk::ImageTiling::eOptimal,
         p_texturePixels
     );
 
-    LOG_TRACE(TEXTURE, "Freeing stbi texture");
+    LOG_TRACE(TEXTURE, "Freeing stbi image");
     stbi_image_free(p_texturePixels);
 
     return stagedImageBuffer;
@@ -276,7 +264,9 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
         static_cast<uint32_t>(textureHeight),
         static_cast<uint32_t>(textureChannelCount),
         textureSizeBytes,
+        1,
         vk::ImageUsageFlagBits::eSampled,
+        {},
         vk::Format::eR8G8B8A8Unorm,
         vk::ImageTiling::eOptimal,
         p_texturePixels
@@ -388,8 +378,10 @@ quartz::rendering::Texture::Texture(
         imageWidth,
         imageHeight,
         channelCount,
-        imageWidth * imageHeight * channelCount,
+        imageWidth * imageHeight * channelCount, /** @todo 2024/06/09 Should this be WxHx4???? */
+        1,
         vk::ImageUsageFlagBits::eSampled,
+        {},
         vk::Format::eR8G8B8A8Unorm,
         vk::ImageTiling::eOptimal,
         p_pixels
@@ -399,7 +391,8 @@ quartz::rendering::Texture::Texture(
         *(m_stagedImageBuffer.getVulkanImagePtr()),
         m_stagedImageBuffer.getVulkanFormat(),
         {},
-        vk::ImageAspectFlagBits::eColor
+        vk::ImageAspectFlagBits::eColor,
+        vk::ImageViewType::e2D
     )),
     mp_vulkanSampler(quartz::rendering::Texture::createVulkanSamplerPtr(
         renderingDevice,
@@ -429,7 +422,8 @@ quartz::rendering::Texture::Texture(
             *(m_stagedImageBuffer.getVulkanImagePtr()),
             m_stagedImageBuffer.getVulkanFormat(),
             {},
-            vk::ImageAspectFlagBits::eColor
+            vk::ImageAspectFlagBits::eColor,
+            vk::ImageViewType::e2D
         )
     ),
     mp_vulkanSampler(
@@ -463,7 +457,8 @@ quartz::rendering::Texture::Texture(
             *(m_stagedImageBuffer.getVulkanImagePtr()),
             m_stagedImageBuffer.getVulkanFormat(),
             {},
-            vk::ImageAspectFlagBits::eColor
+            vk::ImageAspectFlagBits::eColor,
+            vk::ImageViewType::e2D
         )
     ),
     mp_vulkanSampler(

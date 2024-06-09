@@ -83,7 +83,9 @@ private: // static functions
         const vk::UniqueDevice& p_logicalDevice,
         const uint32_t imageWidth,
         const uint32_t imageHeight,
+        const uint32_t layerCount,
         const vk::ImageUsageFlags usageFlags,
+        const vk::ImageCreateFlags createFlags,
         const vk::Format format,
         const vk::ImageTiling tiling
     );

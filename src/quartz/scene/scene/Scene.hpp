@@ -17,6 +17,7 @@
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
 #include "quartz/scene/light/SpotLight.hpp"
+#include "quartz/scene/sky_box/SkyBox.hpp"
 
 namespace quartz {
 namespace scene {
@@ -47,6 +48,7 @@ public: // member functions
         const std::vector<quartz::scene::PointLight>& pointLights,
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const glm::vec3& screenClearColor,
+        const std::array<std::string, 6>& skyboxInformation,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
@@ -67,6 +69,7 @@ private: // member variables
 
     std::vector<quartz::scene::Doodad> m_doodads;
 
+    quartz::scene::SkyBox m_skybox;
     quartz::scene::AmbientLight m_ambientLight;
     quartz::scene::DirectionalLight m_directionalLight;
     std::vector<quartz::scene::PointLight> m_pointLights;

@@ -25,7 +25,7 @@ public: // member functions
 
     LocallyMappedBuffer& operator=(LocallyMappedBuffer&& other);
 
-    USE_LOGGER(BUFFER);
+    USE_LOGGER(BUFFER_MAPPED);
 
     const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }
     void* getMappedLocalMemoryPtr() { return mp_mappedLocalMemory; }

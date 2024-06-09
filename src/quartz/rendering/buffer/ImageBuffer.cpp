@@ -8,13 +8,17 @@ quartz::rendering::ImageBuffer::ImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
+    const uint32_t layerCount,
     const vk::ImageUsageFlags usageFlags,
+    const vk::ImageCreateFlags createFlags,
     const vk::Format format,
     const vk::ImageTiling tiling
 ) :
     m_imageWidth(imageWidth),
     m_imageHeight(imageHeight),
+    m_layerCount(layerCount),
     m_usageFlags(usageFlags),
+    m_createFlags(createFlags),
     m_format(format),
     m_tiling(tiling),
     mp_vulkanImage(
@@ -22,7 +26,9 @@ quartz::rendering::ImageBuffer::ImageBuffer(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
+            m_layerCount,
             m_usageFlags,
+            m_createFlags,
             m_format,
             m_tiling
         )
@@ -42,27 +48,15 @@ quartz::rendering::ImageBuffer::ImageBuffer(
 quartz::rendering::ImageBuffer::ImageBuffer(
     quartz::rendering::ImageBuffer&& other
 ) :
-    m_imageWidth(
-        other.m_imageWidth
-    ),
-    m_imageHeight(
-        other.m_imageHeight
-    ),
-    m_usageFlags(
-        other.m_usageFlags
-    ),
-    m_format(
-        other.m_format
-    ),
-    m_tiling(
-        other.m_tiling
-    ),
-    mp_vulkanImage(std::move(
-        other.mp_vulkanImage
-    )),
-    mp_vulkanPhysicalDeviceMemory(std::move(
-        other.mp_vulkanPhysicalDeviceMemory
-    ))
+    m_imageWidth(other.m_imageWidth),
+    m_imageHeight(other.m_imageHeight),
+    m_layerCount(other.m_layerCount),
+    m_usageFlags(other.m_usageFlags),
+    m_createFlags(other.m_createFlags),
+    m_format(other.m_format),
+    m_tiling(other.m_tiling),
+    mp_vulkanImage(std::move(other.mp_vulkanImage)),
+    mp_vulkanPhysicalDeviceMemory(std::move(other.mp_vulkanPhysicalDeviceMemory))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -79,16 +73,14 @@ quartz::rendering::ImageBuffer::operator=(
 
     m_imageWidth = other.m_imageWidth;
     m_imageHeight = other.m_imageHeight;
+    m_layerCount = other.m_layerCount;
     m_usageFlags = other.m_usageFlags;
+    m_createFlags = other.m_createFlags;
     m_format = other.m_format;
     m_tiling = other.m_tiling;
 
-    mp_vulkanImage = std::move(
-        other.mp_vulkanImage
-    );
-    mp_vulkanPhysicalDeviceMemory = std::move(
-        other.mp_vulkanPhysicalDeviceMemory
-    );
+    mp_vulkanImage = std::move(other.mp_vulkanImage);
+    mp_vulkanPhysicalDeviceMemory = std::move(other.mp_vulkanPhysicalDeviceMemory);
 
     return *this;
 }

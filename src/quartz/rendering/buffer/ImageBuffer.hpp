@@ -19,7 +19,9 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         const uint32_t imageWidth,
         const uint32_t imageHeight,
+        const uint32_t layerCount,
         const vk::ImageUsageFlags usageFlags,
+        const vk::ImageCreateFlags createFlags,
         const vk::Format format,
         const vk::ImageTiling tiling
     );
@@ -29,7 +31,7 @@ public: // member functions
 
     void reset();
 
-    USE_LOGGER(BUFFER);
+    USE_LOGGER(IMAGE);
 
     const vk::Format& getVulkanFormat() const { return m_format; }
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
@@ -39,7 +41,9 @@ private: // static functions
 private: // member variables
     uint32_t m_imageWidth;
     uint32_t m_imageHeight;
+    uint32_t m_layerCount;
     vk::ImageUsageFlags m_usageFlags;
+    vk::ImageCreateFlags m_createFlags;
     vk::Format m_format;
     vk::ImageTiling m_tiling;
 

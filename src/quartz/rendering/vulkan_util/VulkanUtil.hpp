@@ -20,6 +20,8 @@ public: // static functions
     // ----- stringifying things ----- //
 
     static std::string toString(const vk::DescriptorType descriptorType);
+    static std::string toString(const vk::ImageCreateFlags flags);
+    static std::string toString(const vk::ImageViewType type);
 
     // ----- image and image view things ----- //
 
@@ -28,7 +30,8 @@ public: // static functions
         const vk::Image& image,
         const vk::Format format,
         const vk::ComponentMapping components,
-        const vk::ImageAspectFlags imageAspectFlags
+        const vk::ImageAspectFlags imageAspectFlags,
+        const vk::ImageViewType imageViewType
     );
 
     // ----- command pool and command buffer things ----- //

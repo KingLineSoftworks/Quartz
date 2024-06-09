@@ -14,7 +14,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
     const vk::UniqueBuffer& p_logicalBuffer,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_STAGED, "{} bytes", sizeBytes);
 
     vk::UniqueCommandPool p_commandPool =
         quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
@@ -31,11 +31,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
         )[0]
     );
 
-    LOG_TRACE(
-        BUFFER,
-        "Memory is *NOT* allocated for a source buffer. Populating with data "
-        "from staged buffer instead"
-    );
+    LOG_TRACE(BUFFER_STAGED, "Memory is *NOT* allocated for a source buffer. Populating with data from staged buffer instead");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -61,7 +57,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
         p_commandBuffer
     );
 
-    LOG_TRACE(BUFFER, "Successfully copied data from staging buffer");
+    LOG_TRACE(BUFFER_STAGED, "Successfully copied data from staging buffer");
 }
 
 vk::UniqueDeviceMemory
@@ -75,7 +71,7 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryPt
     const vk::MemoryPropertyFlags requiredMemoryProperties,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_STAGED, "{} bytes", sizeBytes);
     
     vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
         quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(

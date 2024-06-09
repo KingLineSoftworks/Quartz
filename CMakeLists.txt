@@ -193,6 +193,7 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/camera")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/doodad")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/light")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/scene")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 
 #====================================================================
 # The demo application

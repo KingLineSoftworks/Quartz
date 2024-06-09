@@ -88,7 +88,8 @@ quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
                 swapchainImage,
                 surfaceFormat.format,
                 components,
-                vk::ImageAspectFlagBits::eColor
+                vk::ImageAspectFlagBits::eColor,
+                vk::ImageViewType::e2D
             )
         );
     }

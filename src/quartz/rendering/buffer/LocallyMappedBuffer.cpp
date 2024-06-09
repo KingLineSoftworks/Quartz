@@ -10,16 +10,16 @@ quartz::rendering::LocallyMappedBuffer::mapVulkanPhysicalDeviceMemoryToLocalMemo
     const uint32_t sizeBytes,
     const vk::UniqueDeviceMemory& p_physicalDeviceMemory
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_MAPPED, "");
 
-    LOG_TRACE(BUFFER, "Mapping memory from physical device memory to logical memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
+    LOG_TRACE(BUFFER_MAPPED, "Mapping memory from physical device memory to logical memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
     void* p_mappedLocalMemory = p_logicalDevice->mapMemory(
         *(p_physicalDeviceMemory),
         0,
         sizeBytes
     );
 
-    LOG_TRACE(BUFFER, "Mapped to {}", p_mappedLocalMemory);
+    LOG_TRACE(BUFFER_MAPPED, "Mapped to {}", p_mappedLocalMemory);
     return p_mappedLocalMemory;
 }
 

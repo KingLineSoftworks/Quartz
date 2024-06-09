@@ -11,10 +11,11 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
     const vk::UniqueDevice& p_logicalDevice,
     const vk::Queue& graphicsQueue,
     const vk::UniqueImage& p_image,
+    const uint32_t layerCount,
     const vk::ImageLayout inputLayout,
     const vk::ImageLayout outputLayout
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_IMAGE, "");
 
     vk::UniqueCommandPool p_commandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
         graphicsQueueFamilyIndex,
@@ -30,7 +31,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         )[0]
     );
 
-    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer for transitioning image's layout");
+    LOG_TRACE(BUFFER_IMAGE, "Recording commands to newly created command buffer for transitioning image's layout");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -45,7 +46,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         inputLayout == vk::ImageLayout::eUndefined &&
         outputLayout == vk::ImageLayout::eTransferDstOptimal
     ) {
-        LOG_TRACE(BUFFER, "Transferring image from undefined layout to optimal transfer destination layout");
+        LOG_TRACE(BUFFER_IMAGE, "Transferring image from undefined layout to optimal transfer destination layout");
 
         destinationAccessMask = vk::AccessFlagBits::eTransferWrite;
 
@@ -55,7 +56,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         inputLayout == vk::ImageLayout::eTransferDstOptimal &&
         outputLayout == vk::ImageLayout::eShaderReadOnlyOptimal
     ) {
-        LOG_TRACE(BUFFER, "Transferring image from optimal transfer destination layout to optimal shader read only format");
+        LOG_TRACE(BUFFER_IMAGE, "Transferring image from optimal transfer destination layout to optimal shader read only format");
 
         sourceAccessMask = vk::AccessFlagBits::eTransferWrite;
         destinationAccessMask = vk::AccessFlagBits::eShaderRead;
@@ -63,7 +64,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         sourceStage = vk::PipelineStageFlagBits::eTransfer;
         destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
     } else {
-        LOG_THROW(BUFFER, util::VulkanFeatureNotSupportedError, "Unsupported image layout transition");
+        LOG_THROW(BUFFER_IMAGE, util::VulkanFeatureNotSupportedError, "Unsupported image layout transition");
     }
 
     vk::ImageMemoryBarrier imageMemoryBarrier(
@@ -79,7 +80,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
             0,
             1,
             0,
-            1 /** @todo 2024/06/08 Set to 6 for cube maps */
+            layerCount
         }
     );
 
@@ -99,7 +100,7 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         p_commandBuffer
     );
 
-    LOG_TRACE(BUFFER, "Successfully transitioned image's layout");
+    LOG_TRACE(BUFFER_IMAGE, "Successfully transitioned image's layout");
 }
 
 void
@@ -109,10 +110,11 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
     const vk::Queue& graphicsQueue,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
+    const uint32_t layerCount,
     const vk::UniqueBuffer& p_stagingBuffer,
     const vk::UniqueImage& p_image
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_IMAGE, "");
 
     vk::UniqueCommandPool p_commandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
         graphicsQueueFamilyIndex,
@@ -128,7 +130,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
         )[0]
     );
 
-    LOG_TRACE(BUFFER, "Recording commands to newly created command buffer for copying data from staged buffer to image");
+    LOG_TRACE(BUFFER_IMAGE, "Recording commands to newly created command buffer for copying data from staged buffer to image");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -143,7 +145,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
             vk::ImageAspectFlagBits::eColor,
             0,
             0,
-            1 /** @todo 2024/06/08 Set to 6 for cube maps */
+            layerCount
         },
         {
             0,
@@ -171,7 +173,7 @@ quartz::rendering::StagedImageBuffer::populateVulkanImageWithStagedData(
         p_commandBuffer
     );
 
-    LOG_TRACE(BUFFER, "Successfully copied data");
+    LOG_TRACE(BUFFER_IMAGE, "Successfully copied data");
 }
 
 vk::UniqueDeviceMemory
@@ -182,11 +184,12 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
     const vk::Queue& graphicsQueue,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
+    const uint32_t layerCount,
     const vk::UniqueBuffer& p_stagingBuffer,
     const vk::UniqueImage& p_image,
     const vk::MemoryPropertyFlags requiredMemoryProperties
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_IMAGE, "");
 
     vk::UniqueDeviceMemory p_vulkanPhysicalDeviceTextureMemory = quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
         physicalDevice,
@@ -195,13 +198,14 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
         requiredMemoryProperties
     );
 
-    LOG_TRACE(BUFFER, "Transitioning layout and populating memory from buffer");
+    LOG_TRACE(BUFFER_IMAGE, "Transitioning layout and populating memory from buffer");
 
     quartz::rendering::StagedImageBuffer::transitionImageLayout(
         graphicsQueueFamilyIndex,
         p_logicalDevice,
         graphicsQueue,
         p_image,
+        layerCount,
         vk::ImageLayout::eUndefined,
         vk::ImageLayout::eTransferDstOptimal
     );
@@ -211,6 +215,7 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
         graphicsQueue,
         imageWidth,
         imageHeight,
+        layerCount,
         p_stagingBuffer,
         p_image
     );
@@ -219,6 +224,7 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
         p_logicalDevice,
         graphicsQueue,
         p_image,
+        layerCount,
         vk::ImageLayout::eTransferDstOptimal,
         vk::ImageLayout::eShaderReadOnlyOptimal
     );
@@ -226,13 +232,30 @@ quartz::rendering::StagedImageBuffer::allocateVulkanPhysicalDeviceImageMemoryAnd
     return p_vulkanPhysicalDeviceTextureMemory;
 }
 
+quartz::rendering::StagedImageBuffer::StagedImageBuffer() :
+    m_imageWidth(0),
+    m_imageHeight(0),
+    m_channelCount(0),
+    m_sizeBytes(0),
+    m_layerCount(0),
+    m_usageFlags(),
+    m_format(),
+    m_tiling(),
+    mp_vulkanLogicalStagingBuffer(nullptr),
+    mp_vulkanPhysicalDeviceStagingMemory(nullptr),
+    mp_vulkanImage(nullptr),
+    mp_vulkanPhysicalDeviceMemory(nullptr)
+{}
+
 quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
     const uint32_t channelCount,
     const uint32_t sizeBytes,
+    const uint32_t layerCount,
     const vk::ImageUsageFlags usageFlags,
+    const vk::ImageCreateFlags createFlags,
     const vk::Format format,
     const vk::ImageTiling tiling,
     const void* p_bufferData
@@ -241,13 +264,15 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     m_imageHeight(imageHeight),
     m_channelCount(channelCount),
     m_sizeBytes(sizeBytes),
+    m_layerCount(layerCount),
     m_usageFlags(usageFlags),
+    m_createFlags(createFlags),
     m_format(format),
     m_tiling(tiling),
     mp_vulkanLogicalStagingBuffer(
         quartz::rendering::BufferUtil::createVulkanBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            m_sizeBytes,
+            m_sizeBytes * m_layerCount, /** @todo 2024/06/09 Should this be multiplied by the layer count???? */
             vk::BufferUsageFlagBits::eTransferSrc
         )
     ),
@@ -255,7 +280,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
         quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceStagingMemoryPtr(
             renderingDevice.getVulkanPhysicalDevice(),
             renderingDevice.getVulkanLogicalDevicePtr(),
-            m_sizeBytes,
+            m_sizeBytes * m_layerCount,
             p_bufferData,
             mp_vulkanLogicalStagingBuffer,
             {
@@ -269,7 +294,9 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_imageWidth,
             m_imageHeight,
+            m_layerCount,
             vk::ImageUsageFlagBits::eTransferDst | m_usageFlags,
+            m_createFlags,
             m_format,
             m_tiling
         )
@@ -282,6 +309,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
             renderingDevice.getVulkanGraphicsQueue(),
             m_imageWidth,
             m_imageHeight,
+            m_layerCount,
             mp_vulkanLogicalStagingBuffer,
             mp_vulkanImage,
             vk::MemoryPropertyFlagBits::eDeviceLocal
@@ -294,43 +322,49 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
 quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     quartz::rendering::StagedImageBuffer&& other
 ) :
-    m_imageWidth(
-        other.m_imageWidth
-    ),
-    m_imageHeight(
-        other.m_imageHeight
-    ),
-    m_channelCount(
-        other.m_channelCount
-    ),
-    m_sizeBytes(
-        other.m_sizeBytes
-    ),
-    m_usageFlags(
-        other.m_usageFlags
-    ),
-    m_format(
-        other.m_format
-    ),
-    m_tiling(
-        other.m_tiling
-    ),
-    mp_vulkanLogicalStagingBuffer(std::move(
-        other.mp_vulkanLogicalStagingBuffer
-    )),
-    mp_vulkanPhysicalDeviceStagingMemory(std::move(
-        other.mp_vulkanPhysicalDeviceStagingMemory
-    )),
-    mp_vulkanImage(std::move(
-        other.mp_vulkanImage
-    )),
-    mp_vulkanPhysicalDeviceMemory(std::move(
-        other.mp_vulkanPhysicalDeviceMemory
-    ))
+    m_imageWidth(other.m_imageWidth),
+    m_imageHeight(other.m_imageHeight),
+    m_channelCount(other.m_channelCount),
+    m_sizeBytes(other.m_sizeBytes),
+    m_layerCount(other.m_layerCount),
+    m_usageFlags(other.m_usageFlags),
+    m_format(other.m_format),
+    m_tiling(other.m_tiling),
+    mp_vulkanLogicalStagingBuffer(std::move(other.mp_vulkanLogicalStagingBuffer)),
+    mp_vulkanPhysicalDeviceStagingMemory(std::move(other.mp_vulkanPhysicalDeviceStagingMemory)),
+    mp_vulkanImage(std::move(other.mp_vulkanImage)),
+    mp_vulkanPhysicalDeviceMemory(std::move(other.mp_vulkanPhysicalDeviceMemory))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 quartz::rendering::StagedImageBuffer::~StagedImageBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::rendering::StagedImageBuffer&
+quartz::rendering::StagedImageBuffer::operator=(
+    quartz::rendering::StagedImageBuffer&& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    m_imageWidth = other.m_imageWidth;
+    m_imageHeight = other.m_imageHeight;
+    m_channelCount = other.m_channelCount;
+    m_sizeBytes = other.m_sizeBytes;
+    m_layerCount = other.m_layerCount;
+    m_usageFlags = other.m_usageFlags;
+    m_format = other.m_format;
+    m_tiling = other.m_tiling;
+
+    mp_vulkanLogicalStagingBuffer = std::move(other.mp_vulkanLogicalStagingBuffer);
+    mp_vulkanPhysicalDeviceStagingMemory = std::move(other.mp_vulkanPhysicalDeviceStagingMemory);
+    mp_vulkanImage = std::move(other.mp_vulkanImage);
+    mp_vulkanPhysicalDeviceMemory = std::move(other.mp_vulkanPhysicalDeviceMemory);
+
+    return *this;
 }
