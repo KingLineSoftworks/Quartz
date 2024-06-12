@@ -15,6 +15,8 @@ namespace rendering {
 }
 }
 
+#define TEST_SETUP 0
+
 class quartz::rendering::CubeMap {
 public: // member functions
     CubeMap();
@@ -42,7 +44,13 @@ public: // member functions
 public: // static functions
     static vk::VertexInputBindingDescription getVulkanVertexInputBindingDescription();
     static std::vector<vk::VertexInputAttributeDescription> getVulkanVertexInputAttributeDescriptions();
+#if TEST_SETUP == 0
+    static uint32_t getIndexCount() { return 6 * 6; }
+#elif TEST_SETUP == 1
+    static uint32_t getIndexCount() { return 6 * 6; }
+#else
     static uint32_t getIndexCount() { return 12 * 6; }
+#endif
 
 private: // static functions
     quartz::rendering::StagedImageBuffer createStagedImageBufferFromFilepaths (

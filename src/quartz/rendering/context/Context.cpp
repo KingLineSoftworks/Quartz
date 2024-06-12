@@ -35,7 +35,7 @@ quartz::rendering::Context::createSkyBoxRenderingPipeline(
             1,
             sizeof(quartz::scene::Camera::UniformBufferObject),
             false,
-            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+            vk::ShaderStageFlagBits::eVertex
         }
     };
 
@@ -56,6 +56,8 @@ quartz::rendering::Context::createSkyBoxRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription(),
         quartz::rendering::CubeMap::getVulkanVertexInputAttributeDescriptions(),
+        vk::CullModeFlagBits::eFront,
+        false,
         {},
         uniformBufferInfos,
         uniformSamplerCubeInfo,
@@ -198,6 +200,8 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription(),
         quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions(),
+        vk::CullModeFlagBits::eBack,
+        true,
         pushConstantInfos,
         uniformBufferInfos,
         std::nullopt,

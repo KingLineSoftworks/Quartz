@@ -525,6 +525,8 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
     const std::vector<vk::Viewport> viewports,
     const std::vector<vk::Rect2D> scissorRectangles,
+    const vk::CullModeFlags cullModeFlags,
+    const bool shouldDepthTest,
     const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
     const std::vector<vk::DynamicState> dynamicStates,
     const vk::UniqueShaderModule& p_vertexShaderModule,
@@ -596,7 +598,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
         false,
         false,
         vk::PolygonMode::eFill,
-        vk::CullModeFlagBits::eBack,
+        cullModeFlags,
         vk::FrontFace::eCounterClockwise,
         false,
         0.0f,
@@ -621,10 +623,10 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
 
     vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo(
         {},
-        true,
-        true,
+        shouldDepthTest,
+        shouldDepthTest,
         vk::CompareOp::eLess,
-        false, /// @todo 2023/11/01 enable with phys dev features
+        false, /** @todo 2023/11/01 enable with phys dev features */
         false,
         {},
         {},
@@ -696,6 +698,8 @@ quartz::rendering::Pipeline::Pipeline(
     const uint32_t maxNumFramesInFlight,
     const vk::VertexInputBindingDescription& vertexInputBindingDescription,
     const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
+    const vk::CullModeFlags cullModeFlags,
+    const bool shouldDepthTest,
     const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
     const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
@@ -720,6 +724,8 @@ quartz::rendering::Pipeline::Pipeline(
             renderingWindow.getVulkanExtent()
         )
     }),
+    m_vulkanCullModeFlags(cullModeFlags),
+    m_shouldDepthTest(shouldDepthTest),
     m_vulkanColorBlendAttachmentStates({
         vk::PipelineColorBlendAttachmentState(
             true,
@@ -806,6 +812,8 @@ quartz::rendering::Pipeline::Pipeline(
             m_vulkanVertexInputAttributeDescriptions,
             m_vulkanViewports,
             m_vulkanScissorRectangles,
+            m_vulkanCullModeFlags,
+            m_shouldDepthTest,
             m_vulkanColorBlendAttachmentStates,
             m_vulkanDynamicStates,
             mp_vulkanVertexShaderModule,
@@ -848,6 +856,8 @@ quartz::rendering::Pipeline::recreate(
         m_vulkanVertexInputAttributeDescriptions,
         m_vulkanViewports,
         m_vulkanScissorRectangles,
+        m_vulkanCullModeFlags,
+        m_shouldDepthTest,
         m_vulkanColorBlendAttachmentStates,
         m_vulkanDynamicStates,
         mp_vulkanVertexShaderModule,

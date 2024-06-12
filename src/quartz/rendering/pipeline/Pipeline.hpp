@@ -50,6 +50,8 @@ public: // member functions
         const uint32_t maxNumFramesInFlight,
         const vk::VertexInputBindingDescription& vertexInputBindingDescription,
         const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
+        const vk::CullModeFlags cullModeFlags,
+        const bool shouldDepthTest,
         const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
         const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
@@ -166,6 +168,8 @@ private: // static functions
         const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
         const std::vector<vk::Viewport> viewports,
         const std::vector<vk::Rect2D> scissorRectangles,
+        const vk::CullModeFlags cullModeFlags,
+        const bool shouldDepthTest,
         const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
         const std::vector<vk::DynamicState> dynamicStates,
         const vk::UniqueShaderModule& p_vertexShaderModule,
@@ -179,6 +183,8 @@ private: // member variables
     std::vector<vk::VertexInputAttributeDescription> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
     std::vector<vk::Rect2D> m_vulkanScissorRectangles;
+    vk::CullModeFlags m_vulkanCullModeFlags;
+    bool m_shouldDepthTest;
     std::vector<vk::PipelineColorBlendAttachmentState> m_vulkanColorBlendAttachmentStates;
     std::vector<vk::DynamicState> m_vulkanDynamicStates;
 
