@@ -48,7 +48,7 @@ public: // member functions
     void finish();
 
 private: // static functions
-    static quartz::rendering::Pipeline createSkyboxRenderingPipeline(
+    static quartz::rendering::Pipeline createSkyBoxRenderingPipeline(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::RenderPass& renderingRenderPass,
@@ -71,7 +71,7 @@ private: // member variables
     quartz::rendering::Device m_renderingDevice;
     quartz::rendering::Window m_renderingWindow;
     quartz::rendering::RenderPass m_renderingRenderPass;
-    quartz::rendering::Pipeline m_skyboxRenderingPipeline;
+    quartz::rendering::Pipeline m_skyBoxRenderingPipeline;
     quartz::rendering::Pipeline m_doodadRenderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };

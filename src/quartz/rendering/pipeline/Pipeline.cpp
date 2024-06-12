@@ -336,7 +336,7 @@ quartz::rendering::Pipeline::updateUniformSamplerCubeDescriptorSets(
         LOG_TRACE(PIPELINE, "Updating descriptor set {}", i);
         const vk::DescriptorSet& descriptorSet = descriptorSets[i];
 
-        LOG_TRACE(PIPELINE, "  Using uniform sampler info");
+        LOG_TRACE(PIPELINE, "  Using uniform sampler cube info");
         LOG_TRACE(PIPELINE, "    destination binding    = {}", o_uniformSamplerCubeInfo->getBindingLocation());
         LOG_TRACE(PIPELINE, "    descriptor count       = {}", o_uniformSamplerCubeInfo->getDescriptorCount());
         LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(o_uniformSamplerCubeInfo->getVulkanDescriptorType()));

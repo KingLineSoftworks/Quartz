@@ -24,6 +24,8 @@ public: // member functions
     StagedBuffer(StagedBuffer&& other);
     ~StagedBuffer();
 
+    StagedBuffer& operator=(StagedBuffer&& other);
+
     USE_LOGGER(BUFFER_STAGED);
 
     const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }

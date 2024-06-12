@@ -184,3 +184,24 @@ quartz::rendering::StagedBuffer::StagedBuffer(
 quartz::rendering::StagedBuffer::~StagedBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
+
+
+quartz::rendering::StagedBuffer&
+quartz::rendering::StagedBuffer::operator=(
+    quartz::rendering::StagedBuffer&& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    m_sizeBytes = other.m_sizeBytes;
+    m_usageFlags = other.m_usageFlags;
+    mp_vulkanLogicalStagingBuffer = std::move(other.mp_vulkanLogicalStagingBuffer);
+    mp_vulkanPhysicalDeviceStagingMemory = std::move(other.mp_vulkanPhysicalDeviceStagingMemory);
+    mp_vulkanLogicalBuffer = std::move(other.mp_vulkanLogicalBuffer);
+    mp_vulkanPhysicalDeviceMemory = std::move(other.mp_vulkanPhysicalDeviceMemory);
+
+    return *this;
+}

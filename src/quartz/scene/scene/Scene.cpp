@@ -57,7 +57,7 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::PointLight>& pointLights,
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const glm::vec3& screenClearColor,
-    const std::array<std::string, 6>& skyboxInformation,
+    const std::array<std::string, 6>& skyBoxInformation,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
@@ -71,14 +71,14 @@ quartz::scene::Scene::load(
     m_camera = camera;
     LOG_TRACEthis("Loaded camera at position {}", glm::to_string(m_camera.getWorldPosition()));
 
-    m_skybox = quartz::scene::SkyBox(
+    m_skyBox = quartz::scene::SkyBox(
         renderingDevice,
-        skyboxInformation[0],
-        skyboxInformation[1],
-        skyboxInformation[2],
-        skyboxInformation[3],
-        skyboxInformation[4],
-        skyboxInformation[5]
+        skyBoxInformation[0],
+        skyBoxInformation[1],
+        skyBoxInformation[2],
+        skyBoxInformation[3],
+        skyBoxInformation[4],
+        skyBoxInformation[5]
     );
     LOG_TRACEthis("Loaded skybox");
 

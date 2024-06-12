@@ -135,8 +135,134 @@ quartz::rendering::CubeMap::createStagedImageBufferFromFilepaths(
     };
 }
 
+
+quartz::rendering::StagedBuffer
+quartz::rendering::CubeMap::createStagedVertexBuffer(
+    const quartz::rendering::Device& renderingDevice
+) {
+    /** @brief Taken from https://github.com/KhronosGroup/Vulkan-Tools/blob/a9a1bcd709e185700847268eb4310f6484b027bc/cube/cube.cpp#L112 */
+    const std::vector<float> vertices = {
+        -1.0f,-1.0f,-1.0f,  // -X side
+        -1.0f,-1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f,-1.0f,
+        -1.0f,-1.0f,-1.0f,
+
+        -1.0f,-1.0f,-1.0f,  // -Z side
+        1.0f, 1.0f,-1.0f,
+        1.0f,-1.0f,-1.0f,
+        -1.0f,-1.0f,-1.0f,
+        -1.0f, 1.0f,-1.0f,
+        1.0f, 1.0f,-1.0f,
+
+        -1.0f,-1.0f,-1.0f,  // -Y side
+        1.0f,-1.0f,-1.0f,
+        1.0f,-1.0f, 1.0f,
+        -1.0f,-1.0f,-1.0f,
+        1.0f,-1.0f, 1.0f,
+        -1.0f,-1.0f, 1.0f,
+
+        -1.0f, 1.0f,-1.0f,  // +Y side
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f,-1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f,-1.0f,
+
+        1.0f, 1.0f,-1.0f,  // +X side
+        1.0f, 1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f,
+        1.0f,-1.0f,-1.0f,
+        1.0f, 1.0f,-1.0f,
+
+        -1.0f, 1.0f, 1.0f,  // +Z side
+        -1.0f,-1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f,-1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+    };
+
+    quartz::rendering::StagedBuffer stagedVertexBuffer(
+        renderingDevice,
+        sizeof(float) * vertices.size(),
+        vk::BufferUsageFlagBits::eVertexBuffer,
+        vertices.data()
+    );
+
+    return stagedVertexBuffer;
+}
+
+quartz::rendering::StagedBuffer
+quartz::rendering::CubeMap::createStagedIndexBuffer(
+    const quartz::rendering::Device& renderingDevice
+) {
+    /**
+     * @brief Taken from https://github.com/KhronosGroup/Vulkan-Tools/blob/a9a1bcd709e185700847268eb4310f6484b027bc/cube/cube.cpp#L156
+     *    but modified to be uint32_t
+     */
+    const std::vector<uint32_t> indices = {
+        0, 1,  // -X side
+        1, 1,
+        1, 0,
+        1, 0,
+        0, 0,
+        0, 1,
+
+        1, 1,  // -Z side
+        0, 0,
+        0, 1,
+        1, 1,
+        1, 0,
+        0, 0,
+
+        1, 0,  // -Y side
+        1, 1,
+        0, 1,
+        1, 0,
+        0, 1,
+        0, 0,
+
+        1, 0,  // +Y side
+        0, 0,
+        0, 1,
+        1, 0,
+        0, 1,
+        1, 1,
+
+        1, 0,  // +X side
+        0, 0,
+        0, 1,
+        0, 1,
+        1, 1,
+        1, 0,
+
+        0, 0,  // +Z side
+        0, 1,
+        1, 0,
+        0, 1,
+        1, 1,
+        1, 0,
+    };
+
+    quartz::rendering::StagedBuffer indexBuffer(
+        renderingDevice,
+        sizeof(uint32_t) * indices.size(),
+        vk::BufferUsageFlagBits::eIndexBuffer,
+        indices.data()
+    );
+
+    return indexBuffer;
+}
+
 quartz::rendering::CubeMap::CubeMap() :
-    m_stagedImageBuffer()
+    m_stagedImageBuffer(),
+    mp_vulkanImageView(),
+    mp_vulkanCombinedImageSampler(),
+    m_stagedVertexBuffer(),
+    m_stagedIndexBuffer()
 {}
 
 quartz::rendering::CubeMap::CubeMap(
@@ -179,7 +305,9 @@ quartz::rendering::CubeMap::CubeMap(
             vk::SamplerAddressMode::eRepeat,
             vk::SamplerAddressMode::eRepeat
         )
-    )
+    ),
+    m_stagedVertexBuffer(quartz::rendering::CubeMap::createStagedVertexBuffer(renderingDevice)),
+    m_stagedIndexBuffer(quartz::rendering::CubeMap::createStagedIndexBuffer(renderingDevice))
 {}
 
 quartz::rendering::CubeMap::CubeMap(
@@ -187,7 +315,9 @@ quartz::rendering::CubeMap::CubeMap(
 ) :
     m_stagedImageBuffer(std::move(other.m_stagedImageBuffer)),
     mp_vulkanImageView(std::move(other.mp_vulkanImageView)),
-    mp_vulkanCombinedImageSampler(std::move(other.mp_vulkanCombinedImageSampler))
+    mp_vulkanCombinedImageSampler(std::move(other.mp_vulkanCombinedImageSampler)),
+    m_stagedVertexBuffer(std::move(other.m_stagedVertexBuffer)),
+    m_stagedIndexBuffer(std::move(other.m_stagedIndexBuffer))
 {}
 
 quartz::rendering::CubeMap::~CubeMap() {}
@@ -203,6 +333,8 @@ quartz::rendering::CubeMap::operator=(
     m_stagedImageBuffer = std::move(other.m_stagedImageBuffer);
     mp_vulkanImageView = std::move(other.mp_vulkanImageView);
     mp_vulkanCombinedImageSampler = std::move(other.mp_vulkanCombinedImageSampler);
+    m_stagedVertexBuffer = std::move(other.m_stagedVertexBuffer);
+    m_stagedIndexBuffer = std::move(other.m_stagedIndexBuffer);
 
     return *this;
 }

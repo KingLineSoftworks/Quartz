@@ -18,7 +18,7 @@
 #include "quartz/scene/light/SpotLight.hpp"
 
 quartz::rendering::Pipeline
-quartz::rendering::Context::createSkyboxRenderingPipeline(
+quartz::rendering::Context::createSkyBoxRenderingPipeline(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
     const quartz::rendering::RenderPass& renderingRenderPass,
@@ -236,8 +236,8 @@ quartz::rendering::Context::Context(
         m_renderingDevice,
         m_renderingWindow
     ),
-    m_skyboxRenderingPipeline(
-        quartz::rendering::Context::createSkyboxRenderingPipeline(
+    m_skyBoxRenderingPipeline(
+        quartz::rendering::Context::createSkyBoxRenderingPipeline(
             m_renderingDevice,
             m_renderingWindow,
             m_renderingRenderPass,
@@ -271,7 +271,8 @@ quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
     LOG_DEBUGthis("Updating skybox rendering pipeline's descriptor sets");
-    m_skyboxRenderingPipeline.updateSamplerCubeDescriptorSets(m_renderingDevice, scene.getSkyBox().getCubeMap().getVulkanSamplerPtr(), scene.getSkyBox().getCubeMap().getVulkanImageViewPtr());
+    m_skyBoxRenderingPipeline.updateUniformBufferDescriptorSets(m_renderingDevice);
+    m_skyBoxRenderingPipeline.updateSamplerCubeDescriptorSets(m_renderingDevice, scene.getSkyBox().getCubeMap().getVulkanSamplerPtr(), scene.getSkyBox().getCubeMap().getVulkanImageViewPtr());
 
     LOG_DEBUGthis("Updating doodad rendering pipeline's descriptor sets");
     m_doodadRenderingPipeline.updateUniformBufferDescriptorSets(m_renderingDevice);
@@ -302,9 +303,11 @@ quartz::rendering::Context::draw(
 
     // update skybox pipeline //
 
+    quartz::scene::Camera::UniformBufferObject cameraUBO(scene.getCamera());
+    m_skyBoxRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
+
     // update doodad drawing pipeline //
 
-    quartz::scene::Camera::UniformBufferObject cameraUBO(scene.getCamera());
     m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
 
     quartz::scene::AmbientLight ambientLight(scene.getAmbientLight());
@@ -353,6 +356,18 @@ quartz::rendering::Context::draw(
     );
 
     // skybox pipeline //
+
+    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
+        m_renderingWindow,
+        m_skyBoxRenderingPipeline,
+        m_currentInFlightFrameIndex
+    );
+
+    m_renderingSwapchain.recordSkyBoxToDrawingCommandBuffer(
+        m_skyBoxRenderingPipeline,
+        scene.getSkyBox(),
+        m_currentInFlightFrameIndex
+    );
 
     // doodad drawing pipeline //
 
@@ -409,6 +424,10 @@ quartz::rendering::Context::recreateSwapchain() {
     m_renderingRenderPass.recreate(
         m_renderingDevice,
         m_renderingWindow
+    );
+    m_skyBoxRenderingPipeline.recreate(
+        m_renderingDevice,
+        m_renderingRenderPass
     );
     m_doodadRenderingPipeline.recreate(
         m_renderingDevice,

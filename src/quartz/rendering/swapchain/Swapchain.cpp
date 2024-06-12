@@ -532,6 +532,45 @@ quartz::rendering::Swapchain::bindPipelineToDrawingCommandBuffer(
 }
 
 void
+quartz::rendering::Swapchain::recordSkyBoxToDrawingCommandBuffer(
+    const quartz::rendering::Pipeline& skyBoxRenderingPipeline,
+    const quartz::scene::SkyBox& skyBox,
+    const uint32_t inFlightFrameIndex
+) {
+    uint32_t offset = 0;
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *skyBoxRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(skyBoxRenderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        &offset
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+        0,
+        *(skyBox.getCubeMap().getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        offset
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+        *(skyBox.getCubeMap().getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        0,
+        vk::IndexType::eUint32
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+        quartz::rendering::CubeMap::getIndexCount(),
+        1,
+        0,
+        0,
+        0
+    );
+}
+
+void
 quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Pipeline& doodadRenderingPipeline,
@@ -570,12 +609,14 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+            /** @brief This is the offset into the dynamic uniform buffer */
             uint32_t materialMasterIndex = primitive.getMaterialMasterIndex();
             uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
                 (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
                 sizeof(quartz::rendering::Material::UniformBufferObject);
             materialByteOffset *= materialMasterIndex;
 
+            // Bind the descriptor set
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
                 vk::PipelineBindPoint::eGraphics,
                 *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
@@ -596,6 +637,7 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 reinterpret_cast<void*>(&materialMasterIndex)
             );
 
+            // Bind the vertex buffer
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
                 0,
@@ -603,12 +645,14 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 offset
             );
 
+            // Index buffer
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
                 *(primitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
                 0,
                 vk::IndexType::eUint32
             );
 
+            // Draw using the vertex and index buffer
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
                 primitive.getIndexCount(),
                 1,

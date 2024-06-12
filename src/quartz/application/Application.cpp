@@ -61,14 +61,6 @@ void quartz::Application::run() {
     UNUSED double currentFrameStartTime = 0.0f;
     UNUSED double frameTimeAccumulator = 0.0f;
 
-    /**
-     * @todo 2023/12/12 FIX COORDINATE SYSTEM.
-     *   WE ARE CURRENTLY USING SOME SORT OF COORDINATE SYSTEM (I FORGOT WHICH).
-     *   BUT IT IS CLEARLY NOT THE SAME AS THE COORDINATE SYSTEM THAT GLTF USES.
-     *   ALL GLTF MODELS ARE LOADING IN UPSIDE DOWN AND WHEN WE USE THE BOOM BOX WITH AXES
-     *   WE CAN CLEARLY SEE THAT OUR COORDINATE SYSTEM IS INCORRECT.
-     */
-
 #define USE_SAMPLE_SCENE false
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
 #if USE_SAMPLE_SCENE
@@ -103,7 +95,7 @@ void quartz::Application::run() {
         {
             "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
             {
-                {0.0f, 0.0f, 0.0f},
+                {3.0f, 3.0f, 3.0f},
                 0.0f,
                 {0.0f, 0.0f, 1.0f},
                 {1.0f, 1.0f, 1.0f}
@@ -112,7 +104,7 @@ void quartz::Application::run() {
 #endif
     };
 
-    std::array<std::string, 6> skyboxInformation = {
+    std::array<std::string, 6> skyBoxInformation = {
         "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posx.jpg",
         "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negx.jpg",
         "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posy.jpg",
@@ -153,7 +145,8 @@ void quartz::Application::run() {
             0.0f, // rotation around y-axis (left right)
             0.0f,
             75.0f,
-            { -5.0f, 0.0f, 0.0f }
+            // { -5.0f, 0.0f, 0.0f }
+            { -0.0f, 0.0f, 0.0f }
         },
 #if USE_SAMPLE_SCENE
         {
@@ -175,7 +168,7 @@ void quartz::Application::run() {
         pointLights,
         spotLights,
         {0.25f, 0.4f, 0.6f},
-        skyboxInformation,
+        skyBoxInformation,
         doodadInformations
     );
     m_renderingContext.loadScene(m_scene);

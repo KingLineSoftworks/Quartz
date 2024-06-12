@@ -13,6 +13,7 @@
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "quartz/scene/sky_box/SkyBox.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -65,6 +66,11 @@ public: // member functions
     void bindPipelineToDrawingCommandBuffer(
         const quartz::rendering::Window& renderingWindow,
         const quartz::rendering::Pipeline& renderingPipeline,
+        const uint32_t inFlightFrameIndex
+    );
+    void recordSkyBoxToDrawingCommandBuffer(
+        const quartz::rendering::Pipeline& skyBoxRenderingPipeline,
+        const quartz::scene::SkyBox& skyBox,
         const uint32_t inFlightFrameIndex
     );
     void recordDoodadToDrawingCommandBuffer(
