@@ -12,6 +12,7 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
+#include "quartz/rendering/pipeline/UniformSamplerCubeInfo.hpp"
 #include "quartz/rendering/pipeline/UniformSamplerInfo.hpp"
 #include "quartz/rendering/pipeline/UniformTextureArrayInfo.hpp"
 #include "quartz/rendering/render_pass/RenderPass.hpp"
@@ -51,6 +52,7 @@ public: // member functions
         const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
         const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
         const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
         const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
     );
@@ -62,9 +64,20 @@ public: // member functions
         const quartz::rendering::RenderPass& renderingRenderPass
     );
 
-    void updateVulkanDescriptorSets(
+    void updateUniformBufferDescriptorSets(
+        const quartz::rendering::Device& renderingDevice
+    );
+    void updateSamplerCubeDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
-        const vk::UniqueSampler& p_sampler,
+        const vk::UniqueSampler& p_combinedImageSampler,
+        const vk::UniqueImageView& p_imageView
+    );
+    void updateSamplerDescriptorSets(
+        const quartz::rendering::Device& renderingDevice,
+        const vk::UniqueSampler& p_sampler
+    );
+    void updateTextureArrayDescriptorSets(
+        const quartz::rendering::Device& renderingDevice,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
@@ -99,12 +112,14 @@ private: // static functions
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
         const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
         const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
     );
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
         const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
         const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
         const uint32_t numDescriptorSets
@@ -121,6 +136,13 @@ private: // static functions
         const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
         const std::vector<vk::DescriptorSet>& descriptorSets
     );
+    static void updateUniformSamplerCubeDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
+        const vk::UniqueSampler& p_combinedImageSampler,
+        const vk::UniqueImageView& p_imageView,
+        const std::vector<vk::DescriptorSet>& descriptorSets
+    );
     static void updateUniformSamplerDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
@@ -130,16 +152,6 @@ private: // static functions
     static void updateUniformTextureArrayDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
         const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
-        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
-        const std::vector<vk::DescriptorSet>& descriptorSets
-    );
-    static void updateVulkanDescriptorSets(
-        const vk::UniqueDevice& p_logicalDevice,
-        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
-        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
-        const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
-        const vk::UniqueSampler& p_sampler,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
         const std::vector<vk::DescriptorSet>& descriptorSets
     );
@@ -175,6 +187,7 @@ private: // member variables
 
     std::vector<quartz::rendering::PushConstantInfo> m_pushConstantInfos;
     std::vector<quartz::rendering::UniformBufferInfo> m_uniformBufferInfos;
+    std::optional<quartz::rendering::UniformSamplerCubeInfo> mo_uniformSamplerCubeInfo;
     std::optional<quartz::rendering::UniformSamplerInfo> mo_uniformSamplerInfo;
     std::optional<quartz::rendering::UniformTextureArrayInfo> mo_uniformTextureArrayInfo;
 

@@ -10,6 +10,9 @@ add_library(
         UniformBufferInfo.hpp
         UniformBufferInfo.cpp
 
+        UniformSamplerCubeInfo.hpp
+        UniformSamplerCubeInfo.cpp
+
         UniformSamplerInfo.hpp
         UniformSamplerInfo.cpp
 

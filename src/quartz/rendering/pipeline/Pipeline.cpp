@@ -77,6 +77,7 @@ vk::UniqueDescriptorSetLayout
 quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
     const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
     const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
 ) {
@@ -94,6 +95,18 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
             {}
         );
         layoutBindings.push_back(uniformBufferLayoutBinding);
+    }
+
+    LOG_TRACE(PIPELINE, "{}reating layout binding for uniform sampler cube", o_uniformSamplerCubeInfo ? "C" : "Not c");
+    if (o_uniformSamplerCubeInfo) {
+        vk::DescriptorSetLayoutBinding samplerCubeLayoutBinding(
+            o_uniformSamplerCubeInfo->getBindingLocation(),
+            o_uniformSamplerCubeInfo->getVulkanDescriptorType(),
+            o_uniformSamplerCubeInfo->getDescriptorCount(),
+            o_uniformSamplerCubeInfo->getVulkanShaderStageFlags(),
+            {}
+        );
+        layoutBindings.push_back(samplerCubeLayoutBinding);
     }
 
     LOG_TRACE(PIPELINE, "{}reating layout binding for uniform sampler", o_uniformSamplerInfo ? "C" : "Not c");
@@ -137,6 +150,7 @@ vk::UniqueDescriptorPool
 quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     const vk::UniqueDevice& p_logicalDevice,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
     const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
     const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
     const uint32_t numDescriptorSets /** should be the maximum number of frames in flight */
@@ -152,6 +166,15 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
             numDescriptorSets * uniformBufferInfo.getDescriptorCount()
         );
         descriptorPoolSizes.push_back(uniformBufferPoolSize);
+    }
+
+    LOG_TRACE(PIPELINE, "{}reating descriptor pool size for uniform sampler cube", o_uniformSamplerCubeInfo ? "C" : "Not c");
+    if (o_uniformSamplerCubeInfo) {
+        vk::DescriptorPoolSize samplerCubePoolSize(
+            o_uniformSamplerCubeInfo->getVulkanDescriptorType(),
+            numDescriptorSets * o_uniformSamplerCubeInfo->getDescriptorCount()
+        );
+        descriptorPoolSizes.push_back(samplerCubePoolSize);
     }
 
     LOG_TRACE(PIPELINE, "{}reating descriptor pool size for uniform sampler", o_uniformSamplerInfo ? "C" : "Not c");
@@ -295,6 +318,56 @@ quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
 }
 
 void
+quartz::rendering::Pipeline::updateUniformSamplerCubeDescriptorSets(
+    const vk::UniqueDevice& p_logicalDevice,
+    const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
+    const vk::UniqueSampler& p_combinedImageSampler,
+    const vk::UniqueImageView& p_imageView,
+    const std::vector<vk::DescriptorSet>& descriptorSets
+) {
+    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
+
+    if (!o_uniformSamplerCubeInfo) {
+        LOG_TRACE(PIPELINE, "No uniform sampler cube info. Not updating descriptor sets for it");
+        return;
+    }
+
+    for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
+        LOG_TRACE(PIPELINE, "Updating descriptor set {}", i);
+        const vk::DescriptorSet& descriptorSet = descriptorSets[i];
+
+        LOG_TRACE(PIPELINE, "  Using uniform sampler info");
+        LOG_TRACE(PIPELINE, "    destination binding    = {}", o_uniformSamplerCubeInfo->getBindingLocation());
+        LOG_TRACE(PIPELINE, "    descriptor count       = {}", o_uniformSamplerCubeInfo->getDescriptorCount());
+        LOG_TRACE(PIPELINE, "    vulkan descriptor type = {}", quartz::rendering::VulkanUtil::toString(o_uniformSamplerCubeInfo->getVulkanDescriptorType()));
+        vk::DescriptorImageInfo samplerCubeImageInfo(
+            *(p_combinedImageSampler),
+            *(p_imageView),
+            vk::ImageLayout::eShaderReadOnlyOptimal
+        );
+        vk::WriteDescriptorSet writeDescriptorSet(
+            descriptorSet,
+            o_uniformSamplerCubeInfo->getBindingLocation(),
+            0,
+            o_uniformSamplerCubeInfo->getDescriptorCount(),
+            o_uniformSamplerCubeInfo->getVulkanDescriptorType(),
+            &samplerCubeImageInfo,
+            {},
+            {}
+        );
+
+        LOG_TRACE(PIPELINE, "  Updating descriptor set {} with 1 descriptor writes", i);
+
+        p_logicalDevice->updateDescriptorSets(
+            1,
+            &writeDescriptorSet,
+            0,
+            nullptr
+        );
+    }
+}
+
+void
 quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
     const vk::UniqueDevice& p_logicalDevice,
     const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
@@ -403,41 +476,6 @@ void quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
             nullptr
         );
     }
-}
-
-void
-quartz::rendering::Pipeline::updateVulkanDescriptorSets(
-    const vk::UniqueDevice& p_logicalDevice,
-    const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
-    const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
-    const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
-    const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
-    const vk::UniqueSampler& p_sampler,
-    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
-    const std::vector<vk::DescriptorSet>& descriptorSets
-) {
-    LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "");
-
-    quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
-        p_logicalDevice,
-        uniformBufferInfos,
-        locallyMappedBuffers,
-        descriptorSets
-    );
-
-    quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
-        p_logicalDevice,
-        o_uniformSamplerInfo,
-        p_sampler,
-        descriptorSets
-    );
-
-    quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
-        p_logicalDevice,
-        o_uniformTextureArrayInfo,
-        texturePtrs,
-        descriptorSets
-    );
 }
 
 vk::UniquePipelineLayout
@@ -660,6 +698,7 @@ quartz::rendering::Pipeline::Pipeline(
     const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
     const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
     const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+    const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
     const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
     const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
 ) :
@@ -716,6 +755,7 @@ quartz::rendering::Pipeline::Pipeline(
     ),
     m_pushConstantInfos(pushConstantInfos),
     m_uniformBufferInfos(uniformBufferInfos),
+    mo_uniformSamplerCubeInfo(o_uniformSamplerCubeInfo),
     mo_uniformSamplerInfo(o_uniformSamplerInfo),
     mo_uniformTextureArrayInfo(o_uniformTextureArrayInfo),
     m_locallyMappedBuffers(
@@ -729,6 +769,7 @@ quartz::rendering::Pipeline::Pipeline(
         quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_uniformBufferInfos,
+            mo_uniformSamplerCubeInfo,
             mo_uniformSamplerInfo,
             mo_uniformTextureArrayInfo
         )
@@ -737,6 +778,7 @@ quartz::rendering::Pipeline::Pipeline(
         quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             m_uniformBufferInfos,
+            mo_uniformSamplerCubeInfo,
             mo_uniformSamplerInfo,
             mo_uniformTextureArrayInfo,
             maxNumFramesInFlight
@@ -816,20 +858,53 @@ quartz::rendering::Pipeline::recreate(
 }
 
 void
-quartz::rendering::Pipeline::updateVulkanDescriptorSets(
-    const quartz::rendering::Device& renderingDevice,
-    const vk::UniqueSampler& p_sampler,
-    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
+quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
+    const quartz::rendering::Device& renderingDevice
 ) {
-    LOG_FUNCTION_SCOPE_TRACEthis("");
-
-    quartz::rendering::Pipeline::updateVulkanDescriptorSets(
+    quartz::rendering::Pipeline::updateUniformBufferDescriptorSets(
         renderingDevice.getVulkanLogicalDevicePtr(),
         m_uniformBufferInfos,
-        mo_uniformSamplerInfo,
-        mo_uniformTextureArrayInfo,
         m_locallyMappedBuffers,
+        m_vulkanDescriptorSets
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateSamplerCubeDescriptorSets(
+    const quartz::rendering::Device& renderingDevice,
+    const vk::UniqueSampler& p_combinedImageSampler,
+    const vk::UniqueImageView& p_imageView
+) {
+    quartz::rendering::Pipeline::updateUniformSamplerCubeDescriptorSets(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        mo_uniformSamplerCubeInfo,
+        p_combinedImageSampler,
+        p_imageView,
+        m_vulkanDescriptorSets
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateSamplerDescriptorSets(
+    const quartz::rendering::Device& renderingDevice,
+    const vk::UniqueSampler& p_sampler
+) {
+    quartz::rendering::Pipeline::updateUniformSamplerDescriptorSets(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        mo_uniformSamplerInfo,
         p_sampler,
+        m_vulkanDescriptorSets
+    );
+}
+
+void
+quartz::rendering::Pipeline::updateTextureArrayDescriptorSets(
+    const quartz::rendering::Device& renderingDevice,
+    const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
+) {
+    quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
+        renderingDevice.getVulkanLogicalDevicePtr(),
+        mo_uniformTextureArrayInfo,
         texturePtrs,
         m_vulkanDescriptorSets
     );

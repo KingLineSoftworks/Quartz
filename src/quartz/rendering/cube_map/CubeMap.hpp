@@ -33,6 +33,9 @@ public: // member functions
 
     USE_LOGGER(CUBEMAP);
 
+    const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
+    const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanCombinedImageSampler; }
+
 public: // static functions
     static vk::VertexInputBindingDescription getVulkanVertexInputBindingDescription();
     static std::vector<vk::VertexInputAttributeDescription> getVulkanVertexInputAttributeDescriptions();
@@ -51,5 +54,5 @@ private: // static functions
 private: // member variables
     quartz::rendering::StagedImageBuffer m_stagedImageBuffer;
     vk::UniqueImageView mp_vulkanImageView;
-
+    vk::UniqueSampler mp_vulkanCombinedImageSampler;
 };

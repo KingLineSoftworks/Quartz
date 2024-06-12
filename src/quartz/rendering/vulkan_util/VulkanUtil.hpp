@@ -23,7 +23,7 @@ public: // static functions
     static std::string toString(const vk::ImageCreateFlags flags);
     static std::string toString(const vk::ImageViewType type);
 
-    // ----- image and image view things ----- //
+    // ----- image, image view, smapler things ----- //
 
     static vk::UniqueImageView createVulkanImageViewPtr(
         const vk::UniqueDevice& p_logicalDevice,
@@ -32,6 +32,16 @@ public: // static functions
         const vk::ComponentMapping components,
         const vk::ImageAspectFlags imageAspectFlags,
         const vk::ImageViewType imageViewType
+    );
+
+    static vk::UniqueSampler createVulkanSamplerPtr(
+        const vk::PhysicalDevice& vulkanPhysicalDevice,
+        const vk::UniqueDevice& p_vulkanLogicalDevice,
+        const vk::Filter magFilter,
+        const vk::Filter minFilter,
+        const vk::SamplerAddressMode addressModeU,
+        const vk::SamplerAddressMode addressModeV,
+        const vk::SamplerAddressMode addressModeW
     );
 
     // ----- command pool and command buffer things ----- //

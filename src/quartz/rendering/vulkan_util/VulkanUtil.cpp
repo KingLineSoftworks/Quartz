@@ -146,6 +146,52 @@ quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
     return p_imageView;
 }
 
+
+
+vk::UniqueSampler
+quartz::rendering::VulkanUtil::createVulkanSamplerPtr(
+    const vk::PhysicalDevice& vulkanPhysicalDevice,
+    const vk::UniqueDevice& p_vulkanLogicalDevice,
+    const vk::Filter magFilter,
+    const vk::Filter minFilter,
+    const vk::SamplerAddressMode addressModeU,
+    const vk::SamplerAddressMode addressModeV,
+    const vk::SamplerAddressMode addressModeW
+) {
+    LOG_FUNCTION_CALL_TRACE(TEXTURE, "");
+
+    vk::PhysicalDeviceProperties physicalDeviceProperties = vulkanPhysicalDevice.getProperties();
+
+    vk::SamplerCreateInfo samplerCreateInfo(
+        {},
+        magFilter,
+        minFilter,
+        vk::SamplerMipmapMode::eLinear,
+        addressModeU,
+        addressModeV,
+        addressModeW,
+        0.0f,
+        true,
+        physicalDeviceProperties.limits.maxSamplerAnisotropy,
+        false,
+        vk::CompareOp::eAlways,
+        0.0f,
+        0.0f,
+        vk::BorderColor::eIntOpaqueBlack,
+        false
+    );
+
+    vk::UniqueSampler p_sampler = p_vulkanLogicalDevice->createSamplerUnique(
+        samplerCreateInfo
+    );
+
+    if (!p_sampler) {
+        LOG_THROW(TEXTURE, util::VulkanCreationFailedError, "Failed to create vk::Sampler");
+    }
+
+    return p_sampler;
+}
+
 vk::UniqueCommandPool
 quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
     const uint32_t graphicsQueueFamilyIndex,

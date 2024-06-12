@@ -168,6 +168,17 @@ quartz::rendering::CubeMap::CubeMap(
             vk::ImageAspectFlagBits::eColor,
             vk::ImageViewType::eCube
         )
+    ),
+    mp_vulkanCombinedImageSampler(
+        quartz::rendering::VulkanUtil::createVulkanSamplerPtr(
+            renderingDevice.getVulkanPhysicalDevice(),
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            vk::Filter::eLinear,
+            vk::Filter::eLinear,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat
+        )
     )
 {}
 
@@ -175,7 +186,8 @@ quartz::rendering::CubeMap::CubeMap(
     quartz::rendering::CubeMap&& other
 ) :
     m_stagedImageBuffer(std::move(other.m_stagedImageBuffer)),
-    mp_vulkanImageView(std::move(other.mp_vulkanImageView))
+    mp_vulkanImageView(std::move(other.mp_vulkanImageView)),
+    mp_vulkanCombinedImageSampler(std::move(other.mp_vulkanCombinedImageSampler))
 {}
 
 quartz::rendering::CubeMap::~CubeMap() {}
@@ -190,6 +202,7 @@ quartz::rendering::CubeMap::operator=(
 
     m_stagedImageBuffer = std::move(other.m_stagedImageBuffer);
     mp_vulkanImageView = std::move(other.mp_vulkanImageView);
+    mp_vulkanCombinedImageSampler = std::move(other.mp_vulkanCombinedImageSampler);
 
     return *this;
 }

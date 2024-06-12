@@ -26,8 +26,6 @@ quartz::rendering::Context::createSkyboxRenderingPipeline(
 ) {
     LOG_FUNCTION_SCOPE_DEBUG(CONTEXT, "");
 
-    std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos;
-
     std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
         // camera
         {
@@ -41,10 +39,13 @@ quartz::rendering::Context::createSkyboxRenderingPipeline(
         }
     };
 
-    LOG_DEBUG(PIPELINE, "Using {} push constants", pushConstantInfos.size());
+    quartz::rendering::UniformSamplerCubeInfo uniformSamplerCubeInfo(
+        1,
+        1,
+        vk::ShaderStageFlagBits::eFragment
+    );
+
     LOG_DEBUG(PIPELINE, "Using {} uniform buffers", uniformBufferInfos.size());
-    LOG_DEBUG(PIPELINE, "Using no uniform sampler");
-    LOG_DEBUG(PIPELINE, "Using no uniform texture array");
 
     return {
         renderingDevice,
@@ -55,8 +56,9 @@ quartz::rendering::Context::createSkyboxRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription(),
         quartz::rendering::CubeMap::getVulkanVertexInputAttributeDescriptions(),
-        pushConstantInfos,
+        {},
         uniformBufferInfos,
+        uniformSamplerCubeInfo,
         std::nullopt,
         std::nullopt
     };
@@ -198,6 +200,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions(),
         pushConstantInfos,
         uniformBufferInfos,
+        std::nullopt,
         uniformSamplerInfo,
         uniformTextureArrayInfo
     };
@@ -267,11 +270,13 @@ void
 quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    m_doodadRenderingPipeline.updateVulkanDescriptorSets(
-        m_renderingDevice,
-        quartz::rendering::Texture::getDefaultVulkanSamplerPtr(),
-        quartz::rendering::Texture::getMasterTextureList()
-    );
+    LOG_DEBUGthis("Updating skybox rendering pipeline's descriptor sets");
+    m_skyboxRenderingPipeline.updateSamplerCubeDescriptorSets(m_renderingDevice, scene.getSkyBox().getCubeMap().getVulkanSamplerPtr(), scene.getSkyBox().getCubeMap().getVulkanImageViewPtr());
+
+    LOG_DEBUGthis("Updating doodad rendering pipeline's descriptor sets");
+    m_doodadRenderingPipeline.updateUniformBufferDescriptorSets(m_renderingDevice);
+    m_doodadRenderingPipeline.updateSamplerDescriptorSets(m_renderingDevice, quartz::rendering::Texture::getDefaultVulkanSamplerPtr());
+    m_doodadRenderingPipeline.updateTextureArrayDescriptorSets(m_renderingDevice, quartz::rendering::Texture::getMasterTextureList());
 
     m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
 }

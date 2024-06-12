@@ -323,49 +323,6 @@ quartz::rendering::Texture::getVulkanSamplerAddressMode(const int32_t addressMod
     return vk::SamplerAddressMode::eRepeat;
 }
 
-vk::UniqueSampler
-quartz::rendering::Texture::createVulkanSamplerPtr(
-    const quartz::rendering::Device& renderingDevice,
-    const vk::Filter magFilter,
-    const vk::Filter minFilter,
-    const vk::SamplerAddressMode addressModeU,
-    const vk::SamplerAddressMode addressModeV,
-    const vk::SamplerAddressMode addressModeW
-) {
-    LOG_FUNCTION_SCOPE_TRACE(TEXTURE, "");
-
-    vk::PhysicalDeviceProperties physicalDeviceProperties = renderingDevice.getVulkanPhysicalDevice().getProperties();
-
-    vk::SamplerCreateInfo samplerCreateInfo(
-        {},
-        magFilter,
-        minFilter,
-        vk::SamplerMipmapMode::eLinear,
-        addressModeU,
-        addressModeV,
-        addressModeW,
-        0.0f,
-        true,
-        physicalDeviceProperties.limits.maxSamplerAnisotropy,
-        false,
-        vk::CompareOp::eAlways,
-        0.0f,
-        0.0f,
-        vk::BorderColor::eIntOpaqueBlack,
-        false
-    );
-
-    vk::UniqueSampler p_sampler = renderingDevice.getVulkanLogicalDevicePtr()->createSamplerUnique(
-        samplerCreateInfo
-    );
-
-    if (!p_sampler) {
-        LOG_THROW(TEXTURE, util::VulkanCreationFailedError, "Failed to create vk::Sampler");
-    }
-
-    return p_sampler;
-}
-
 quartz::rendering::Texture::Texture(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t imageWidth,
@@ -386,22 +343,27 @@ quartz::rendering::Texture::Texture(
         vk::ImageTiling::eOptimal,
         p_pixels
     ),
-    mp_vulkanImageView(quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
-        renderingDevice.getVulkanLogicalDevicePtr(),
-        *(m_stagedImageBuffer.getVulkanImagePtr()),
-        m_stagedImageBuffer.getVulkanFormat(),
-        {},
-        vk::ImageAspectFlagBits::eColor,
-        vk::ImageViewType::e2D
-    )),
-    mp_vulkanSampler(quartz::rendering::Texture::createVulkanSamplerPtr(
-        renderingDevice,
-        vk::Filter::eLinear,
-        vk::Filter::eLinear,
-        vk::SamplerAddressMode::eRepeat,
-        vk::SamplerAddressMode::eRepeat,
-        vk::SamplerAddressMode::eRepeat
-    ))
+    mp_vulkanImageView(
+        quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            *(m_stagedImageBuffer.getVulkanImagePtr()),
+            m_stagedImageBuffer.getVulkanFormat(),
+            {},
+            vk::ImageAspectFlagBits::eColor,
+            vk::ImageViewType::e2D
+        )
+    ),
+    mp_vulkanSampler(
+        quartz::rendering::VulkanUtil::createVulkanSamplerPtr(
+            renderingDevice.getVulkanPhysicalDevice(),
+            renderingDevice.getVulkanLogicalDevicePtr(),
+            vk::Filter::eLinear,
+            vk::Filter::eLinear,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat
+        )
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -427,8 +389,9 @@ quartz::rendering::Texture::Texture(
         )
     ),
     mp_vulkanSampler(
-        quartz::rendering::Texture::createVulkanSamplerPtr(
-            renderingDevice,
+        quartz::rendering::VulkanUtil::createVulkanSamplerPtr(
+            renderingDevice.getVulkanPhysicalDevice(),
+            renderingDevice.getVulkanLogicalDevicePtr(),
             vk::Filter::eLinear,
             vk::Filter::eLinear,
             vk::SamplerAddressMode::eRepeat,
@@ -462,8 +425,9 @@ quartz::rendering::Texture::Texture(
         )
     ),
     mp_vulkanSampler(
-        quartz::rendering::Texture::createVulkanSamplerPtr(
-            renderingDevice,
+        quartz::rendering::VulkanUtil::createVulkanSamplerPtr(
+            renderingDevice.getVulkanPhysicalDevice(),
+            renderingDevice.getVulkanLogicalDevicePtr(),
             quartz::rendering::Texture::getVulkanFilterMode(gltfSampler.minFilter),
             quartz::rendering::Texture::getVulkanFilterMode(gltfSampler.magFilter),
             quartz::rendering::Texture::getVulkanSamplerAddressMode(gltfSampler.wrapS),

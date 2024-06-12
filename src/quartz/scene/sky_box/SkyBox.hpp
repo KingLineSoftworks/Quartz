@@ -29,6 +29,8 @@ public: // member functions
 
     USE_LOGGER(SKYBOX);
 
+    const quartz::rendering::CubeMap& getCubeMap() const { return m_cubeMap; }
+
 private: // member variables
     quartz::rendering::CubeMap m_cubeMap;
 };

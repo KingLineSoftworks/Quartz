@@ -62,14 +62,6 @@ private: // static functions
     );
     static vk::Filter getVulkanFilterMode(const int32_t filterMode);
     static vk::SamplerAddressMode getVulkanSamplerAddressMode(const int32_t addressMode);
-    static vk::UniqueSampler createVulkanSamplerPtr(
-        const quartz::rendering::Device& renderingDevice,
-        const vk::Filter magFilter,
-        const vk::Filter minFilter,
-        const vk::SamplerAddressMode addressModeU,
-        const vk::SamplerAddressMode addressModeV,
-        const vk::SamplerAddressMode addressModeW
-    );
 
 private: // static variables
     static uint32_t baseColorDefaultMasterIndex;
