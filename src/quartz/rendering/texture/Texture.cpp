@@ -335,7 +335,7 @@ quartz::rendering::Texture::Texture(
         imageWidth,
         imageHeight,
         channelCount,
-        imageWidth * imageHeight * channelCount, /** @todo 2024/06/09 Should this be WxHx4???? */
+        imageWidth * imageHeight * channelCount,
         1,
         vk::ImageUsageFlagBits::eSampled,
         {},

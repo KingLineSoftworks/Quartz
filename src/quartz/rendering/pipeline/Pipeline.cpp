@@ -433,7 +433,7 @@ void quartz::rendering::Pipeline::updateUniformTextureArrayDescriptorSets(
         LOG_TRACE(PIPELINE, "Updating descriptor set {}", i);
         const vk::DescriptorSet& descriptorSet = descriptorSets[i];
 
-        const uint32_t numTexturesToUse = std::min<uint32_t>(o_uniformTextureArrayInfo->getDescriptorCount(), texturePtrs.size());
+        UNUSED const uint32_t numTexturesToUse = std::min<uint32_t>(o_uniformTextureArrayInfo->getDescriptorCount(), texturePtrs.size());
         LOG_TRACE(PIPELINE, "  Using texture array sampler info");
         LOG_TRACE(PIPELINE, "    destination binding    = {}", o_uniformTextureArrayInfo->getBindingLocation());
         LOG_TRACE(PIPELINE, "    descriptor count       = {}", o_uniformTextureArrayInfo->getDescriptorCount());

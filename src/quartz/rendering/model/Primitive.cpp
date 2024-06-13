@@ -64,7 +64,7 @@ quartz::rendering::Primitive::handleMissingVertexAttribute(
 
 bool
 quartz::rendering::Primitive::handleDefaultTextureAttribute(
-    std::vector<quartz::rendering::Vertex>& verticesToPopulate,
+    UNUSED std::vector<quartz::rendering::Vertex>& verticesToPopulate,
     const std::shared_ptr<quartz::rendering::Material>& p_material,
     const quartz::rendering::Vertex::AttributeType attributeType
 ) {
