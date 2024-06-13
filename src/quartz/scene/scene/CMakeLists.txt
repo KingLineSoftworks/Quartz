@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_SCENE_Scene
         SHARED
+        Scene.hpp
         Scene.cpp
 )
 
@@ -26,4 +27,5 @@ target_link_libraries(
         QUARTZ_SCENE_Camera
         QUARTZ_SCENE_Doodad
         QUARTZ_SCENE_Light
+        QUARTZ_SCENE_SkyBox
 )

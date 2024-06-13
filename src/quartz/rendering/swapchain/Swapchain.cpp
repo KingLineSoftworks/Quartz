@@ -88,7 +88,8 @@ quartz::rendering::Swapchain::createVulkanSwapchainImageViewUniquePtrs(
                 swapchainImage,
                 surfaceFormat.format,
                 components,
-                vk::ImageAspectFlagBits::eColor
+                vk::ImageAspectFlagBits::eColor,
+                vk::ImageViewType::e2D
             )
         );
     }
@@ -197,7 +198,8 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
 quartz::rendering::Swapchain::Swapchain(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
-    const quartz::rendering::Pipeline& renderingPipeline
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
 ):
     m_shouldRecreate(false),
     mp_vulkanSwapchain(
@@ -236,7 +238,7 @@ quartz::rendering::Swapchain::Swapchain(
             renderingWindow.getVulkanExtent(),
             m_vulkanImageViewPtrs,
             m_depthBuffer.getVulkanImageViewPtr(),
-            renderingPipeline.getVulkanRenderPassPtr()
+            renderingRenderPass.getVulkanRenderPassPtr()
         )
     ),
     m_screenClearColor(0.0, 0.0, 0.0),
@@ -251,25 +253,25 @@ quartz::rendering::Swapchain::Swapchain(
         quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
             mp_vulkanDrawingCommandPool,
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     ),
     m_vulkanImageAvailableSemaphorePtrs(
         quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     ),
     m_vulkanRenderFinishedSemaphorePtrs(
         quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     ),
     m_vulkanInFlightFencePtrs(
         quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            renderingPipeline.getMaxNumFramesInFlight()
+            maxNumFramesInFlight
         )
     )
 {
@@ -312,7 +314,8 @@ void
 quartz::rendering::Swapchain::recreate(
     const quartz::rendering::Device& renderingDevice,
     const quartz::rendering::Window& renderingWindow,
-    const quartz::rendering::Pipeline& renderingPipeline
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -346,7 +349,7 @@ quartz::rendering::Swapchain::recreate(
         renderingWindow.getVulkanExtent(),
         m_vulkanImageViewPtrs,
         m_depthBuffer.getVulkanImageViewPtr(),
-        renderingPipeline.getVulkanRenderPassPtr()
+        renderingRenderPass.getVulkanRenderPassPtr()
     );
     mp_vulkanDrawingCommandPool = quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
         renderingDevice.getGraphicsQueueFamilyIndex(),
@@ -356,19 +359,19 @@ quartz::rendering::Swapchain::recreate(
     m_vulkanDrawingCommandBufferPtrs = quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
         renderingDevice.getVulkanLogicalDevicePtr(),
         mp_vulkanDrawingCommandPool,
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
     m_vulkanImageAvailableSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
     m_vulkanRenderFinishedSemaphorePtrs = quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
     m_vulkanInFlightFencePtrs = quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
         renderingDevice.getVulkanLogicalDevicePtr(),
-        renderingPipeline.getMaxNumFramesInFlight()
+        maxNumFramesInFlight
     );
 
     LOG_TRACEthis("Clearing the \"should recreate\" flag");
@@ -431,7 +434,7 @@ quartz::rendering::Swapchain::resetInFlightFence(
 void
 quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     const quartz::rendering::Window& renderingWindow,
-    const quartz::rendering::Pipeline& renderingPipeline,
+    const quartz::rendering::RenderPass& renderingRenderPass,
     const uint32_t inFlightFrameIndex,
     const uint32_t availableSwapchainImageIndex
 ) {
@@ -480,7 +483,7 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
     );
 
     vk::RenderPassBeginInfo renderPassBeginInfo(
-        *renderingPipeline.getVulkanRenderPassPtr(),
+        *renderingRenderPass.getVulkanRenderPassPtr(),
         *(m_vulkanFramebufferPtrs[availableSwapchainImageIndex]),
         renderPassRenderArea,
         clearValues
@@ -490,7 +493,14 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
         renderPassBeginInfo,
         vk::SubpassContents::eInline
     );
+}
 
+void
+quartz::rendering::Swapchain::bindPipelineToDrawingCommandBuffer(
+    const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::Pipeline& renderingPipeline,
+    const uint32_t inFlightFrameIndex
+) {
     // ----- draw (bind graphics pipeline, set up viewport & scissor) ----- //
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindPipeline(
@@ -522,9 +532,48 @@ quartz::rendering::Swapchain::resetAndBeginDrawingCommandBuffer(
 }
 
 void
+quartz::rendering::Swapchain::recordSkyBoxToDrawingCommandBuffer(
+    const quartz::rendering::Pipeline& skyBoxRenderingPipeline,
+    const quartz::scene::SkyBox& skyBox,
+    const uint32_t inFlightFrameIndex
+) {
+    uint32_t offset = 0;
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *skyBoxRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(skyBoxRenderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        &offset
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+        0,
+        *(skyBox.getCubeMap().getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        offset
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+        *(skyBox.getCubeMap().getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        0,
+        vk::IndexType::eUint32
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+        quartz::rendering::CubeMap::getIndexCount(),
+        1,
+        0,
+        0,
+        0
+    );
+}
+
+void
 quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
     const quartz::rendering::Device& renderingDevice,
-    const quartz::rendering::Pipeline& renderingPipeline,
+    const quartz::rendering::Pipeline& doodadRenderingPipeline,
     const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
@@ -550,40 +599,45 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
         }
 
         glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
+        const quartz::rendering::PushConstantInfo& transformMatrixPushConstantInfo = doodadRenderingPipeline.getPushConstantInfos()[0];
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-            *renderingPipeline.getVulkanPipelineLayoutPtr(),
-            vk::ShaderStageFlagBits::eVertex,
-            0,
-            sizeof(glm::mat4),
+            *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
+            transformMatrixPushConstantInfo.getVulkanShaderStageFlags(),
+            transformMatrixPushConstantInfo.getOffset(),
+            transformMatrixPushConstantInfo.getSize(),
             reinterpret_cast<void*>(&currentTransformationMatrix)
         );
 
         for (const quartz::rendering::Primitive& primitive : p_node->getMeshPtr()->getPrimitives()) {
+            /** @brief This is the offset into the dynamic uniform buffer */
             uint32_t materialMasterIndex = primitive.getMaterialMasterIndex();
             uint32_t materialByteOffset = minUniformBufferOffsetAlignment > 0 ?
-                (sizeof(quartz::rendering::MaterialUniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
-                sizeof(quartz::rendering::MaterialUniformBufferObject);
+                (sizeof(quartz::rendering::Material::UniformBufferObject) + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
+                sizeof(quartz::rendering::Material::UniformBufferObject);
             materialByteOffset *= materialMasterIndex;
 
+            // Bind the descriptor set
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
                 vk::PipelineBindPoint::eGraphics,
-                *renderingPipeline.getVulkanPipelineLayoutPtr(),
+                *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
                 0,
                 1,
-                &(renderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+                &(doodadRenderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
                 1,
                 &materialByteOffset
             );
 
             /** @brief 2024/05/16 This isn't actually used for anything and is just here as an example of using a push constant in the fragment shader */
+            const quartz::rendering::PushConstantInfo& dummyPushConstantInfo = doodadRenderingPipeline.getPushConstantInfos()[1];
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
-                *renderingPipeline.getVulkanPipelineLayoutPtr(),
-                vk::ShaderStageFlagBits::eFragment,
-                sizeof(glm::mat4),
-                sizeof(uint32_t),
+                *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),
+                dummyPushConstantInfo.getVulkanShaderStageFlags(),
+                dummyPushConstantInfo.getOffset(),
+                dummyPushConstantInfo.getSize(),
                 reinterpret_cast<void*>(&materialMasterIndex)
             );
 
+            // Bind the vertex buffer
             uint32_t offset = 0;
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
                 0,
@@ -591,12 +645,14 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
                 offset
             );
 
+            // Index buffer
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
                 *(primitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
                 0,
                 vk::IndexType::eUint32
             );
 
+            // Draw using the vertex and index buffer
             m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
                 primitive.getIndexCount(),
                 1,

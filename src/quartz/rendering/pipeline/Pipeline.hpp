@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <optional>
 
 #include <glm/mat4x4.hpp>
 
@@ -9,6 +10,12 @@
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
+#include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
+#include "quartz/rendering/pipeline/UniformSamplerCubeInfo.hpp"
+#include "quartz/rendering/pipeline/UniformSamplerInfo.hpp"
+#include "quartz/rendering/pipeline/UniformTextureArrayInfo.hpp"
+#include "quartz/rendering/render_pass/RenderPass.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
@@ -20,135 +27,139 @@
 
 namespace quartz {
 namespace rendering {
-    struct CameraUniformBufferObject;
-    struct MaterialUniformBufferObject;
     class Pipeline;
 }
 }
 
-/**
- * @todo 2024/05/11 Just make the member variables of the camera aligned and push that
- *   instead of creating a copy into this weird little struct
- */
-struct quartz::rendering::CameraUniformBufferObject {
-public: // member functions
-    CameraUniformBufferObject() = default;
-    CameraUniformBufferObject(
-        const glm::vec3 position_,
-        const glm::mat4 viewMatrix_,
-        const glm::mat4 projectionMatrix_
-    );
-
-public: // member variables
-    alignas(16) glm::vec3 position;
-    alignas(16) glm::mat4 viewMatrix;
-    alignas(16) glm::mat4 projectionMatrix;
-};
-
-struct quartz::rendering::MaterialUniformBufferObject {
-public: // member functions
-    MaterialUniformBufferObject() = default;
-    MaterialUniformBufferObject(
-        const uint32_t baseColorTextureMasterIndex_,
-        const uint32_t metallicRoughnessTextureMasterIndex_,
-        const uint32_t normalTextureMasterIndex_,
-        const uint32_t emissionTextureMasterIndex_,
-        const uint32_t occlusionTextureMasterIndex_,
-        const glm::vec4& baseColorFactor_,
-        const glm::vec3& emissiveFactor_,
-        const float metallicFactor_,
-        const float roughnessFactor_,
-        const uint32_t alphaMode_,
-        const float alphaCutoff_,
-        const bool doubleSided_
-    );
-
-public: // member variables
-    alignas(4) uint32_t baseColorTextureMasterIndex;
-    alignas(4) uint32_t metallicRoughnessTextureMasterIndex;
-    alignas(4) uint32_t normalTextureMasterIndex;
-    alignas(4) uint32_t emissionTextureMasterIndex;
-    alignas(4) uint32_t occlusionTextureMasterIndex;
-
-    alignas(16) glm::vec4 baseColorFactor;
-    alignas(16) glm::vec3 emissiveFactor;
-    alignas(4) float metallicFactor;
-    alignas(4) float roughnessFactor;
-
-    alignas(4) uint32_t alphaMode;
-    alignas(4) float alphaCutoff;
-    alignas(4) bool doubleSided;
-};
-
 class quartz::rendering::Pipeline {
 public: // member functions
+    /**
+     * @brief This takes an r value to the vector of uniform buffer infos so we don't have to be copying the locally mapped buffers around,
+     *    but instead just move them around
+     * @todo 2024/06/06 Make the UniformBufferInfo class just be a POD and not contain the actually locally mapped buffer.
+     *    We could have the pipeline manage the locally mapped buffers directly?
+     *    We could have a custom UniformBuffer class that contains the locally mapped buffers and is constructed within the pipeline
+     *       when we give the UniformBufferInfo POD?
+     */
     Pipeline(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
-        const uint32_t maxNumFramesInFlight
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const std::string& compiledVertexShaderFilepath,
+        const std::string& compiledFragmentShaderFilepath,
+        const uint32_t maxNumFramesInFlight,
+        const vk::VertexInputBindingDescription& vertexInputBindingDescription,
+        const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
+        const vk::CullModeFlags cullModeFlags,
+        const bool shouldDepthTest,
+        const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
     );
     ~Pipeline();
 
     void reset();
     void recreate(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Window& renderingWindow
+        const quartz::rendering::RenderPass& renderingRenderPass
     );
 
-    void allocateVulkanDescriptorSets(
+    void updateUniformBufferDescriptorSets(
+        const quartz::rendering::Device& renderingDevice
+    );
+    void updateSamplerCubeDescriptorSets(
+        const quartz::rendering::Device& renderingDevice,
+        const vk::UniqueSampler& p_combinedImageSampler,
+        const vk::UniqueImageView& p_imageView
+    );
+    void updateSamplerDescriptorSets(
+        const quartz::rendering::Device& renderingDevice,
+        const vk::UniqueSampler& p_sampler
+    );
+    void updateTextureArrayDescriptorSets(
         const quartz::rendering::Device& renderingDevice,
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
     USE_LOGGER(PIPELINE);
 
-    uint32_t getMaxNumFramesInFlight() const { return m_maxNumFramesInFlight; }
-    uint32_t getCurrentInFlightFrameIndex() const { return m_currentInFlightFrameIndex; }
+    const std::vector<quartz::rendering::PushConstantInfo>& getPushConstantInfos() const { return m_pushConstantInfos; }
+    const std::vector<quartz::rendering::UniformBufferInfo>& getUniformBufferInfos() const { return m_uniformBufferInfos; }
+    const quartz::rendering::UniformBufferInfo& getUniformBufferInfo(const uint32_t index) const { return m_uniformBufferInfos[index]; }
+
+    const std::vector<vk::Viewport>& getVulkanViewports() const { return m_vulkanViewports; }
+    const std::vector<vk::Rect2D>& getVulkanScissorRectangles() const { return m_vulkanScissorRectangles; }
     const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
-    const vk::UniqueRenderPass& getVulkanRenderPassPtr() const { return mp_vulkanRenderPass; }
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
 
-    void updateCameraUniformBuffer(const quartz::scene::Camera& camera);
-    void updateAmbientLightUniformBuffer(const quartz::scene::AmbientLight& ambientLight);
-    void updateDirectionalLightUniformBuffer(const quartz::scene::DirectionalLight& directionalLight);
-    void updatePointLightUniformBuffer(const std::vector<quartz::scene::PointLight>& pointLights);
-    void updateSpotLightUniformBuffer(const std::vector<quartz::scene::SpotLight>& spotLights);
-    void updateMaterialArrayUniformBuffer(const uint32_t minUniformBufferOffsetAlignment);
-    void incrementCurrentInFlightFrameIndex() { m_currentInFlightFrameIndex = (m_currentInFlightFrameIndex + 1) % m_maxNumFramesInFlight; }
+    void updateUniformBuffer(
+        const uint32_t currentInFlightFrameIndex,
+        const uint32_t uniformIndex,
+        void* p_dataToCopy
+    );
 
 private: // static functions
     static vk::UniqueShaderModule createVulkanShaderModulePtr(
         const vk::UniqueDevice& p_logicalDevice,
         const std::string& filepath
     );
-    static std::vector<quartz::rendering::LocallyMappedBuffer> createUniformBuffers(
+    static std::vector<quartz::rendering::LocallyMappedBuffer> createLocallyMappedBuffers(
         const quartz::rendering::Device& renderingDevice,
-        const uint32_t numBuffers
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const uint32_t maxNumFramesInFlight
     );
     static vk::UniqueDescriptorSetLayout createVulkanDescriptorSetLayoutPtr(
-        const vk::UniqueDevice& p_logicalDevice
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo
     );
     static vk::UniqueDescriptorPool createVulkanDescriptorPoolPtr(
         const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
         const uint32_t numDescriptorSets
     );
     static std::vector<vk::DescriptorSet> allocateVulkanDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const uint32_t minUniformBufferOffsetAlignment,
-        const uint32_t maxNumFramesInFlight, // should be m_maxNumFramesInFlight
-        const std::vector<quartz::rendering::LocallyMappedBuffer>& uniformBuffers,
+        const uint32_t maxNumFramesInFlight,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout,
-        const vk::UniqueDescriptorPool& uniqueDescriptorPool,
-        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
+        const vk::UniqueDescriptorPool& p_descriptorPool
     );
-    static vk::UniqueRenderPass createVulkanRenderPassPtr(
+    static void updateUniformBufferDescriptorSets(
         const vk::UniqueDevice& p_logicalDevice,
-        const vk::SurfaceFormatKHR& surfaceFormat,
-        const vk::Format& depthFormat
+        const std::vector<quartz::rendering::UniformBufferInfo>& uniformBufferInfos,
+        const std::vector<quartz::rendering::LocallyMappedBuffer>& locallyMappedBuffers,
+        const std::vector<vk::DescriptorSet>& descriptorSets
+    );
+    static void updateUniformSamplerCubeDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::optional<quartz::rendering::UniformSamplerCubeInfo>& o_uniformSamplerCubeInfo,
+        const vk::UniqueSampler& p_combinedImageSampler,
+        const vk::UniqueImageView& p_imageView,
+        const std::vector<vk::DescriptorSet>& descriptorSets
+    );
+    static void updateUniformSamplerDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::optional<quartz::rendering::UniformSamplerInfo>& o_uniformSamplerInfo,
+        const vk::UniqueSampler& p_sampler,
+        const std::vector<vk::DescriptorSet>& descriptorSets
+    );
+    static void updateUniformTextureArrayDescriptorSets(
+        const vk::UniqueDevice& p_logicalDevice,
+        const std::optional<quartz::rendering::UniformTextureArrayInfo>& o_uniformTextureArrayInfo,
+        const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs,
+        const std::vector<vk::DescriptorSet>& descriptorSets
     );
     static vk::UniquePipelineLayout createVulkanPipelineLayoutPtr(
         const vk::UniqueDevice& p_logicalDevice,
+        const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
         const vk::UniqueDescriptorSetLayout& p_descriptorSetLayout
     );
     static vk::UniquePipeline createVulkanGraphicsPipelinePtr(
@@ -157,6 +168,8 @@ private: // static functions
         const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
         const std::vector<vk::Viewport> viewports,
         const std::vector<vk::Rect2D> scissorRectangles,
+        const vk::CullModeFlags cullModeFlags,
+        const bool shouldDepthTest,
         const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
         const std::vector<vk::DynamicState> dynamicStates,
         const vk::UniqueShaderModule& p_vertexShaderModule,
@@ -166,24 +179,28 @@ private: // static functions
     );
 
 private: // member variables
-    const uint32_t m_maxNumFramesInFlight;
-    uint32_t m_currentInFlightFrameIndex;
     vk::VertexInputBindingDescription m_vulkanVertexInputBindingDescriptions;
     std::vector<vk::VertexInputAttributeDescription> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
     std::vector<vk::Rect2D> m_vulkanScissorRectangles;
+    vk::CullModeFlags m_vulkanCullModeFlags;
+    bool m_shouldDepthTest;
     std::vector<vk::PipelineColorBlendAttachmentState> m_vulkanColorBlendAttachmentStates;
     std::vector<vk::DynamicState> m_vulkanDynamicStates;
 
     vk::UniqueShaderModule mp_vulkanVertexShaderModule;
     vk::UniqueShaderModule mp_vulkanFragmentShaderModule;
 
-    std::vector<quartz::rendering::LocallyMappedBuffer> m_uniformBuffers;
-    vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
-    vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr;
-    std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;
+    std::vector<quartz::rendering::PushConstantInfo> m_pushConstantInfos;
+    std::vector<quartz::rendering::UniformBufferInfo> m_uniformBufferInfos;
+    std::optional<quartz::rendering::UniformSamplerCubeInfo> mo_uniformSamplerCubeInfo;
+    std::optional<quartz::rendering::UniformSamplerInfo> mo_uniformSamplerInfo;
+    std::optional<quartz::rendering::UniformTextureArrayInfo> mo_uniformTextureArrayInfo;
 
-    vk::UniqueRenderPass mp_vulkanRenderPass;
+    std::vector<quartz::rendering::LocallyMappedBuffer> m_locallyMappedBuffers;
+    vk::UniqueDescriptorSetLayout mp_vulkanDescriptorSetLayout;
+    vk::UniqueDescriptorPool m_vulkanDescriptorPoolPtr; /** @todo 2024/06/07 Do we need to track this? It is only used when allocating descriptor sets */
+    std::vector<vk::DescriptorSet> m_vulkanDescriptorSets;
 
     vk::UniquePipelineLayout mp_vulkanPipelineLayout;
     vk::UniquePipeline mp_vulkanGraphicsPipeline;

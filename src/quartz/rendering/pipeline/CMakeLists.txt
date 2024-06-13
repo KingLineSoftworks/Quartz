@@ -4,7 +4,23 @@
 add_library(
         QUARTZ_RENDERING_Pipeline
         SHARED
+        Pipeline.hpp
         Pipeline.cpp
+
+        UniformBufferInfo.hpp
+        UniformBufferInfo.cpp
+
+        UniformSamplerCubeInfo.hpp
+        UniformSamplerCubeInfo.cpp
+
+        UniformSamplerInfo.hpp
+        UniformSamplerInfo.cpp
+
+        UniformTextureArrayInfo.hpp
+        UniformTextureArrayInfo.cpp
+
+        PushConstantInfo.cpp
+        PushConstantInfo.hpp
 )
 
 target_compile_options(
@@ -27,6 +43,7 @@ target_link_libraries(
         QUARTZ_RENDERING_Buffer
         QUARTZ_RENDERING_Device
         QUARTZ_RENDERING_Model
+        QUARTZ_RENDERING_RenderPass
         QUARTZ_RENDERING_Texture
         QUARTZ_RENDERING_Window
         QUARTZ_SCENE_Camera

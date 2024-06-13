@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_SCENE_Camera
         SHARED
+        Camera.hpp
         Camera.cpp
 )
 

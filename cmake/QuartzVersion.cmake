@@ -16,4 +16,5 @@ endfunction()
 #set_quartz_major_minor_patch_versions(0 1 2) # load gltf models, default & indexed textures
 #set_quartz_major_minor_patch_versions(0 1 3) # multiple gltf models
 #set_quartz_major_minor_patch_versions(0 1 4) # default textures, materials, normal textures, emission textures, occlusion textures
-set_quartz_major_minor_patch_versions(0 1 5) # metallic roughness PBR BRDF with point lights and spot lights
+#set_quartz_major_minor_patch_versions(0 1 5) # metallic roughness PBR BRDF with point lights and spot lights
+set_quartz_major_minor_patch_versions(0 1 6) # skyboxes =D so preeetttttttty (and ability to create multiple pipelines)

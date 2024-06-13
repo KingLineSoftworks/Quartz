@@ -382,7 +382,16 @@ vec3 calculateAmbientLightContribution(
 ) {
     vec3 ambientLightContribution = ambientLight.color * fragmentBaseColor * occlusionScale;
 
-    return ambientLightContribution;
+    /**
+     * @todo 2024/06/08 We should figure out how to ensure that the specular brdf cannot be negative so
+     *    we don't have to do any clamping here. It is likely a result of a dot product not being clamped.
+     *    My main two suspects are ndotv and ndotl
+     */
+    return vec3(
+        clamp(ambientLightContribution.r, 0.0, 1.0),
+        clamp(ambientLightContribution.g, 0.0, 1.0),
+        clamp(ambientLightContribution.b, 0.0, 1.0)
+    );
 }
 
 // --------------------------------------------------------------------------------
@@ -403,7 +412,16 @@ vec3 calculateDirectionalLightContribution(
 
     vec3 directionalLightContribution = directionalLight.color * (directionalLightImpact * fragmentBaseColor) * occlusionScale;
 
-    return directionalLightContribution;
+    /**
+     * @todo 2024/06/08 We should figure out how to ensure that the specular brdf cannot be negative so
+     *    we don't have to do any clamping here. It is likely a result of a dot product not being clamped.
+     *    My main two suspects are ndotv and ndotl
+     */
+    return vec3(
+        clamp(directionalLightContribution.r, 0.0, 1.0),
+        clamp(directionalLightContribution.g, 0.0, 1.0),
+        clamp(directionalLightContribution.b, 0.0, 1.0)
+    );
 }
 
 // --------------------------------------------------------------------------------
@@ -439,7 +457,16 @@ vec3 calculatePointLightContribution(
         result += intensity * ((diffuseColor * occlusionScale) + specularColor) * ndotl;
     }
 
-    return result;
+    /**
+     * @todo 2024/06/08 We should figure out how to ensure that the specular brdf cannot be negative so
+     *    we don't have to do any clamping here. It is likely a result of a dot product not being clamped.
+     *    My main two suspects are ndotv and ndotl
+     */
+    return vec3(
+        clamp(result.r, 0.0, 1.0),
+        clamp(result.g, 0.0, 1.0),
+        clamp(result.b, 0.0, 1.0)
+    );
 }
 
 // --------------------------------------------------------------------------------
@@ -474,7 +501,16 @@ vec3 calculateSpotLightContribution(
         result += intensity * ((diffuseColor * occlusionScale) + specularColor) * ndotl;
     }
 
-    return result;
+    /**
+     * @todo 2024/06/08 We should figure out how to ensure that the specular brdf cannot be negative so
+     *    we don't have to do any clamping here. It is likely a result of a dot product not being clamped.
+     *    My main two suspects are ndotv and ndotl
+     */
+    return vec3(
+        clamp(result.r, 0.0, 1.0),
+        clamp(result.g, 0.0, 1.0),
+        clamp(result.b, 0.0, 1.0)
+    );
 }
 
 // --------------------------------------------------------------------------------

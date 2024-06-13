@@ -61,14 +61,6 @@ void quartz::Application::run() {
     UNUSED double currentFrameStartTime = 0.0f;
     UNUSED double frameTimeAccumulator = 0.0f;
 
-    /**
-     * @todo 2023/12/12 FIX COORDINATE SYSTEM.
-     *   WE ARE CURRENTLY USING SOME SORT OF COORDINATE SYSTEM (I FORGOT WHICH).
-     *   BUT IT IS CLEARLY NOT THE SAME AS THE COORDINATE SYSTEM THAT GLTF USES.
-     *   ALL GLTF MODELS ARE LOADING IN UPSIDE DOWN AND WHEN WE USE THE BOOM BOX WITH AXES
-     *   WE CAN CLEARLY SEE THAT OUR COORDINATE SYSTEM IS INCORRECT.
-     */
-
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
         {
             "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
@@ -86,7 +78,7 @@ void quartz::Application::run() {
                 0.0f,
                 {0.0f, 0.0f, 1.0f},
                 {100.0f, 100.0f, 100.0f}
-            },
+            }
         },
         {
             "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf",
@@ -97,6 +89,24 @@ void quartz::Application::run() {
                 {10.0f, 10.0f, 10.0f}
             }
         },
+        {
+            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
+            {
+                {5.0f, 0.0f, 0.0f},
+                0.0f,
+                {0.0f, 0.0f, 1.0f},
+                {1.0f, 1.0f, 1.0f}
+            }
+        }
+    };
+
+    std::array<std::string, 6> skyBoxInformation = {
+        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posx.jpg",
+        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negx.jpg",
+        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posy.jpg",
+        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negy.jpg",
+        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posz.jpg",
+        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negz.jpg"
     };
 
     std::vector<quartz::scene::PointLight> pointLights = {
@@ -124,21 +134,22 @@ void quartz::Application::run() {
         m_renderingContext.getRenderingDevice(),
         {
             0.0f, // rotation around x-axis (up down)
-            0.0f, // rotation around y-axis (left right)
+            -90.0f, // rotation around y-axis (left right)
             0.0f,
             75.0f,
-            { -5.0f, 0.0f, 0.0f }
+             { 1.25f, 0.0f, 5.0f }
         },
         {
-            { 0.000f, 0.000f, 0.000f }
+            { 0.01f, 0.01f, 0.01f }
         },
         {
-            { 0.000f, 0.000f, 0.000f },
+            { 0.05f, 0.05f, 0.05f },
             { 3.0f, -2.0f, 0.0f }
         },
         pointLights,
         spotLights,
         {0.25f, 0.4f, 0.6f},
+        skyBoxInformation,
         doodadInformations
     );
     m_renderingContext.loadScene(m_scene);

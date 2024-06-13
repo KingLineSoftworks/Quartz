@@ -4,7 +4,10 @@
 add_library(
         QUARTZ_SCENE_Doodad
         SHARED
+        Doodad.hpp
         Doodad.cpp
+
+        Transform.hpp
         Transform.cpp
 )
 

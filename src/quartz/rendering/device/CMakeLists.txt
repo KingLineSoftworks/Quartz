@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Device
         SHARED
+        Device.hpp
         Device.cpp
 )
 

@@ -23,8 +23,9 @@ public: // member functions
         const vk::ImageTiling tiling
     );
     DepthBuffer(DepthBuffer&& other);
-    DepthBuffer& operator=(DepthBuffer&& other);
     ~DepthBuffer();
+
+    DepthBuffer& operator=(DepthBuffer&& other);
 
     void reset();
 

@@ -6,4 +6,7 @@ compile_shaders(
     ${CMAKE_CURRENT_LIST_DIR}   # directory containing input shaders
     shader.vert
     shader.frag
+
+    skybox.vert
+    skybox.frag
 )

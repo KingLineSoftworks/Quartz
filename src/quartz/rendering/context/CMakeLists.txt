@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Context
         SHARED
+        Context.hpp
         Context.cpp
 )
 
@@ -26,10 +27,12 @@ target_link_libraries(
 
         PUBLIC
         QUARTZ_RENDERING_Buffer
+        QUARTZ_RENDERING_CubeMap
         QUARTZ_RENDERING_Device
         QUARTZ_RENDERING_Instance
         QUARTZ_RENDERING_Model
         QUARTZ_RENDERING_Pipeline
+        QUARTZ_RENDERING_RenderPass
         QUARTZ_RENDERING_Swapchain
         QUARTZ_RENDERING_Texture
         QUARTZ_RENDERING_Window

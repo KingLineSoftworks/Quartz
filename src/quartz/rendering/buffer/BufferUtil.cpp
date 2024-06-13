@@ -4,6 +4,7 @@
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/BufferUtil.hpp"
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
 std::string
 quartz::rendering::BufferUtil::getUsageFlagsString(
@@ -223,14 +224,20 @@ quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
     const vk::UniqueDevice& p_logicalDevice,
     const uint32_t imageWidth,
     const uint32_t imageHeight,
+    const uint32_t layerCount,
     const vk::ImageUsageFlags usageFlags,
+    const vk::ImageCreateFlags createFlags,
     const vk::Format format,
     const vk::ImageTiling tiling
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(IMAGE, "");
+
+    LOG_TRACE(IMAGE, "Using image create flags: {}", quartz::rendering::VulkanUtil::toString(createFlags));
+
+    LOG_TRACE(IMAGE, "Using {} array layers", layerCount);
 
     vk::ImageCreateInfo imageCreateInfo(
-        {},
+        createFlags,
         vk::ImageType::e2D,
         format,
         {
@@ -239,7 +246,7 @@ quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
             1
         },
         1,
-        1,
+        layerCount,
         vk::SampleCountFlagBits::e1,
         tiling,
         usageFlags,
@@ -248,7 +255,7 @@ quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
 
     vk::UniqueImage p_vulkanImage = p_logicalDevice->createImageUnique(imageCreateInfo);
     if (!p_vulkanImage) {
-        LOG_THROW(BUFFER, util::VulkanCreationFailedError, "Failed to create vk::Image");
+        LOG_THROW(IMAGE, util::VulkanCreationFailedError, "Failed to create vk::Image");
     }
 
     return p_vulkanImage;
@@ -261,7 +268,7 @@ quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
     const vk::UniqueImage& p_image,
     const vk::MemoryPropertyFlags requiredMemoryProperties
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(IMAGE, "");
 
     vk::MemoryRequirements memoryRequirements = p_logicalDevice->getImageMemoryRequirements(*p_image);
 
@@ -278,7 +285,7 @@ quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
 
     vk::UniqueDeviceMemory p_vulkanPhysicalDeviceImageMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
     if (!p_vulkanPhysicalDeviceImageMemory) {
-        LOG_THROW(BUFFER, util::VulkanCreationFailedError, "Failed to create vk::DeviceMemory for vk::Image");
+        LOG_THROW(IMAGE, util::VulkanCreationFailedError, "Failed to create vk::DeviceMemory for vk::Image");
     }
 
     p_logicalDevice->bindImageMemory(

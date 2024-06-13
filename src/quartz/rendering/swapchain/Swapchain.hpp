@@ -13,6 +13,7 @@
 #include "quartz/rendering/pipeline/Pipeline.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "quartz/scene/sky_box/SkyBox.hpp"
 
 namespace quartz {
 namespace rendering {
@@ -25,7 +26,8 @@ public: // member functions
     Swapchain(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
-        const quartz::rendering::Pipeline& renderingPipeline
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
     );
     ~Swapchain();
 
@@ -33,7 +35,8 @@ public: // member functions
     void recreate(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
-        const quartz::rendering::Pipeline& renderingPipeline
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
     );
 
     USE_LOGGER(SWAPCHAIN);
@@ -56,13 +59,23 @@ public: // member functions
     );
     void resetAndBeginDrawingCommandBuffer(
         const quartz::rendering::Window& renderingWindow,
-        const quartz::rendering::Pipeline& renderingPipeline,
+        const quartz::rendering::RenderPass& renderingRenderPass,
         const uint32_t inFlightFrameIndex,
         const uint32_t availableSwapchainImageIndex
     );
+    void bindPipelineToDrawingCommandBuffer(
+        const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::Pipeline& renderingPipeline,
+        const uint32_t inFlightFrameIndex
+    );
+    void recordSkyBoxToDrawingCommandBuffer(
+        const quartz::rendering::Pipeline& skyBoxRenderingPipeline,
+        const quartz::scene::SkyBox& skyBox,
+        const uint32_t inFlightFrameIndex
+    );
     void recordDoodadToDrawingCommandBuffer(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::rendering::Pipeline& renderingPipeline,
+        const quartz::rendering::Pipeline& doodadRenderingPipeline,
         const quartz::scene::Doodad& doodad,
         const uint32_t inFlightFrameIndex
     );

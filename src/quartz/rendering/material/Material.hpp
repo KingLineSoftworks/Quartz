@@ -21,6 +21,48 @@ namespace rendering {
  * @brief Default values specified here https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#reference-material
  */
 class quartz::rendering::Material {
+public: // classes
+    /**
+     * @brief So we don't need to pass all of the information stored in the material (don't pass the name string)
+     *
+     * @todo 2024/06/04 Can we copy the material into the GPU's memory but only copy 72 bytes so we slice off the name variable?
+     */
+    struct UniformBufferObject {
+    public: // member functions
+        UniformBufferObject() = default;
+        UniformBufferObject(
+            const uint32_t baseColorTextureMasterIndex_,
+            const uint32_t metallicRoughnessTextureMasterIndex_,
+            const uint32_t normalTextureMasterIndex_,
+            const uint32_t emissionTextureMasterIndex_,
+            const uint32_t occlusionTextureMasterIndex_,
+            const glm::vec4& baseColorFactor_,
+            const glm::vec3& emissiveFactor_,
+            const float metallicFactor_,
+            const float roughnessFactor_,
+            const uint32_t alphaMode_,
+            const float alphaCutoff_,
+            const bool doubleSided_
+        );
+        UniformBufferObject(const Material& material);
+
+    public: // member variables
+        alignas(4) uint32_t baseColorTextureMasterIndex;
+        alignas(4) uint32_t metallicRoughnessTextureMasterIndex;
+        alignas(4) uint32_t normalTextureMasterIndex;
+        alignas(4) uint32_t emissionTextureMasterIndex;
+        alignas(4) uint32_t occlusionTextureMasterIndex;
+
+        alignas(16) glm::vec4 baseColorFactor;
+        alignas(16) glm::vec3 emissiveFactor;
+        alignas(4) float metallicFactor;
+        alignas(4) float roughnessFactor;
+
+        alignas(4) uint32_t alphaMode;
+        alignas(4) float alphaCutoff;
+        alignas(4) bool doubleSided;
+    };
+
 public: // enums
     enum class AlphaMode : uint32_t {
         Opaque  = 0,
@@ -55,6 +97,7 @@ public: // static functions
 
     static uint32_t getDefaultMaterialMasterIndex() { return quartz::rendering::Material::defaultMaterialMasterIndex; }
 
+    static uint32_t getNumCreatedMaterials() { return quartz::rendering::Material::masterMaterialList.size(); }
     static std::shared_ptr<quartz::rendering::Material> getMaterialPtr(const uint32_t index) { return quartz::rendering::Material::masterMaterialList[index]; }
     static const std::vector<std::shared_ptr<quartz::rendering::Material>>& getMasterMaterialList() { return quartz::rendering::Material::masterMaterialList; }
 

@@ -8,6 +8,7 @@
 #include "quartz/rendering/instance/Instance.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/rendering/pipeline/Pipeline.hpp"
+#include "quartz/rendering/render_pass/RenderPass.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -46,13 +47,31 @@ public: // member functions
     void draw(const quartz::scene::Scene& scene);
     void finish();
 
+private: // static functions
+    static quartz::rendering::Pipeline createSkyBoxRenderingPipeline(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
+    );
+    static quartz::rendering::Pipeline createDoodadRenderingPipeline(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
+    );
+
 private: // member functions
     void recreateSwapchain();
 
 private: // member variables
+    const uint32_t m_maxNumFramesInFlight;
+    uint32_t m_currentInFlightFrameIndex;
     quartz::rendering::Instance m_renderingInstance;
     quartz::rendering::Device m_renderingDevice;
     quartz::rendering::Window m_renderingWindow;
-    quartz::rendering::Pipeline m_renderingPipeline;
+    quartz::rendering::RenderPass m_renderingRenderPass;
+    quartz::rendering::Pipeline m_skyBoxRenderingPipeline;
+    quartz::rendering::Pipeline m_doodadRenderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };

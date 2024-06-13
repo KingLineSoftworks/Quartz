@@ -10,16 +10,16 @@ quartz::rendering::LocallyMappedBuffer::mapVulkanPhysicalDeviceMemoryToLocalMemo
     const uint32_t sizeBytes,
     const vk::UniqueDeviceMemory& p_physicalDeviceMemory
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "");
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_MAPPED, "");
 
-    LOG_TRACE(BUFFER, "Mapping memory from physical device memory to logical memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
+    LOG_TRACE(BUFFER_MAPPED, "Mapping memory from physical device memory to logical memory instance {}", static_cast<const void*>(&(*p_physicalDeviceMemory)));
     void* p_mappedLocalMemory = p_logicalDevice->mapMemory(
         *(p_physicalDeviceMemory),
         0,
         sizeBytes
     );
 
-    LOG_TRACE(BUFFER, "Mapped to {}", p_mappedLocalMemory);
+    LOG_TRACE(BUFFER_MAPPED, "Mapped to {}", p_mappedLocalMemory);
     return p_mappedLocalMemory;
 }
 
@@ -86,4 +86,24 @@ quartz::rendering::LocallyMappedBuffer::LocallyMappedBuffer(
 
 quartz::rendering::LocallyMappedBuffer::~LocallyMappedBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::rendering::LocallyMappedBuffer&
+quartz::rendering::LocallyMappedBuffer::operator=(
+    quartz::rendering::LocallyMappedBuffer&& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    m_sizeBytes = other.m_sizeBytes;
+    m_usageFlags = other.m_usageFlags;
+    m_requiredMemoryProperties = other.m_requiredMemoryProperties;
+    mp_vulkanLogicalBuffer = std::move(other.mp_vulkanLogicalBuffer);
+    mp_vulkanPhysicalDeviceMemory = std::move(other.mp_vulkanPhysicalDeviceMemory);
+    mp_mappedLocalMemory = std::move(other.mp_mappedLocalMemory);
+
+    return *this;
 }

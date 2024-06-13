@@ -10,6 +10,13 @@ quartz::scene::DirectionalLight::DirectionalLight(
     direction(direction_)
 {}
 
+quartz::scene::DirectionalLight::DirectionalLight(
+    const quartz::scene::DirectionalLight& other
+) :
+    color(other.color),
+    direction(other.direction)
+{}
+
 quartz::scene::DirectionalLight&
 quartz::scene::DirectionalLight::operator=(
     const quartz::scene::DirectionalLight& other

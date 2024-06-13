@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_DepthBuffer
         SHARED
+        DepthBuffer.hpp
         DepthBuffer.cpp
 )
 

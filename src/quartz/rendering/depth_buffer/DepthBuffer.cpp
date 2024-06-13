@@ -20,7 +20,9 @@ quartz::rendering::DepthBuffer::DepthBuffer(
         renderingDevice,
         m_imageWidth,
         m_imageHeight,
+        1,
         usageFlags,
+        {},
         format,
         tiling
     ),
@@ -30,7 +32,8 @@ quartz::rendering::DepthBuffer::DepthBuffer(
             *(m_imageBuffer.getVulkanImagePtr()),
             m_imageBuffer.getVulkanFormat(),
             {},
-            vk::ImageAspectFlagBits::eDepth
+            vk::ImageAspectFlagBits::eDepth,
+            vk::ImageViewType::e2D
         )
     )
 {

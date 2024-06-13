@@ -17,6 +17,7 @@
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
 #include "quartz/scene/light/SpotLight.hpp"
+#include "quartz/scene/sky_box/SkyBox.hpp"
 
 namespace quartz {
 namespace scene {
@@ -33,6 +34,7 @@ public: // member functions
 
     const quartz::scene::Camera& getCamera() const { return m_camera; }
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
+    const quartz::scene::SkyBox& getSkyBox() const { return m_skyBox; }
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
     const std::vector<quartz::scene::PointLight>& getPointLights() const { return m_pointLights; }
@@ -47,6 +49,7 @@ public: // member functions
         const std::vector<quartz::scene::PointLight>& pointLights,
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const glm::vec3& screenClearColor,
+        const std::array<std::string, 6>& skyBoxInformation,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
@@ -67,6 +70,7 @@ private: // member variables
 
     std::vector<quartz::scene::Doodad> m_doodads;
 
+    quartz::scene::SkyBox m_skyBox;
     quartz::scene::AmbientLight m_ambientLight;
     quartz::scene::DirectionalLight m_directionalLight;
     std::vector<quartz::scene::PointLight> m_pointLights;

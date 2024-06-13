@@ -5,6 +5,24 @@
 
 #include "quartz/scene/camera/Camera.hpp"
 
+quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
+    const glm::vec3 position_,
+    const glm::mat4 viewMatrix_,
+    const glm::mat4 projectionMatrix_
+) :
+    position(position_),
+    viewMatrix(viewMatrix_),
+    projectionMatrix(projectionMatrix_)
+{}
+
+quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
+    const quartz::scene::Camera& camera
+) :
+    position(camera.m_worldPosition),
+    viewMatrix(camera.m_viewMatrix),
+    projectionMatrix(camera.m_projectionMatrix)
+{}
+
 quartz::scene::Camera::Camera() :
     m_pitch(0.0f),
     m_yaw(0.0f),

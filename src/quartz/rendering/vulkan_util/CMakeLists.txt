@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_VulkanUtil
         SHARED
+        VulkanUtil.hpp
         VulkanUtil.cpp
 )
 

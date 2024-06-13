@@ -14,7 +14,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
     const vk::UniqueBuffer& p_logicalBuffer,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_STAGED, "{} bytes", sizeBytes);
 
     vk::UniqueCommandPool p_commandPool =
         quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
@@ -31,11 +31,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
         )[0]
     );
 
-    LOG_TRACE(
-        BUFFER,
-        "Memory is *NOT* allocated for a source buffer. Populating with data "
-        "from staged buffer instead"
-    );
+    LOG_TRACE(BUFFER_STAGED, "Memory is *NOT* allocated for a source buffer. Populating with data from staged buffer instead");
 
     vk::CommandBufferBeginInfo commandBufferBeginInfo(
         vk::CommandBufferUsageFlagBits::eOneTimeSubmit
@@ -61,7 +57,7 @@ quartz::rendering::StagedBuffer::populateVulkanLogicalBufferWithStagedData(
         p_commandBuffer
     );
 
-    LOG_TRACE(BUFFER, "Successfully copied data from staging buffer");
+    LOG_TRACE(BUFFER_STAGED, "Successfully copied data from staging buffer");
 }
 
 vk::UniqueDeviceMemory
@@ -75,7 +71,7 @@ quartz::rendering::StagedBuffer::allocateVulkanPhysicalDeviceDestinationMemoryPt
     const vk::MemoryPropertyFlags requiredMemoryProperties,
     const vk::UniqueBuffer& p_logicalStagingBuffer
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(BUFFER, "{} bytes", sizeBytes);
+    LOG_FUNCTION_SCOPE_TRACE(BUFFER_STAGED, "{} bytes", sizeBytes);
     
     vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory =
         quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(
@@ -187,4 +183,25 @@ quartz::rendering::StagedBuffer::StagedBuffer(
 
 quartz::rendering::StagedBuffer::~StagedBuffer() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+
+quartz::rendering::StagedBuffer&
+quartz::rendering::StagedBuffer::operator=(
+    quartz::rendering::StagedBuffer&& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    m_sizeBytes = other.m_sizeBytes;
+    m_usageFlags = other.m_usageFlags;
+    mp_vulkanLogicalStagingBuffer = std::move(other.mp_vulkanLogicalStagingBuffer);
+    mp_vulkanPhysicalDeviceStagingMemory = std::move(other.mp_vulkanPhysicalDeviceStagingMemory);
+    mp_vulkanLogicalBuffer = std::move(other.mp_vulkanLogicalBuffer);
+    mp_vulkanPhysicalDeviceMemory = std::move(other.mp_vulkanPhysicalDeviceMemory);
+
+    return *this;
 }

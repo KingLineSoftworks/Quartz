@@ -40,6 +40,8 @@ public: // static functions
 
     static std::string getTextureTypeGLTFString(const quartz::rendering::Texture::Type type);
 
+    static const vk::UniqueSampler& getDefaultVulkanSamplerPtr() { return quartz::rendering::Texture::masterTextureList[quartz::rendering::Texture::baseColorDefaultMasterIndex]->getVulkanSamplerPtr(); }
+
     static uint32_t getBaseColorDefaultMasterIndex() { return quartz::rendering::Texture::baseColorDefaultMasterIndex; }
     static uint32_t getMetallicRoughnessDefaultMasterIndex() { return quartz::rendering::Texture::metallicRoughnessDefaultMasterIndex; }
     static uint32_t getNormalDefaultMasterIndex() { return quartz::rendering::Texture::normalDefaultMasterIndex; }
@@ -60,14 +62,6 @@ private: // static functions
     );
     static vk::Filter getVulkanFilterMode(const int32_t filterMode);
     static vk::SamplerAddressMode getVulkanSamplerAddressMode(const int32_t addressMode);
-    static vk::UniqueSampler createVulkanSamplerPtr(
-        const quartz::rendering::Device& renderingDevice,
-        const vk::Filter magFilter,
-        const vk::Filter minFilter,
-        const vk::SamplerAddressMode addressModeU,
-        const vk::SamplerAddressMode addressModeV,
-        const vk::SamplerAddressMode addressModeW
-    );
 
 private: // static variables
     static uint32_t baseColorDefaultMasterIndex;

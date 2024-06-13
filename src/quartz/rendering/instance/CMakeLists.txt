@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Instance
         SHARED
+        Instance.hpp
         Instance.cpp
 )
 

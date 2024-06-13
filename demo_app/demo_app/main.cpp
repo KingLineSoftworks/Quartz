@@ -44,9 +44,14 @@ int main() {
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
+        {"BUFFER_MAPPED", util::Logger::Level::info},
+        {"BUFFER_IMAGE", util::Logger::Level::info},
+        {"BUFFER_STAGED", util::Logger::Level::info},
         {"CONTEXT", util::Logger::Level::info},
+        {"CUBEMAP", util::Logger::Level::info},
         {"DEPTHBUFFER", util::Logger::Level::info},
         {"DEVICE", util::Logger::Level::info},
+        {"IMAGE", util::Logger::Level::info},
         {"INSTANCE", util::Logger::Level::info},
         {"MATERIAL", util::Logger::Level::info},
         {"MODEL", util::Logger::Level::info},
@@ -54,7 +59,7 @@ int main() {
         {"MODEL_PRIMITIVE", util::Logger::Level::info},
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
-        {"PIPELINE", util::Logger::Level::trace},
+        {"PIPELINE", util::Logger::Level::info},
         {"SWAPCHAIN", util::Logger::Level::info},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
@@ -65,6 +70,7 @@ int main() {
         {"CAMERA", util::Logger::Level::info},
         {"DOODAD", util::Logger::Level::info},
         {"SCENE", util::Logger::Level::info},
+        {"SKYBOX", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {

@@ -4,8 +4,12 @@
 add_library(
         UTIL_Errors
         SHARED
+        AssetErrors.hpp
         AssetErrors.cpp
+
+        VulkanErrors.hpp
         VulkanErrors.cpp
+
 )
 
 target_compile_options(

@@ -4,13 +4,27 @@
 add_library(
         QUARTZ_RENDERING_Model
         SHARED
+        Mesh.hpp
         Mesh.cpp
+
+        Model.hpp
         Model.cpp
+
+        Node.hpp
         Node.cpp
+
+        Primitive.hpp
         Primitive.cpp
+
+        Scene.hpp
         Scene.cpp
+
+        TangentCalculator.hpp
         TangentCalculator.cpp
+
+        Vertex.hpp
         Vertex.cpp
+
 )
 
 target_compile_options(

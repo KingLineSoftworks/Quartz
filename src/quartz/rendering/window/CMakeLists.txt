@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_RENDERING_Window
         SHARED
+        Window.hpp
         Window.cpp
 )
 

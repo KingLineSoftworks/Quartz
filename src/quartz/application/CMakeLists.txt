@@ -4,6 +4,7 @@
 add_library(
         QUARTZ_Application
         SHARED
+        Application.hpp
         Application.cpp
 )
 

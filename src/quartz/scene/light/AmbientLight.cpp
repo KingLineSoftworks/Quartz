@@ -8,6 +8,12 @@ quartz::scene::AmbientLight::AmbientLight(
     color(color_)
 {}
 
+quartz::scene::AmbientLight::AmbientLight(
+    const quartz::scene::AmbientLight& other
+) :
+    color(other.color)
+{}
+
 quartz::scene::AmbientLight&
 quartz::scene::AmbientLight::operator=(
     const quartz::scene::AmbientLight& other

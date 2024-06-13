@@ -12,6 +12,29 @@ namespace scene {
 }
 
 class quartz::scene::Camera {
+public: // classes
+    /**
+     * @brief This is so we don't have to pass unnecessary fields (pitch, yaw, roll, fov) to the shader
+     *
+     * @todo 2024/06/04 Can we rearrange the member variables of the camera class so we can copy the camera
+     *   directly to the GPU's memory but slice off the unnecessary fields at the end?
+     */
+    struct UniformBufferObject {
+    public: // member functions
+        UniformBufferObject() = default;
+        UniformBufferObject(
+            const glm::vec3 position_,
+            const glm::mat4 viewMatrix_,
+            const glm::mat4 projectionMatrix_
+        );
+        UniformBufferObject(const Camera& camera);
+
+    public: // member variables
+        alignas(16) glm::vec3 position;
+        alignas(16) glm::mat4 viewMatrix;
+        alignas(16) glm::mat4 projectionMatrix;
+    };
+
 public: // member functions
     Camera();
     Camera(

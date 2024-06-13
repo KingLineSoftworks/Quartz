@@ -4,6 +4,7 @@
 add_library(
     UTIL_Logger
     SHARED
+    Logger.hpp
     Logger.cpp
 )
 

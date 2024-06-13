@@ -57,12 +57,30 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::PointLight>& pointLights,
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const glm::vec3& screenClearColor,
+    const std::array<std::string, 6>& skyBoxInformation,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
 
+    LOG_TRACEthis("Initializing master texture list");
+    quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
+
+    LOG_TRACEthis("Initializing master material list");
+    quartz::rendering::Material::initializeMasterMaterialList(renderingDevice);
+
     m_camera = camera;
     LOG_TRACEthis("Loaded camera at position {}", glm::to_string(m_camera.getWorldPosition()));
+
+    m_skyBox = quartz::scene::SkyBox(
+        renderingDevice,
+        skyBoxInformation[0],
+        skyBoxInformation[1],
+        skyBoxInformation[2],
+        skyBoxInformation[3],
+        skyBoxInformation[4],
+        skyBoxInformation[5]
+    );
+    LOG_TRACEthis("Loaded skybox");
 
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,

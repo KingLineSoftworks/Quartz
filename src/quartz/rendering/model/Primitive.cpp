@@ -151,8 +151,9 @@ quartz::rendering::Primitive::loadMaterialMasterIndex(
     LOG_TRACE(MODEL_PRIMITIVE, "Primitive uses material at local index {}", materialLocalIndex);
 
     if (materialLocalIndex < 0) {
-        LOG_TRACE(MODEL_PRIMITIVE, "No material provided, so using default material");
-        return quartz::rendering::Material::getDefaultMaterialMasterIndex();
+        const uint32_t defaultMaterialIndex = quartz::rendering::Material::getDefaultMaterialMasterIndex();
+        LOG_TRACE(MODEL_PRIMITIVE, "No material provided, so using default material at index {}, with {} materials created", defaultMaterialIndex, quartz::rendering::Material::getNumCreatedMaterials());
+        return defaultMaterialIndex;
     }
 
     const uint32_t materialMasterIndex = materialMasterIndices[materialLocalIndex];
