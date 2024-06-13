@@ -445,7 +445,6 @@ vec3 calculatePointLightContribution(
         vec3 l = normalize(pointLight.position - in_fragmentPosition);
         vec3 h = normalize(l + v);
 
-        // @todo 2024/05/29 Just give the whole point light to the function //
         vec3 intensity = calculatePointLightIntensity(pointLight);
 
         vec3 diffuseColor = diffuseBRDF(fragmentBaseColor, metallicValue);

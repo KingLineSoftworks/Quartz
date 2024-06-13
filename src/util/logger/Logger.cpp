@@ -91,11 +91,6 @@ void util::Logger::registerLogger(const std::string& loggerName, const util::Log
     );
 #endif
 
-    /**
-     * @todo 2023/10/20 Use the DEBUG, TEST, RELEASE macros to clamp the logging levels to
-     * a certain minimum value?
-     */
-
     // Set the logging level
     switch (defaultLevel) {
         case util::Logger::Level::trace:

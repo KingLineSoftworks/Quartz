@@ -33,14 +33,6 @@ namespace rendering {
 
 class quartz::rendering::Pipeline {
 public: // member functions
-    /**
-     * @brief This takes an r value to the vector of uniform buffer infos so we don't have to be copying the locally mapped buffers around,
-     *    but instead just move them around
-     * @todo 2024/06/06 Make the UniformBufferInfo class just be a POD and not contain the actually locally mapped buffer.
-     *    We could have the pipeline manage the locally mapped buffers directly?
-     *    We could have a custom UniformBuffer class that contains the locally mapped buffers and is constructed within the pipeline
-     *       when we give the UniformBufferInfo POD?
-     */
     Pipeline(
         const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Window& renderingWindow,
