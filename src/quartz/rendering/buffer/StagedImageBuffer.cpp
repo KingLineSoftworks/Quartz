@@ -272,7 +272,7 @@ quartz::rendering::StagedImageBuffer::StagedImageBuffer(
     mp_vulkanLogicalStagingBuffer(
         quartz::rendering::BufferUtil::createVulkanBufferPtr(
             renderingDevice.getVulkanLogicalDevicePtr(),
-            m_sizeBytes * m_layerCount, /** @todo 2024/06/09 Should this be multiplied by the layer count???? */
+            m_sizeBytes * m_layerCount,
             vk::BufferUsageFlagBits::eTransferSrc
         )
     ),

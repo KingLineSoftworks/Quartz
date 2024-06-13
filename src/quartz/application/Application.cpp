@@ -61,9 +61,7 @@ void quartz::Application::run() {
     UNUSED double currentFrameStartTime = 0.0f;
     UNUSED double frameTimeAccumulator = 0.0f;
 
-#define USE_SAMPLE_SCENE false
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
-#if USE_SAMPLE_SCENE
         {
             "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
             {
@@ -91,17 +89,15 @@ void quartz::Application::run() {
                 {10.0f, 10.0f, 10.0f}
             }
         },
-#else
         {
             "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
             {
-                {3.0f, 3.0f, 3.0f},
+                {5.0f, 0.0f, 0.0f},
                 0.0f,
                 {0.0f, 0.0f, 1.0f},
                 {1.0f, 1.0f, 1.0f}
             }
         }
-#endif
     };
 
     std::array<std::string, 6> skyBoxInformation = {
@@ -114,18 +110,15 @@ void quartz::Application::run() {
     };
 
     std::vector<quartz::scene::PointLight> pointLights = {
-#if USE_SAMPLE_SCENE
         {
             {0.6500f, 0.6500f, 0.6500f},
             {0.0f, 0.0f, -6.0f},
             0.001f,
             0.001f
         },
-#endif
     };
 
     std::vector<quartz::scene::SpotLight> spotLights = {
-#if USE_SAMPLE_SCENE
         {
             {0.7f, 0.7f, 0.7f},
             {0.0f, 6.0f, 9.0f},
@@ -134,7 +127,6 @@ void quartz::Application::run() {
             0.005f,
             0.01f
         },
-#endif
     };
 
     LOG_INFOthis("Loading scene");
@@ -142,29 +134,18 @@ void quartz::Application::run() {
         m_renderingContext.getRenderingDevice(),
         {
             0.0f, // rotation around x-axis (up down)
-            0.0f, // rotation around y-axis (left right)
+            -90.0f, // rotation around y-axis (left right)
             0.0f,
             75.0f,
-            // { -5.0f, 0.0f, 0.0f }
-            { -0.0f, 0.0f, 0.0f }
-        },
-#if USE_SAMPLE_SCENE
-        {
-            { 0.000f, 0.000f, 0.000f }
+             { 1.25f, 0.0f, 5.0f }
         },
         {
-            { 0.000f, 0.000f, 0.000f },
+            { 0.01f, 0.01f, 0.01f }
+        },
+        {
+            { 0.05f, 0.05f, 0.05f },
             { 3.0f, -2.0f, 0.0f }
         },
-#else
-        {
-            { 1.000f, 1.000f, 1.000f }
-        },
-        {
-            { 0.000f, 0.000f, 0.000f },
-            { 3.0f, -2.0f, 0.0f }
-        },
-#endif
         pointLights,
         spotLights,
         {0.25f, 0.4f, 0.6f},

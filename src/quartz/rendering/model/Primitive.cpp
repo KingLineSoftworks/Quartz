@@ -222,10 +222,6 @@ quartz::rendering::Primitive::loadIndicesFromGltfPrimitive(
     }
 
     LOG_TRACE(MODEL_PRIMITIVE, "Successfully loaded {} indices for primitive", indices.size());
-    LOG_INFO(MODEL_PRIMITIVE, "INDICES");
-    for (uint32_t i = 0; i < indices.size(); ++i) {
-        LOG_INFO(MODEL_PRIMITIVE, "{} = {}", i, indices[i]);
-    }
     return indices;
 }
 
@@ -352,10 +348,6 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
     }
 
     LOG_TRACE(MODEL_PRIMITIVE, "Successfully populated {} vertices", vertexCount);
-    LOG_INFO(MODEL_PRIMITIVE, "VERTEX POSITIONS");
-    for (uint32_t i = 0; i < vertexCount; ++i) {
-        LOG_INFO(MODEL_PRIMITIVE, "{} = {} , {} , {}", i, vertices[i].position.x, vertices[i].position.y, vertices[i].position.z);
-    }
 
     quartz::rendering::StagedBuffer stagedVertexBuffer(
         renderingDevice,

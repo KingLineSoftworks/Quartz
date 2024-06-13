@@ -139,8 +139,9 @@ quartz::rendering::StagedBuffer
 quartz::rendering::CubeMap::createStagedVertexBuffer(
     const quartz::rendering::Device& renderingDevice
 ) {
-    /** @brief Taken from https://github.com/KhronosGroup/Vulkan-Tools/blob/a9a1bcd709e185700847268eb4310f6484b027bc/cube/cube.cpp#L112 */
-#if TEST_SETUP == 0
+    /**
+     * @brief Taken from the vertices we load when we load glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf
+     */
     std::vector<glm::vec3> vertices = {
         {0.0f , 0.0f , 0.0f},
         {1.0f , 0.0f , 0.0f},
@@ -171,35 +172,6 @@ quartz::rendering::CubeMap::createStagedVertexBuffer(
         vertices[i] = (2.0f * vertices[i]) - glm::vec3(1.0f, 1.0f, 1.0f);
     }
 
-#elif TEST_SETUP == 1
-    const std::vector<glm::vec3> vertices = {
-        // -X side
-        {-1.0f, -1.0f, -1.0f},  {-1.0f, -1.0f,  1.0f},  {-1.0f,  1.0f,  1.0f},
-        {-1.0f,  1.0f,  1.0f},  {-1.0f,  1.0f, -1.0f},  {-1.0f, -1.0f, -1.0f},
-
-        // -Z side
-        {-1.0f, -1.0f, -1.0f},  { 1.0f,  1.0f, -1.0f},  { 1.0f, -1.0f, -1.0f},
-        {-1.0f, -1.0f, -1.0f},  {-1.0f,  1.0f, -1.0f},  { 1.0f,  1.0f, -1.0f},
-
-        // -Y side
-        {-1.0f, -1.0f, -1.0f},  { 1.0f, -1.0f, -1.0f},  { 1.0f, -1.0f,  1.0f},
-        {-1.0f, -1.0f, -1.0f},  { 1.0f, -1.0f,  1.0f},  {-1.0f, -1.0f,  1.0f},
-
-        // +Y side
-        {-1.0f,  1.0f, -1.0f},  {-1.0f,  1.0f,  1.0f},  { 1.0f,  1.0f,  1.0f},
-        {-1.0f,  1.0f, -1.0f},  { 1.0f,  1.0f,  1.0f},  { 1.0f,  1.0f, -1.0f},
-
-        // +X side
-        { 1.0f,  1.0f, -1.0f},  { 1.0f,  1.0f,  1.0f},  { 1.0f, -1.0f,  1.0f},
-        { 1.0f, -1.0f,  1.0f},  { 1.0f, -1.0f, -1.0f},  { 1.0f,  1.0f, -1.0f},
-
-        // +Z side
-        {-1.0f,  1.0f,  1.0f},  {-1.0f, -1.0f,  1.0f},  { 1.0f,  1.0f,  1.0f},
-        {-1.0f, -1.0f,  1.0f},  { 1.0f, -1.0f,  1.0f},  { 1.0f,  1.0f,  1.0f},
-    };
-#else
-#endif
-
     quartz::rendering::StagedBuffer stagedVertexBuffer(
         renderingDevice,
         sizeof(glm::vec3) * vertices.size(),
@@ -215,10 +187,8 @@ quartz::rendering::CubeMap::createStagedIndexBuffer(
     const quartz::rendering::Device& renderingDevice
 ) {
     /**
-     * @brief Taken from https://github.com/KhronosGroup/Vulkan-Tools/blob/a9a1bcd709e185700847268eb4310f6484b027bc/cube/cube.cpp#L156
-     *    but modified to be uint32_t
+     * @brief Taken from the indices when we load glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf
      */
-#if TEST_SETUP == 0
     const std::vector<uint32_t> indices = {
          0,  2,  1,
          0,  3,  2,
@@ -238,83 +208,6 @@ quartz::rendering::CubeMap::createStagedIndexBuffer(
         20, 22, 21,
         20, 23, 22,
     };
-#elif TEST_SETUP == 1
-    const std::vector<uint32_t> indices = {
-        // -X side
-         0,  1,  2,
-         3,  4,  5,
-
-        // -Z side
-         6,  7,  8,
-         9, 10, 11,
-
-        // -Y size
-        12, 13, 14,
-        15, 16, 17,
-
-        // +Y side
-        18, 19, 20,
-        21, 22, 23,
-
-        // +X side
-        24, 25, 26,
-        27, 28, 29,
-
-        // +Z side
-        30, 31, 32,
-        33, 34, 35,
-    };
-#else
-    const std::vector<uint32_t> indices = {
-        // -X side
-        0, 1,
-        1, 1,
-        1, 0,
-        1, 0,
-        0, 0,
-        0, 1,
-
-        // -Z side
-        1, 1,
-        0, 0,
-        0, 1,
-        1, 1,
-        1, 0,
-        0, 0,
-
-        // -Y size
-        1, 0,
-        1, 1,
-        0, 1,
-        1, 0,
-        0, 1,
-        0, 0,
-
-        // +Y side
-        1, 0,
-        0, 0,
-        0, 1,
-        1, 0,
-        0, 1,
-        1, 1,
-
-        // +X side
-        1, 0,
-        0, 0,
-        0, 1,
-        0, 1,
-        1, 1,
-        1, 0,
-
-        // +Z side
-        0, 0,
-        0, 1,
-        1, 0,
-        0, 1,
-        1, 1,
-        1, 0,
-    };
-#endif
 
     quartz::rendering::StagedBuffer indexBuffer(
         renderingDevice,
