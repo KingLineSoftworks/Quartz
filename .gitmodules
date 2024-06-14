@@ -22,6 +22,3 @@
 [submodule "assets"]
 	path = assets
 	url = https://github.com/KingLineSoftworks/assets.git
-[submodule "vendor/JoltPhysics"]
-	path = vendor/JoltPhysics
-	url = https://github.com/jrouwe/JoltPhysics.git

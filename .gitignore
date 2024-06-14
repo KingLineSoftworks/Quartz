@@ -75,3 +75,4 @@ build/
 *scratch.txt*
 *scratch.md*
 .ignore
+*.bkp.*
