@@ -84,7 +84,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
 
         bool found = false;
         for (const vk::LayerProperties& layerProperties : supportedLayerProperties) {
-            if (layerProperties.layerName == std::string(requiredValidationLayerName)) {
+            if (std::string(layerProperties.layerName) == std::string(requiredValidationLayerName)) {
                 found = true;
                 break;
             }
@@ -143,7 +143,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
 
         bool found = false;
         for (const vk::ExtensionProperties& extensionProperties : availableInstanceExtensionProperties) {
-            if (extensionProperties.extensionName == std::string(requiredInstanceExtensionName)) {
+            if (std::string(extensionProperties.extensionName) == std::string(requiredInstanceExtensionName)) {
                 found = true;
                 break;
             }

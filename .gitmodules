@@ -19,3 +19,6 @@
 [submodule "vendor/MikkTSpace"]
 	path = vendor/MikkTSpace
 	url = https://github.com/mmikk/MikkTSpace.git
+[submodule "vendor/JoltPhysics"]
+	path = vendor/JoltPhysics
+	url = https://github.com/jrouwe/JoltPhysics.git

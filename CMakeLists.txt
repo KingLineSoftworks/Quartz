@@ -3,10 +3,13 @@
 #====================================================================
 set(PROJECT_NAME "Quartz")
 
+cmake_policy(SET CMP0042 NEW) # Set the CMP0042 policy to OLD to disable MACOSX_RPATH by default, need to do this before defining any targets
+
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(QuartzVersion) # Gives us version for quartz
 include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS list
 include(CompileShader) # Gives us compile_shaders function
+include(CompileJolt) # Gives us function to compile Jolt Physics manually so it doesnt override a bunch of our compilation options
 
 cmake_minimum_required(VERSION 3.14)
 
@@ -96,6 +99,9 @@ add_subdirectory("${VENDOR_ROOT_DIR}/glm")
 add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
 add_compile_definitions(GLM_FORCE_RADIANS)
+
+# Jolt (jolt physics)
+add_jolt_library(jolt)
 
 # mikktspace
 add_library(mikktspace SHARED "${VENDOR_ROOT_DIR}/MikkTSpace/mikktspace.c")
