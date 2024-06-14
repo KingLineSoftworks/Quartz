@@ -3,6 +3,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include <Jolt/Jolt.h>
+#include <Jolt/RegisterTypes.h>
+
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/Loggers.hpp"
@@ -14,8 +17,25 @@
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
 
+void Trace_impl(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    std::array<char, 1024> buffer;
+    vsnprintf(buffer.data(), buffer.size(), format, args);
+
+    va_end(args);
+
+    LOG_TRACE(BIGBOY, "{}", buffer.data());
+}
+
+class [[nodiscard]] TestClass {
+public:
+    static std::string hello() { return "booger"; }
+};
+
 int main() {
-    constexpr bool shouldLogPreamble = true;
+    constexpr bool shouldLogPreamble = false;
 
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
@@ -32,6 +52,7 @@ int main() {
     util::Logger::setLevels({
         // demo app
         {"GENERAL", util::Logger::Level::info},
+        {"BIGBOY", util::Logger::Level::trace},
 
         // util
         {"FILESYSTEM", util::Logger::Level::info},
@@ -96,7 +117,8 @@ int main() {
 #endif // ON_MAC
     }
 
-#ifdef QUARTZ_RELEASE
+#if false
+    #ifdef QUARTZ_RELEASE
     const bool validationLayersEnabled = false;
 #else
     const bool validationLayersEnabled = true;
@@ -128,4 +150,7 @@ int main() {
 
     LOG_TRACE(GENERAL, "Terminating");
     return EXIT_SUCCESS;
+#endif
+
+    JPH::RegisterDefaultAllocator();
 }

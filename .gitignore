@@ -55,6 +55,8 @@ build/
 
 *.obj
 *.mtl
+*.gltf
+*.glb
 
 # ========================================
 # Miscellaneous
@@ -64,4 +66,5 @@ build/
 *.old.*
 *.external
 *.external.*
+*scratch.txt*
 *scratch.md*

@@ -1,12 +1,12 @@
 #====================================================================
 # The executable target application (the *game* oooooh)
 #====================================================================
-set(APPLICATION_NAME "Demo_App_The_Sequel")
+set(APPLICATION_NAME "Jolt_Demo_App")
 
 include(ApplicationVersion)
 
 add_executable(
-    ${APPLICATION_NAME} ${APPLICATION_SOURCE_DIR}/main.cpp
+    ${APPLICATION_NAME} ${JOLT_TESTING_SOURCE_DIR}/jolt_main.cpp
 )
 
 target_include_directories(
@@ -26,9 +26,8 @@ target_compile_options(
 target_link_libraries(
     ${APPLICATION_NAME}
 
-    # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
     PRIVATE
-    # some_lib
+    jolt
 
     # Utility
     PRIVATE

@@ -4,12 +4,20 @@
 # This is essentially the provided Jolt.cmake but with some stuff stripped out
 # (mainly global compile variables and install information) and some additional
 # configurations added (RelWithDebInfo to be compatible with QUARTZ_TEST)
+#
+# @todo 2024/06/14 We need to make all of these Jolt specific options
+#       prefixed with JOLT_ so they don't pollute global namespace
 #====================================================================
 
 function(add_jolt_library JOLT_CUSTOM_LIBRARY_NAME)
     set(PHYSICS_REPO_ROOT "${VENDOR_ROOT_DIR}/JoltPhysics")
 
     set(JOLT_PHYSICS_ROOT ${PHYSICS_REPO_ROOT}/Jolt)
+
+    # Mapping Quartz's build modes to Jolt's
+    # QUARTZ_DEBUG_MODE (Debug) = Debug
+    # QUARTZ_TEST_MODE (RelWithDebInfo) = Release,Distribution,ReleaseASAN,ReleaseUBSAN,ReleaseCoverage
+    # QUARTZ_RELEASE_MODE (Release) = Distribution
 
     # Source files
     set(JOLT_PHYSICS_SRC_FILES
@@ -477,14 +485,10 @@ function(add_jolt_library JOLT_CUSTOM_LIBRARY_NAME)
         # Set default visibility to hidden
         # But we only want to do this for Jolt, not for anything else
         # so we can't do set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-        set_target_properties(
-            ${JOLT_CUSTOM_LIBRARY_NAME}
-            PROPERTIES
-            CXX_VISIBILITY_PRESET hidden
-            VISIBILITY_INLINES_HIDDEN 1
-        )
+        set_target_properties(${JOLT_CUSTOM_LIBRARY_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
-        if (GENERATE_DEBUG_SYMBOLS)
+        # We are replacing "GENERATE_DEBUG_SYMBOLS" here
+        if (QUARTZ_DEBUG_MODE OR QUARTZ_TEST_MODE)
             if (MSVC)
                 # MSVC specific option to enable PDB generation
                 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FASTLINK")
@@ -508,79 +512,125 @@ function(add_jolt_library JOLT_CUSTOM_LIBRARY_NAME)
     endif()
 
     target_include_directories(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "${PHYSICS_REPO_ROOT}")
+    target_precompile_headers(${JOLT_CUSTOM_LIBRARY_NAME} PRIVATE ${JOLT_PHYSICS_ROOT}/Jolt.h)
 
     # Set the debug/non-debug build flags
-    target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:Debug>:_DEBUG>") # Add _DEBUG definition if config is Debug
-    target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:RelWithDebInfo>:_DEBUG>") # Add _DEBUG definition if config is Test
-    target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:Release,Distribution,ReleaseASAN,ReleaseUBSAN,ReleaseCoverage>:NDEBUG>") # Add NDEBUG definition if config is not debug or test
+    if (QUARTZ_DEBUG_MODE OR QUARTZ_TEST_MODE)
+        target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "_DEBUG") # Add _DEBUG definition if config is Debug
+    else() # QUARTZ_RELEASE_MODE
+        target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "NDEBUG") # Add NDEBUG definition if config is not debug or test
+    endif()
 
     # ASAN should use the default allocators
     target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:ReleaseASAN>:JPH_DISABLE_TEMP_ALLOCATOR;JPH_DISABLE_CUSTOM_ALLOCATOR>")
 
     # Setting floating point exceptions
+    # When turning this on, in Debug and Release mode, the library will emit extra code to ensure that the 4th component of a 3-vector is kept the same as the 3rd component
+    # and will enable floating point exceptions during simulation to detect divisions by zero.
+    # Note that this currently only works using MSVC. Clang turns Float2 into a SIMD vector sometimes causing floating point exceptions (the option is ignored).
+    option(FLOATING_POINT_EXCEPTIONS_ENABLED "Enable floating point exceptions" ON)
     if (FLOATING_POINT_EXCEPTIONS_ENABLED AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:Debug,RelWithDebInfo,Release>:JPH_FLOATING_POINT_EXCEPTIONS_ENABLED>")
     endif()
 
     # Setting the disable custom allocator flag
+    # Setting this option will force the library to use malloc/free instead of allowing the user to override the memory allocator
+    option(DISABLE_CUSTOM_ALLOCATOR "Disable support for a custom memory allocator" OFF)
     if (DISABLE_CUSTOM_ALLOCATOR)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_DISABLE_CUSTOM_ALLOCATOR)
     endif()
 
     # Setting enable asserts flag
+    # When turning this option on, the library will be compiled using assertions. By default asserts are enabled in Debug build.
+    option(USE_ASSERTS "Enable asserts" ON)
     if (USE_ASSERTS)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_ENABLE_ASSERTS)
     endif()
 
-    # Setting double precision flag
+    # Setting double precision flag (default == off)
+    # When turning this option on, the library will be compiled using doubles for positions. This allows for much bigger worlds.
+    option(DOUBLE_PRECISION "Use double precision math" OFF)
     if (DOUBLE_PRECISION)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_DOUBLE_PRECISION)
     endif()
 
     # Setting to attempt cross platform determinism
+    # When turning this option on, the library will be compiled in such a way to attempt to keep the simulation deterministic across platforms
+    option(CROSS_PLATFORM_DETERMINISTIC "Cross platform deterministic" OFF)
     if (CROSS_PLATFORM_DETERMINISTIC)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_CROSS_PLATFORM_DETERMINISTIC)
     endif()
 
     # Setting to determine number of bits in ObjectLayer
+    # Number of bits to use in ObjectLayer. Can be 16 or 32.
+    option(OBJECT_LAYER_BITS "Number of bits in ObjectLayer" 16)
     if (OBJECT_LAYER_BITS)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_OBJECT_LAYER_BITS=${OBJECT_LAYER_BITS})
     endif()
 
+    # Setting this option will force the library to use the STL vector instead of the custom Array class
+    option(USE_STD_VECTOR "Use std::vector instead of own Array class" OFF)
     if (USE_STD_VECTOR)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_USE_STD_VECTOR)
     endif()
 
     # Setting to periodically trace broadphase stats to help determine if the broadphase layer configuration is optimal
+    option(TRACK_BROADPHASE_STATS "Track Broadphase Stats" OFF)
     if (TRACK_BROADPHASE_STATS)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_TRACK_BROADPHASE_STATS)
     endif()
 
     # Setting to periodically trace narrowphase stats to help determine which collision queries could be optimized
+    option(TRACK_NARROWPHASE_STATS "Track Narrowphase Stats" OFF)
     if (TRACK_NARROWPHASE_STATS)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_TRACK_NARROWPHASE_STATS)
     endif()
 
-    # Enable the debug renderer
+    # Enable the debug renderer in the Debug and Release builds. Note that DEBUG_RENDERER_IN_DISTRIBUTION will override this setting.
+    option(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE "Enable debug renderer in Debug and Release builds" ON)
+    # Setting to enable the debug renderer in all builds.
+    # Note that enabling this reduces the performance of the library even if you're not drawing anything.
+    option(DEBUG_RENDERER_IN_DISTRIBUTION "Enable debug renderer in all builds" OFF)
     if (DEBUG_RENDERER_IN_DISTRIBUTION)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "JPH_DEBUG_RENDERER")
     elseif (DEBUG_RENDERER_IN_DEBUG_AND_RELEASE)
-        target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:Debug,Release,ReleaseASAN,ReleaseUBSAN>:JPH_DEBUG_RENDERER>")
+        if(QUARTZ_DEBUG_MODE OR QUARTZ_TEST_MODE)
+            target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "JPH_DEBUG_RENDERER")
+        endif()
     endif()
 
     # Enable the profiler
+    # Enable the profiler in Debug and Release builds. Note that PROFILER_IN_DISTRIBUTION will override this setting.
+    option(PROFILER_IN_DEBUG_AND_RELEASE "Enable the profiler in Debug and Release builds" ON)
+    # Enable the profiler in all builds.
+    # Note that enabling this reduces the performance of the library.
+    option(PROFILER_IN_DISTRIBUTION "Enable the profiler in all builds" OFF)
     if (PROFILER_IN_DISTRIBUTION)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "JPH_PROFILE_ENABLED")
     elseif (PROFILER_IN_DEBUG_AND_RELEASE)
-        target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "$<$<CONFIG:Debug,RelWithDebInfo,Release,ReleaseASAN,ReleaseUBSAN>:JPH_PROFILE_ENABLED>")
+        if (QUARTZ_DEBUG_MODE OR QUARTZ_TEST_MODE)
+            target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC "JPH_PROFILE_ENABLED")
+        endif()
     endif()
 
     # Compile the ObjectStream class and RTTI attribute information
+    # Setting this option will compile the ObjectStream class and RTTI attribute information
+    option(ENABLE_OBJECT_STREAM "Compile the ObjectStream class and RTTI attribute information" ON)
     if (ENABLE_OBJECT_STREAM)
         target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_OBJECT_STREAM)
     endif()
 
     # Emit the instruction set definitions to ensure that child projects use the same settings even if they override the used instruction sets (a mismatch causes link errors)
+    # Select X86 processor features to use (if everything is off it will be SSE2 compatible)
+    option(USE_SSE4_1 "Enable SSE4.1" ON)
+    option(USE_SSE4_2 "Enable SSE4.2" ON)
+    option(USE_AVX "Enable AVX" ON)
+    option(USE_AVX2 "Enable AVX2" ON)
+    option(USE_AVX512 "Enable AVX512" OFF)
+    option(USE_LZCNT "Enable LZCNT" ON)
+    option(USE_TZCNT "Enable TZCNT" ON)
+    option(USE_F16C "Enable F16C" ON)
+    option(USE_FMADD "Enable FMADD" ON)
     function(EMIT_X86_INSTRUCTION_SET_DEFINITIONS)
         if (USE_AVX512)
             target_compile_definitions(${JOLT_CUSTOM_LIBRARY_NAME} PUBLIC JPH_USE_AVX512)
