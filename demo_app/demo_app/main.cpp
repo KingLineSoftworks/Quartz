@@ -1,7 +1,10 @@
-#include <stdexcept>
 #include <cstdlib>
+#include <stdexcept>
+#include <memory>
 
 #include <glm/gtx/string_cast.hpp>
+
+#include <reactphysics3d/reactphysics3d.h>
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
@@ -15,7 +18,7 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
-    constexpr bool shouldLogPreamble = true;
+    constexpr bool shouldLogPreamble = false;
 
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
@@ -32,6 +35,7 @@ int main() {
     util::Logger::setLevels({
         // demo app
         {"GENERAL", util::Logger::Level::info},
+        {"BIGBOY", util::Logger::Level::trace},
 
         // util
         {"FILESYSTEM", util::Logger::Level::info},
@@ -112,6 +116,7 @@ int main() {
 #endif
     }
 
+#if false
 #ifdef QUARTZ_RELEASE
     const bool validationLayersEnabled = false;
 #else
@@ -143,5 +148,26 @@ int main() {
     }
 
     LOG_TRACE(GENERAL, "Terminating");
+    return EXIT_SUCCESS;
+#endif
+
+    reactphysics3d::PhysicsCommon physicsCommon;
+    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsCommon.createPhysicsWorld();
+
+    reactphysics3d::Vector3 position(0, 20, 0);
+    reactphysics3d::Quaternion orientation = reactphysics3d::Quaternion::identity();
+    reactphysics3d::Transform transform(position, orientation);
+    reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(transform);
+
+    const uint32_t simulationTimeSec = 120;
+    const reactphysics3d::decimal timeStep = 1.0f / 60.0f;
+    for (uint32_t i = 0; i < simulationTimeSec; ++i) {
+        p_physicsWorld->update(timeStep);
+        const reactphysics3d::Transform& currTransform = p_rigidBody->getTransform();
+        const reactphysics3d::Vector3& currPosition = currTransform.getPosition();
+
+        LOG_TRACE(BIGBOY, "Rigid body position: {:10.6f}, {:10.6f}, {:10.6f}", currPosition.x, currPosition.y, currPosition.z);
+    }
+
     return EXIT_SUCCESS;
 }

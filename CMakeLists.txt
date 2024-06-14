@@ -144,6 +144,10 @@ target_compile_options(glm INTERFACE -Wno-deprecated-declarations) # for sprintf
 add_library(mikktspace SHARED "${VENDOR_ROOT_DIR}/MikkTSpace/mikktspace.c")
 target_include_directories(mikktspace PUBLIC "${VENDOR_ROOT_DIR}/MikkTSpace")
 
+# reactphysics3d
+add_subdirectory("${VENDOR_ROOT_DIR}/reactphysics3d")
+target_compile_options(reactphysics3d PRIVATE -Wno-nested-anon-types)
+
 # spdlog
 set(SPDLOG_USE_STD_FORMAT OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")

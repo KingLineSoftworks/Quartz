@@ -48,7 +48,7 @@ set(
     -Wmicrosoft-fixed-enum
     -Wmicrosoft-flexible-array
     -Wmicrosoft-redeclare-static
-    -Wnested-anon-types
+    # -Wnested-anon-types # Have to disable this for something in reactphysics3d
     -Wnullability-extension
     -Woverlength-strings
     -Wretained-language-linkage

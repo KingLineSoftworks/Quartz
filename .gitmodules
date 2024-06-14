@@ -22,3 +22,6 @@
 [submodule "assets"]
 	path = assets
 	url = https://github.com/KingLineSoftworks/assets.git
+[submodule "vendor/reactphysics3d"]
+	path = vendor/reactphysics3d
+	url = https://github.com/DanielChappuis/reactphysics3d.git
