@@ -8,6 +8,12 @@ add_library(
     FileSystem.cpp
 )
 
+target_include_directories(
+    UTIL_FileSystem
+    PUBLIC
+    ${QUARTZ_INCLUDE_DIRS}
+)
+
 target_compile_options(
     UTIL_FileSystem
     PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}

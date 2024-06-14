@@ -46,28 +46,36 @@ set(QUARTZ_COMPILE_DEFINITIONS "")
 message(STATUS "Generator is set to ${CMAKE_GENERATOR}")
 message(STATUS "Quartz using ${CMAKE_SYSTEM_NAME} as a build platform")
 
+set(QUARTZ_DEBUG_MODE FALSE)
+set(QUARTZ_TEST_MODE FALSE)
+set(QUARTZ_RELEASE_MODE FALSE)
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding DEBUG definition")
     set(CMAKE_BUILD_TYPE Debug)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
     add_compile_definitions(DEBUG)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
+    set(QUARTZ_DEBUG_MODE TRUE)
     
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding TEST definition")
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_TEST)
+    set(QUARTZ_TEST_MODE TRUE)
     
 elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported, adding RELEASE definition")
     set(CMAKE_BUILD_TYPE MinSizeRel)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
+    set(QUARTZ_RELEASE_MODE TRUE)
     
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding RELEASE definition")
     set(CMAKE_BUILD_TYPE Release)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
+    set(QUARTZ_RELEASE_MODE TRUE)
     
 else ()
     if (CMAKE_BUILD_TYPE STREQUAL "")
@@ -76,6 +84,7 @@ else ()
         set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
         add_compile_definitions(DEBUG)
         list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
+        set(QUARTZ_DEBUG_MODE TRUE)
 
     else ()
         message(FATAL_ERROR " - CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} is unsupported, please use Debug, RelWithDebInfo, MinSizeRel, or Release")
@@ -127,7 +136,9 @@ add_compile_definitions(GLFW_INCLUDE_NONE)
 
 # glm
 add_subdirectory("${VENDOR_ROOT_DIR}/glm")
-target_compile_definitions(glm INTERFACE GLM_FORCE_DEFAULT_ALIGNED_GENTYPES GLM_FORCE_DEPTH_ZERO_TO_ONE GLM_FORCE_RADIANS)
+target_compile_definitions(glm INTERFACE GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+target_compile_definitions(glm INTERFACE GLM_FORCE_DEPTH_ZERO_TO_ONE)
+target_compile_definitions(glm INTERFACE GLM_FORCE_RADIANS)
 target_compile_options(glm INTERFACE -Wno-deprecated-declarations) # for sprintf
 
 # Jolt (jolt physics)
@@ -142,7 +153,8 @@ set(SPDLOG_USE_STD_FORMAT OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 
 # stb
-include_directories("${VENDOR_ROOT_DIR}/stb")
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE "${VENDOR_ROOT_DIR}/stb")
 
 # tinygltf
 set(TINYGLTF_NO_INCLUDE_STB_IMAGE OFF CACHE INTERNAL "" FORCE)
@@ -178,16 +190,7 @@ set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION "${VULKAN_LIBRARIES}" 
 
 # ====================================================================
 # Define preprocessor directives for the Quartz libraries
-# ====================================================================
-# @todo: only add these for Quartz libraries. We don't want to be setting these for the vendor libraries. These should only be visible for
-# Quartz and application
-
-list(
-    APPEND QUARTZ_COMPILE_DEFINITIONS
-    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-    PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
-    SHADER_BINARY_DIR="${CMAKE_SHADER_OUTPUT_DIRECTORY}"
-)
+#====================================================================
 
 set(MAX_NUMBER_TEXTURES 100)
 set(MAX_NUMBER_MATERIALS 100)
@@ -206,6 +209,10 @@ list(
     QUARTZ_MAX_NUMBER_MATERIALS=${MAX_NUMBER_MATERIALS}
     QUARTZ_MAX_NUMBER_POINT_LIGHTS=${MAX_NUMBER_POINT_LIGHTS}
     QUARTZ_MAX_NUMBER_SPOT_LIGHTS=${MAX_NUMBER_SPOT_LIGHTS}
+    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
+    SHADER_BINARY_DIR="${CMAKE_SHADER_OUTPUT_DIRECTORY}"
+    GLFW_INCLUDE_NONE
 )
 
 message(STATUS "Quartz specific compile definitions:")
@@ -217,7 +224,7 @@ endforeach()
 # Utility and Quartz libraries
 # ====================================================================
 set(QUARTZ_ROOT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
-include_directories(${QUARTZ_ROOT_SOURCE_DIR})
+set(QUARTZ_INCLUDE_DIRS ${QUARTZ_ROOT_SOURCE_DIR})
 
 # Utility
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
@@ -254,5 +261,9 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 # The demo application
 # ====================================================================
 set(APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
+
 set(APPLICATION_SOURCE_DIR "${APPLICATION_ROOT_DIR}/demo_app")
 add_subdirectory("${APPLICATION_SOURCE_DIR}")
+
+set(JOLT_TESTING_SOURCE_DIR "${APPLICATION_ROOT_DIR}/jolt_testing")
+add_subdirectory("${JOLT_TESTING_SOURCE_DIR}")

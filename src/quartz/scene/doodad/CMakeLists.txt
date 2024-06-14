@@ -2,18 +2,30 @@
 # The Scene Doodad library
 #====================================================================
 add_library(
-        QUARTZ_SCENE_Doodad
-        SHARED
-        Doodad.hpp
-        Doodad.cpp
+    QUARTZ_SCENE_Doodad
+    SHARED
+    Doodad.hpp
+    Doodad.cpp
 
-        Transform.hpp
-        Transform.cpp
+    Transform.hpp
+    Transform.cpp
 )
 
+target_include_directories(
+    QUARTZ_SCENE_Doodad
+    PUBLIC
+    ${QUARTZ_INCLUDE_DIRS}
+)
+
+
 target_compile_options(
-        QUARTZ_SCENE_Doodad
-        PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+    QUARTZ_SCENE_Doodad
+    PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+)
+
+target_compile_definitions(
+    QUARTZ_SCENE_Doodad
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_compile_definitions(
@@ -22,15 +34,15 @@ target_compile_definitions(
 )
 
 target_link_libraries(
-        QUARTZ_SCENE_Doodad
+    QUARTZ_SCENE_Doodad
 
-        PUBLIC
-        glm
+    PUBLIC
+    glm
 
-        PUBLIC
-        UTIL_Logger
+    PUBLIC
+    UTIL_Logger
 
-        PUBLIC
-        QUARTZ_RENDERING_Device
-        QUARTZ_RENDERING_Model
+    PUBLIC
+    QUARTZ_RENDERING_Device
+    QUARTZ_RENDERING_Model
 )

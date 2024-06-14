@@ -8,6 +8,12 @@ add_library(
     Logger.cpp
 )
 
+target_include_directories(
+    UTIL_Logger
+    PUBLIC
+    ${QUARTZ_INCLUDE_DIRS}
+)
+
 target_compile_options(
     UTIL_Logger
     PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
