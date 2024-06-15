@@ -52,7 +52,7 @@ public: // member functions
     void setShouldCollectKeyInput(const bool shouldCollect);
 
 public: // static functions
-    static std::shared_ptr<InputManager> getPtr(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
+    static InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
     static void mousePositionInputCallback(
         GLFWwindow* p_glfwWindow,
@@ -71,10 +71,7 @@ private: // member functions
 private: // static functions
 
 private: // static variables
-    static std::map<
-        const GLFWwindow* const,
-        std::shared_ptr<quartz::managers::InputManager>
-    > inputManagerPtrMap;
+    static std::map<const GLFWwindow* const, quartz::managers::InputManager> inputManagerMap;
 
 private: // member variables
     std::shared_ptr<GLFWwindow> mp_glfwWindow;

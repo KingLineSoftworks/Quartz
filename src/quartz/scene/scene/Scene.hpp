@@ -55,7 +55,7 @@ public: // member functions
 
     void update(
         const quartz::rendering::Window& renderingWindow,
-        const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
+        const quartz::managers::InputManager& inputManager,
         const double tickTimeDelta
     );
 

@@ -2,10 +2,7 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 
-std::map<
-    const GLFWwindow* const,
-    std::shared_ptr<quartz::managers::InputManager>
-> quartz::managers::InputManager::inputManagerPtrMap;
+std::map<const GLFWwindow* const, quartz::managers::InputManager> quartz::managers::InputManager::inputManagerMap;
 
 quartz::managers::InputManager::InputManager(
     const std::shared_ptr<GLFWwindow>& p_glfwWindow
@@ -115,23 +112,22 @@ quartz::managers::InputManager::setShouldCollectKeyInput(const bool shouldCollec
     LOG_DEBUGthis("{} mouse input", (m_shouldCollectKeyInput ? "Enabling" : "Disabling"));
 }
 
-std::shared_ptr<quartz::managers::InputManager>
-quartz::managers::InputManager::getPtr(
+quartz::managers::InputManager&
+quartz::managers::InputManager::getInstance(
     const std::shared_ptr<GLFWwindow>& p_glfwWindow
 ) {
     LOG_FUNCTION_SCOPE_TRACE(INPUTMAN, "GLFW Window pointer {}", static_cast<const void*>(p_glfwWindow.get()));
 
-    if (quartz::managers::InputManager::inputManagerPtrMap.count(p_glfwWindow.get()) > 0) {
+    if (quartz::managers::InputManager::inputManagerMap.count(p_glfwWindow.get()) > 0) {
         LOG_TRACE(INPUTMAN, "Input manager already exists for GLFW Window pointer at {}", static_cast<const void*>(p_glfwWindow.get()));
-        return quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow.get()];
+        return quartz::managers::InputManager::inputManagerMap.at(p_glfwWindow.get());
     }
 
     LOG_TRACE(INPUTMAN, "Creating input manager for GLFW Window pointer at {}", static_cast<const void*>(p_glfwWindow.get()));
 
-    quartz::managers::InputManager inputManager(p_glfwWindow);
-    quartz::managers::InputManager::inputManagerPtrMap.insert({
+    quartz::managers::InputManager::inputManagerMap.insert({
         p_glfwWindow.get(),
-        std::make_shared<quartz::managers::InputManager>(std::move(inputManager))
+        quartz::managers::InputManager(p_glfwWindow)
     });
 
     glfwSetInputMode(
@@ -150,7 +146,7 @@ quartz::managers::InputManager::getPtr(
         quartz::managers::InputManager::scrollInputCallback
     );
 
-    return quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow.get()];
+    return quartz::managers::InputManager::inputManagerMap.at(p_glfwWindow.get());
 }
 
 void
@@ -159,20 +155,20 @@ quartz::managers::InputManager::mousePositionInputCallback(
     double updatedMousePosition_x,
     double updatedMousePosition_y
 ) {
-    std::shared_ptr<quartz::managers::InputManager> p_inputManager = quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
+    quartz::managers::InputManager& inputManager = quartz::managers::InputManager::inputManagerMap.at(p_glfwWindow);
 
-    if (!p_inputManager->m_shouldCollectMouseInput) {
+    if (!inputManager.m_shouldCollectMouseInput) {
         return;
     }
 
-    if (p_inputManager->m_mousePositionInitialized) {
-        p_inputManager->m_mousePositionOffset_x = p_inputManager->m_mousePosition_x - updatedMousePosition_x;
-        p_inputManager->m_mousePositionOffset_y = p_inputManager->m_mousePosition_y - updatedMousePosition_y;
+    if (inputManager.m_mousePositionInitialized) {
+        inputManager.m_mousePositionOffset_x = inputManager.m_mousePosition_x - updatedMousePosition_x;
+        inputManager.m_mousePositionOffset_y = inputManager.m_mousePosition_y - updatedMousePosition_y;
     }
 
-    p_inputManager->m_mousePosition_x = updatedMousePosition_x;
-    p_inputManager->m_mousePosition_y = updatedMousePosition_y;
-    p_inputManager->m_mousePositionInitialized = true;
+    inputManager.m_mousePosition_x = updatedMousePosition_x;
+    inputManager.m_mousePosition_y = updatedMousePosition_y;
+    inputManager.m_mousePositionInitialized = true;
 }
 
 void
@@ -181,12 +177,12 @@ quartz::managers::InputManager::scrollInputCallback(
     double scrollOffset_x,
     double scrollOffset_y
 ) {
-    std::shared_ptr<quartz::managers::InputManager> p_inputManager = quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
+    quartz::managers::InputManager& inputManager = quartz::managers::InputManager::inputManagerMap.at(p_glfwWindow);
 
-    if (!p_inputManager->m_shouldCollectMouseInput) {
+    if (!inputManager.m_shouldCollectMouseInput) {
         return;
     }
 
-    p_inputManager->m_scrollOffset_x = scrollOffset_x;
-    p_inputManager->m_scrollOffset_y = scrollOffset_y;
+    inputManager.m_scrollOffset_x = scrollOffset_x;
+    inputManager.m_scrollOffset_y = scrollOffset_y;
 }
