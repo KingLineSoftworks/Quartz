@@ -38,7 +38,7 @@ quartz::Application::Application(
         validationLayersEnabled
     ),
     mp_inputManager(quartz::managers::InputManager::getPtr(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
-    m_physicsManager(quartz::managers::PhysicsManager::getInstance()),
+    m_physicsManager(quartz::managers::PhysicsManager::Client::getInstance()),
     m_scene(),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
