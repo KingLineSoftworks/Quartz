@@ -7,12 +7,28 @@
 #include "quartz/managers/Loggers.hpp"
 
 namespace quartz {
+
+class Application; // We must declare the application class here as well so we can have its declaration for friending //
+
 namespace managers {
     class PhysicsManager;
+    class PhysicsManagerClient;
 }
 }
 
 class quartz::managers::PhysicsManager {
+public: // classes
+    class Client {
+    public: // member functions
+        Client() = delete;
+
+    private: // static functions
+        static quartz::managers::PhysicsManager& getInstance() { return quartz::managers::PhysicsManager::getInstance(); }
+
+    private: // friend classes
+        friend class quartz::Application;
+    };
+
 public: // member functions
     PhysicsManager(const PhysicsManager& other) = delete;
     PhysicsManager(PhysicsManager&& other) = delete;
@@ -21,11 +37,11 @@ public: // member functions
 
     USE_LOGGER(PHYSICSMAN);
 
-public: // static functions
-    static PhysicsManager& getInstance();
-
 private: // member functions
     PhysicsManager();
+
+private: // static functions
+    static PhysicsManager& getInstance();
 
 private: // static variables
 
