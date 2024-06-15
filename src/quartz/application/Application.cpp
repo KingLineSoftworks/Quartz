@@ -37,9 +37,8 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    mp_inputManager(quartz::managers::InputManager::getPtr(
-        m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
-    )),
+    mp_inputManager(quartz::managers::InputManager::getPtr(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
+    m_physicsManager(quartz::managers::PhysicsManager::getInstance()),
     m_scene(),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
@@ -62,33 +61,6 @@ void quartz::Application::run() {
     UNUSED double frameTimeAccumulator = 0.0f;
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"),
-            {
-                {-2.5f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {20.0f, 20.0f, 20.0f}
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf"),
-            {
-                {0.0f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {100.0f, 100.0f, 100.0f}
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf"),
-            {
-                {2.5f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {10.0f, 10.0f, 10.0f}
-            }
-        },
         {
             util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf"),
             {

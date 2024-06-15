@@ -41,6 +41,7 @@ target_link_libraries(
 
     PUBLIC
     QUARTZ_MANAGERS_InputManager
+    QUARTZ_MANAGERS_PhysicsManager
     QUARTZ_RENDERING_Context
     QUARTZ_SCENE_Scene
 )

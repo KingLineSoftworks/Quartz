@@ -37,10 +37,39 @@ quartz::managers::InputManager::InputManager(
     m_scrollOffset_x(0.0f),
     m_scrollOffset_y(0.0f)
 {
-    LOG_FUNCTION_CALL_TRACEthis(
-        "GLFW Window pointer {}", static_cast<const void*>(p_glfwWindow.get())
-    );
+    LOG_FUNCTION_CALL_TRACEthis("GLFW Window pointer {}", static_cast<const void*>(p_glfwWindow.get()));
 }
+
+quartz::managers::InputManager::InputManager(
+    quartz::managers::InputManager&& other
+) :
+    mp_glfwWindow(std::move(other.mp_glfwWindow)),
+
+    m_shouldCollectMouseInput(other.m_shouldCollectMouseInput),
+    m_mousePositionInitialized(other.m_mousePositionInitialized),
+
+    m_shouldCollectKeyInput(other.m_shouldCollectKeyInput),
+
+    m_keyDown_q(other.m_keyDown_q),
+    m_keyImpact_q(other.m_keyImpact_q),
+    m_keyDown_esc(other.m_keyDown_esc),
+    m_keyImpact_esc(other.m_keyImpact_esc),
+
+    m_keyDown_w(other.m_keyDown_w),
+    m_keyDown_a(other.m_keyDown_a),
+    m_keyDown_s(other.m_keyDown_s),
+    m_keyDown_d(other.m_keyDown_d),
+    m_keyDown_space(other.m_keyDown_space),
+    m_keyDown_shift(other.m_keyDown_shift),
+
+    m_mousePosition_x(other.m_mousePosition_x),
+    m_mousePosition_y(other.m_mousePosition_y),
+    m_mousePositionOffset_x(other.m_mousePositionOffset_x),
+    m_mousePositionOffset_y(other.m_mousePositionOffset_y),
+
+    m_scrollOffset_x(other.m_scrollOffset_x),
+    m_scrollOffset_y(other.m_scrollOffset_y)
+{}
 
 void
 quartz::managers::InputManager::collectInput() {
@@ -90,24 +119,14 @@ std::shared_ptr<quartz::managers::InputManager>
 quartz::managers::InputManager::getPtr(
     const std::shared_ptr<GLFWwindow>& p_glfwWindow
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(
-        INPUTMAN, "GLFW Window pointer {}",
-        static_cast<const void*>(p_glfwWindow.get())
-    );
+    LOG_FUNCTION_SCOPE_TRACE(INPUTMAN, "GLFW Window pointer {}", static_cast<const void*>(p_glfwWindow.get()));
 
     if (quartz::managers::InputManager::inputManagerPtrMap.count(p_glfwWindow.get()) > 0) {
-        LOG_TRACE(
-            INPUTMAN, "Input manager already exists for GLFW Window pointer at {}",
-            static_cast<const void*>(p_glfwWindow.get())
-        );
-
+        LOG_TRACE(INPUTMAN, "Input manager already exists for GLFW Window pointer at {}", static_cast<const void*>(p_glfwWindow.get()));
         return quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow.get()];
     }
 
-    LOG_TRACE(
-        INPUTMAN, "Creating input manager for GLFW Window pointer at {}",
-        static_cast<const void*>(p_glfwWindow.get())
-    );
+    LOG_TRACE(INPUTMAN, "Creating input manager for GLFW Window pointer at {}", static_cast<const void*>(p_glfwWindow.get()));
 
     quartz::managers::InputManager inputManager(p_glfwWindow);
     quartz::managers::InputManager::inputManagerPtrMap.insert({
@@ -140,18 +159,15 @@ quartz::managers::InputManager::mousePositionInputCallback(
     double updatedMousePosition_x,
     double updatedMousePosition_y
 ) {
-    std::shared_ptr<quartz::managers::InputManager> p_inputManager =
-        quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
+    std::shared_ptr<quartz::managers::InputManager> p_inputManager = quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
 
     if (!p_inputManager->m_shouldCollectMouseInput) {
         return;
     }
 
     if (p_inputManager->m_mousePositionInitialized) {
-        p_inputManager->m_mousePositionOffset_x =
-            p_inputManager->m_mousePosition_x - updatedMousePosition_x;
-        p_inputManager->m_mousePositionOffset_y =
-            p_inputManager->m_mousePosition_y - updatedMousePosition_y;
+        p_inputManager->m_mousePositionOffset_x = p_inputManager->m_mousePosition_x - updatedMousePosition_x;
+        p_inputManager->m_mousePositionOffset_y = p_inputManager->m_mousePosition_y - updatedMousePosition_y;
     }
 
     p_inputManager->m_mousePosition_x = updatedMousePosition_x;
@@ -165,8 +181,7 @@ quartz::managers::InputManager::scrollInputCallback(
     double scrollOffset_x,
     double scrollOffset_y
 ) {
-    std::shared_ptr<quartz::managers::InputManager> p_inputManager =
-        quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
+    std::shared_ptr<quartz::managers::InputManager> p_inputManager = quartz::managers::InputManager::inputManagerPtrMap[p_glfwWindow];
 
     if (!p_inputManager->m_shouldCollectMouseInput) {
         return;

@@ -45,6 +45,7 @@ int main() {
 
         // rendering
         {"INPUTMAN", util::Logger::Level::info},
+        {"PHYSICSMAN", util::Logger::Level::info},
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
@@ -116,7 +117,6 @@ int main() {
 #endif
     }
 
-#if false
 #ifdef QUARTZ_RELEASE
     const bool validationLayersEnabled = false;
 #else
@@ -147,10 +147,9 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    LOG_TRACE(GENERAL, "Terminating");
-    return EXIT_SUCCESS;
-#endif
+    LOG_TRACE(GENERAL, "Terminating application");
 
+    LOG_TRACE(GENERAL, "Performing physics simulation");
     reactphysics3d::PhysicsCommon physicsCommon;
     reactphysics3d::PhysicsWorld* p_physicsWorld = physicsCommon.createPhysicsWorld();
 
