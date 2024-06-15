@@ -13,12 +13,16 @@ namespace managers {
 }
 }
 
+/**
+ * @todo 2024/06/14 Store a map of instances. There is not a reason we can't use instances and return a reference
+ *    to the instance in the map.
+ */
+
 class quartz::managers::InputManager {
 public: // member functions
+    InputManager(InputManager&& other);
     InputManager(const InputManager& other) = delete;
-    void operator=(const InputManager& other) = delete;
-
-    InputManager(InputManager&& other) = default;
+    InputManager& operator=(const InputManager& other) = delete;
 
     USE_LOGGER(INPUTMAN);
 
@@ -47,9 +51,6 @@ public: // member functions
     void setShouldCollectMouseInput(const bool shouldCollect);
     void setShouldCollectKeyInput(const bool shouldCollect);
 
-private: // member functions
-    InputManager(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
-
 public: // static functions
     static std::shared_ptr<InputManager> getPtr(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
@@ -63,6 +64,9 @@ public: // static functions
         double scrollOffset_x,
         double scrollOffset_y
     );
+
+private: // member functions
+    InputManager(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
 private: // static functions
 
