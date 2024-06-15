@@ -50,7 +50,7 @@ private: // member variables
     const uint32_t m_patchVersion;
 
     quartz::rendering::Context m_renderingContext;
-    std::shared_ptr<quartz::managers::InputManager> mp_inputManager;
+    quartz::managers::InputManager& m_inputManager;
     quartz::managers::PhysicsManager& m_physicsManager;
     quartz::scene::Scene m_scene;
 

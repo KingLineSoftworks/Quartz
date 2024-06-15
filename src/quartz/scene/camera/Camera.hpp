@@ -56,7 +56,7 @@ public: // member functions
     void update(
         const float windowWidth,
         const float windowHeight,
-        const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
+        const quartz::managers::InputManager& inputManager,
         const double tickTimeDelta
     );
 

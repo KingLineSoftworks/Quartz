@@ -107,13 +107,13 @@ quartz::scene::Scene::load(
 void
 quartz::scene::Scene::update(
     const quartz::rendering::Window& renderingWindow,
-    const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
+    const quartz::managers::InputManager& inputManager,
     const double tickTimeDelta
 ) {
     m_camera.update(
         static_cast<float>(renderingWindow.getVulkanExtent().width),
         static_cast<float>(renderingWindow.getVulkanExtent().height),
-        p_inputManager,
+        inputManager,
         tickTimeDelta
     );
 

@@ -37,7 +37,7 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    mp_inputManager(quartz::managers::InputManager::getPtr(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
+    m_inputManager(quartz::managers::InputManager::getInstance(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
     m_physicsManager(quartz::managers::PhysicsManager::Client::getInstance()),
     m_scene(),
     m_targetTicksPerSecond(120.0),
@@ -137,7 +137,7 @@ void quartz::Application::run() {
 
             m_scene.update(
                 m_renderingContext.getRenderingWindow(),
-                mp_inputManager,
+                m_inputManager,
                 targetTickTimeDelta
             );
 
@@ -153,19 +153,17 @@ void quartz::Application::run() {
 
 void
 quartz::Application::processInput() {
-    mp_inputManager->collectInput();
+    m_inputManager.collectInput();
 
-    m_shouldQuit =
-        m_renderingContext.getRenderingWindow().shouldClose() ||
-        mp_inputManager->getKeyDown_q();
+    m_shouldQuit = m_renderingContext.getRenderingWindow().shouldClose() || m_inputManager.getKeyDown_q();
 
-    if (mp_inputManager->getKeyImpact_esc()) {
+    if (m_inputManager.getKeyImpact_esc()) {
         m_isPaused = !m_isPaused;
 
         LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));
 
         m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
-        mp_inputManager->setShouldCollectMouseInput(!m_isPaused);
-        mp_inputManager->setShouldCollectKeyInput(!m_isPaused);
+        m_inputManager.setShouldCollectMouseInput(!m_isPaused);
+        m_inputManager.setShouldCollectKeyInput(!m_isPaused);
     }
 }

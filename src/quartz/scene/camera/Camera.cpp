@@ -85,15 +85,15 @@ void
 quartz::scene::Camera::update(
     const float windowWidth,
     const float windowHeight,
-    const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
+    const quartz::managers::InputManager& inputManager,
     const double tickTimeDelta
 ) {
     // ----- update orientation ----- //
 
     const float mouseSensitivity = 0.25f;
 
-    const float calibratedMousePositionOffset_x = p_inputManager->getMousePositionOffset_x() * mouseSensitivity;
-    const float calibratedMousePositionOffset_y = p_inputManager->getMousePositionOffset_y() * mouseSensitivity;
+    const float calibratedMousePositionOffset_x = inputManager.getMousePositionOffset_x() * mouseSensitivity;
+    const float calibratedMousePositionOffset_y = inputManager.getMousePositionOffset_y() * mouseSensitivity;
 
     m_pitch += calibratedMousePositionOffset_y;
     if (m_pitch > 89.5f) {
@@ -130,7 +130,7 @@ quartz::scene::Camera::update(
 
     const float scrollSensitivity = 1.0f;
 
-    m_fovDegrees -= p_inputManager->getScrollOffset_y() * scrollSensitivity;
+    m_fovDegrees -= inputManager.getScrollOffset_y() * scrollSensitivity;
 
     if (m_fovDegrees < 5.0f) {
         m_fovDegrees = 5.0f;
@@ -142,24 +142,24 @@ quartz::scene::Camera::update(
 
     const float movementSpeed = 2.0f * tickTimeDelta;
 
-    if (p_inputManager->getKeyDown_w()) {
+    if (inputManager.getKeyDown_w()) {
         m_worldPosition += movementSpeed * currentLookVector;
     }
-    if (p_inputManager->getKeyDown_s()) {
+    if (inputManager.getKeyDown_s()) {
         m_worldPosition -= movementSpeed * currentLookVector;
     }
 
-    if (p_inputManager->getKeyDown_d()) {
+    if (inputManager.getKeyDown_d()) {
         m_worldPosition += movementSpeed * currentRightVector;
     }
-    if (p_inputManager->getKeyDown_a()) {
+    if (inputManager.getKeyDown_a()) {
         m_worldPosition -= movementSpeed * currentRightVector;
     }
 
-    if (p_inputManager->getKeyDown_space()) {
+    if (inputManager.getKeyDown_space()) {
         m_worldPosition += movementSpeed * worldUpVector;
     }
-    if (p_inputManager->getKeyDown_shift()) {
+    if (inputManager.getKeyDown_shift()) {
         m_worldPosition -= movementSpeed * worldUpVector;
     }
 
