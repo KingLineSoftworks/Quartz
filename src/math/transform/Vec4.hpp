@@ -5,12 +5,8 @@
 #include <glm/vec4.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include <reactphysics3d/reactphysics3d.h>
-
 namespace math {
     union Vec4;
-
-    using Quaternion = Vec4;
 }
 
 union math::Vec4 {
@@ -20,11 +16,9 @@ union math::Vec4 {
 
     Vec4(const Vec4& other) : glmVec(other.glmVec) {}
     Vec4(const glm::vec4& other) : glmVec(other) {}
-    Vec4(const reactphysics3d::Quaternion& other) : rp3dQuat(other) {}
 
     Vec4& operator=(const Vec4& other)                       { glmVec = other.glmVec; return *this; }
     Vec4& operator=(const glm::vec4 other)                   { glmVec = other;        return *this; }
-    Vec4& operator=(const reactphysics3d::Quaternion& other) { rp3dQuat = other;       return *this; }
 
     /**
      * -------------------------------------------------------------------------------------
@@ -34,15 +28,6 @@ union math::Vec4 {
 
     operator const glm::vec4&() const { return glmVec; }
     operator glm::vec4&() { return glmVec; }
-
-    /**
-     * -------------------------------------------------------------------------------------
-     * @brief conversion to reactphysics3d
-     * -------------------------------------------------------------------------------------
-     */
-
-    operator const reactphysics3d::Quaternion&() const { return rp3dQuat; }
-    operator reactphysics3d::Quaternion&() { return rp3dQuat; }
 
     /**
      * -------------------------------------------------------------------------------------
@@ -77,27 +62,21 @@ union math::Vec4 {
 
     Vec4 operator+(const Vec4& other)                      const { return {glmVec + other.glmVec}; }
     Vec4 operator+(const glm::vec4 other)                  const { return {glmVec + other}; }
-    Vec4 operator+(const reactphysics3d::Quaternion other) const { return {rp3dQuat + other}; }
 
     Vec4& operator+=(const Vec4& other)                       { glmVec += other.glmVec; return *this;}
     Vec4& operator+=(const glm::vec4& other)                  { glmVec += other;        return *this;}
-    Vec4& operator+=(const reactphysics3d::Quaternion& other) { rp3dQuat += other;       return *this;}
 
     Vec4 operator-(const Vec4& other)                      const { return {glmVec - other.glmVec}; }
     Vec4 operator-(const glm::vec4 other)                  const { return {glmVec - other}; }
-    Vec4 operator-(const reactphysics3d::Quaternion other) const { return {rp3dQuat - other}; }
 
     Vec4& operator-=(const Vec4& other)                       { glmVec -= other.glmVec; return *this; }
     Vec4& operator-=(const glm::vec4& other)                  { glmVec -= other;        return *this; }
-    Vec4& operator-=(const reactphysics3d::Quaternion& other) { rp3dQuat -= other;       return *this; }
 
     Vec4 operator*(const Vec4& other)                      const { return {glmVec * other.glmVec}; }
     Vec4 operator*(const glm::vec4 other)                  const { return {glmVec * other}; }
-    Vec4 operator*(const reactphysics3d::Quaternion other) const { return {rp3dQuat * other}; }
 
     Vec4& operator*=(const Vec4& other)                       { glmVec *= other.glmVec;    return *this; }
     Vec4& operator*=(const glm::vec4& other)                  { glmVec *= other;           return *this; }
-    Vec4& operator*=(const reactphysics3d::Quaternion& other) { rp3dQuat = rp3dQuat * other; return *this; }
 
     Vec4 operator/(const Vec4& other)                      const { return {glmVec / other.glmVec}; }
     Vec4 operator/(const glm::vec4 other)                  const { return {glmVec / other}; }
@@ -107,11 +86,9 @@ union math::Vec4 {
 
     bool operator==(const Vec4& other)                       const { return glmVec == other.glmVec; }
     bool operator==(const glm::vec4& other)                  const { return glmVec == other; }
-    bool operator==(const reactphysics3d::Quaternion& other) const { return rp3dQuat == other; }
 
     bool operator!=(const Vec4& other)                       const { return glmVec != other.glmVec; }
     bool operator!=(const glm::vec4& other)                  const { return glmVec != other; }
-    bool operator!=(const reactphysics3d::Quaternion& other) const { return rp3dQuat != other; }
 
     /**
      * -------------------------------------------------------------------------------------
@@ -121,7 +98,6 @@ union math::Vec4 {
 
     float dot(const Vec4& other)                       const { return glm::dot(glmVec, other.glmVec); }
     float dot(const glm::vec4& other)                  const { return glm::dot(glmVec, other); }
-    float dot(const reactphysics3d::Quaternion& other) const { return rp3dQuat.dot(other); }
 
     Vec4& normalize() { glmVec = glm::normalize(glmVec); return *this; }
 
@@ -157,5 +133,4 @@ union math::Vec4 {
      * @brief Try not to use these two directly. Use the xyzw and rgba attributes wherever possible
      */
     glm::vec4 glmVec;
-    reactphysics3d::Quaternion rp3dQuat;
 };

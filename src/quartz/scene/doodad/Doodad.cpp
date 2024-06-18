@@ -15,7 +15,7 @@ quartz::scene::Doodad::createRigidBodyPtr(
         return nullptr;
     }
 
-    const math::Quaternion quat; /** @todo 2024/06/17 Create implementation for conversion from axis angle rotation to quaternion */
+    const reactphysics3d::Quaternion quat; /** @todo 2024/06/17 Create implementation for conversion from axis angle rotation to quaternion */
     const reactphysics3d::Transform rp3dTransform(transform.position, quat);
     return p_physicsWorld->createRigidBody(rp3dTransform);
 }
