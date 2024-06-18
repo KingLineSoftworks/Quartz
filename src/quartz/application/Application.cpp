@@ -62,6 +62,24 @@ void quartz::Application::run() {
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
         {
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf"),
+            {
+                {0.0f, 0.0f, 0.0f},
+                0.0f,
+                {0.0f, 0.0f, 1.0f},
+                {100.0f, 100.0f, 100.0f}
+            }
+        },
+        {
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf"),
+            {
+                {2.5f, 0.0f, 0.0f},
+                0.0f,
+                {0.0f, 0.0f, 1.0f},
+                {10.0f, 10.0f, 10.0f}
+            }
+        },
+        {
             util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf"),
             {
                 {5.0f, 0.0f, 0.0f},

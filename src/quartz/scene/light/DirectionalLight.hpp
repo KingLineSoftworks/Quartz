@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/vec3.hpp>
+#include "math/transform/Vec3.hpp"
 
 namespace quartz {
 namespace scene {
@@ -12,13 +12,13 @@ struct quartz::scene::DirectionalLight {
 public: // member functions
     DirectionalLight() = default;
     DirectionalLight(
-        const glm::vec3& color_,
-        const glm::vec3& direction_
+        const math::Vec3& color_,
+        const math::Vec3& direction_
     );
     DirectionalLight(const DirectionalLight& other);
     DirectionalLight& operator=(const DirectionalLight& other);
 
 public: // member variables
-    alignas(16) glm::vec3 color;
-    alignas(16) glm::vec3 direction;
+    alignas(16) math::Vec3 color;
+    alignas(16) math::Vec3 direction;
 };

@@ -1,5 +1,3 @@
-#include <glm/vec3.hpp>
-
 #include <mikktspace.h>
 
 #include "util/macros.hpp"
@@ -83,7 +81,7 @@ quartz::rendering::TangentCalculator::getVertexIndex(
     return masterIndex;
 }
 
-glm::vec3
+math::Vec3
 quartz::rendering::TangentCalculator::getVertexAttribute(
     const SMikkTSpaceContext* p_mikktspaceContext,
     const int32_t faceIndex,
@@ -148,7 +146,7 @@ quartz::rendering::TangentCalculator::getPosition(
     int32_t faceIndex,
     int32_t faceLocalVertexIndex
 ) {
-    const glm::vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
+    const math::Vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
         p_mikktspaceContext,
         faceIndex,
         faceLocalVertexIndex,
@@ -167,7 +165,7 @@ quartz::rendering::TangentCalculator::getNormal(
     int32_t faceIndex,
     int32_t faceLocalVertexIndex
 ) {
-    const glm::vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
+    const math::Vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
         p_mikktspaceContext,
         faceIndex,
         faceLocalVertexIndex,
@@ -186,7 +184,7 @@ quartz::rendering::TangentCalculator::getTextureCoordinate(
     UNUSED int32_t faceIndex,
     UNUSED int32_t faceLocalVertexIndex
 ) {
-    const glm::vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
+    const math::Vec3 vertexAttribute = quartz::rendering::TangentCalculator::getVertexAttribute(
         p_mikktspaceContext,
         faceIndex,
         faceLocalVertexIndex,

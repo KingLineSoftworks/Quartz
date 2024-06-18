@@ -33,9 +33,11 @@ target_link_libraries(
     QUARTZ_RENDERING_CubeMap
 
     PUBLIC
-    stb # don't need to link against stb because it's header only
-    glm
+    stb
     vulkan
+
+    PUBLIC
+    MATH_Transform
 
     PUBLIC
     UTIL_Logger

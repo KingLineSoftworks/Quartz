@@ -241,7 +241,7 @@ quartz::rendering::Model::loadMaterialMasterIndices(
         );
 
         const std::vector<double>& baseColorFactorVector = gltfMaterial.pbrMetallicRoughness.baseColorFactor; // assuming length == 4
-        const glm::vec4 baseColorFactor = glm::vec4(
+        const math::Vec4 baseColorFactor(
             baseColorFactorVector[0],
             baseColorFactorVector[1],
             baseColorFactorVector[2],
@@ -249,7 +249,7 @@ quartz::rendering::Model::loadMaterialMasterIndices(
         );
 
         const std::vector<double>& emissiveFactorVector = gltfMaterial.emissiveFactor; // assuming length == 3
-        const glm::vec3 emissiveFactor = glm::vec3(
+        const math::Vec3 emissiveFactor = math::Vec3(
             emissiveFactorVector[0],
             emissiveFactorVector[1],
             emissiveFactorVector[2]

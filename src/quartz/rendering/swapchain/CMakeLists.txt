@@ -33,8 +33,10 @@ target_link_libraries(
     QUARTZ_RENDERING_Swapchain
 
     PUBLIC
-    glm
     vulkan
+
+    PUBLIC
+    MATH_Transform
 
     PUBLIC
     UTIL_FileSystem

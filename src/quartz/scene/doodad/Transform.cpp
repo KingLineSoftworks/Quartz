@@ -10,8 +10,8 @@ quartz::scene::Transform::Transform() :
 quartz::scene::Transform::Transform(
     const math::Vec3& position_,
     const float rotationAmountDegrees_,
-    const glm::vec3& rotationAxis_,
-    const glm::vec3& scale_
+    const math::Vec3& rotationAxis_,
+    const math::Vec3& scale_
 ) :
     position(position_),
     rotationAmountDegrees(rotationAmountDegrees_),

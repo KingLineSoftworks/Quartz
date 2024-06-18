@@ -62,12 +62,12 @@ quartz::rendering::Node::loadLocalTransformationMatrix(
 
     LOG_TRACE(MODEL_NODE, "Using TRS calculation from node");
 
-    glm::vec3 translation = glm::vec3(0.0f);
+    math::Vec3 translation(0.0f);
     if (gltfNode.translation.size() == 3) {
         translation = glm::make_vec3(gltfNode.translation.data());
-        LOG_TRACE(MODEL_NODE, "Loaded translation vector {}", glm::to_string(translation));
+        LOG_TRACE(MODEL_NODE, "Loaded translation vector {}", translation.toString());
     }
-    transformationMatrix = glm::translate(transformationMatrix, translation);
+    transformationMatrix = glm::translate(transformationMatrix, translation.glmVec);
 
     glm::mat4 rotation = glm::mat4(1.0f);
     if (gltfNode.rotation.size() == 4) {
@@ -77,12 +77,12 @@ quartz::rendering::Node::loadLocalTransformationMatrix(
     }
     transformationMatrix = transformationMatrix * rotation;
 
-    glm::vec3 scale = glm::vec3(1.0f);
+    math::Vec3 scale(1.0f);
     if (gltfNode.scale.size() == 3) {
         scale = glm::make_vec3(gltfNode.scale.data());
-        LOG_TRACE(MODEL_NODE, "Loaded scale vector {}", glm::to_string(scale));
+        LOG_TRACE(MODEL_NODE, "Loaded scale vector {}", scale.toString());
     }
-    transformationMatrix = glm::scale(transformationMatrix, scale);
+    transformationMatrix = glm::scale(transformationMatrix, scale.glmVec);
 
     LOG_TRACE(MODEL_NODE, "Calculated local transformation matrix");
     LOG_TRACE(MODEL_NODE, "{}", glm::to_string(transformationMatrix));
@@ -198,7 +198,7 @@ quartz::rendering::Node::getTransformationMatrix() const {
         rotationMatrix = glm::rotate(
             rotationMatrix,
             glm::radians(180.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f)
+            {0.0f, 0.0f, 1.0f}
         );
 
         transformationMatrix = rotationMatrix * transformationMatrix;

@@ -34,8 +34,10 @@ target_link_libraries(
     QUARTZ_SCENE_Scene
 
     PUBLIC
-    glm
     reactphysics3d
+
+    PUBLIC
+    MATH_Transform
 
     PUBLIC
     UTIL_Logger

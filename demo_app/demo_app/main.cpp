@@ -183,7 +183,23 @@ int main() {
     physicsCommon.destroyPhysicsWorld(p_physicsWorld);
 
     LOG_TRACE(BIGBOY, "Testing vector3 union");
+    LOG_TRACE(BIGBOY, "Size                           : {}", sizeof(math::Vec3));
+    LOG_TRACE(BIGBOY, "Size of glm::vec3              : {}", sizeof(glm::vec3));
+    LOG_TRACE(BIGBOY, "Size of reactphysics3d::Vector3: {}", sizeof(reactphysics3d::Vector3));
+    LOG_TRACE(BIGBOY, "Size of 3 floats               : {}", 3 * sizeof(float));
+
     math::Vec3 vec3(424242.42f, 123456.7890f, -999.888f);
+    LOG_TRACE(BIGBOY, "Vector3Union values xyz: {}, {}, {}", vec3.x, vec3.y, vec3.z);
+    LOG_TRACE(BIGBOY, "Vector3Union values rgb: {}, {}, {}", vec3.r, vec3.g, vec3.b);
+    LOG_TRACE(BIGBOY, "Vector3Union glm       : {}, {}, {}", vec3.glmVec.x, vec3.glmVec.y, vec3.glmVec.z);
+    LOG_TRACE(BIGBOY, "Vector3Union rp3d      : {}, {}, {}", vec3.rp3dVec.x, vec3.rp3dVec.y, vec3.rp3dVec.z);
+    printVec3(vec3);
+    printVector3(vec3);
+
+    LOG_TRACE(BIGBOY, "Resetting vector3 union");
+    vec3.x = -3858838.0f;
+    vec3.g = -0.145868f;
+    vec3.z = 0.0007244f;
     LOG_TRACE(BIGBOY, "Vector3Union values xyz: {}, {}, {}", vec3.x, vec3.y, vec3.z);
     LOG_TRACE(BIGBOY, "Vector3Union values rgb: {}, {}, {}", vec3.r, vec3.g, vec3.b);
     LOG_TRACE(BIGBOY, "Vector3Union glm       : {}, {}, {}", vec3.glmVec.x, vec3.glmVec.y, vec3.glmVec.z);
