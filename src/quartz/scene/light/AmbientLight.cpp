@@ -1,9 +1,7 @@
-#include <glm/vec3.hpp>
-
 #include "quartz/scene/light/AmbientLight.hpp"
 
 quartz::scene::AmbientLight::AmbientLight(
-    const glm::vec3& color_
+    const math::Vec3& color_
 ) :
     color(color_)
 {}

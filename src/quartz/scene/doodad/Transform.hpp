@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 #include "math/transform/Vec3.hpp"
 
 namespace quartz {
@@ -16,8 +14,8 @@ public: // public methods
     Transform(
         const math::Vec3& position_,
         const float rotationAmountDegrees_,
-        const glm::vec3& rotationAxis_,
-        const glm::vec3& scale_
+        const math::Vec3& rotationAxis_,
+        const math::Vec3& scale_
     );
     ~Transform() = default;
 
@@ -25,7 +23,7 @@ public: // member variables
     math::Vec3 position;
 
     float rotationAmountDegrees;
-    glm::vec3 rotationAxis;
+    math::Vec3 rotationAxis;
 
-    glm::vec3 scale;
+    math::Vec3 scale;
 };

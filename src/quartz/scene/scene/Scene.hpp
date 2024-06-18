@@ -4,9 +4,9 @@
 #include <utility>
 #include <vector>
 
-#include <glm/vec3.hpp>
-
 #include <reactphysics3d/reactphysics3d.h>
+
+#include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
@@ -42,7 +42,7 @@ public: // member functions
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
     const std::vector<quartz::scene::PointLight>& getPointLights() const { return m_pointLights; }
     const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
-    const glm::vec3& getScreenClearColor() const { return m_screenClearColor; }
+    const math::Vec3& getScreenClearColor() const { return m_screenClearColor; }
 
     void load(
         const quartz::rendering::Device& renderingDevice,
@@ -52,7 +52,7 @@ public: // member functions
         const quartz::scene::DirectionalLight& directionalLight,
         const std::vector<quartz::scene::PointLight>& pointLights,
         const std::vector<quartz::scene::SpotLight>& spotLights,
-        const glm::vec3& screenClearColor,
+        const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
@@ -84,5 +84,5 @@ private: // member variables
     std::vector<quartz::scene::PointLight> m_pointLights;
     std::vector<quartz::scene::SpotLight> m_spotLights;
 
-    glm::vec3 m_screenClearColor;
+    math::Vec3 m_screenClearColor;
 };

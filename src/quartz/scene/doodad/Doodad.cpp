@@ -39,8 +39,8 @@ quartz::scene::Doodad::Doodad(
     LOG_TRACEthis("Constructing doodad with transform:");
     LOG_TRACE(SCENE, "  position         = {}", transform.position.toString());
     LOG_TRACE(SCENE, "  rotation degrees = {}", transform.rotationAmountDegrees);
-    LOG_TRACE(SCENE, "  rotation axis    = {}", glm::to_string(transform.rotationAxis));
-    LOG_TRACE(SCENE, "  scale            = {}", glm::to_string(transform.scale));
+    LOG_TRACE(SCENE, "  rotation axis    = {}", transform.rotationAxis.toString());
+    LOG_TRACE(SCENE, "  scale            = {}", transform.scale.toString());
 }
 
 quartz::scene::Doodad::Doodad(
@@ -72,11 +72,11 @@ quartz::scene::Doodad::update(
     m_transformationMatrix = glm::rotate(
         m_transformationMatrix,
         glm::radians(m_transform.rotationAmountDegrees),
-        m_transform.rotationAxis
+        m_transform.rotationAxis.glmVec
     );
 
     m_transformationMatrix = glm::scale(
         m_transformationMatrix,
-        m_transform.scale
+        m_transform.scale.glmVec
     );
 }

@@ -32,6 +32,9 @@ target_link_libraries(
     glm
 
     PUBLIC
+    MATH_Transform
+
+    PUBLIC
     UTIL_Logger
 
     PUBLIC

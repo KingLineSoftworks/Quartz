@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
+#include "math/transform/Vec2.hpp"
+#include "math/transform/Vec3.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -29,14 +29,14 @@ public: // enums
 public: // member functions
     Vertex();
     Vertex(
-        const glm::vec3& position_,
-        const glm::vec3& normal_,
-        const glm::vec3& color_,
-        const glm::vec2& baseColorTextureCoordinate_,
-        const glm::vec2& metallicRoughnessTextureCoordinate_,
-        const glm::vec2& normalTextureCoordinate_,
-        const glm::vec2& emissionTextureCoordinate_,
-        const glm::vec2& occlusionTextureCoordinate_
+        const math::Vec3& position_,
+        const math::Vec3& normal_,
+        const math::Vec3& color_,
+        const math::Vec2& baseColorTextureCoordinate_,
+        const math::Vec2& metallicRoughnessTextureCoordinate_,
+        const math::Vec2& normalTextureCoordinate_,
+        const math::Vec2& emissionTextureCoordinate_,
+        const math::Vec2& occlusionTextureCoordinate_
     );
     bool operator==(const Vertex& other) const;
 
@@ -47,16 +47,16 @@ public: // static functions
     static std::vector<vk::VertexInputAttributeDescription> getVulkanVertexInputAttributeDescriptions();
 
 public: // member variables
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec3 tangent;
-    glm::vec3 color;
+    math::Vec3 position;
+    math::Vec3 normal;
+    math::Vec3 tangent;
+    math::Vec3 color;
 
-    glm::vec2 baseColorTextureCoordinate;
-    glm::vec2 metallicRoughnessTextureCoordinate;
-    glm::vec2 normalTextureCoordinate;
-    glm::vec2 emissionTextureCoordinate;
-    glm::vec2 occlusionTextureCoordinate;
+    math::Vec2 baseColorTextureCoordinate;
+    math::Vec2 metallicRoughnessTextureCoordinate;
+    math::Vec2 normalTextureCoordinate;
+    math::Vec2 emissionTextureCoordinate;
+    math::Vec2 occlusionTextureCoordinate;
 };
 
 template <> struct std::hash<quartz::rendering::Vertex> {

@@ -1,10 +1,8 @@
-#include <glm/vec3.hpp>
-
 #include "quartz/scene/light/DirectionalLight.hpp"
 
 quartz::scene::DirectionalLight::DirectionalLight(
-    const glm::vec3& color_,
-    const glm::vec3& direction_
+    const math::Vec3& color_,
+    const math::Vec3& direction_
 ) :
     color(color_),
     direction(direction_)

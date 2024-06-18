@@ -6,7 +6,7 @@
 #include "quartz/scene/camera/Camera.hpp"
 
 quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
-    const glm::vec3 position_,
+    const math::Vec3 position_,
     const glm::mat4 viewMatrix_,
     const glm::mat4 projectionMatrix_
 ) :
@@ -44,7 +44,7 @@ quartz::scene::Camera::Camera(
     const double yaw,
     const double roll,
     const double fovDegrees,
-    const glm::vec3& worldPosition
+    const math::Vec3& worldPosition
 ) :
     m_pitch(pitch),
     m_yaw(yaw),
@@ -104,27 +104,17 @@ quartz::scene::Camera::update(
 
     m_yaw = glm::mod(m_yaw - calibratedMousePositionOffset_x, 360.0f);
 
-    constexpr glm::vec3 worldUpVector{0.0f, 1.0f, 0.0f};
+    const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
 
-    glm::vec3 currentLookVector;
+    math::Vec3 currentLookVector;
     currentLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
     currentLookVector.y = sin(glm::radians(m_pitch));
     currentLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector = glm::normalize(currentLookVector);
+    currentLookVector.normalize();
 
-    glm::vec3 currentRightVector = glm::normalize(
-        glm::cross(
-            currentLookVector,
-            worldUpVector
-        )
-    );
+    math::Vec3 currentRightVector = currentLookVector.cross(worldUpVector).normalize();
 
-    glm::vec3 currentUpVector = glm::normalize(
-        glm::cross(
-            currentRightVector,
-            currentLookVector
-        )
-    );
+    math::Vec3 currentUpVector = currentRightVector.cross(currentLookVector).normalize();
 
     // ----- update fov ----- //
 
@@ -166,9 +156,9 @@ quartz::scene::Camera::update(
     // ----- update view and projection matrices ----- //
 
     m_viewMatrix = glm::lookAt(
-        m_worldPosition,
-        m_worldPosition + currentLookVector,
-        currentUpVector
+        m_worldPosition.glmVec,
+        m_worldPosition.glmVec + currentLookVector.glmVec,
+        currentUpVector.glmVec
     );
 
     m_projectionMatrix = glm::perspective(

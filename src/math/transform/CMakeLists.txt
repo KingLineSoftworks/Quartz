@@ -4,7 +4,9 @@
 add_library(
     MATH_Transform
     SHARED
+    Vec2.hpp
     Vec3.hpp
+    Vec4.hpp
 )
 
 # Set the language manually for some reason

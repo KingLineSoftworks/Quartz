@@ -28,7 +28,10 @@ target_link_libraries(
     QUARTZ_RENDERING_Material
 
     PUBLIC
-    glm
+    # some vendor lib
+
+    PUBLIC
+    MATH_Transform
 
     PUBLIC
     UTIL_Logger

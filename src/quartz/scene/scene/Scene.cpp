@@ -29,8 +29,8 @@ quartz::scene::Scene::loadDoodads(
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
         LOG_TRACE(SCENE, "  position         = {}", transform.position.toString());
         LOG_TRACE(SCENE, "  rotation degrees = {}", transform.rotationAmountDegrees);
-        LOG_TRACE(SCENE, "  rotation axis    = {}", glm::to_string(transform.rotationAxis));
-        LOG_TRACE(SCENE, "  scale            = {}", glm::to_string(transform.scale));
+        LOG_TRACE(SCENE, "  rotation axis    = {}", transform.rotationAxis.toString());
+        LOG_TRACE(SCENE, "  scale            = {}", transform.scale.toString());
 
         doodads.emplace_back(
             renderingDevice,
@@ -60,7 +60,7 @@ quartz::scene::Scene::load(
     const quartz::scene::DirectionalLight& directionalLight,
     const std::vector<quartz::scene::PointLight>& pointLights,
     const std::vector<quartz::scene::SpotLight>& spotLights,
-    const glm::vec3& screenClearColor,
+    const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
@@ -77,7 +77,7 @@ quartz::scene::Scene::load(
     quartz::rendering::Material::initializeMasterMaterialList(renderingDevice);
 
     m_camera = camera;
-    LOG_TRACEthis("Loaded camera at position {}", glm::to_string(m_camera.getWorldPosition()));
+    LOG_TRACEthis("Loaded camera at position {}", m_camera.getWorldPosition().toString());
 
     m_skyBox = quartz::scene::SkyBox(
         renderingDevice,
@@ -98,10 +98,10 @@ quartz::scene::Scene::load(
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
 
     m_ambientLight = ambientLight;
-    LOG_TRACEthis("Loaded ambient light with color {}", glm::to_string(m_ambientLight.color));
+    LOG_TRACEthis("Loaded ambient light with color {}", m_ambientLight.color.toString());
 
     m_directionalLight = directionalLight;
-    LOG_TRACEthis("Loaded directional light with color {} and direction {}", glm::to_string(m_directionalLight.color), glm::to_string(m_directionalLight.direction));
+    LOG_TRACEthis("Loaded directional light with color {} and direction {}", m_directionalLight.color.toString(), m_directionalLight.direction.toString());
 
     m_pointLights = pointLights;
     LOG_TRACEthis("Loaded {} point lights", m_pointLights.size());
@@ -110,7 +110,7 @@ quartz::scene::Scene::load(
     LOG_TRACEthis("Loaded {} spot lights", m_spotLights.size());
 
     m_screenClearColor = screenClearColor;
-    LOG_TRACEthis("Loaded screen clear color {}", glm::to_string(m_screenClearColor));
+    LOG_TRACEthis("Loaded screen clear color {}", m_screenClearColor.toString());
 }
 
 void

@@ -3,11 +3,11 @@
 #include <cstdint>
 #include <vector>
 
-#include <glm/vec3.hpp>
-
 #include <mikktspace.h>
 
 #include <tiny_gltf.h>
+
+#include "math/transform/Vec3.hpp"
 
 #include "quartz/rendering/model/Vertex.hpp"
 
@@ -55,7 +55,7 @@ public: // static functions
         int32_t faceIndex,
         int32_t faceLocalVertexIndex
     );
-    static glm::vec3 getVertexAttribute(
+    static math::Vec3 getVertexAttribute(
         const SMikkTSpaceContext* p_mikktspaceContext,
         const int32_t faceIndex,
         const int32_t faceLocalVertexIndex,

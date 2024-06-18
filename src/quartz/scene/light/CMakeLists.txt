@@ -37,5 +37,5 @@ target_link_libraries(
     QUARTZ_SCENE_Light
 
     PUBLIC
-    glm
+    MATH_Transform
 )

@@ -1,5 +1,3 @@
-#include <glm/vec3.hpp>
-
 #include <vulkan/vulkan.hpp>
 
 #include "quartz/rendering/model/Vertex.hpp"
@@ -137,14 +135,14 @@ quartz::rendering::Vertex::Vertex() :
 {}
 
 quartz::rendering::Vertex::Vertex(
-    const glm::vec3& position_,
-    const glm::vec3& normal_,
-    const glm::vec3& color_,
-    const glm::vec2& baseColorTextureCoordinate_,
-    const glm::vec2& metallicRoughnessTextureCoordinate_,
-    const glm::vec2& normalTextureCoordinate_,
-    const glm::vec2& emissionTextureCoordinate_,
-    const glm::vec2& occlusionTextureCoordinate_
+    const math::Vec3& position_,
+    const math::Vec3& normal_,
+    const math::Vec3& color_,
+    const math::Vec2& baseColorTextureCoordinate_,
+    const math::Vec2& metallicRoughnessTextureCoordinate_,
+    const math::Vec2& normalTextureCoordinate_,
+    const math::Vec2& emissionTextureCoordinate_,
+    const math::Vec2& occlusionTextureCoordinate_
 ) :
     position(position_),
     normal(normal_),

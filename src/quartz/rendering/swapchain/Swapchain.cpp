@@ -283,7 +283,7 @@ quartz::rendering::Swapchain::~Swapchain() {
 }
 
 void
-quartz::rendering::Swapchain::setScreenClearColor(const glm::vec3& screenClearColor) {
+quartz::rendering::Swapchain::setScreenClearColor(const math::Vec3& screenClearColor) {
     m_screenClearColor = screenClearColor;
 }
 

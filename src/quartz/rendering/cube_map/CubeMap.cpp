@@ -1,6 +1,6 @@
-#include <glm/vec3.hpp>
-
 #include <stb_image.h>
+
+#include "math/transform/Vec3.hpp"
 
 #include "quartz/rendering/cube_map/CubeMap.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
@@ -9,7 +9,7 @@ vk::VertexInputBindingDescription
 quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription() {
     vk::VertexInputBindingDescription vertexInputBindingDescription(
         0,
-        sizeof(glm::vec3),
+        sizeof(math::Vec3),
         vk::VertexInputRate::eVertex
     );
 
@@ -142,7 +142,7 @@ quartz::rendering::CubeMap::createStagedVertexBuffer(
     /**
      * @brief Taken from the vertices we load when we load glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf
      */
-    std::vector<glm::vec3> vertices = {
+    std::vector<math::Vec3> vertices = {
         {0.0f , 0.0f , 0.0f},
         {1.0f , 0.0f , 0.0f},
         {1.0f , 1.0f , 0.0f},
@@ -169,12 +169,12 @@ quartz::rendering::CubeMap::createStagedVertexBuffer(
         {0.0f , 0.0f , 0.0f},
     };
     for (uint32_t i = 0; i < vertices.size(); ++i) {
-        vertices[i] = (2.0f * vertices[i]) - glm::vec3(1.0f, 1.0f, 1.0f);
+        vertices[i] = (2.0f * vertices[i]) - math::Vec3(1.0f, 1.0f, 1.0f);
     }
 
     quartz::rendering::StagedBuffer stagedVertexBuffer(
         renderingDevice,
-        sizeof(glm::vec3) * vertices.size(),
+        sizeof(math::Vec3) * vertices.size(),
         vk::BufferUsageFlagBits::eVertexBuffer,
         vertices.data()
     );

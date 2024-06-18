@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include "math/transform/Vec3.hpp"
+#include "math/transform/Vec4.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -36,8 +36,8 @@ public: // classes
             const uint32_t normalTextureMasterIndex_,
             const uint32_t emissionTextureMasterIndex_,
             const uint32_t occlusionTextureMasterIndex_,
-            const glm::vec4& baseColorFactor_,
-            const glm::vec3& emissiveFactor_,
+            const math::Vec4& baseColorFactor_,
+            const math::Vec3& emissiveFactor_,
             const float metallicFactor_,
             const float roughnessFactor_,
             const uint32_t alphaMode_,
@@ -53,8 +53,8 @@ public: // classes
         alignas(4) uint32_t emissionTextureMasterIndex;
         alignas(4) uint32_t occlusionTextureMasterIndex;
 
-        alignas(16) glm::vec4 baseColorFactor;
-        alignas(16) glm::vec3 emissiveFactor;
+        alignas(16) math::Vec4 baseColorFactor;
+        alignas(16) math::Vec3 emissiveFactor;
         alignas(4) float metallicFactor;
         alignas(4) float roughnessFactor;
 
@@ -84,8 +84,8 @@ public: // static functions
         const uint32_t normalTextureMasterIndex,
         const uint32_t emissionTextureMasterIndex,
         const uint32_t occlusionTextureMasterIndex,
-        const glm::vec4& baseColorFactor,
-        const glm::vec3& emissiveFactor,
+        const math::Vec4& baseColorFactor,
+        const math::Vec3& emissiveFactor,
         const float metallicFactor,
         const float roughnessFactor,
         const quartz::rendering::Material::AlphaMode alphaMode,
@@ -118,8 +118,8 @@ public: // member functions
         const uint32_t normalTextureMasterIndex,
         const uint32_t emissionTextureMasterIndex,
         const uint32_t occlusionTextureMasterIndex,
-        const glm::vec4& baseColorFactor,
-        const glm::vec3& emissiveFactor,
+        const math::Vec4& baseColorFactor,
+        const math::Vec3& emissiveFactor,
         const float metallicFactor,
         const float roughnessFactor,
         const quartz::rendering::Material::AlphaMode alphaMode,
@@ -140,8 +140,8 @@ public: // member functions
     uint32_t getEmissionTextureMasterIndex() const { return m_emissionTextureMasterIndex; }
     uint32_t getOcclusionTextureMasterIndex() const { return m_occlusionTextureMasterIndex; }
 
-    const glm::vec4& getBaseColorFactor() const { return m_baseColorFactor; }
-    const glm::vec3& getEmissiveFactor() const { return m_emissiveFactor; }
+    const math::Vec4& getBaseColorFactor() const { return m_baseColorFactor; }
+    const math::Vec3& getEmissiveFactor() const { return m_emissiveFactor; }
     float getMetallicFactor() const { return m_metallicFactor; }
     float getRoughnessFactor() const { return m_roughnessFactor; }
 
@@ -160,8 +160,8 @@ private: // member variables
     alignas(4) uint32_t m_occlusionTextureMasterIndex;
 
     // 40 bytes of factors
-    alignas(16) glm::vec4 m_baseColorFactor;
-    alignas(16) glm::vec3 m_emissiveFactor;
+    alignas(16) math::Vec4 m_baseColorFactor;
+    alignas(16) math::Vec3 m_emissiveFactor;
     alignas(4) float m_metallicFactor;
     alignas(4) float m_roughnessFactor;
 
