@@ -1,5 +1,7 @@
 #include <string>
 
+#include "math/transform/Mat4.hpp"
+
 #include "util/file_system/FileSystem.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
@@ -80,12 +82,12 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         {
             vk::ShaderStageFlagBits::eVertex,
             0,
-            sizeof(glm::mat4)
+            sizeof(math::Mat4)
         },
         // dummy
         {
             vk::ShaderStageFlagBits::eFragment,
-            sizeof(glm::mat4),
+            sizeof(math::Mat4),
             sizeof(uint32_t)
         }
     };

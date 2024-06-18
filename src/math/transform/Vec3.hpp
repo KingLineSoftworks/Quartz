@@ -9,6 +9,8 @@
 
 namespace math {
     union Vec3;
+
+    union Mat4;
 }
 
 /**
@@ -23,6 +25,10 @@ union math::Vec3 {
     Vec3(const Vec3& other) : glmVec(other.glmVec) {}
     Vec3(const glm::vec3& other) : glmVec(other) {}
     Vec3(const reactphysics3d::Vector3& other) : rp3dVec(other) {}
+
+    Vec3& operator=(const Vec3& other)                    { glmVec = other.glmVec; return *this; }
+    Vec3& operator=(const glm::vec3 other)                { glmVec = other;        return *this; }
+    Vec3& operator=(const reactphysics3d::Vector3& other) { rp3dVec = other;       return *this; }
 
     /**
      * -------------------------------------------------------------------------------------
@@ -63,10 +69,6 @@ union math::Vec3 {
      * @brief Vector operators
      * -------------------------------------------------------------------------------------
      */
-
-    Vec3& operator=(const Vec3& other)                    { glmVec = other.glmVec; return *this; }
-    Vec3& operator=(const glm::vec3 other)                { glmVec = other;        return *this; }
-    Vec3& operator=(const reactphysics3d::Vector3& other) { rp3dVec = other;       return *this; }
 
     Vec3 operator+(const Vec3& other)                   const { return {glmVec + other.glmVec}; }
     Vec3 operator+(const glm::vec3 other)               const { return {glmVec + other}; }
@@ -126,6 +128,14 @@ union math::Vec3 {
 
     /**
      * -------------------------------------------------------------------------------------
+     * @brief creating matrices
+     * -------------------------------------------------------------------------------------
+     */
+
+    math::Mat4 look(const Vec3& direction, const Vec3& upVector) const;
+
+    /**
+     * -------------------------------------------------------------------------------------
      * @brief misc functionality
      * -------------------------------------------------------------------------------------
      */
@@ -151,7 +161,7 @@ union math::Vec3 {
     };
 
     /**
-     * @brief Try not to use these two directly
+     * @brief Try not to use these two directly. Use the xyz and rgb attributes wherever possible
      */
     glm::vec3 glmVec;
     reactphysics3d::Vector3 rp3dVec;

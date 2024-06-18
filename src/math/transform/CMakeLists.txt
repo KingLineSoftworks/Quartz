@@ -6,7 +6,12 @@ add_library(
     SHARED
     Vec2.hpp
     Vec3.hpp
+    Vec3.cpp
     Vec4.hpp
+    Vec4.cpp
+
+    Mat4.hpp
+    Mat4.cpp
 )
 
 # Set the language manually for some reason

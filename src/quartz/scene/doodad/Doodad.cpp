@@ -1,8 +1,8 @@
 #include <string>
 
-#include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
+
+#include "math/transform/Mat4.hpp"
 
 #include "quartz/scene/doodad/Doodad.hpp"
 
@@ -15,9 +15,8 @@ quartz::scene::Doodad::createRigidBodyPtr(
         return nullptr;
     }
 
-    const reactphysics3d::Quaternion rp3dQuaternion;
-    const reactphysics3d::Vector3 rp3dPosition(transform.position.x, transform.position.y, transform.position.z);
-    const reactphysics3d::Transform rp3dTransform(rp3dPosition, rp3dQuaternion);
+    const math::Quaternion quat; /** @todo 2024/06/17 Create implementation for conversion from axis angle rotation to quaternion */
+    const reactphysics3d::Transform rp3dTransform(transform.position, quat);
     return p_physicsWorld->createRigidBody(rp3dTransform);
 }
 
@@ -62,21 +61,11 @@ void
 quartz::scene::Doodad::update(
     UNUSED const double tickTimeDelta
 ) {
-    m_transformationMatrix = glm::mat4(1.0f);
+    m_transformationMatrix = math::Mat4(1.0f);
 
-    m_transformationMatrix = glm::translate(
-        m_transformationMatrix,
-        m_transform.position.glmVec
-    );
+    m_transformationMatrix.translate(m_transform.position);
 
-    m_transformationMatrix = glm::rotate(
-        m_transformationMatrix,
-        glm::radians(m_transform.rotationAmountDegrees),
-        m_transform.rotationAxis.glmVec
-    );
+    m_transformationMatrix.rotate(m_transform.rotationAxis, glm::radians(m_transform.rotationAmountDegrees));
 
-    m_transformationMatrix = glm::scale(
-        m_transformationMatrix,
-        m_transform.scale.glmVec
-    );
+    m_transformationMatrix.scale(m_transform.scale);
 }

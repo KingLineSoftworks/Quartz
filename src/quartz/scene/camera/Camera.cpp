@@ -1,14 +1,11 @@
 #include <chrono>
 
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "quartz/scene/camera/Camera.hpp"
 
 quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
     const math::Vec3 position_,
-    const glm::mat4 viewMatrix_,
-    const glm::mat4 projectionMatrix_
+    const math::Mat4 viewMatrix_,
+    const math::Mat4 projectionMatrix_
 ) :
     position(position_),
     viewMatrix(viewMatrix_),
@@ -155,13 +152,9 @@ quartz::scene::Camera::update(
 
     // ----- update view and projection matrices ----- //
 
-    m_viewMatrix = glm::lookAt(
-        m_worldPosition.glmVec,
-        m_worldPosition.glmVec + currentLookVector.glmVec,
-        currentUpVector.glmVec
-    );
+    m_viewMatrix = m_worldPosition.look(currentLookVector, currentUpVector);
 
-    m_projectionMatrix = glm::perspective(
+    m_projectionMatrix = math::Mat4::createPerspective(
         glm::radians(m_fovDegrees),
         windowWidth / windowHeight,
         0.1f,
