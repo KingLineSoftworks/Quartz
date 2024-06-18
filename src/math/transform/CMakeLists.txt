@@ -12,6 +12,9 @@ add_library(
 
     Mat4.hpp
     Mat4.cpp
+
+    Quaternion.hpp
+    Quaternion.cpp
 )
 
 # Set the language manually for some reason

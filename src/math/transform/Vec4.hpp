@@ -17,8 +17,8 @@ union math::Vec4 {
     Vec4(const Vec4& other) : glmVec(other.glmVec) {}
     Vec4(const glm::vec4& other) : glmVec(other) {}
 
-    Vec4& operator=(const Vec4& other)                       { glmVec = other.glmVec; return *this; }
-    Vec4& operator=(const glm::vec4 other)                   { glmVec = other;        return *this; }
+    Vec4& operator=(const Vec4& other)     { glmVec = other.glmVec; return *this; }
+    Vec4& operator=(const glm::vec4 other) { glmVec = other;        return *this; }
 
     /**
      * -------------------------------------------------------------------------------------
@@ -60,39 +60,39 @@ union math::Vec4 {
      * -------------------------------------------------------------------------------------
      */
 
-    Vec4 operator+(const Vec4& other)                      const { return {glmVec + other.glmVec}; }
-    Vec4 operator+(const glm::vec4 other)                  const { return {glmVec + other}; }
+    Vec4 operator+(const Vec4& other)     const { return {glmVec + other.glmVec}; }
+    Vec4 operator+(const glm::vec4 other) const { return {glmVec + other}; }
 
-    Vec4& operator+=(const Vec4& other)                       { glmVec += other.glmVec; return *this;}
-    Vec4& operator+=(const glm::vec4& other)                  { glmVec += other;        return *this;}
+    Vec4& operator+=(const Vec4& other)      { glmVec += other.glmVec; return *this;}
+    Vec4& operator+=(const glm::vec4& other) { glmVec += other;        return *this;}
 
-    Vec4 operator-(const Vec4& other)                      const { return {glmVec - other.glmVec}; }
-    Vec4 operator-(const glm::vec4 other)                  const { return {glmVec - other}; }
+    Vec4 operator-(const Vec4& other)     const { return {glmVec - other.glmVec}; }
+    Vec4 operator-(const glm::vec4 other) const { return {glmVec - other}; }
 
-    Vec4& operator-=(const Vec4& other)                       { glmVec -= other.glmVec; return *this; }
-    Vec4& operator-=(const glm::vec4& other)                  { glmVec -= other;        return *this; }
+    Vec4& operator-=(const Vec4& other)      { glmVec -= other.glmVec; return *this; }
+    Vec4& operator-=(const glm::vec4& other) { glmVec -= other;        return *this; }
 
-    Vec4 operator*(const Vec4& other)                      const { return {glmVec * other.glmVec}; }
-    Vec4 operator*(const glm::vec4 other)                  const { return {glmVec * other}; }
+    Vec4 operator*(const Vec4& other)     const { return {glmVec * other.glmVec}; }
+    Vec4 operator*(const glm::vec4 other) const { return {glmVec * other}; }
 
-    Vec4& operator*=(const Vec4& other)                       { glmVec *= other.glmVec;    return *this; }
-    Vec4& operator*=(const glm::vec4& other)                  { glmVec *= other;           return *this; }
+    Vec4& operator*=(const Vec4& other)      { glmVec *= other.glmVec;    return *this; }
+    Vec4& operator*=(const glm::vec4& other) { glmVec *= other;           return *this; }
 
-    Vec4 operator/(const Vec4& other)                      const { return {glmVec / other.glmVec}; }
-    Vec4 operator/(const glm::vec4 other)                  const { return {glmVec / other}; }
+    Vec4 operator/(const Vec4& other)     const { return {glmVec / other.glmVec}; }
+    Vec4 operator/(const glm::vec4 other) const { return {glmVec / other}; }
 
-    Vec4& operator/=(const Vec4& other)                       { glmVec /= other.glmVec;    return *this; }
-    Vec4& operator/=(const glm::vec4& other)                  { glmVec /= other;           return *this; }
+    Vec4& operator/=(const Vec4& other)      { glmVec /= other.glmVec;    return *this; }
+    Vec4& operator/=(const glm::vec4& other) { glmVec /= other;           return *this; }
 
-    bool operator==(const Vec4& other)                       const { return glmVec == other.glmVec; }
-    bool operator==(const glm::vec4& other)                  const { return glmVec == other; }
+    bool operator==(const Vec4& other)      const { return glmVec == other.glmVec; }
+    bool operator==(const glm::vec4& other) const { return glmVec == other; }
 
-    bool operator!=(const Vec4& other)                       const { return glmVec != other.glmVec; }
-    bool operator!=(const glm::vec4& other)                  const { return glmVec != other; }
+    bool operator!=(const Vec4& other)      const { return glmVec != other.glmVec; }
+    bool operator!=(const glm::vec4& other) const { return glmVec != other; }
 
     /**
      * -------------------------------------------------------------------------------------
-     * @brief vector specific functionality
+     * @brief Vector functions
      * -------------------------------------------------------------------------------------
      */
 
@@ -100,6 +100,7 @@ union math::Vec4 {
     float dot(const glm::vec4& other)                  const { return glm::dot(glmVec, other); }
 
     Vec4& normalize() { glmVec = glm::normalize(glmVec); return *this; }
+    Vec4 normalize() const { return {glm::normalize(glmVec)}; }
 
     /**
      * -------------------------------------------------------------------------------------
