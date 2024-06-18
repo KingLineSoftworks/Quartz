@@ -1,11 +1,9 @@
 #include <cstdlib>
 #include <stdexcept>
-#include <memory>
-
-#include <glm/gtx/string_cast.hpp>
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "util/macros.hpp"
@@ -206,6 +204,12 @@ int main() {
     LOG_TRACE(BIGBOY, "Vector3Union rp3d      : {}, {}, {}", vec3.rp3dVec.x, vec3.rp3dVec.y, vec3.rp3dVec.z);
     printVec3(vec3);
     printVector3(vec3);
+
+    LOG_TRACE(BIGBOY, "Testing matrix4 union");
+    LOG_TRACE(BIGBOY, "Size                           : {}", sizeof(math::Mat4));
+    LOG_TRACE(BIGBOY, "Size of glm::mat4              : {}", sizeof(glm::mat4));
+    LOG_TRACE(BIGBOY, "Size of 4 math::Vec4           : {}", 4 * sizeof(math::Vec4));
+    LOG_TRACE(BIGBOY, "Size of 4 glm::vec4            : {}", 4 * sizeof(glm::vec4));
 
     return EXIT_SUCCESS;
 }

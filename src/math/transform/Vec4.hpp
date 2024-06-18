@@ -22,6 +22,10 @@ union math::Vec4 {
     Vec4(const glm::vec4& other) : glmVec(other) {}
     Vec4(const reactphysics3d::Quaternion& other) : rp3dQuat(other) {}
 
+    Vec4& operator=(const Vec4& other)                       { glmVec = other.glmVec; return *this; }
+    Vec4& operator=(const glm::vec4 other)                   { glmVec = other;        return *this; }
+    Vec4& operator=(const reactphysics3d::Quaternion& other) { rp3dQuat = other;       return *this; }
+
     /**
      * -------------------------------------------------------------------------------------
      * @brief conversion to glm
@@ -39,6 +43,15 @@ union math::Vec4 {
 
     operator const reactphysics3d::Quaternion&() const { return rp3dQuat; }
     operator reactphysics3d::Quaternion&() { return rp3dQuat; }
+
+    /**
+     * -------------------------------------------------------------------------------------
+     * @brief Access operators
+     * -------------------------------------------------------------------------------------
+     */
+
+    float& operator[](const uint32_t i);
+    const float& operator[](const uint32_t i) const;
 
     /**
      * -------------------------------------------------------------------------------------
@@ -61,10 +74,6 @@ union math::Vec4 {
      * @brief Vector operators
      * -------------------------------------------------------------------------------------
      */
-
-    Vec4& operator=(const Vec4& other)                       { glmVec = other.glmVec; return *this; }
-    Vec4& operator=(const glm::vec4 other)                   { glmVec = other;        return *this; }
-    Vec4& operator=(const reactphysics3d::Quaternion& other) { rp3dQuat = other;       return *this; }
 
     Vec4 operator+(const Vec4& other)                      const { return {glmVec + other.glmVec}; }
     Vec4 operator+(const glm::vec4 other)                  const { return {glmVec + other}; }
@@ -144,6 +153,9 @@ union math::Vec4 {
         float a;
     };
 
+    /**
+     * @brief Try not to use these two directly. Use the xyzw and rgba attributes wherever possible
+     */
     glm::vec4 glmVec;
     reactphysics3d::Quaternion rp3dQuat;
 };

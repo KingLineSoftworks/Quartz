@@ -139,6 +139,7 @@ target_compile_definitions(glm INTERFACE GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 target_compile_definitions(glm INTERFACE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_compile_definitions(glm INTERFACE GLM_FORCE_RADIANS)
 target_compile_options(glm INTERFACE -Wno-deprecated-declarations) # for sprintf
+target_compile_definitions(glm INTERFACE GLM_FORCE_QUAT_DATA_XYZW)
 
 # mikktspace
 add_library(mikktspace SHARED "${VENDOR_ROOT_DIR}/MikkTSpace/mikktspace.c")

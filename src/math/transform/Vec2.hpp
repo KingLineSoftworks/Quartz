@@ -8,7 +8,7 @@
 #include <reactphysics3d/reactphysics3d.h>
 
 namespace math {
-union Vec2;
+    union Vec2;
 }
 
 /**
@@ -23,6 +23,10 @@ union math::Vec2 {
     Vec2(const Vec2& other) : glmVec(other.glmVec) {}
     Vec2(const glm::vec2& other) : glmVec(other) {}
     Vec2(const reactphysics3d::Vector2& other) : rp3dVec(other) {}
+
+    Vec2& operator=(const Vec2& other)                    { glmVec = other.glmVec; return *this; }
+    Vec2& operator=(const glm::vec2 other)                { glmVec = other;        return *this; }
+    Vec2& operator=(const reactphysics3d::Vector2& other) { rp3dVec = other;       return *this; }
 
     /**
      * -------------------------------------------------------------------------------------
@@ -63,10 +67,6 @@ union math::Vec2 {
      * @brief Vector operators
      * -------------------------------------------------------------------------------------
      */
-
-    Vec2& operator=(const Vec2& other)                    { glmVec = other.glmVec; return *this; }
-    Vec2& operator=(const glm::vec2 other)                { glmVec = other;        return *this; }
-    Vec2& operator=(const reactphysics3d::Vector2& other) { rp3dVec = other;       return *this; }
 
     Vec2 operator+(const Vec2& other)                   const { return {glmVec + other.glmVec}; }
     Vec2 operator+(const glm::vec2 other)               const { return {glmVec + other}; }
@@ -140,7 +140,7 @@ union math::Vec2 {
     };
 
     /**
-     * @brief Try not to use these two directly
+     * @brief Try not to use these two directly. Use the xy attributes wherever possible
      */
     glm::vec2 glmVec;
     reactphysics3d::Vector2 rp3dVec;
