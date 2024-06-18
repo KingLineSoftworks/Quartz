@@ -4,6 +4,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "quartz/managers/input_manager/InputManager.hpp"
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -14,6 +15,7 @@
 std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
+    reactphysics3d::PhysicsWorld* p_physicsWorld,
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
@@ -25,7 +27,7 @@ quartz::scene::Scene::loadDoodads(
         const quartz::scene::Transform& transform = doodadInformation.second;
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
-        LOG_TRACE(SCENE, "  position         = {}", glm::to_string(transform.position));
+        LOG_TRACE(SCENE, "  position         = {}", transform.position.toString());
         LOG_TRACE(SCENE, "  rotation degrees = {}", transform.rotationAmountDegrees);
         LOG_TRACE(SCENE, "  rotation axis    = {}", glm::to_string(transform.rotationAxis));
         LOG_TRACE(SCENE, "  scale            = {}", glm::to_string(transform.scale));
@@ -33,7 +35,8 @@ quartz::scene::Scene::loadDoodads(
         doodads.emplace_back(
             renderingDevice,
             filepath,
-            transform
+            transform,
+            p_physicsWorld
         );
     }
 
@@ -51,6 +54,7 @@ quartz::scene::Scene::~Scene() {
 void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
+    UNUSED const quartz::managers::PhysicsManager& physicsManager,
     const quartz::scene::Camera& camera,
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
@@ -61,6 +65,10 @@ quartz::scene::Scene::load(
     const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    LOG_TRACEthis("Creating physics world");
+    /** @todo 2024/06/15 Take in a PhysicsWorld::WorldSettings instance so we can create the physics world to our liking */
+    /** @todo 2024/06/15 Create the physics world pointer */
 
     LOG_TRACEthis("Initializing master texture list");
     quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
@@ -84,6 +92,7 @@ quartz::scene::Scene::load(
 
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
+        mp_physicsWorld,
         doodadInformations
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
@@ -108,6 +117,7 @@ void
 quartz::scene::Scene::update(
     const quartz::rendering::Window& renderingWindow,
     const quartz::managers::InputManager& inputManager,
+    UNUSED const quartz::managers::PhysicsManager& physicsManager,
     const double tickTimeDelta
 ) {
     m_camera.update(

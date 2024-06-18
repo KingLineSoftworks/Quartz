@@ -6,7 +6,10 @@
 
 #include <glm/vec3.hpp>
 
+#include <reactphysics3d/reactphysics3d.h>
+
 #include "quartz/managers/input_manager/InputManager.hpp"
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/Loggers.hpp"
@@ -43,6 +46,7 @@ public: // member functions
 
     void load(
         const quartz::rendering::Device& renderingDevice,
+        const quartz::managers::PhysicsManager& physicsManager,
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
@@ -56,16 +60,20 @@ public: // member functions
     void update(
         const quartz::rendering::Window& renderingWindow,
         const quartz::managers::InputManager& inputManager,
+        const quartz::managers::PhysicsManager& physicsManager,
         const double tickTimeDelta
     );
 
 private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
+        reactphysics3d::PhysicsWorld* p_physicsWorld,
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
 private: // member variables
+    reactphysics3d::PhysicsWorld* mp_physicsWorld;
+
     quartz::scene::Camera m_camera;
 
     std::vector<quartz::scene::Doodad> m_doodads;

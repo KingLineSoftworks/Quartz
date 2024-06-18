@@ -8,19 +8,29 @@
 #include "quartz/managers/Loggers.hpp"
 
 namespace quartz {
+
+class Application;
+
 namespace managers {
     class InputManager;
 }
 }
 
-/**
- * @todo 2024/06/14 Store a map of instances. There is not a reason we can't use instances and return a reference
- *    to the instance in the map.
- */
-
 class quartz::managers::InputManager {
+public: // classes
+    class Client {
+    public: // member functions
+        Client() = delete;
+
+    private: // static functions
+        static quartz::managers::InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow) { return quartz::managers::InputManager::getInstance(p_glfwWindow); }
+
+    private: // friend classes
+        friend class quartz::Application;
+    };
+
 public: // member functions
-    InputManager(InputManager&& other);
+    InputManager(InputManager&& other); /** @todo 2024/06/15 See if we can make this private. Seems like insert needs access to this??? We don't want others to see this. */
     InputManager(const InputManager& other) = delete;
     InputManager& operator=(const InputManager& other) = delete;
 
@@ -52,8 +62,6 @@ public: // member functions
     void setShouldCollectKeyInput(const bool shouldCollect);
 
 public: // static functions
-    static InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
-
     static void mousePositionInputCallback(
         GLFWwindow* p_glfwWindow,
         double updatedMousePosition_x,
@@ -66,12 +74,13 @@ public: // static functions
     );
 
 private: // member functions
+    static InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
+
+private: // member functions
     InputManager(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
-private: // static functions
-
 private: // static variables
-    static std::map<const GLFWwindow* const, quartz::managers::InputManager> inputManagerMap;
+    static std::map<const GLFWwindow* const, quartz::managers::InputManager> inputManagerMap; // leaving this as member variable for the callbacks //
 
 private: // member variables
     std::shared_ptr<GLFWwindow> mp_glfwWindow;

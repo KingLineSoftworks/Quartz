@@ -1,52 +1,38 @@
 #====================================================================
-# The Scene Doodad library
+# The math transform library
 #====================================================================
 add_library(
-    QUARTZ_SCENE_Doodad
+    MATH_Transform
     SHARED
-    Doodad.hpp
-    Doodad.cpp
-
-    Transform.hpp
-    Transform.cpp
+    Vec3.hpp
 )
 
+# Set the language manually for some reason
+set_target_properties(MATH_Transform PROPERTIES LINKER_LANGUAGE CXX)
+
 target_include_directories(
-    QUARTZ_SCENE_Doodad
+    MATH_Transform
     PUBLIC
     ${QUARTZ_INCLUDE_DIRS}
 )
 
-
 target_compile_options(
-    QUARTZ_SCENE_Doodad
+    MATH_Transform
     PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_compile_definitions(
-    QUARTZ_SCENE_Doodad
+    MATH_Transform
     PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
-target_compile_definitions(
-        QUARTZ_SCENE_Doodad
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
-)
-
 target_link_libraries(
-    QUARTZ_SCENE_Doodad
+    MATH_Transform
 
     PUBLIC
     glm
     reactphysics3d
 
     PUBLIC
-    MATH_Transform
-
-    PUBLIC
-    UTIL_Logger
-
-    PUBLIC
-    QUARTZ_RENDERING_Device
-    QUARTZ_RENDERING_Model
+    # MATH_Something
 )

@@ -6,6 +6,8 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Vec3.hpp"
+
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/Loggers.hpp"
@@ -16,6 +18,14 @@
 
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
+
+void printVec3(const glm::vec3& vec3) {
+    LOG_TRACE(BIGBOY, "Vector3Union glm cast  : {}, {}, {}", vec3.x, vec3.y, vec3.z);
+}
+
+void printVector3(const reactphysics3d::Vector3 vec3) {
+    LOG_TRACE(BIGBOY, "Vector3Union rp3d cast : {}, {}, {}", vec3.x, vec3.y, vec3.z);
+}
 
 int main() {
     constexpr bool shouldLogPreamble = false;
@@ -167,6 +177,19 @@ int main() {
 
         LOG_TRACE(BIGBOY, "Rigid body position: {:10.6f}, {:10.6f}, {:10.6f}", currPosition.x, currPosition.y, currPosition.z);
     }
+
+    // These will automatically get destroyed when the physics common goes out of scope but I think it'd be best practice to do them manually
+    p_physicsWorld->destroyRigidBody(p_rigidBody);
+    physicsCommon.destroyPhysicsWorld(p_physicsWorld);
+
+    LOG_TRACE(BIGBOY, "Testing vector3 union");
+    math::Vec3 vec3(424242.42f, 123456.7890f, -999.888f);
+    LOG_TRACE(BIGBOY, "Vector3Union values xyz: {}, {}, {}", vec3.x, vec3.y, vec3.z);
+    LOG_TRACE(BIGBOY, "Vector3Union values rgb: {}, {}, {}", vec3.r, vec3.g, vec3.b);
+    LOG_TRACE(BIGBOY, "Vector3Union glm       : {}, {}, {}", vec3.glmVec.x, vec3.glmVec.y, vec3.glmVec.z);
+    LOG_TRACE(BIGBOY, "Vector3Union rp3d      : {}, {}, {}", vec3.rp3dVec.x, vec3.rp3dVec.y, vec3.rp3dVec.z);
+    printVec3(vec3);
+    printVector3(vec3);
 
     return EXIT_SUCCESS;
 }

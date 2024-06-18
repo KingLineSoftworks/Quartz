@@ -226,6 +226,10 @@ endforeach()
 set(QUARTZ_ROOT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 set(QUARTZ_INCLUDE_DIRS ${QUARTZ_ROOT_SOURCE_DIR})
 
+# Math
+set(MATH_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/math")
+add_subdirectory("${MATH_SOURCE_DIR}/transform")
+
 # Utility
 set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
 add_subdirectory("${UTIL_SOURCE_DIR}/errors")
