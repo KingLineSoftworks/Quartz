@@ -12,7 +12,6 @@ class Application; // We must declare the application class here as well so we c
 
 namespace managers {
     class PhysicsManager;
-    class PhysicsManagerClient;
 }
 }
 

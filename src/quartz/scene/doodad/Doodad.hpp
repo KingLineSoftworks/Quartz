@@ -5,6 +5,8 @@
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
+#include <reactphysics3d/reactphysics3d.h>
+
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
@@ -21,7 +23,8 @@ public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         const std::string& objectFilepath,
-        const quartz::scene::Transform& transform
+        const quartz::scene::Transform& transform,
+        reactphysics3d::PhysicsWorld* p_physicsWorld
     );
     Doodad(Doodad&& other);
     ~Doodad();
@@ -34,11 +37,16 @@ public: // member functions
     void update(const double tickTimeDelta);
 
 private: // static functions
+    static reactphysics3d::RigidBody* createRigidBodyPtr(
+        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        const quartz::scene::Transform& transform
+    );
 
 private: // member variables
     quartz::rendering::Model m_model;
 
     quartz::scene::Transform m_transform;
-
     glm::mat4 m_transformationMatrix;
+
+    reactphysics3d::RigidBody* mp_rigidBody;
 };

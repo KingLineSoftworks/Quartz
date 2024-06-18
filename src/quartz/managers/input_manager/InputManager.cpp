@@ -116,6 +116,8 @@ quartz::managers::InputManager&
 quartz::managers::InputManager::getInstance(
     const std::shared_ptr<GLFWwindow>& p_glfwWindow
 ) {
+    static std::map<const GLFWwindow* const, quartz::managers::InputManager> inputManagerMap;
+
     LOG_FUNCTION_SCOPE_TRACE(INPUTMAN, "GLFW Window pointer {}", static_cast<const void*>(p_glfwWindow.get()));
 
     if (quartz::managers::InputManager::inputManagerMap.count(p_glfwWindow.get()) > 0) {

@@ -37,7 +37,7 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    m_inputManager(quartz::managers::InputManager::getInstance(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
+    m_inputManager(quartz::managers::InputManager::Client::getInstance(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
     m_physicsManager(quartz::managers::PhysicsManager::Client::getInstance()),
     m_scene(),
     m_targetTicksPerSecond(120.0),
@@ -104,6 +104,7 @@ void quartz::Application::run() {
     LOG_INFOthis("Loading scene");
     m_scene.load(
         m_renderingContext.getRenderingDevice(),
+        m_physicsManager,
         {
             0.0f, // rotation around x-axis (up down)
             -90.0f, // rotation around y-axis (left right)
@@ -138,6 +139,7 @@ void quartz::Application::run() {
             m_scene.update(
                 m_renderingContext.getRenderingWindow(),
                 m_inputManager,
+                m_physicsManager,
                 targetTickTimeDelta
             );
 

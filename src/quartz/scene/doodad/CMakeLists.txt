@@ -33,6 +33,10 @@ target_link_libraries(
 
     PUBLIC
     glm
+    reactphysics3d
+
+    PUBLIC
+    MATH_Transform
 
     PUBLIC
     UTIL_Logger
