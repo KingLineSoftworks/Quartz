@@ -5,7 +5,7 @@
 #include <glm/vec2.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include <reactphysics3d/reactphysics3d.h>
+#include <reactphysics3d/mathematics/Vector2.h>
 
 namespace math {
     union Vec2;
@@ -110,7 +110,7 @@ union math::Vec2 {
 
     /**
      * -------------------------------------------------------------------------------------
-     * @brief vector specific functionality
+     * @brief Vector functions
      * -------------------------------------------------------------------------------------
      */
 
@@ -119,6 +119,7 @@ union math::Vec2 {
     float dot(const reactphysics3d::Vector2& other) const { return rp3dVec.dot(other); }
 
     Vec2& normalize() { glmVec = glm::normalize(glmVec); return *this; }
+    Vec2 normalize() const { return {glm::normalize(glmVec)}; }
 
     /**
      * -------------------------------------------------------------------------------------

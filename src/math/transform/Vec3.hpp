@@ -5,7 +5,7 @@
 #include <glm/vec3.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include <reactphysics3d/reactphysics3d.h>
+#include <reactphysics3d/mathematics/Vector3.h>
 
 namespace math {
     union Vec3;
@@ -112,7 +112,7 @@ union math::Vec3 {
 
     /**
      * -------------------------------------------------------------------------------------
-     * @brief vector specific functionality
+     * @brief Vector functions
      * -------------------------------------------------------------------------------------
      */
 
@@ -125,6 +125,7 @@ union math::Vec3 {
     Vec3 cross(const reactphysics3d::Vector3& other) const { return rp3dVec.cross(other); }
 
     Vec3& normalize() { glmVec = glm::normalize(glmVec); return *this; }
+    Vec3 normalize() const { return {glm::normalize(glmVec)}; }
 
     /**
      * -------------------------------------------------------------------------------------

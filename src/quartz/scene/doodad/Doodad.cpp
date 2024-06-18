@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "math/transform/Mat4.hpp"
+#include "math/transform/Quaternion.hpp"
 
 #include "quartz/scene/doodad/Doodad.hpp"
 
@@ -15,7 +16,7 @@ quartz::scene::Doodad::createRigidBodyPtr(
         return nullptr;
     }
 
-    const reactphysics3d::Quaternion quat; /** @todo 2024/06/17 Create implementation for conversion from axis angle rotation to quaternion */
+    const math::Quaternion quat = math::Quaternion::fromAxisAngleRotation(transform.rotationAxis.normalize(), transform.rotationAmountDegrees);
     const reactphysics3d::Transform rp3dTransform(transform.position, quat);
     return p_physicsWorld->createRigidBody(rp3dTransform);
 }
