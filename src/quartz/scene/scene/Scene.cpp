@@ -118,7 +118,8 @@ quartz::scene::Scene::update(
     const quartz::rendering::Window& renderingWindow,
     const quartz::managers::InputManager& inputManager,
     UNUSED const quartz::managers::PhysicsManager& physicsManager,
-    const double tickTimeDelta
+    UNUSED const double totalElapsedTime,
+    UNUSED const double tickTimeDelta
 ) {
     m_camera.update(
         static_cast<float>(renderingWindow.getVulkanExtent().width),

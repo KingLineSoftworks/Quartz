@@ -61,6 +61,7 @@ public: // member functions
         const quartz::rendering::Window& renderingWindow,
         const quartz::managers::InputManager& inputManager,
         const quartz::managers::PhysicsManager& physicsManager,
+        const double totalElapsedTime,
         const double tickTimeDelta
     );
 

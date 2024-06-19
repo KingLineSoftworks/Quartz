@@ -54,12 +54,6 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
-    const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
-    UNUSED double currentFrameTimeDelta = 0.0;
-    UNUSED double previousFrameStartTime = 0.0f;
-    UNUSED double currentFrameStartTime = 0.0f;
-    UNUSED double frameTimeAccumulator = 0.0f;
-
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
         {
             util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf"),
@@ -145,22 +139,41 @@ void quartz::Application::run() {
     );
     m_renderingContext.loadScene(m_scene);
 
+    const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
+    double totalElapsedTime = 0.0;
+    double currentFrameTimeDelta = 0.0;
+    double previousFrameStartTime = 0.0f;
+    double currentFrameStartTime = 0.0f;
+    double frameTimeAccumulator = 0.0f;
+
+    /**
+     * @brief When the article says to integrate between the previous state and the current state,
+     *    that means to advance the physics simulation by a certain time step. The current state is
+     *    represented by advancing the physics simulation by targetTickTimeDelta seconds. The previous
+     *    state is represented by advancing the physics simulation by 0 seconds. Interpolating between
+     *    0 and targetTickTimeDelta will give us the interpolation between the previous state and
+     *    the current state.
+     *
+     *    Maybe????
+     */
+
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
         currentFrameStartTime = glfwGetTime();
         currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
         previousFrameStartTime = currentFrameStartTime;
         frameTimeAccumulator += currentFrameTimeDelta;
-        while (frameTimeAccumulator >= targetTickTimeDelta) {
-            processInput();
 
+        while (frameTimeAccumulator >= 0) {
+            processInput();
             m_scene.update(
                 m_renderingContext.getRenderingWindow(),
                 m_inputManager,
                 m_physicsManager,
+                totalElapsedTime,
                 targetTickTimeDelta
             );
-
+            totalElapsedTime += targetTickTimeDelta;
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
