@@ -8,7 +8,7 @@
 
 namespace quartz {
 
-class Application; // We must declare the application class here as well so we can have its declaration for friending //
+class Application; // We must forward declare the application class here, so we can have its declaration for friending //
 
 namespace managers {
     class PhysicsManager;
@@ -35,6 +35,8 @@ public: // member functions
     PhysicsManager& operator=(PhysicsManager&& other) = delete;
 
     USE_LOGGER(PHYSICSMAN);
+
+    reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
 
 private: // member functions
     PhysicsManager();

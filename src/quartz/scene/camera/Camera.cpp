@@ -79,11 +79,8 @@ quartz::scene::Camera::~Camera() {
 }
 
 void
-quartz::scene::Camera::update(
-    const float windowWidth,
-    const float windowHeight,
-    const quartz::managers::InputManager& inputManager,
-    const double tickTimeDelta
+quartz::scene::Camera::fixedUpdate(
+    const quartz::managers::InputManager& inputManager
 ) {
     // ----- update orientation ----- //
 
@@ -127,7 +124,7 @@ quartz::scene::Camera::update(
 
     // ----- update position ----- //
 
-    const float movementSpeed = 2.0f * tickTimeDelta;
+    const float movementSpeed = 2.0f;
 
     if (inputManager.getKeyDown_w()) {
         m_worldPosition += movementSpeed * currentLookVector;
@@ -149,6 +146,26 @@ quartz::scene::Camera::update(
     if (inputManager.getKeyDown_shift()) {
         m_worldPosition -= movementSpeed * worldUpVector;
     }
+}
+
+void
+quartz::scene::Camera::update(
+    const float windowWidth,
+    const float windowHeight,
+    UNUSED const double frameTimeDelta,
+    UNUSED const double frameInterpolationFactor
+) {
+    const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
+
+    math::Vec3 currentLookVector;
+    currentLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    currentLookVector.y = sin(glm::radians(m_pitch));
+    currentLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    currentLookVector.normalize();
+
+    math::Vec3 currentRightVector = currentLookVector.cross(worldUpVector).normalize();
+
+    math::Vec3 currentUpVector = currentRightVector.cross(currentLookVector).normalize();
 
     // ----- update view and projection matrices ----- //
 

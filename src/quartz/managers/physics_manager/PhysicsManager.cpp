@@ -14,3 +14,10 @@ quartz::managers::PhysicsManager::getInstance() {
 
     return physicsManagerInstance;
 }
+
+reactphysics3d::PhysicsWorld*
+quartz::managers::PhysicsManager::createPhysicsWorldPtr(
+    const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings
+) {
+    return m_physicsCommon.createPhysicsWorld(physicsWorldSettings);
+}

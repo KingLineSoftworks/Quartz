@@ -145,6 +145,7 @@ void quartz::Application::run() {
     double previousFrameStartTime = 0.0f;
     double currentFrameStartTime = 0.0f;
     double frameTimeAccumulator = 0.0f;
+    double frameInterpolationFactor = 0.0f;
 
     /**
      * @brief When the article says to integrate between the previous state and the current state,
@@ -166,8 +167,7 @@ void quartz::Application::run() {
 
         while (frameTimeAccumulator >= 0) {
             processInput();
-            m_scene.update(
-                m_renderingContext.getRenderingWindow(),
+            m_scene.fixedUpdate(
                 m_inputManager,
                 m_physicsManager,
                 totalElapsedTime,
@@ -177,6 +177,9 @@ void quartz::Application::run() {
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
+        frameInterpolationFactor = frameTimeAccumulator / targetTickTimeDelta;
+
+        m_scene.update(m_renderingContext.getRenderingWindow(), currentFrameTimeDelta, frameInterpolationFactor);
         m_renderingContext.draw(m_scene);
     }
 

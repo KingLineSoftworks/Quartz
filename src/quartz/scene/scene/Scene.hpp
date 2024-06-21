@@ -46,7 +46,7 @@ public: // member functions
 
     void load(
         const quartz::rendering::Device& renderingDevice,
-        const quartz::managers::PhysicsManager& physicsManager,
+        quartz::managers::PhysicsManager& physicsManager,
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
@@ -57,12 +57,16 @@ public: // member functions
         const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
     );
 
-    void update(
-        const quartz::rendering::Window& renderingWindow,
+    void fixedUpdate(
         const quartz::managers::InputManager& inputManager,
         const quartz::managers::PhysicsManager& physicsManager,
         const double totalElapsedTime,
         const double tickTimeDelta
+    );
+    void update(
+        const quartz::rendering::Window& renderingWindow,
+        const double frameTimeDelta,
+        const double frameInterpolationFactor
     );
 
 private: // static functions

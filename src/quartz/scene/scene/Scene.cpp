@@ -54,7 +54,7 @@ quartz::scene::Scene::~Scene() {
 void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
-    UNUSED const quartz::managers::PhysicsManager& physicsManager,
+    quartz::managers::PhysicsManager& physicsManager,
     const quartz::scene::Camera& camera,
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
@@ -67,8 +67,20 @@ quartz::scene::Scene::load(
    LOG_FUNCTION_SCOPE_TRACEthis("");
 
     LOG_TRACEthis("Creating physics world");
-    /** @todo 2024/06/15 Take in a PhysicsWorld::WorldSettings instance so we can create the physics world to our liking */
-    /** @todo 2024/06/15 Create the physics world pointer */
+    /**
+     * @todo 2024/06/20 Create a class extending reactphysics3d::EventListener,
+     *    instantiate an instance of that class, and set that instance as the
+     *    physics world's event listener
+     */
+    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
+    physicsWorldSettings.defaultVelocitySolverNbIterations = 10;
+    physicsWorldSettings.defaultPositionSolverNbIterations = 5;
+    physicsWorldSettings.isSleepingEnabled = true;
+    physicsWorldSettings.defaultTimeBeforeSleep = 1.0;      // seconds
+    physicsWorldSettings.defaultSleepLinearVelocity = 0.5;  // meters per second
+    physicsWorldSettings.defaultSleepAngularVelocity = 0.5; // meters per second
+    physicsWorldSettings.gravity = math::Vec3(0, -9.81, 0);
+    mp_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
 
     LOG_TRACEthis("Initializing master texture list");
     quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
@@ -114,21 +126,35 @@ quartz::scene::Scene::load(
 }
 
 void
-quartz::scene::Scene::update(
-    const quartz::rendering::Window& renderingWindow,
+quartz::scene::Scene::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
     UNUSED const quartz::managers::PhysicsManager& physicsManager,
     UNUSED const double totalElapsedTime,
-    UNUSED const double tickTimeDelta
+    const double tickTimeDelta
+) {
+    m_camera.fixedUpdate(inputManager);
+
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.fixedUpdate();
+    }
+
+    mp_physicsWorld->update(tickTimeDelta);
+}
+
+void
+quartz::scene::Scene::update(
+    const quartz::rendering::Window& renderingWindow,
+    const double frameTimeDelta,
+    const double frameInterpolationFactor
 ) {
     m_camera.update(
         static_cast<float>(renderingWindow.getVulkanExtent().width),
         static_cast<float>(renderingWindow.getVulkanExtent().height),
-        inputManager,
-        tickTimeDelta
+        frameTimeDelta,
+        frameInterpolationFactor
     );
 
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.update(tickTimeDelta);
+        doodad.update(frameTimeDelta, frameInterpolationFactor);
     }
 }
