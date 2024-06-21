@@ -229,6 +229,7 @@ set(QUARTZ_INCLUDE_DIRS ${QUARTZ_ROOT_SOURCE_DIR})
 
 # Math
 set(MATH_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/math")
+add_subdirectory("${MATH_SOURCE_DIR}/algorithms")
 add_subdirectory("${MATH_SOURCE_DIR}/transform")
 
 # Utility

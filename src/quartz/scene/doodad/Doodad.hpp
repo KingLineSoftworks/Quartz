@@ -33,7 +33,11 @@ public: // member functions
     const quartz::rendering::Model& getModel() const { return m_model; }
     const math::Mat4& getTransformationMatrix() const { return m_transformationMatrix; }
 
-    void update(const double tickTimeDelta);
+    void fixedUpdate();
+    void update(
+        const double frameTimeDelta,
+        const double frameInterpolationFactor
+    );
 
 private: // static functions
     static reactphysics3d::RigidBody* createRigidBodyPtr(
@@ -44,7 +48,8 @@ private: // static functions
 private: // member variables
     quartz::rendering::Model m_model;
 
-    quartz::scene::Transform m_transform;
+    quartz::scene::Transform m_previousTransform;
+    quartz::scene::Transform m_currentTransform;
     math::Mat4 m_transformationMatrix;
 
     reactphysics3d::RigidBody* mp_rigidBody;

@@ -41,6 +41,7 @@ target_link_libraries(
     reactphysics3d
 
     PUBLIC
+    MATH_Algorithms
     MATH_Transform
 
     PUBLIC

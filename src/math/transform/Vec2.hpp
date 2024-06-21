@@ -68,33 +68,33 @@ union math::Vec2 {
      * -------------------------------------------------------------------------------------
      */
 
-    Vec2 operator+(const Vec2& other)                   const { return {glmVec + other.glmVec}; }
-    Vec2 operator+(const glm::vec2 other)               const { return {glmVec + other}; }
-    Vec2 operator+(const reactphysics3d::Vector2 other) const { return {rp3dVec + other}; }
+    Vec2 operator+(const Vec2& other)                    const { return {glmVec + other.glmVec}; }
+    Vec2 operator+(const glm::vec2& other)               const { return {glmVec + other}; }
+    Vec2 operator+(const reactphysics3d::Vector2& other) const { return {rp3dVec + other}; }
 
     Vec2& operator+=(const Vec2& other)                    { glmVec += other.glmVec; return *this;}
     Vec2& operator+=(const glm::vec2& other)               { glmVec += other;        return *this;}
     Vec2& operator+=(const reactphysics3d::Vector2& other) { rp3dVec += other;       return *this;}
 
-    Vec2 operator-(const Vec2& other)                   const { return {glmVec - other.glmVec}; }
-    Vec2 operator-(const glm::vec2 other)               const { return {glmVec - other}; }
-    Vec2 operator-(const reactphysics3d::Vector2 other) const { return {rp3dVec - other}; }
+    Vec2 operator-(const Vec2& other)                    const { return {glmVec - other.glmVec}; }
+    Vec2 operator-(const glm::vec2& other)               const { return {glmVec - other}; }
+    Vec2 operator-(const reactphysics3d::Vector2& other) const { return {rp3dVec - other}; }
 
     Vec2& operator-=(const Vec2& other)                    { glmVec -= other.glmVec; return *this; }
     Vec2& operator-=(const glm::vec2& other)               { glmVec -= other;        return *this; }
     Vec2& operator-=(const reactphysics3d::Vector2& other) { rp3dVec -= other;       return *this; }
 
-    Vec2 operator*(const Vec2& other)                   const { return {glmVec * other.glmVec}; }
-    Vec2 operator*(const glm::vec2 other)               const { return {glmVec * other}; }
-    Vec2 operator*(const reactphysics3d::Vector2 other) const { return {rp3dVec * other}; }
+    Vec2 operator*(const Vec2& other)                    const { return {glmVec * other.glmVec}; }
+    Vec2 operator*(const glm::vec2& other)               const { return {glmVec * other}; }
+    Vec2 operator*(const reactphysics3d::Vector2& other) const { return {rp3dVec * other}; }
 
     Vec2& operator*=(const Vec2& other)                    { glmVec *= other.glmVec;    return *this; }
     Vec2& operator*=(const glm::vec2& other)               { glmVec *= other;           return *this; }
     Vec2& operator*=(const reactphysics3d::Vector2& other) { rp3dVec = rp3dVec * other; return *this; }
 
-    Vec2 operator/(const Vec2& other)                   const { return {glmVec / other.glmVec}; }
-    Vec2 operator/(const glm::vec2 other)               const { return {glmVec / other}; }
-    Vec2 operator/(const reactphysics3d::Vector2 other) const { return {rp3dVec / other}; }
+    Vec2 operator/(const Vec2& other)                    const { return {glmVec / other.glmVec}; }
+    Vec2 operator/(const glm::vec2& other)               const { return {glmVec / other}; }
+    Vec2 operator/(const reactphysics3d::Vector2& other) const { return {rp3dVec / other}; }
 
     Vec2& operator/=(const Vec2& other)                    { glmVec /= other.glmVec;    return *this; }
     Vec2& operator/=(const glm::vec2& other)               { glmVec /= other;           return *this; }

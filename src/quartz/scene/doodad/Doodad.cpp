@@ -2,6 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 
@@ -16,9 +17,26 @@ quartz::scene::Doodad::createRigidBodyPtr(
         return nullptr;
     }
 
+    /**
+     * @todo 2024/06/20 Take in a physics settings struct (or something similar) so we have all the properties
+     *    we need to do things like the following:
+     * @todo 2024/06/20 Create a collider for the rigid body
+     * @todo 2024/06/20 Set the type of the rigid body (static, kinematic, dynamic)
+     * @todo 2024/06/20 Determine if we want to interact with gravity
+     * @todo 2024/06/20 Set the angular and linear velocity damping to simulate things like air friction when there is no collision happening
+     */
+
     const math::Quaternion quat = math::Quaternion::fromAxisAngleRotation(transform.rotationAxis.normalize(), transform.rotationAmountDegrees);
     const reactphysics3d::Transform rp3dTransform(transform.position, quat);
-    return p_physicsWorld->createRigidBody(rp3dTransform);
+    reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(rp3dTransform);
+
+    p_rigidBody->setType(reactphysics3d::BodyType::DYNAMIC);
+    p_rigidBody->enableGravity(true);
+    p_rigidBody->setLinearDamping(0.0);
+    p_rigidBody->setAngularDamping(0.0);
+    p_rigidBody->setIsAllowedToSleep(true);
+
+    return p_rigidBody;
 }
 
 quartz::scene::Doodad::Doodad(
@@ -31,7 +49,8 @@ quartz::scene::Doodad::Doodad(
         renderingDevice,
         objectFilepath
     ),
-    m_transform(transform),
+    m_previousTransform(transform),
+    m_currentTransform(transform),
     m_transformationMatrix(),
     mp_rigidBody(quartz::scene::Doodad::createRigidBodyPtr(p_physicsWorld, transform))
 {
@@ -47,7 +66,7 @@ quartz::scene::Doodad::Doodad(
     quartz::scene::Doodad&& other
 ) :
     m_model(std::move(other.m_model)),
-    m_transform(other.m_transform),
+    m_currentTransform(other.m_currentTransform),
     m_transformationMatrix(other.m_transformationMatrix),
     mp_rigidBody(std::move(other.mp_rigidBody))
 {
@@ -59,14 +78,55 @@ quartz::scene::Doodad::~Doodad() {
 }
 
 void
+quartz::scene::Doodad::fixedUpdate() {
+    /**
+     * @todo 2024/06/20 Call the fixed update callback given to the doodad that actual contains
+     *    the logic that we execute here
+     */
+
+    mp_rigidBody->applyLocalForceAtCenterOfMass({1.0, 0.0, 0.0});
+}
+
+void
 quartz::scene::Doodad::update(
-    UNUSED const double tickTimeDelta
+    UNUSED const double frameTimeDelta,
+    UNUSED const double frameInterpolationFactor
 ) {
+    const reactphysics3d::Transform& currentRP3DTransform = mp_rigidBody->getTransform();
+    const math::Quaternion currentQuat = currentRP3DTransform.getOrientation();
+
+    m_currentTransform.position = currentRP3DTransform.getPosition();
+    m_currentTransform.rotationAmountDegrees = currentQuat.getAngleDegrees();
+    m_currentTransform.rotationAxis = currentQuat.getAxis(m_currentTransform.rotationAmountDegrees);
+
+    const math::Vec3 interpolatedPosition = math::lerp(
+        m_previousTransform.position,
+        m_currentTransform.position,
+        frameInterpolationFactor
+    );
+
+    const math::Quaternion previousQuat = math::Quaternion::fromAxisAngleRotation(
+        m_previousTransform.rotationAxis.normalize(),
+        m_previousTransform.rotationAmountDegrees
+    );
+    const math::Quaternion interpolatedQuat = math::Quaternion::slerpShortestPath(
+        previousQuat,
+        currentQuat,
+        frameInterpolationFactor
+    );
+    const float interpolatedRotationAmountDegrees = interpolatedQuat.getAngleDegrees();
+    const math::Vec3 interpolatedRotationAxis = interpolatedQuat.getAxis(interpolatedRotationAmountDegrees);
+
+    const math::Vec3 interpolatedScale = math::lerp(
+        m_previousTransform.scale,
+        m_currentTransform.scale,
+        frameInterpolationFactor
+    );
+
     m_transformationMatrix = math::Mat4(1.0f);
+    m_transformationMatrix.translate(interpolatedPosition);
+    m_transformationMatrix.rotate(interpolatedRotationAxis, glm::radians(interpolatedRotationAmountDegrees));
+    m_transformationMatrix.scale(interpolatedScale);
 
-    m_transformationMatrix.translate(m_transform.position);
-
-    m_transformationMatrix.rotate(m_transform.rotationAxis, glm::radians(m_transform.rotationAmountDegrees));
-
-    m_transformationMatrix.scale(m_transform.scale);
+    m_previousTransform = m_currentTransform;
 }

@@ -43,9 +43,60 @@ union math::Quaternion {
 
     /**
      * -------------------------------------------------------------------------------------
+     * @brief Scalar operators
+     * -------------------------------------------------------------------------------------
+     */
+
+    Quaternion operator*(const float scalar) const { return {glmQuat * scalar}; }
+    friend Quaternion operator*(const float scalar, const Quaternion& vec4) { return {scalar * vec4.glmQuat}; }
+    Quaternion& operator*=(const float scalar) { glmQuat *= scalar; return *this; }
+
+    Quaternion operator/(const float scalar) const { return {glmQuat / scalar}; }
+    Quaternion& operator/=(const float scalar) { glmQuat /= scalar; return *this; }
+
+    /**
+     * -------------------------------------------------------------------------------------
+     * @brief Quaternion operators
+     * -------------------------------------------------------------------------------------
+     */
+
+    Quaternion operator-() const { return {-x, -y, -z, -w}; }
+
+    Quaternion operator+(const Quaternion& other)                 const { return {glmQuat + other.glmQuat}; }
+    Quaternion operator+(const glm::quat& other)                  const { return {glmQuat + other}; }
+    Quaternion operator+(const reactphysics3d::Quaternion& other) const { return {rp3dQuat + other}; }
+
+    Quaternion& operator+=(const Quaternion& other)                 { glmQuat += other.glmQuat; return *this;}
+    Quaternion& operator+=(const glm::quat& other)                  { glmQuat += other;         return *this;}
+    Quaternion& operator+=(const reactphysics3d::Quaternion& other) { rp3dQuat += other;        return *this;}
+
+    Quaternion operator*(const Quaternion& other)                 const { return {glmQuat * other.glmQuat}; }
+    Quaternion operator*(const glm::quat& other)                  const { return {glmQuat * other}; }
+    Quaternion operator*(const reactphysics3d::Quaternion& other) const { return {rp3dQuat * other}; }
+
+    Quaternion& operator*=(const Quaternion& other)                 { glmQuat *= other.glmQuat;    return *this; }
+    Quaternion& operator*=(const glm::quat& other)                  { glmQuat *= other;            return *this; }
+    Quaternion& operator*=(const reactphysics3d::Quaternion& other) { rp3dQuat = rp3dQuat * other; return *this; }
+
+    bool operator==(const Quaternion& other) const { return glmQuat == other.glmQuat; }
+    bool operator==(const glm::quat& other)  const { return glmQuat == other; }
+
+    bool operator!=(const Quaternion& other) const { return glmQuat != other.glmQuat; }
+    bool operator!=(const glm::quat& other)  const { return glmQuat != other; }
+
+    /**
+     * -------------------------------------------------------------------------------------
      * @brief Quaternion functions
      * -------------------------------------------------------------------------------------
      */
+
+    float dot(const Quaternion& other) const { return glm::dot(glmQuat, other.glmQuat); }
+    float dot(const glm::quat& other)  const { return glm::dot(glmQuat, other); }
+
+    bool isNormalized() const { return *this == glm::normalize(glmQuat); }
+
+    float getAngleDegrees() const;
+    math::Vec3 getAxis(const float angleDegrees) const;
 
     /**
      * @brief This function creates a quaternion from an axis angle representation. If quartz
@@ -57,6 +108,18 @@ union math::Quaternion {
     static Quaternion fromAxisAngleRotation(
         const math::Vec3& normalizedRotationAxis,
         const float rotationAmountDegrees
+    );
+
+    static Quaternion slerp(
+        const Quaternion& normalizedA,
+        const Quaternion& normalizedB,
+        const float t
+    );
+
+    static Quaternion slerpShortestPath(
+        const Quaternion& normalizedA,
+        const Quaternion& normalizedB,
+        const float t
     );
 
     /**

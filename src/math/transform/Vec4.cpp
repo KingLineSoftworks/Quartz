@@ -6,7 +6,7 @@ math::Vec4::operator[](const uint32_t i) {
     assert(i >= 0 && i <= 3);
 #endif
 
-    switch(i) {
+    switch (i) {
         case 0:
             return x;
         case 1:
@@ -25,7 +25,7 @@ math::Vec4::operator[](const uint32_t i) const {
     assert(i >= 0 && i <= 3);
 #endif
 
-    switch(i) {
+    switch (i) {
         case 0:
             return x;
         case 1:
