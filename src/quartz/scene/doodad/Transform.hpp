@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/transform/Vec3.hpp"
+#include "math/transform/Quaternion.hpp"
 
 namespace quartz {
 namespace scene {
@@ -17,13 +18,17 @@ public: // public methods
         const math::Vec3& rotationAxis_,
         const math::Vec3& scale_
     );
+    Transform(
+        const math::Vec3& position_,
+        const math::Quaternion& rotation_,
+        const math::Vec3& scale_
+    );
     ~Transform() = default;
 
 public: // member variables
     math::Vec3 position;
 
-    float rotationAmountDegrees;
-    math::Vec3 rotationAxis;
+    math::Quaternion rotation;
 
     math::Vec3 scale;
 };

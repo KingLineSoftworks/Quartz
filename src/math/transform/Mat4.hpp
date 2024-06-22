@@ -7,6 +7,7 @@
 
 #include "math/transform/Vec3.hpp"
 #include "math/transform/Vec4.hpp"
+#include "math/transform/Quaternion.hpp"
 
 namespace math {
     union Mat4;
@@ -57,16 +58,35 @@ union math::Mat4 {
      * -------------------------------------------------------------------------------------
      */
 
+    Mat4& translate(const math::Vec3& translation);
+    Mat4& rotate(const math::Vec3& rotationAxis, const float rotationAmountRadians);
+    Mat4& rotate(const math::Quaternion& rotation);
+    Mat4& scale(const math::Vec3& scale);
+
+    static Mat4 translate(
+        const Mat4& m,
+        const math::Vec3& translation
+    );
+    static Mat4 rotate(
+        const Mat4& m,
+        const math::Vec3& rotationAxis,
+        const float rotationAmountDegrees
+    );
+    static Mat4 rotate(
+        const Mat4& m,
+        const math::Quaternion& rotation
+    );
+    static Mat4 scale(
+        const Mat4& m,
+        const math::Vec3& translation
+    );
+
     static Mat4 createPerspective(
         const float fovyRadians,
         const float aspectRatio,
         const float nearClippingPlaneDistance,
         const float farClippingPlaneDistance
     );
-
-    Mat4& translate(const math::Vec3& translation);
-    Mat4& rotate(const math::Vec3& rotationAxis, const float rotationAmountRadians);
-    Mat4& scale(const math::Vec3& scale);
 
     /**
      * -------------------------------------------------------------------------------------

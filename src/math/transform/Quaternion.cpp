@@ -1,43 +1,55 @@
 #include <limits>
 
+#include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
+#include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
+
+#include "util/macros.hpp"
 
 float
 math::Quaternion::getAngleDegrees() const {
+    LOG_INFO(TRANSFORM, "Getting rotation amount in degrees from quaternion {}", toString());
+    LOG_INFO(TRANSFORM, "Got {}", acos(w) * 2);
     return acos(w) * 2;
 }
 
 math::Vec3
 math::Quaternion::getAxis(const float angleDegrees) const {
-    return {
+    LOG_INFO(TRANSFORM, "Getting rotation axis from with angle of {} degrees from quaternion {}", angleDegrees, toString());
+    math::Vec3 axis(
         x / sin(acos(angleDegrees)),
         y / sin(acos(angleDegrees)),
         z / sin(acos(angleDegrees))
-    };
+    );
+    LOG_INFO(TRANSFORM, "Resulting axis: {}", axis.toString());
+
+    return axis;
 }
 
+math::Mat4
+math::Quaternion::getRotationMatrix() const {
+    return glm::mat4_cast(glmQuat);
+}
 
 math::Quaternion
 math::Quaternion::fromAxisAngleRotation(
     const math::Vec3& normalizedRotationAxis,
     const float rotationAmountDegrees
 ) {
-#ifdef QUARTZ_DEBUG
-    const math::Vec3 reNormalizedRotationAxis = normalizedRotationAxis.normalize();
-    const math::Vec3& axis = reNormalizedRotationAxis;
-#else
-    const math::Vec3& axis = normalizedRotationAxis;
-#endif
+    QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "A is not normalized");
 
     const float s = sin(rotationAmountDegrees / 2.0f);
     const float c = cos(rotationAmountDegrees / 2.0f);
-    return {
-        axis.x * s,
-        axis.y * s,
-        axis.z * s,
+
+    math::Quaternion quat(
+        normalizedRotationAxis.x * s,
+        normalizedRotationAxis.y * s,
+        normalizedRotationAxis.z * s,
         c
-    };
+    );
+
+    return quat;
 }
 
 /**
@@ -49,11 +61,9 @@ math::Quaternion::slerp(
     const math::Quaternion& normalizedB,
     const float t
 ) {
-#if QUARTZ_DEBUG
-    assert(normalizedA.isNormalized());
-    assert(normalizedB.isNormalized());
-    assert(t >= 0.0 && t <= 1.0);
-#endif
+    QUARTZ_ASSERT(normalizedA.isNormalized(), "A is not normalized");
+    QUARTZ_ASSERT(normalizedB.isNormalized(), "B is not normalized");
+    QUARTZ_ASSERT(t >= 0.0 && t <= 1.0, "t " + std::to_string(t) + " is not between 0.0 and 1.0");
 
     const float cosHalfAngle = normalizedA.dot(normalizedB);
     const float absCosHalfAngle = abs(cosHalfAngle);
@@ -81,11 +91,9 @@ math::Quaternion::slerpShortestPath(
     const math::Quaternion& normalizedB,
     const float t
 ) {
-#if QUARTZ_DEBUG
-    assert(normalizedA.isNormalized());
-    assert(normalizedB.isNormalized());
-    assert(t >= 0.0 && t <= 1.0);
-#endif
+    QUARTZ_ASSERT(normalizedA.isNormalized(), "A is not normalized");
+    QUARTZ_ASSERT(normalizedB.isNormalized(), "B is not normalized");
+    QUARTZ_ASSERT(t >= 0.0 && t <= 1.0, "t " + std::to_string(t) + " is not between 0.0 and 1.0");
 
     const float cosHalfAngle = normalizedA.dot(normalizedB);
 

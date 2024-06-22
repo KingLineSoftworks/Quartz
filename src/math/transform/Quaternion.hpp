@@ -9,6 +9,7 @@
 
 namespace math {
     union Quaternion;
+    union Mat4;
 }
 
 union math::Quaternion {
@@ -93,10 +94,16 @@ union math::Quaternion {
     float dot(const Quaternion& other) const { return glm::dot(glmQuat, other.glmQuat); }
     float dot(const glm::quat& other)  const { return glm::dot(glmQuat, other); }
 
-    bool isNormalized() const { return *this == glm::normalize(glmQuat); }
+    Quaternion& normalize() { glmQuat = glm::normalize(glmQuat); return *this; }
+    Quaternion normalize() const { return {glm::normalize(glmQuat)}; }
+
+    float magnitude() const { return glm::length(glmQuat); }
+    bool isNormalized() const { return magnitude() == 1.0f; }
 
     float getAngleDegrees() const;
     math::Vec3 getAxis(const float angleDegrees) const;
+
+    math::Mat4 getRotationMatrix() const;
 
     /**
      * @brief This function creates a quaternion from an axis angle representation. If quartz

@@ -121,6 +121,9 @@ union math::Vec2 {
     Vec2& normalize() { glmVec = glm::normalize(glmVec); return *this; }
     Vec2 normalize() const { return {glm::normalize(glmVec)}; }
 
+    float magnitude() const { return glm::length(glmVec); }
+    bool isNormalized() const { return magnitude() == 1.0f; }
+
     /**
      * -------------------------------------------------------------------------------------
      * @brief misc functionality

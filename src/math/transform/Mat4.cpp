@@ -35,6 +35,28 @@ math::Mat4::operator[](const uint32_t i) const {
     return cols[i];
 }
 
+math::Mat4
+math::Mat4::translate(const math::Mat4& m, const math::Vec3& translation) {
+    return glm::translate(m.glmMat, translation.glmVec);
+}
+
+math::Mat4
+math::Mat4::rotate(const math::Mat4& m, const math::Vec3& rotationAxis, const float rotationAmountDegrees) {
+    return glm::rotate(m.glmMat, rotationAmountDegrees, rotationAxis.glmVec);
+}
+
+math::Mat4
+math::Mat4::rotate(const math::Mat4& m, const math::Quaternion& rotation) {
+    const math::Mat4 rotationMatrix = rotation.getRotationMatrix();
+
+    return m * rotationMatrix;
+}
+
+math::Mat4
+math::Mat4::scale(const math::Mat4& m, const math::Vec3& scale) {
+    return glm::scale(m.glmMat, scale.glmVec);
+}
+
 math::Mat4&
 math::Mat4::translate(const math::Vec3& translation) {
     glmMat = glm::translate(glmMat, translation.glmVec);
@@ -45,6 +67,15 @@ math::Mat4::translate(const math::Vec3& translation) {
 math::Mat4&
 math::Mat4::rotate(const math::Vec3& rotationAxis, const float rotationAmountRadians) {
     glmMat = glm::rotate(glmMat, rotationAmountRadians, rotationAxis.glmVec);
+
+    return *this;
+}
+
+math::Mat4&
+math::Mat4::rotate(const math::Quaternion& rotation) {
+    const math::Mat4 rotationMatrix = rotation.getRotationMatrix();
+
+    glmMat = glmMat * rotationMatrix;
 
     return *this;
 }

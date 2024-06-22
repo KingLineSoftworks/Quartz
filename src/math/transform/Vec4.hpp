@@ -102,7 +102,8 @@ union math::Vec4 {
     Vec4& normalize() { glmVec = glm::normalize(glmVec); return *this; }
     Vec4 normalize() const { return {glm::normalize(glmVec)}; }
 
-    bool isNormalized() const { return *this == glm::normalize(glmVec); }
+    float magnitude() const { return glm::length(glmVec); }
+    bool isNormalized() const { return magnitude() == 1.0f; }
 
     /**
      * -------------------------------------------------------------------------------------

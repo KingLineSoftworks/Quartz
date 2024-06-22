@@ -54,7 +54,7 @@ public: // member functions
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
-        const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
+        const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
     );
 
     void fixedUpdate(
@@ -73,7 +73,7 @@ private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
         reactphysics3d::PhysicsWorld* p_physicsWorld,
-        const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
+        const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
     );
 
 private: // member variables

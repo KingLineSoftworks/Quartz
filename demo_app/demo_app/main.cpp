@@ -3,8 +3,7 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
-#include "math/transform/Mat4.hpp"
-#include "math/transform/Vec3.hpp"
+#include "math/Loggers.hpp"
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
@@ -33,6 +32,7 @@ int main() {
 
     util::Logger::setShouldLogPreamble(shouldLogPreamble);
 
+    REGISTER_LOGGER_GROUP(MATH);
     REGISTER_LOGGER_GROUP(UTIL);
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(QUARTZ_MANAGERS);
@@ -44,6 +44,9 @@ int main() {
         // demo app
         {"GENERAL", util::Logger::Level::info},
         {"BIGBOY", util::Logger::Level::trace},
+
+        // math
+        {"TRANSFORM", util::Logger::Level::info},
 
         // util
         {"FILESYSTEM", util::Logger::Level::info},
@@ -82,7 +85,7 @@ int main() {
 
         // scene
         {"CAMERA", util::Logger::Level::info},
-        {"DOODAD", util::Logger::Level::info},
+        {"DOODAD", util::Logger::Level::trace},
         {"SCENE", util::Logger::Level::info},
         {"SKYBOX", util::Logger::Level::info},
     });
@@ -157,6 +160,7 @@ int main() {
 
     LOG_TRACE(GENERAL, "Terminating application");
 
+#if false
     LOG_TRACE(GENERAL, "Performing physics simulation");
     reactphysics3d::PhysicsCommon physicsCommon;
     reactphysics3d::PhysicsWorld* p_physicsWorld = physicsCommon.createPhysicsWorld();
@@ -179,6 +183,7 @@ int main() {
     // These will automatically get destroyed when the physics common goes out of scope but I think it'd be best practice to do them manually
     p_physicsWorld->destroyRigidBody(p_rigidBody);
     physicsCommon.destroyPhysicsWorld(p_physicsWorld);
+#endif
 
     return EXIT_SUCCESS;
 }
