@@ -31,5 +31,8 @@ target_link_libraries(
     reactphysics3d
 
     PUBLIC
+    MATH_Transform
+
+    PUBLIC
     UTIL_Logger
 )

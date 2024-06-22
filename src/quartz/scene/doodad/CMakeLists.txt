@@ -46,6 +46,7 @@ target_link_libraries(
     UTIL_Logger
 
     PUBLIC
+    QUARTZ_MANAGERS_PhysicsManager
     QUARTZ_RENDERING_Device
     QUARTZ_RENDERING_Model
 )
