@@ -16,25 +16,26 @@ std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     reactphysics3d::PhysicsWorld* p_physicsWorld,
-    const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
+    const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
 
     std::vector<quartz::scene::Doodad> doodads;
 
-    for (const std::pair<std::string, quartz::scene::Transform>& doodadInformation : doodadInformations) {
-        const std::string& filepath = doodadInformation.first;
-        const quartz::scene::Transform& transform = doodadInformation.second;
+    for (const std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>& doodadInformation : doodadInformations) {
+        const std::string& filepath = std::get<0>(doodadInformation);
+        const quartz::scene::Transform& transform = std::get<1>(doodadInformation);
+        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties = std::get<2>(doodadInformation);
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
-        LOG_TRACE(SCENE, "  position         = {}", transform.position.toString());
-        LOG_TRACE(SCENE, "  rotation degrees = {}", transform.rotationAmountDegrees);
-        LOG_TRACE(SCENE, "  rotation axis    = {}", transform.rotationAxis.toString());
-        LOG_TRACE(SCENE, "  scale            = {}", transform.scale.toString());
+        LOG_TRACE(SCENE, "  position = {}", transform.position.toString());
+        LOG_TRACE(SCENE, "  rotation = {}", transform.rotation.toString());
+        LOG_TRACE(SCENE, "  scale    = {}", transform.scale.toString());
 
         doodads.emplace_back(
             renderingDevice,
             filepath,
+            o_physicsProperties,
             transform,
             p_physicsWorld
         );
@@ -62,7 +63,7 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
-    const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
+    const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
 

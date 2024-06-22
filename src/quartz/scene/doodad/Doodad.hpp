@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -9,6 +10,7 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
+#include "quartz/scene/doodad/PhysicsProperties.hpp"
 #include "quartz/scene/doodad/Transform.hpp"
 
 namespace quartz {
@@ -18,10 +20,13 @@ namespace scene {
 }
 
 class quartz::scene::Doodad {
+public: //
+
 public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         const std::string& objectFilepath,
+        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
         const quartz::scene::Transform& transform,
         reactphysics3d::PhysicsWorld* p_physicsWorld
     );
@@ -40,16 +45,17 @@ public: // member functions
     );
 
 private: // static functions
+    static quartz::scene::Transform fixTransform(const quartz::scene::Transform& transform);
     static reactphysics3d::RigidBody* createRigidBodyPtr(
         reactphysics3d::PhysicsWorld* p_physicsWorld,
+        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
         const quartz::scene::Transform& transform
     );
 
 private: // member variables
     quartz::rendering::Model m_model;
 
-    quartz::scene::Transform m_previousTransform;
-    quartz::scene::Transform m_currentTransform;
+    quartz::scene::Transform m_transform;
     math::Mat4 m_transformationMatrix;
 
     reactphysics3d::RigidBody* mp_rigidBody;

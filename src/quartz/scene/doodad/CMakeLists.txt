@@ -7,6 +7,9 @@ add_library(
     Doodad.hpp
     Doodad.cpp
 
+    PhysicsProperties.hpp
+    PhysicsProperties.cpp
+
     Transform.hpp
     Transform.cpp
 )

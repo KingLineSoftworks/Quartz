@@ -124,27 +124,28 @@ quartz::scene::Camera::fixedUpdate(
 
     // ----- update position ----- //
 
-    const float movementSpeed = 2.0f;
+    const float movementSpeedMPS = 2.0f;
+    const float movementSpeedAdjusted = movementSpeedMPS * 0.01666666666;
 
     if (inputManager.getKeyDown_w()) {
-        m_worldPosition += movementSpeed * currentLookVector;
+        m_worldPosition += movementSpeedAdjusted * currentLookVector;
     }
     if (inputManager.getKeyDown_s()) {
-        m_worldPosition -= movementSpeed * currentLookVector;
+        m_worldPosition -= movementSpeedAdjusted * currentLookVector;
     }
 
     if (inputManager.getKeyDown_d()) {
-        m_worldPosition += movementSpeed * currentRightVector;
+        m_worldPosition += movementSpeedAdjusted * currentRightVector;
     }
     if (inputManager.getKeyDown_a()) {
-        m_worldPosition -= movementSpeed * currentRightVector;
+        m_worldPosition -= movementSpeedAdjusted * currentRightVector;
     }
 
     if (inputManager.getKeyDown_space()) {
-        m_worldPosition += movementSpeed * worldUpVector;
+        m_worldPosition += movementSpeedAdjusted * worldUpVector;
     }
     if (inputManager.getKeyDown_shift()) {
-        m_worldPosition -= movementSpeed * worldUpVector;
+        m_worldPosition -= movementSpeedAdjusted * worldUpVector;
     }
 }
 
