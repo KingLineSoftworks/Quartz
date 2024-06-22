@@ -65,8 +65,24 @@ quartz::scene::Doodad::createRigidBodyPtr(
     return p_rigidBody;
 }
 
+reactphysics3d::Collider*
+quartz::scene::Doodad::createColliderPtr(
+    quartz::managers::PhysicsManager& physicsManager,
+    reactphysics3d::RigidBody* p_rigidBody,
+    const quartz::scene::Transform& transform
+) {
+    const math::Vec3 colliderExtents = transform.scale / 2.0f;
+    reactphysics3d::BoxShape* p_colliderShape = physicsManager.createBoxShapePtr(colliderExtents);
+
+    const reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity();
+    reactphysics3d::Collider* p_collider = p_rigidBody->addCollider(p_colliderShape, colliderTransform);
+
+    return p_collider;
+}
+
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
     const std::string& objectFilepath,
     const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
     const quartz::scene::Transform& transform,
@@ -78,7 +94,8 @@ quartz::scene::Doodad::Doodad(
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
-    mp_rigidBody(quartz::scene::Doodad::createRigidBodyPtr(p_physicsWorld, o_physicsProperties, transform))
+    mp_rigidBody(quartz::scene::Doodad::createRigidBodyPtr(p_physicsWorld, o_physicsProperties, m_transform)),
+    mp_collider(quartz::scene::Doodad::createColliderPtr(physicsManager, mp_rigidBody, m_transform))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");

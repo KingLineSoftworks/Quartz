@@ -21,3 +21,10 @@ quartz::managers::PhysicsManager::createPhysicsWorldPtr(
 ) {
     return m_physicsCommon.createPhysicsWorld(physicsWorldSettings);
 }
+
+reactphysics3d::BoxShape*
+quartz::managers::PhysicsManager::createBoxShapePtr(
+    const math::Vec3& extents
+) {
+    return m_physicsCommon.createBoxShape(extents);
+}

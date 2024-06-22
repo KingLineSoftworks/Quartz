@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -98,7 +100,7 @@ union math::Quaternion {
     Quaternion normalize() const { return {glm::normalize(glmQuat)}; }
 
     float magnitude() const { return glm::length(glmQuat); }
-    bool isNormalized() const { return magnitude() == 1.0f; }
+    bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
 
     float getAngleDegrees() const;
     math::Vec3 getAxis(const float angleDegrees) const;

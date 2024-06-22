@@ -7,6 +7,7 @@
 
 #include "math/transform/Mat4.hpp"
 
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
@@ -25,6 +26,7 @@ public: //
 public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
         const std::string& objectFilepath,
         const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
         const quartz::scene::Transform& transform,
@@ -51,6 +53,11 @@ private: // static functions
         const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
         const quartz::scene::Transform& transform
     );
+    static reactphysics3d::Collider* createColliderPtr(
+        quartz::managers::PhysicsManager& physicsManager,
+        reactphysics3d::RigidBody* p_rigidBody,
+        const quartz::scene::Transform& transform
+    );
 
 private: // member variables
     quartz::rendering::Model m_model;
@@ -59,4 +66,5 @@ private: // member variables
     math::Mat4 m_transformationMatrix;
 
     reactphysics3d::RigidBody* mp_rigidBody;
+    reactphysics3d::Collider* mp_collider;
 };

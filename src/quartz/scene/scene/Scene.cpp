@@ -15,6 +15,7 @@
 std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::PhysicsWorld* p_physicsWorld,
     const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
 ) {
@@ -34,6 +35,7 @@ quartz::scene::Scene::loadDoodads(
 
         doodads.emplace_back(
             renderingDevice,
+            physicsManager,
             filepath,
             o_physicsProperties,
             transform,
@@ -80,7 +82,8 @@ quartz::scene::Scene::load(
     physicsWorldSettings.defaultTimeBeforeSleep = 1.0;      // seconds
     physicsWorldSettings.defaultSleepLinearVelocity = 0.5;  // meters per second
     physicsWorldSettings.defaultSleepAngularVelocity = 0.5; // meters per second
-    physicsWorldSettings.gravity = math::Vec3(0, -9.81, 0);
+//    physicsWorldSettings.gravity = math::Vec3(0, -9.81, 0);
+    physicsWorldSettings.gravity = math::Vec3(0, -1.0, 0);
     mp_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
 
     LOG_TRACEthis("Initializing master texture list");
@@ -105,6 +108,7 @@ quartz::scene::Scene::load(
 
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
+        physicsManager,
         mp_physicsWorld,
         doodadInformations
     );

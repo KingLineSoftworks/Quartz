@@ -72,6 +72,7 @@ public: // member functions
 private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::PhysicsWorld* p_physicsWorld,
         const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
     );

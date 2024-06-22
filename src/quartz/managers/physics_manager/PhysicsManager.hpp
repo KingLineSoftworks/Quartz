@@ -4,6 +4,8 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Vec3.hpp"
+
 #include "quartz/managers/Loggers.hpp"
 
 namespace quartz {
@@ -37,6 +39,7 @@ public: // member functions
     USE_LOGGER(PHYSICSMAN);
 
     reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
+    reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& extents);
 
 private: // member functions
     PhysicsManager();
