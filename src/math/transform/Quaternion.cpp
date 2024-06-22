@@ -7,24 +7,35 @@
 
 #include "util/macros.hpp"
 
+bool
+math::Quaternion::operator!=(const math::Quaternion& other) const {
+    bool xNEquals = x - other.x > std::numeric_limits<float>::epsilon();
+
+    bool yNEquals = y - other.y > std::numeric_limits<float>::epsilon();
+
+    bool zNEquals = z - other.z > std::numeric_limits<float>::epsilon();
+
+    bool wNEquals = w - other.w > std::numeric_limits<float>::epsilon();
+
+    return xNEquals || yNEquals || zNEquals || wNEquals;
+}
+
 float
 math::Quaternion::getAngleDegrees() const {
-    LOG_INFO(TRANSFORM, "Getting rotation amount in degrees from quaternion {}", toString());
-    LOG_INFO(TRANSFORM, "Got {}", acos(w) * 2);
     return acos(w) * 2;
 }
 
 math::Vec3
 math::Quaternion::getAxis(const float angleDegrees) const {
-    LOG_INFO(TRANSFORM, "Getting rotation axis from with angle of {} degrees from quaternion {}", angleDegrees, toString());
-    math::Vec3 axis(
-        x / sin(acos(angleDegrees)),
-        y / sin(acos(angleDegrees)),
-        z / sin(acos(angleDegrees))
-    );
-    LOG_INFO(TRANSFORM, "Resulting axis: {}", axis.toString());
+    const float sa = sin(acos(angleDegrees));
 
-    return axis;
+    math::Vec3 axis(
+        x / sa,
+        y / sa,
+        z / sa
+    );
+
+    return axis.normalize();
 }
 
 math::Mat4
@@ -49,7 +60,7 @@ math::Quaternion::fromAxisAngleRotation(
         c
     );
 
-    return quat;
+    return quat.normalize();
 }
 
 /**
@@ -111,4 +122,14 @@ math::Quaternion::slerpShortestPath(
     const float bWeight = sin(t * alpha);
 
     return (aWeight * shortestNormalizedA + bWeight * normalizedB) / sin(alpha);
+}
+
+
+std::string
+math::Quaternion::toString() const {
+    std::ostringstream ss;
+
+    ss << "[ " << x << " , " << y << " , " << z << " , " << w << " ]";
+
+    return ss.str();
 }

@@ -5,6 +5,7 @@ add_library(
     MATH_Transform
     SHARED
     Vec2.hpp
+    Vec2.cpp
     Vec3.hpp
     Vec3.cpp
     Vec4.hpp

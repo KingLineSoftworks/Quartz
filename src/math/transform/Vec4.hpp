@@ -87,7 +87,7 @@ union math::Vec4 {
     bool operator==(const Vec4& other)      const { return glmVec == other.glmVec; }
     bool operator==(const glm::vec4& other) const { return glmVec == other; }
 
-    bool operator!=(const Vec4& other)      const { return glmVec != other.glmVec; }
+    bool operator!=(const Vec4& other)      const;
     bool operator!=(const glm::vec4& other) const { return glmVec != other; }
 
     /**
@@ -111,7 +111,8 @@ union math::Vec4 {
      * -------------------------------------------------------------------------------------
      */
 
-    std::string toString() const { return glm::to_string(glmVec); }
+    std::string toString() const;
+    friend std::ostream& operator<<(std::ostream& os, const math::Vec4& vec) { return os << vec.toString(); }
 
     /**
      * -------------------------------------------------------------------------------------

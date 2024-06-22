@@ -120,6 +120,7 @@ add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE "${VENDOR_ROOT_DIR}/stb")
 
 # tinygltf
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 
 # vulkan
@@ -214,6 +215,15 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/doodad")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/light")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/scene")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
+
+#====================================================================
+# The tests
+#====================================================================
+include(CTest)
+
+set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
+
+add_subdirectory("${QUARTZ_TEST_DIR}/unit_test")
 
 #====================================================================
 # The demo application

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <limits>
 
 #include <glm/gtc/quaternion.hpp>
@@ -81,10 +82,10 @@ union math::Quaternion {
     Quaternion& operator*=(const glm::quat& other)                  { glmQuat *= other;            return *this; }
     Quaternion& operator*=(const reactphysics3d::Quaternion& other) { rp3dQuat = rp3dQuat * other; return *this; }
 
-    bool operator==(const Quaternion& other) const { return glmQuat == other.glmQuat; }
+    bool operator==(const Quaternion& other) const { return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w); }
     bool operator==(const glm::quat& other)  const { return glmQuat == other; }
 
-    bool operator!=(const Quaternion& other) const { return glmQuat != other.glmQuat; }
+    bool operator!=(const Quaternion& other) const;
     bool operator!=(const glm::quat& other)  const { return glmQuat != other; }
 
     /**
@@ -137,7 +138,8 @@ union math::Quaternion {
      * -------------------------------------------------------------------------------------
      */
 
-    std::string toString() const { return glm::to_string(glmQuat); }
+    std::string toString() const;
+    friend std::ostream& operator<<(std::ostream& os, const math::Quaternion& quat) { return os << quat.toString(); }
 
     /**
      * -------------------------------------------------------------------------------------
