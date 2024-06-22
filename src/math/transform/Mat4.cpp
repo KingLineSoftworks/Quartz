@@ -86,3 +86,12 @@ math::Mat4::scale(const math::Vec3& scale) {
 
     return *this;
 }
+
+std::string
+math::Mat4::toString() const {
+    std::ostringstream ss;
+
+    ss << "[ " << col0 << " , " << col1 << " , " << col2 << " , " << col3 << " ]";
+
+    return ss.str();
+}

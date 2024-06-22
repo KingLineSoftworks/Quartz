@@ -264,7 +264,16 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/light")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/scene")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 
-# ====================================================================
+#====================================================================
+# The tests
+#====================================================================
+include(CTest)
+
+set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
+
+add_subdirectory("${QUARTZ_TEST_DIR}/unit_test")
+
+#====================================================================
 # The demo application
 # ====================================================================
 set(APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")

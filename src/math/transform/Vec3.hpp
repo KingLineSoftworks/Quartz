@@ -106,7 +106,7 @@ union math::Vec3 {
     bool operator==(const glm::vec3& other)               const { return glmVec == other; }
     bool operator==(const reactphysics3d::Vector3& other) const { return rp3dVec == other; }
 
-    bool operator!=(const Vec3& other)                    const { return glmVec != other.glmVec; }
+    bool operator!=(const Vec3& other)                    const;
     bool operator!=(const glm::vec3& other)               const { return glmVec != other; }
     bool operator!=(const reactphysics3d::Vector3& other) const { return rp3dVec != other; }
 
@@ -144,7 +144,8 @@ union math::Vec3 {
      * -------------------------------------------------------------------------------------
      */
 
-    std::string toString() const { return glm::to_string(glmVec); }
+    std::string toString() const;
+    friend std::ostream& operator<<(std::ostream& os, const math::Vec3& vec) { return os << vec.toString(); }
 
     /**
      * -------------------------------------------------------------------------------------
