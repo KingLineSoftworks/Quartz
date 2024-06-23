@@ -147,7 +147,7 @@ quartz::scene::Doodad::update(
         frameInterpolationFactor
     );
 
-    const math::Quaternion interpolatedRotation = math::Quaternion::slerpShortestPath(
+    const math::Quaternion interpolatedRotation = math::Quaternion::slerp(
         m_transform.rotation.normalize(),
         currentTransform.rotation.normalize(),
         frameInterpolationFactor

@@ -42,18 +42,11 @@ math::Quaternion::fromAxisAngleRotation(
     const math::Vec3& normalizedRotationAxis,
     const float rotationAmountDegrees
 ) {
-    LOG_TRACE(TRANSFORM, "Rotation axis: {}", normalizedRotationAxis.toString());
-    LOG_TRACE(TRANSFORM, "Magnitude    : {}", normalizedRotationAxis.magnitude());
-    LOG_TRACE(TRANSFORM, "Difference   : {}", 1.0f - normalizedRotationAxis.magnitude());
-    LOG_TRACE(TRANSFORM, "Epsilon      : {}", std::numeric_limits<float>::epsilon());
     QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
 
     return glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec);
 }
 
-/**
- * @brief This is essentially taken from magnum math at https://github.com/mosra/magnum/blob/c0e15614eafd7ab5feeaca33699d841a7ab1ed0c/src/Magnum/Math/Quaternion.h#L190
- */
 math::Quaternion
 math::Quaternion::slerp(
     const math::Quaternion& normalizedA,
@@ -64,54 +57,8 @@ math::Quaternion::slerp(
     QUARTZ_ASSERT(normalizedB.isNormalized(), "B is not normalized");
     QUARTZ_ASSERT(t >= 0.0 && t <= 1.0, "t " + std::to_string(t) + " is not between 0.0 and 1.0");
 
-    const float cosHalfAngle = normalizedA.dot(normalizedB);
-    const float absCosHalfAngle = abs(cosHalfAngle);
-
-    // If the quaternions are sufficiently close, linearly interpolate //
-    if (absCosHalfAngle > 1.0f - 0.5f * std::numeric_limits<float>::epsilon()) {
-        const math::Quaternion shortestNormalizedA = cosHalfAngle < 0.0f ? -normalizedA : normalizedA;
-
-        // return (1.0f - t) * shortestNormalizedA + t * normalizedB;
-        return math::lerp(shortestNormalizedA, normalizedB, t);
-    }
-
-    const float alpha = acos(cosHalfAngle);
-    const float aWeight = sin((1.0f - t) * alpha);
-    const float bWeight = sin(t * alpha);
-    return (aWeight * normalizedA + bWeight * normalizedB) / std::sin(alpha);
+    return glm::slerp(normalizedA.glmQuat, normalizedB.glmQuat, t);
 }
-
-/**
- * @brief This is essentially taken from magnum math at https://github.com/mosra/magnum/blob/c0e15614eafd7ab5feeaca33699d841a7ab1ed0c/src/Magnum/Math/Quaternion.h#L261
- */
-math::Quaternion
-math::Quaternion::slerpShortestPath(
-    const math::Quaternion& normalizedA,
-    const math::Quaternion& normalizedB,
-    const float t
-) {
-    QUARTZ_ASSERT(normalizedA.isNormalized(), "A is not normalized");
-    QUARTZ_ASSERT(normalizedB.isNormalized(), "B is not normalized");
-    QUARTZ_ASSERT(t >= 0.0 && t <= 1.0, "t " + std::to_string(t) + " is not between 0.0 and 1.0");
-
-    const float cosHalfAngle = normalizedA.dot(normalizedB);
-
-    const math::Quaternion shortestNormalizedA = cosHalfAngle < 0.0f ? -normalizedA : normalizedB;
-
-    // Do linear interpolation if the quaternions are sufficiently close //
-    const float absCosHalfAngle = abs(cosHalfAngle);
-    if (absCosHalfAngle >= 1.0f - std::numeric_limits<float>::epsilon()) {
-        // return (1.0f - t) * shortestNormalizedA + t * normalizedB;
-        return math::lerp(shortestNormalizedA, normalizedB, t);
-    }
-
-    const float alpha = acos(absCosHalfAngle);
-    const float aWeight = sin((1.0f - t) * alpha);
-    const float bWeight = sin(t * alpha);
-
-    return (aWeight * shortestNormalizedA + bWeight * normalizedB) / sin(alpha);
-}
-
 
 std::string
 math::Quaternion::toString() const {

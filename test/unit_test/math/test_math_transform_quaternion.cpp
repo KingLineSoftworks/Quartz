@@ -51,18 +51,6 @@ int test_Quaternion_fromAxisAngleRotation() {
     return result;
 }
 
-int test_Quaternion_slerp() {
-    LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
-
-    return 0;
-}
-
-int test_Quaternion_slerpShortestPath() {
-    LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
-
-    return 0;
-}
-
 int main() {
     REGISTER_LOGGER_GROUP(TEST);
     REGISTER_LOGGER_GROUP(MATH);
@@ -71,9 +59,5 @@ int main() {
         {"TRANSFORM", util::Logger::Level::trace},
     });
 
-    return
-        test_Quaternion_fromAxisAngleRotation() |
-        test_Quaternion_slerp() |
-        test_Quaternion_slerpShortestPath()
-    ;
+    return test_Quaternion_fromAxisAngleRotation();
 }
