@@ -122,7 +122,7 @@ union math::Vec2 {
     Vec2 normalize() const { return {glm::normalize(glmVec)}; }
 
     float magnitude() const { return glm::length(glmVec); }
-    bool isNormalized() const { return magnitude() == 1.0f; }
+    bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
 
     /**
      * -------------------------------------------------------------------------------------

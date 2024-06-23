@@ -104,7 +104,7 @@ union math::Quaternion {
     bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
 
     float getAngleDegrees() const;
-    math::Vec3 getAxis(const float angleDegrees) const;
+    math::Vec3 getAxis() const;
 
     math::Mat4 getRotationMatrix() const;
 
