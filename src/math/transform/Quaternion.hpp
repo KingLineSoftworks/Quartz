@@ -126,12 +126,6 @@ union math::Quaternion {
         const float t
     );
 
-    static Quaternion slerpShortestPath(
-        const Quaternion& normalizedA,
-        const Quaternion& normalizedB,
-        const float t
-    );
-
     /**
      * -------------------------------------------------------------------------------------
      * @brief misc functionality
