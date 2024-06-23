@@ -1,5 +1,7 @@
 #include <limits>
 
+#include <glm/ext/quaternion_trigonometric.hpp>
+
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
@@ -22,20 +24,12 @@ math::Quaternion::operator!=(const math::Quaternion& other) const {
 
 float
 math::Quaternion::getAngleDegrees() const {
-    return acos(w) * 2;
+    return glm::angle(glmQuat);
 }
 
 math::Vec3
-math::Quaternion::getAxis(const float angleDegrees) const {
-    const float sa = sin(acos(angleDegrees));
-
-    math::Vec3 axis(
-        x / sa,
-        y / sa,
-        z / sa
-    );
-
-    return axis.normalize();
+math::Quaternion::getAxis() const {
+    return glm::axis(glmQuat);
 }
 
 math::Mat4
@@ -48,19 +42,13 @@ math::Quaternion::fromAxisAngleRotation(
     const math::Vec3& normalizedRotationAxis,
     const float rotationAmountDegrees
 ) {
-    QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "A is not normalized");
+    LOG_TRACE(TRANSFORM, "Rotation axis: {}", normalizedRotationAxis.toString());
+    LOG_TRACE(TRANSFORM, "Magnitude    : {}", normalizedRotationAxis.magnitude());
+    LOG_TRACE(TRANSFORM, "Difference   : {}", 1.0f - normalizedRotationAxis.magnitude());
+    LOG_TRACE(TRANSFORM, "Epsilon      : {}", std::numeric_limits<float>::epsilon());
+    QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
 
-    const float s = sin(rotationAmountDegrees / 2.0f);
-    const float c = cos(rotationAmountDegrees / 2.0f);
-
-    math::Quaternion quat(
-        normalizedRotationAxis.x * s,
-        normalizedRotationAxis.y * s,
-        normalizedRotationAxis.z * s,
-        c
-    );
-
-    return quat.normalize();
+    return glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec);
 }
 
 /**
