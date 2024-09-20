@@ -16,14 +16,6 @@
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
 
-void printVec3(const glm::vec3& vec3) {
-    LOG_TRACE(BIGBOY, "Vector3Union glm cast  : {}, {}, {}", vec3.x, vec3.y, vec3.z);
-}
-
-void printVector3(const reactphysics3d::Vector3 vec3) {
-    LOG_TRACE(BIGBOY, "Vector3Union rp3d cast : {}, {}, {}", vec3.x, vec3.y, vec3.z);
-}
-
 int main() {
     constexpr bool shouldLogPreamble = false;
 
@@ -72,7 +64,7 @@ int main() {
         {"MATERIAL", util::Logger::Level::info},
         {"MODEL", util::Logger::Level::info},
         {"MODEL_MESH", util::Logger::Level::info},
-        {"MODEL_PRIMITIVE", util::Logger::Level::info},
+        {"MODEL_PRIMITIVE", util::Logger::Level::trace},
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},

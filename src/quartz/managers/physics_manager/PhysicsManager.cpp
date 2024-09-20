@@ -28,3 +28,10 @@ quartz::managers::PhysicsManager::createBoxShapePtr(
 ) {
     return m_physicsCommon.createBoxShape(extents);
 }
+
+reactphysics3d::SphereShape*
+quartz::managers::PhysicsManager::createSphereShapePtr(
+    const double radius
+) {
+    return m_physicsCommon.createSphereShape(radius);
+}

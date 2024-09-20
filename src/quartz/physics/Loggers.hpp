@@ -1,0 +1,15 @@
+#pragma once
+
+#include "util/logger/Logger.hpp"
+
+DECLARE_LOGGER(COLLIDER, trace);
+DECLARE_LOGGER(COLLIDER_BOX, trace);
+DECLARE_LOGGER(COLLIDER_SPHERE, trace);
+
+DECLARE_LOGGER_GROUP(
+    PHYSICS,
+    3,
+    COLLIDER,
+    COLLIDER_BOX,
+    COLLIDER_SPHERE
+);
