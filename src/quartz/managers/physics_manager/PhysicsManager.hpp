@@ -40,6 +40,7 @@ public: // member functions
 
     reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
     reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& extents);
+    reactphysics3d::SphereShape* createSphereShapePtr(const double radius);
 
 private: // member functions
     PhysicsManager();
