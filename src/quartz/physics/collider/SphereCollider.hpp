@@ -14,6 +14,17 @@ namespace physics {
 }
 
 class quartz::physics::SphereCollider {
+public: // classes
+    struct Parameters {
+        Parameters(
+            const double radius_
+        ) :
+            radius(radius_)
+        {}
+
+        double radius;
+    };
+
 public: // member functions
     SphereCollider(
         quartz::managers::PhysicsManager& physicsManager,
@@ -24,6 +35,7 @@ public: // member functions
 
 private: // member variables
     reactphysics3d::SphereShape* mp_colliderShape;
+    reactphysics3d::Collider* p_collider;
 
 private: // friend classes
     friend class quartz::physics::Collider;

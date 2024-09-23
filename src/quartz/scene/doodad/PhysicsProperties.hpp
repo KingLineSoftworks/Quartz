@@ -9,6 +9,9 @@ namespace scene {
 }
 
 struct quartz::scene::PhysicsProperties {
+public: // static methods
+    static std::string getBodyTypeString(reactphysics3d::BodyType bodyType);
+
 public: // public methods
     PhysicsProperties() = default;
     PhysicsProperties(

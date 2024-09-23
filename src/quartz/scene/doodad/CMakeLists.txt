@@ -9,9 +9,6 @@ add_library(
 
     PhysicsProperties.hpp
     PhysicsProperties.cpp
-
-    Transform.hpp
-    Transform.cpp
 )
 
 target_include_directories(

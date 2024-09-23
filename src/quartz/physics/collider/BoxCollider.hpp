@@ -16,6 +16,17 @@ namespace physics {
 }
 
 class quartz::physics::BoxCollider {
+public: // classes
+    struct Parameters {
+        Parameters(
+            const math::Vec3& halfExtents_
+        ) :
+            halfExtents(halfExtents_)
+        {}
+
+        math::Vec3 halfExtents;
+    };
+
 public: // member functions
     BoxCollider(
         quartz::managers::PhysicsManager& physicsManager,
