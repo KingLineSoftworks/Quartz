@@ -12,26 +12,45 @@
 #include "quartz/scene/doodad/Doodad.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
+class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {
+public:
+    void onContact(UNUSED const reactphysics3d::CollisionCallback::CallbackData& callbackData) override {
+        LOG_ERROR(PHYSICSMAN, "Collision detected");
+    }
+
+    void onTrigger(UNUSED const reactphysics3d::OverlapCallback::CallbackData& callbackData) override {
+
+    }
+};
+
 std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::PhysicsWorld* p_physicsWorld,
-    const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
+    const std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
 
     std::vector<quartz::scene::Doodad> doodads;
 
-    for (const std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>& doodadInformation : doodadInformations) {
+    for (const std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>& doodadInformation : doodadInformations) {
         const std::string& filepath = std::get<0>(doodadInformation);
-        const quartz::scene::Transform& transform = std::get<1>(doodadInformation);
+        const math::Transform& transform = std::get<1>(doodadInformation);
         const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties = std::get<2>(doodadInformation);
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
-        LOG_TRACE(SCENE, "  position = {}", transform.position.toString());
-        LOG_TRACE(SCENE, "  rotation = {}", transform.rotation.toString());
-        LOG_TRACE(SCENE, "  scale    = {}", transform.scale.toString());
+        LOG_TRACE(SCENE, "  transform:");
+        LOG_TRACE(SCENE, "    position = {}", transform.position.toString());
+        LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
+        LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
+        LOG_TRACE(SCENE, "  physics properties:");
+        if (o_physicsProperties) {
+            LOG_TRACE(SCENE, "    body type       = {}", quartz::scene::PhysicsProperties::getBodyTypeString(o_physicsProperties->bodyType));
+            LOG_TRACE(SCENE, "    gravity enabled = {}", o_physicsProperties->enableGravity);
+        } else {
+            LOG_TRACE(SCENE, "    N/A");
+        }
 
         doodads.emplace_back(
             renderingDevice,
@@ -65,7 +84,7 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
-    const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
+    const std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -85,6 +104,10 @@ quartz::scene::Scene::load(
 //    physicsWorldSettings.gravity = math::Vec3(0, -9.81, 0);
     physicsWorldSettings.gravity = math::Vec3(0, -1.0, 0);
     mp_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
+
+    LOG_ERROR(PHYSICSMAN, "Creating physics event listener");
+    static DummyTestPhysicsEventListener el;
+    mp_physicsWorld->setEventListener(&el);
 
     LOG_TRACEthis("Initializing master texture list");
     quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);

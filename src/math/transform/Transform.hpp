@@ -3,13 +3,11 @@
 #include "math/transform/Vec3.hpp"
 #include "math/transform/Quaternion.hpp"
 
-namespace quartz {
-namespace scene {
+namespace math {
     struct Transform;
 }
-}
 
-struct quartz::scene::Transform {
+struct math::Transform {
 public: // public methods
     Transform();
     Transform(

@@ -1,6 +1,6 @@
-#include "quartz/scene/doodad/Transform.hpp"
+#include "math/transform/Transform.hpp"
 
-quartz::scene::Transform::Transform() :
+math::Transform::Transform() :
     position(0.0f, 0.0f, 0.0f),
     rotation(math::Quaternion::fromAxisAngleRotation(
         math::Vec3(0.0f, 1.0f, 0.0f),
@@ -9,7 +9,7 @@ quartz::scene::Transform::Transform() :
     scale(1.0f, 1.0f, 1.0)
 {}
 
-quartz::scene::Transform::Transform(
+math::Transform::Transform(
     const math::Vec3& position_,
     const float rotationAmountDegrees_,
     const math::Vec3& rotationAxis_,
@@ -23,7 +23,7 @@ quartz::scene::Transform::Transform(
     scale(scale_)
 {}
 
-quartz::scene::Transform::Transform(
+math::Transform::Transform(
     const math::Vec3& position_,
     const math::Quaternion& rotation_,
     const math::Vec3& scale_

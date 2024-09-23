@@ -12,7 +12,7 @@
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/doodad/PhysicsProperties.hpp"
-#include "quartz/scene/doodad/Transform.hpp"
+#include "math/transform/Transform.hpp"
 
 namespace quartz {
 namespace scene {
@@ -29,7 +29,7 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager,
         const std::string& objectFilepath,
         const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
-        const quartz::scene::Transform& transform,
+        const math::Transform& transform,
         reactphysics3d::PhysicsWorld* p_physicsWorld
     );
     Doodad(Doodad&& other);
@@ -47,22 +47,22 @@ public: // member functions
     );
 
 private: // static functions
-    static quartz::scene::Transform fixTransform(const quartz::scene::Transform& transform);
+    static math::Transform fixTransform(const math::Transform& transform);
     static reactphysics3d::RigidBody* createRigidBodyPtr(
         reactphysics3d::PhysicsWorld* p_physicsWorld,
         const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
-        const quartz::scene::Transform& transform
+        const math::Transform& transform
     );
     static reactphysics3d::Collider* createColliderPtr(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::scene::Transform& transform
+        const math::Transform& transform
     );
 
 private: // member variables
     quartz::rendering::Model m_model;
 
-    quartz::scene::Transform m_transform;
+    math::Transform m_transform;
     math::Mat4 m_transformationMatrix;
 
     reactphysics3d::RigidBody* mp_rigidBody;

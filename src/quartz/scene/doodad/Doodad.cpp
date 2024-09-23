@@ -8,11 +8,11 @@
 
 #include "quartz/scene/doodad/Doodad.hpp"
 
-quartz::scene::Transform
+math::Transform
 quartz::scene::Doodad::fixTransform(
-    const quartz::scene::Transform& transform
+    const math::Transform& transform
 ) {
-    quartz::scene::Transform fixedTransform = transform;
+    math::Transform fixedTransform = transform;
 
     if (fixedTransform.rotation.magnitude() == 0.0f) {
         fixedTransform.rotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(0.0f, 1.0f, 0.0f), 0.0f);
@@ -25,7 +25,7 @@ reactphysics3d::RigidBody*
 quartz::scene::Doodad::createRigidBodyPtr(
     reactphysics3d::PhysicsWorld* p_physicsWorld,
     const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
-    const quartz::scene::Transform& transform
+    const math::Transform& transform
 ) {
     LOG_FUNCTION_SCOPE_TRACE(DOODAD, "");
 
@@ -51,9 +51,7 @@ quartz::scene::Doodad::createRigidBodyPtr(
     const reactphysics3d::Transform rp3dTransform(transform.position, transform.rotation);
     reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(rp3dTransform);
 
-    const std::string bodyTypeString = o_physicsProperties->bodyType == reactphysics3d::BodyType::STATIC ?
-        "Static" :
-        o_physicsProperties->bodyType == reactphysics3d::BodyType::KINEMATIC ? "Kinematic" : "Dynamic";
+    const std::string bodyTypeString = quartz::scene::PhysicsProperties::getBodyTypeString(o_physicsProperties->bodyType);
     LOG_TRACE(DOODAD, "Using body type : {}", bodyTypeString);
     LOG_TRACE(DOODAD, "Enabling gravity: {}", o_physicsProperties->enableGravity);
     p_rigidBody->setType(o_physicsProperties->bodyType);
@@ -69,12 +67,19 @@ reactphysics3d::Collider*
 quartz::scene::Doodad::createColliderPtr(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::scene::Transform& transform
+    UNUSED const math::Transform& transform
 ) {
-    const math::Vec3 colliderExtents = transform.scale / 2.0f;
-    reactphysics3d::BoxShape* p_colliderShape = physicsManager.createBoxShapePtr(colliderExtents);
+    const math::Vec3 colliderHalfExtents = transform.scale; // because box is by default 1 unit in each direction
+    reactphysics3d::BoxShape* p_colliderShape = physicsManager.createBoxShapePtr(colliderHalfExtents);
+    LOG_TRACE(DOODAD, "Creating box collider with half extents of {}", colliderHalfExtents.toString());
+    LOG_TRACE(DOODAD, "  with {} vertices", p_colliderShape->getNbVertices());
+    for (uint32_t i = 0; i < p_colliderShape->getNbVertices(); ++i) {
+        UNUSED const uint32_t vertexIndex = p_colliderShape->getVertex(i).vertexPointIndex;
+        UNUSED const math::Vec3 vertexPosition = p_colliderShape->getVertexPosition(i);
+        LOG_TRACE(DOODAD, "    vertex {} -> index {} with position {}", i, vertexIndex, vertexPosition.toString());
+    }
 
-    const reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity();
+    reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity(); // transform relative to the body, not the world
     reactphysics3d::Collider* p_collider = p_rigidBody->addCollider(p_colliderShape, colliderTransform);
 
     return p_collider;
@@ -85,7 +90,7 @@ quartz::scene::Doodad::Doodad(
     quartz::managers::PhysicsManager& physicsManager,
     const std::string& objectFilepath,
     const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
-    const quartz::scene::Transform& transform,
+    const math::Transform& transform,
     reactphysics3d::PhysicsWorld* p_physicsWorld
 ) :
     m_model(
@@ -136,7 +141,7 @@ quartz::scene::Doodad::update(
     UNUSED const double frameTimeDelta,
     UNUSED const double frameInterpolationFactor
 ) {
-    quartz::scene::Transform currentTransform;
+    math::Transform currentTransform;
     currentTransform.position = mp_rigidBody->getTransform().getPosition();
     currentTransform.rotation = mp_rigidBody->getTransform().getOrientation();
     currentTransform.scale = m_transform.scale;

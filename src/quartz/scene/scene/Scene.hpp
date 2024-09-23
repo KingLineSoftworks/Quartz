@@ -15,7 +15,7 @@
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include "quartz/scene/doodad/Transform.hpp"
+#include "math/transform/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
@@ -54,7 +54,7 @@ public: // member functions
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
-        const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
+        const std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
     );
 
     void fixedUpdate(
@@ -74,7 +74,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::PhysicsWorld* p_physicsWorld,
-        const std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
+        const std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
     );
 
 private: // member variables

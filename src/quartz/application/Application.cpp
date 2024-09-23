@@ -55,38 +55,82 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
-    std::vector<std::tuple<std::string, quartz::scene::Transform, std::optional<quartz::scene::PhysicsProperties>>> doodadInformations = {
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf"),
-            {
-                { 5.0f, 10.0f, 0.0f },
-                0.0f,
-                { 0.0f, 0.0f, 1.0f },
-                { 1.0f, 1.0f, 1.0f }
-            },
-            {
-                quartz::scene::PhysicsProperties(
-                    reactphysics3d::BodyType::DYNAMIC,
-                    true
-                )
-            }
-        },
-        // The ground
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"),
-            {
-                {0.0f, -5.0f, 0.0f},
-                0.0f,
-                {0.0f, 1.0f, 0.0f},
-                {25.0f, 1.0f, 25.0f}
-            },
-            {
-                quartz::scene::PhysicsProperties(
-                    reactphysics3d::BodyType::STATIC,
-                    false
-                )
-            }
-        }
+    std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>> doodadInformations = {
+        // {
+        //     util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"),
+        //     {
+        //         { 5.0f, 10.0f, 0.0f },
+        //         0.0f,
+        //         { 0.0f, 0.0f, 1.0f },
+        //         { 1.0f, 1.0f, 1.0f }
+        //     },
+        //     {
+        //         quartz::scene::PhysicsProperties(
+        //             reactphysics3d::BodyType::DYNAMIC,
+        //             true
+        //         )
+        //     }
+        // },
+//        {
+//            "/Users/keegankochis/Downloads/custom unit cube/glb/unit_cube.glb",
+//            {
+//                { 5.0f, 10.0f, 0.0f },
+//                0.0f,
+//                { 0.0f, 0.0f, 1.0f },
+//                { 1.0f, 1.0f, 1.0f }
+//            },
+//            {
+//                quartz::scene::PhysicsProperties(
+//                    reactphysics3d::BodyType::DYNAMIC,
+//                    true
+//                )
+//            }
+//        },
+       {
+           "/Users/keegankochis/Downloads/custom unit sphere/glb/unit_sphere.glb",
+           {
+               { 5.0f, 10.0f, 0.0f },
+               0.0f,
+               { 0.0f, 0.0f, 1.0f },
+               { 1.0f, 1.0f, 1.0f }
+           },
+           {
+               quartz::scene::PhysicsProperties(
+                   reactphysics3d::BodyType::DYNAMIC,
+                   true
+               )
+           }
+       },
+        // {
+        //     util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"),
+        //     {
+        //         {0.0f, -5.0f, 0.0f},
+        //         0.0f,
+        //         {0.0f, 1.0f, 0.0f},
+        //         {25.0f, 1.0f, 25.0f}
+        //     },
+        //     {
+        //         quartz::scene::PhysicsProperties(
+        //             reactphysics3d::BodyType::STATIC,
+        //             false
+        //         )
+        //     }
+        // }
+       {
+           "/Users/keegankochis/Downloads/custom unit cube/glb/unit_cube.glb",
+           {
+               {0.0f, -5.0f, 0.0f},
+               0.0f,
+               {0.0f, 1.0f, 0.0f},
+               {25.0f, 1.0f, 25.0f}
+           },
+           {
+               quartz::scene::PhysicsProperties(
+                   reactphysics3d::BodyType::STATIC,
+                   false
+               )
+           }
+       }
     };
 
     std::array<std::string, 6> skyBoxInformation = {
@@ -98,25 +142,9 @@ void quartz::Application::run() {
         util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negz.jpg")
     };
 
-    std::vector<quartz::scene::PointLight> pointLights = {
-        {
-            {0.6500f, 0.6500f, 0.6500f},
-            {0.0f, 0.0f, -6.0f},
-            0.001f,
-            0.001f
-        },
-    };
+    std::vector<quartz::scene::PointLight> pointLights = {};
 
-    std::vector<quartz::scene::SpotLight> spotLights = {
-        {
-            {0.7f, 0.7f, 0.7f},
-            {0.0f, 6.0f, 9.0f},
-            {0.0f, -2.0f, -3.0f},
-            10.0f, 15.0f,
-            0.005f,
-            0.01f
-        },
-    };
+    std::vector<quartz::scene::SpotLight> spotLights = {};
 
     LOG_INFOthis("Loading scene");
     m_scene.load(
@@ -130,11 +158,11 @@ void quartz::Application::run() {
              { 1.25f, 0.0f, 10.0f }
         },
         {
-            { 0.01f, 0.01f, 0.01f }
+            { 0.1f, 0.1f, 0.1f }
         },
         {
-            { 0.05f, 0.05f, 0.05f },
-            { 3.0f, -2.0f, 0.0f }
+            { 0.5f, 0.5f, 0.5f },
+            { 3.0f, -2.0f, 2.0f }
         },
         pointLights,
         spotLights,
@@ -150,7 +178,6 @@ void quartz::Application::run() {
     double previousFrameStartTime = 0.0f;
     double currentFrameStartTime = 0.0f;
     double frameTimeAccumulator = 0.0f;
-    double frameInterpolationFactor = 0.0f;
 
     /**
      * @brief When the article says to integrate between the previous state and the current state,
@@ -182,21 +209,7 @@ void quartz::Application::run() {
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
-        // If frameTimeAccumulator is < 0, then we have done more physics steps than we need, so we need to
-        // extrapolate into a future state
-        // What happens when we add targetTickTimeDelta to frameTimeAccumulator?
-        //   accum must always be > -dt
-        //   if accum = -dt then adding dt will make accum = 0
-        //   accum must always be < dt
-        //   if accum = dt then adding dt will make accum = 2*dt
-        //   if we divide the newly shifted accum by dt then accum is bound between 0 and 1
-        //   if accum == 0 then we use all of the previous state
-        //   if accum == 1 then we use all of the current state
-        //   this is okay because if accum == 0 then we have advanced physics beyond what we need and don't need to show that state yet
-        //   this is okay because if accum == 1 then we are ready to advance physics again and can show the current state in full
-        //   1. add dt to accum
-        //   2. divide new accum by dt
-        frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
+        double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
         m_scene.update(m_renderingContext.getRenderingWindow(), currentFrameTimeDelta, frameInterpolationFactor);
         m_renderingContext.draw(m_scene);
