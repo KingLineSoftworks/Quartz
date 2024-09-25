@@ -2,12 +2,14 @@
 
 #include <optional>
 #include <string>
+#include <variant>
 
 #include <reactphysics3d/reactphysics3d.h>
 
 #include "math/transform/Mat4.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
@@ -21,16 +23,35 @@ namespace scene {
 }
 
 class quartz::scene::Doodad {
-public: //
+public: // classes
+    struct Parameters {
+        Parameters(
+            std::string objectFilepath_,
+            math::Transform transform_,
+            std::optional<quartz::scene::PhysicsProperties> physicsProperties_,
+            quartz::physics::RigidBody::Parameters rigidBodyParameters_
+        ) :
+            objectFilepath(objectFilepath_),
+            transform(transform_),
+            physicsProperties(physicsProperties_),
+            rigidBodyParameters(rigidBodyParameters_)
+        {}
+
+        std::string objectFilepath;
+        math::Transform transform;
+        std::optional<quartz::scene::PhysicsProperties> physicsProperties;
+        quartz::physics::RigidBody::Parameters rigidBodyParameters;
+    };
 
 public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
+        reactphysics3d::PhysicsWorld* p_physicsWorld,
         const std::string& objectFilepath,
-        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
         const math::Transform& transform,
-        reactphysics3d::PhysicsWorld* p_physicsWorld
+        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
+        const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     );
     Doodad(Doodad&& other);
     ~Doodad();
@@ -67,4 +88,5 @@ private: // member variables
 
     reactphysics3d::RigidBody* mp_rigidBody;
     reactphysics3d::Collider* mp_collider;
+    std::optional<quartz::physics::RigidBody> mo_rigidBody;
 };

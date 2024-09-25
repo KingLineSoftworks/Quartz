@@ -1,21 +1,5 @@
 #include "quartz/physics/collider/Collider.hpp"
 
-reactphysics3d::Collider*
-quartz::physics::Collider::createColliderPtr(
-    reactphysics3d::RigidBody* p_rigidBody,
-    reactphysics3d::CollisionShape* p_collisionShape
-) {
-    reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity(); // transform relative to the body, not the world
-    reactphysics3d::Collider* p_collider = p_rigidBody->addCollider(p_collisionShape, colliderTransform);
-
-    return p_collider;
-}
-
-quartz::physics::Collider::Collider() :
-    mo_boxCollider(),
-    mo_sphereCollider()
-{}
-
 quartz::physics::Collider
 quartz::physics::Collider::createBoxCollider(
     quartz::managers::PhysicsManager& physicsManager,
@@ -45,6 +29,29 @@ quartz::physics::Collider::createSphereCollider(
 
     return collider;
 }
+
+reactphysics3d::Collider*
+quartz::physics::Collider::createColliderPtr(
+    reactphysics3d::RigidBody* p_rigidBody,
+    reactphysics3d::CollisionShape* p_collisionShape
+) {
+    reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity(); // transform relative to the body, not the world
+    reactphysics3d::Collider* p_collider = p_rigidBody->addCollider(p_collisionShape, colliderTransform);
+
+    return p_collider;
+}
+
+quartz::physics::Collider::Collider() :
+    mo_boxCollider(),
+    mo_sphereCollider()
+{}
+
+quartz::physics::Collider::Collider(
+    quartz::physics::Collider&& other
+) :
+    mo_boxCollider(std::move(other.mo_boxCollider)),
+    mo_sphereCollider(std::move(other.mo_sphereCollider))
+{}
 
 reactphysics3d::CollisionShape*
 quartz::physics::Collider::getCollisionShapePtr() {
