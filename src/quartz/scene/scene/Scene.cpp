@@ -15,11 +15,11 @@
 class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {
 public:
     void onContact(UNUSED const reactphysics3d::CollisionCallback::CallbackData& callbackData) override {
-        LOG_ERROR(PHYSICSMAN, "Collision detected");
+        // LOG_ERROR(PHYSICSMAN, "Contact detected");
     }
 
     void onTrigger(UNUSED const reactphysics3d::OverlapCallback::CallbackData& callbackData) override {
-
+        // LOG_ERROR(PHYSICSMAN, "Trigger detected");
     }
 };
 
@@ -37,21 +37,20 @@ quartz::scene::Scene::loadDoodads(
     for (const quartz::scene::Doodad::Parameters& doodadInformation : doodadInformations) {
         const std::string& filepath = doodadInformation.objectFilepath;
         const math::Transform& transform = doodadInformation.transform;
-        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties = doodadInformation.physicsProperties;
-        const quartz::physics::RigidBody::Parameters rigidBodyInformation = doodadInformation.rigidBodyParameters;
+        const quartz::physics::RigidBody::Parameters& rigidBodyInformation = doodadInformation.rigidBodyParameters;
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
         LOG_TRACE(SCENE, "  transform:");
         LOG_TRACE(SCENE, "    position = {}", transform.position.toString());
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
         LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
-        LOG_TRACE(SCENE, "  physics properties:");
-        if (o_physicsProperties) {
-            LOG_TRACE(SCENE, "    body type       = {}", quartz::scene::PhysicsProperties::getBodyTypeString(o_physicsProperties->bodyType));
-            LOG_TRACE(SCENE, "    gravity enabled = {}", o_physicsProperties->enableGravity);
-        } else {
-            LOG_TRACE(SCENE, "    N/A");
-        }
+        LOG_TRACE(SCENE, "  rigid body properties:");
+        // if (rigidBodyInformation) {
+            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(rigidBodyInformation.bodyType));
+            LOG_TRACE(SCENE, "    gravity enabled = {}", rigidBodyInformation.enableGravity);
+        // } else {
+        //     LOG_TRACE(SCENE, "    N/A");
+        // }
 
         doodads.emplace_back(
             renderingDevice,
@@ -59,7 +58,6 @@ quartz::scene::Scene::loadDoodads(
             p_physicsWorld,
             filepath,
             transform,
-            o_physicsProperties,
             rigidBodyInformation
         );
     }
@@ -107,7 +105,6 @@ quartz::scene::Scene::load(
     physicsWorldSettings.gravity = math::Vec3(0, -1.0, 0);
     mp_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
 
-    LOG_ERROR(PHYSICSMAN, "Creating physics event listener");
     static DummyTestPhysicsEventListener el;
     mp_physicsWorld->setEventListener(&el);
 
