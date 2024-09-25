@@ -28,16 +28,17 @@ quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::PhysicsWorld* p_physicsWorld,
-    const std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
 
     std::vector<quartz::scene::Doodad> doodads;
 
-    for (const std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>& doodadInformation : doodadInformations) {
-        const std::string& filepath = std::get<0>(doodadInformation);
-        const math::Transform& transform = std::get<1>(doodadInformation);
-        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties = std::get<2>(doodadInformation);
+    for (const quartz::scene::Doodad::Parameters& doodadInformation : doodadInformations) {
+        const std::string& filepath = doodadInformation.objectFilepath;
+        const math::Transform& transform = doodadInformation.transform;
+        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties = doodadInformation.physicsProperties;
+        const quartz::physics::RigidBody::Parameters rigidBodyInformation = doodadInformation.rigidBodyParameters;
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
         LOG_TRACE(SCENE, "  transform:");
@@ -55,10 +56,11 @@ quartz::scene::Scene::loadDoodads(
         doodads.emplace_back(
             renderingDevice,
             physicsManager,
+            p_physicsWorld,
             filepath,
-            o_physicsProperties,
             transform,
-            p_physicsWorld
+            o_physicsProperties,
+            rigidBodyInformation
         );
     }
 
@@ -84,7 +86,7 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
-    const std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>>& doodadInformations
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
 ) {
    LOG_FUNCTION_SCOPE_TRACEthis("");
 

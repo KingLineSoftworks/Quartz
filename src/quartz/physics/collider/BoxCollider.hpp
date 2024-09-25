@@ -18,9 +18,7 @@ namespace physics {
 class quartz::physics::BoxCollider {
 public: // classes
     struct Parameters {
-        Parameters(
-            const math::Vec3& halfExtents_
-        ) :
+        Parameters(const math::Vec3& halfExtents_) :
             halfExtents(halfExtents_)
         {}
 
@@ -32,6 +30,9 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager,
         const math::Vec3& halfExtents
     );
+    BoxCollider(const BoxCollider& other) = delete;
+    BoxCollider(BoxCollider&& other);
+    BoxCollider& operator=(BoxCollider&& other);
 
     USE_LOGGER(COLLIDER_BOX);
 

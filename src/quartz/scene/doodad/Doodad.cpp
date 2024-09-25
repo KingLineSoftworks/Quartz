@@ -88,10 +88,11 @@ quartz::scene::Doodad::createColliderPtr(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
+    reactphysics3d::PhysicsWorld* p_physicsWorld,
     const std::string& objectFilepath,
-    const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
     const math::Transform& transform,
-    reactphysics3d::PhysicsWorld* p_physicsWorld
+    const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
+    const quartz::physics::RigidBody::Parameters& rigidBodyParameters
 ) :
     m_model(
         renderingDevice,
@@ -100,7 +101,8 @@ quartz::scene::Doodad::Doodad(
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
     mp_rigidBody(quartz::scene::Doodad::createRigidBodyPtr(p_physicsWorld, o_physicsProperties, m_transform)),
-    mp_collider(quartz::scene::Doodad::createColliderPtr(physicsManager, mp_rigidBody, m_transform))
+    mp_collider(quartz::scene::Doodad::createColliderPtr(physicsManager, mp_rigidBody, m_transform)),
+    mo_rigidBody({physicsManager, p_physicsWorld, m_transform, rigidBodyParameters})
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -115,7 +117,8 @@ quartz::scene::Doodad::Doodad(
     m_model(std::move(other.m_model)),
     m_transform(other.m_transform),
     m_transformationMatrix(other.m_transformationMatrix),
-    mp_rigidBody(std::move(other.mp_rigidBody))
+    mp_rigidBody(std::move(other.mp_rigidBody)),
+    mo_rigidBody(std::move(other.mo_rigidBody))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }

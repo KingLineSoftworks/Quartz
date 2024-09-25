@@ -30,6 +30,9 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager,
         const double radius
     );
+    SphereCollider(const SphereCollider& other) = delete;
+    SphereCollider(SphereCollider&& other);
+    SphereCollider& operator=(SphereCollider&& other);
 
     USE_LOGGER(COLLIDER_SPHERE);
 

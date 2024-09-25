@@ -49,6 +49,7 @@ target_link_libraries(
 
     PUBLIC
     QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_PHYSICS_RigidBody
     QUARTZ_RENDERING_Device
     QUARTZ_RENDERING_Model
 )

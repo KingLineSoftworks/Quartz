@@ -17,6 +17,7 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
+    printf("Starting the application/n");
     constexpr bool shouldLogPreamble = false;
 
     ASSERT_QUARTZ_VERSION();
@@ -28,6 +29,7 @@ int main() {
     REGISTER_LOGGER_GROUP(UTIL);
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(QUARTZ_MANAGERS);
+    REGISTER_LOGGER_GROUP(QUARTZ_PHYSICS);
     REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
     REGISTER_LOGGER_GROUP(QUARTZ_SCENE);
     REGISTER_LOGGER_GROUP(DEMO_APP);
@@ -45,6 +47,16 @@ int main() {
 
         // quartz
         {"APPLICATION", util::Logger::Level::info},
+
+        // managers
+        {"INPUTMAN", util::Logger::Level::info},
+        {"PHYSICSMAN", util::Logger::Level::info},
+
+        // physics
+        {"COLLIDER", util::Logger::Level::info},
+        {"COLLIDER_BOX", util::Logger::Level::info},
+        {"COLLIDER_SPHERE", util::Logger::Level::info},
+        {"RIGIDBODY", util::Logger::Level::info},
 
         // rendering
         {"INPUTMAN", util::Logger::Level::info},
@@ -151,31 +163,6 @@ int main() {
     }
 
     LOG_TRACE(GENERAL, "Terminating application");
-
-#if false
-    LOG_TRACE(GENERAL, "Performing physics simulation");
-    reactphysics3d::PhysicsCommon physicsCommon;
-    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsCommon.createPhysicsWorld();
-
-    reactphysics3d::Vector3 position(0, 20, 0);
-    reactphysics3d::Quaternion orientation = reactphysics3d::Quaternion::identity();
-    reactphysics3d::Transform transform(position, orientation);
-    reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(transform);
-
-    const uint32_t simulationTimeSec = 120;
-    const reactphysics3d::decimal timeStep = 1.0f / 60.0f;
-    for (uint32_t i = 0; i < simulationTimeSec; ++i) {
-        p_physicsWorld->update(timeStep);
-        const reactphysics3d::Transform& currTransform = p_rigidBody->getTransform();
-        const reactphysics3d::Vector3& currPosition = currTransform.getPosition();
-
-        LOG_TRACE(BIGBOY, "Rigid body position: {:10.6f}, {:10.6f}, {:10.6f}", currPosition.x, currPosition.y, currPosition.z);
-    }
-
-    // These will automatically get destroyed when the physics common goes out of scope but I think it'd be best practice to do them manually
-    p_physicsWorld->destroyRigidBody(p_rigidBody);
-    physicsCommon.destroyPhysicsWorld(p_physicsWorld);
-#endif
 
     return EXIT_SUCCESS;
 }

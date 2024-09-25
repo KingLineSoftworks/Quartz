@@ -30,6 +30,9 @@ public: // static factory functions
     );
     
 public: // member functions
+    Collider(const Collider& other) = delete;
+    Collider(Collider&& other);
+
     reactphysics3d::CollisionShape* getCollisionShapePtr();
 
 private: // static functions

@@ -55,7 +55,7 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
-    std::vector<std::tuple<std::string, math::Transform, std::optional<quartz::scene::PhysicsProperties>>> doodadInformations = {
+    std::vector<quartz::scene::Doodad::Parameters> doodadInformations = {
         // {
         //     util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"),
         //     {
@@ -99,6 +99,12 @@ void quartz::Application::run() {
                    reactphysics3d::BodyType::DYNAMIC,
                    true
                )
+           },
+           {
+                reactphysics3d::BodyType::DYNAMIC,
+                true,
+                quartz::physics::SphereCollider::Parameters(1.0)
+
            }
        },
         // {
@@ -126,9 +132,14 @@ void quartz::Application::run() {
            },
            {
                quartz::scene::PhysicsProperties(
-                   reactphysics3d::BodyType::STATIC,
-                   false
+                    reactphysics3d::BodyType::STATIC,
+                    false
                )
+           },
+           {
+                reactphysics3d::BodyType::STATIC,
+                false,
+                quartz::physics::BoxCollider::Parameters({25.0f, 1.0f, 25.0f})
            }
        }
     };
