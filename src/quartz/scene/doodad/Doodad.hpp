@@ -13,7 +13,6 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
-#include "quartz/scene/doodad/PhysicsProperties.hpp"
 #include "math/transform/Transform.hpp"
 
 namespace quartz {
@@ -28,18 +27,15 @@ public: // classes
         Parameters(
             std::string objectFilepath_,
             math::Transform transform_,
-            std::optional<quartz::scene::PhysicsProperties> physicsProperties_,
             quartz::physics::RigidBody::Parameters rigidBodyParameters_
         ) :
             objectFilepath(objectFilepath_),
             transform(transform_),
-            physicsProperties(physicsProperties_),
             rigidBodyParameters(rigidBodyParameters_)
         {}
 
         std::string objectFilepath;
         math::Transform transform;
-        std::optional<quartz::scene::PhysicsProperties> physicsProperties;
         quartz::physics::RigidBody::Parameters rigidBodyParameters;
     };
 
@@ -50,7 +46,6 @@ public: // member functions
         reactphysics3d::PhysicsWorld* p_physicsWorld,
         const std::string& objectFilepath,
         const math::Transform& transform,
-        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
         const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     );
     Doodad(Doodad&& other);
@@ -69,16 +64,6 @@ public: // member functions
 
 private: // static functions
     static math::Transform fixTransform(const math::Transform& transform);
-    static reactphysics3d::RigidBody* createRigidBodyPtr(
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
-        const std::optional<quartz::scene::PhysicsProperties>& o_physicsProperties,
-        const math::Transform& transform
-    );
-    static reactphysics3d::Collider* createColliderPtr(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const math::Transform& transform
-    );
 
 private: // member variables
     quartz::rendering::Model m_model;
@@ -86,7 +71,5 @@ private: // member variables
     math::Transform m_transform;
     math::Mat4 m_transformationMatrix;
 
-    reactphysics3d::RigidBody* mp_rigidBody;
-    reactphysics3d::Collider* mp_collider;
     std::optional<quartz::physics::RigidBody> mo_rigidBody;
 };

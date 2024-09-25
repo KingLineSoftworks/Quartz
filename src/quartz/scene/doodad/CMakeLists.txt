@@ -6,9 +6,6 @@ add_library(
     SHARED
     Doodad.hpp
     Doodad.cpp
-
-    PhysicsProperties.hpp
-    PhysicsProperties.cpp
 )
 
 target_include_directories(

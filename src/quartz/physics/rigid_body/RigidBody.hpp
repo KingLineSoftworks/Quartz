@@ -21,6 +21,8 @@ namespace physics {
 class quartz::physics::RigidBody {
 public: // classes
     struct Parameters {
+        static std::string getBodyTypeString(const reactphysics3d::BodyType);
+
         Parameters(
             const reactphysics3d::BodyType bodyType_,
             const bool enableGravity_,
@@ -71,6 +73,9 @@ public: // member functions
     ~RigidBody();
 
     USE_LOGGER(RIGIDBODY);
+
+    math::Vec3 getPosition() { return mp_rigidBody->getTransform().getPosition(); }
+    math::Quaternion getOrientation() { return mp_rigidBody->getTransform().getOrientation(); }
 
 private: // static functions
     static reactphysics3d::RigidBody* createRigidBodyPtr(

@@ -1,5 +1,14 @@
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 
+std::string
+quartz::physics::RigidBody::Parameters::getBodyTypeString(
+    const reactphysics3d::BodyType bodyType
+) {
+    return bodyType == reactphysics3d::BodyType::STATIC ? "Static" :
+        bodyType == reactphysics3d::BodyType::KINEMATIC ? "Kinematic" :
+        "Dynamic";
+}
+
 reactphysics3d::RigidBody*
 quartz::physics::RigidBody::createRigidBodyPtr(
     reactphysics3d::PhysicsWorld* p_physicsWorld,
@@ -12,10 +21,7 @@ quartz::physics::RigidBody::createRigidBodyPtr(
     const reactphysics3d::Transform rp3dTransform(transform.position, transform.rotation);
     reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(rp3dTransform);
 
-    const std::string bodyTypeString =
-        bodyType == reactphysics3d::BodyType::STATIC ? "Static" :
-        bodyType == reactphysics3d::BodyType::DYNAMIC ? "Dynamic" :
-        "Kinematic";
+    const std::string bodyTypeString = quartz::physics::RigidBody::Parameters::getBodyTypeString(bodyType);
     LOG_TRACE(RIGIDBODY, "Using body type : {}", bodyTypeString);
     LOG_TRACE(RIGIDBODY, "Enabling gravity: {}", enableGravity);
     p_rigidBody->setType(bodyType);

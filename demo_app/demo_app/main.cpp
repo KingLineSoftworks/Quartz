@@ -17,7 +17,6 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
-    printf("Starting the application/n");
     constexpr bool shouldLogPreamble = false;
 
     ASSERT_QUARTZ_VERSION();
