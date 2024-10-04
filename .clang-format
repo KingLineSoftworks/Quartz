@@ -42,25 +42,25 @@ AlignOperands:   DontAlign
 AlignTrailingComments:
   Kind:            Never
   OverEmptyLines:  0
-AllowAllArgumentsOnNextLine: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: Empty
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: false
-AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: TopLevel
+AlwaysBreakAfterReturnType: TopLevel
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: MultiLine
 AttributeMacros:
   - __capability
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
 BitFieldColonSpacing: Both
 BraceWrapping:
   AfterCaseLabel:  false
@@ -68,7 +68,7 @@ BraceWrapping:
   AfterControlStatement: Never
   AfterEnum:       false
   AfterExternBlock: false
-  AfterFunction:   true
+  AfterFunction:   false
   AfterNamespace:  false
   AfterObjCDeclaration: false
   AfterStruct:     false
@@ -84,16 +84,17 @@ BraceWrapping:
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
-BreakArrays:     true
-BreakBeforeBinaryOperators: All
+BreakArrays:     false
+BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeConceptDeclarations: Always
-BreakBeforeBraces: WebKit
+BreakBeforeBraces: Custom
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeComma
-BreakInheritanceList: BeforeColon
+BreakConstructorInitializers: AfterColon
+BreakInheritanceList: AfterColon
 BreakStringLiterals: true
-ColumnLimit:     0
+BreakFunctionDefinitionParameters: true
+ColumnLimit:     120
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerIndentWidth: 4
@@ -111,27 +112,31 @@ ForEachMacros:
   - BOOST_FOREACH
 IfMacros:
   - KJ_IF_MAYBE
-IncludeBlocks:   Preserve
+IncludeBlocks:   Regroup
 IncludeCategories:
-  - Regex:           '<vulkan\/.*>'
+  - Regex:           '<glm\/.*>'
     Priority:        10
     SortPriority:    10
     CaseSensitive:   false
-  - Regex:           '<GLFW\/.*>'
+  - Regex:           '<vulkan\/.*>'
     Priority:        11
     SortPriority:    11
     CaseSensitive:   false
-  - Regex:           '"spdlog\/.*"'
+  - Regex:           '<GLFW\/.*>'
     Priority:        12
     SortPriority:    12
     CaseSensitive:   false
-  - Regex:           '<tiny_gltf\.h>'
+  - Regex:           '"spdlog\/.*"'
     Priority:        13
     SortPriority:    13
     CaseSensitive:   false
-  - Regex:           '<reactphysics3d\/.*>'
+  - Regex:           '<tiny_gltf\.h>'
     Priority:        14
     SortPriority:    14
+    CaseSensitive:   false
+  - Regex:           '<reactphysics3d\/.*>'
+    Priority:        15
+    SortPriority:    15
     CaseSensitive:   false
   - Regex:           '"math\/.*"'
     Priority:        98
@@ -162,7 +167,7 @@ IndentWidth:     4
 IndentWrappedFunctionNames: false
 InsertBraces:    true
 InsertNewlineAtEOF: true
-InsertTrailingCommas: None
+InsertTrailingCommas: Wrapped
 IntegerLiteralSeparator:
   Binary:          0
   BinaryMinDigits: 0
@@ -250,14 +255,14 @@ SpacesInParensOptions:
   InConditionalStatements: false
   InEmptyParentheses: false
   Other:           false
-SpacesInSquareBrackets: false
+SpacesInSquareBrackets: true
 Standard:        Latest
 StatementAttributeLikeMacros:
   - Q_EMIT
 StatementMacros:
   - Q_UNUSED
   - QT_REQUIRE_VERSION
-TabWidth:        1
+TabWidth:        4
 UseTab:          Never
 VerilogBreakBetweenInstancePorts: true
 WhitespaceSensitiveMacros:
