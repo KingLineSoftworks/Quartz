@@ -65,27 +65,27 @@ BitFieldColonSpacing: Both
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      false
-  AfterControlStatement: Never
+  AfterControlStatement: Always
   AfterEnum:       false
   AfterExternBlock: false
-  AfterFunction:   false
+  AfterFunction:   true
   AfterNamespace:  false
   AfterObjCDeclaration: false
   AfterStruct:     false
   AfterUnion:      false
-  BeforeCatch:     false
-  BeforeElse:      false
+  BeforeCatch:     true
+  BeforeElse:      true
   BeforeLambdaBody: false
   BeforeWhile:     false
   IndentBraces:    false
-  SplitEmptyFunction: true
-  SplitEmptyRecord: true
-  SplitEmptyNamespace: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
 BreakArrays:     false
-BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBinaryOperators: None
 BreakBeforeConceptDeclarations: Always
 BreakBeforeBraces: Custom
 BreakBeforeInlineASMColon: OnlyMultiline
@@ -93,13 +93,13 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
 BreakStringLiterals: true
-BreakFunctionDefinitionParameters: true
-ColumnLimit:     120
+# BreakFunctionDefinitionParameters: false
+ColumnLimit:     100
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: false
+Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 DisableFormat:   false
 EmptyLineAfterAccessModifier: Never
@@ -158,7 +158,7 @@ IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
 IndentCaseBlocks: false
-IndentCaseLabels: false
+IndentCaseLabels: true
 IndentExternBlock: NoIndent
 IndentGotoLabels: true
 IndentPPDirectives: None
@@ -192,13 +192,13 @@ ObjCSpaceAfterProperty: true
 ObjCSpaceBeforeProtocolList: true
 PackConstructorInitializers: Never
 PenaltyBreakAssignment: 2
-PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakBeforeFirstCallParameter: 0
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 0
-PenaltyBreakScopeResolution: 500
+PenaltyBreakScopeResolution: 10000
 PenaltyBreakString: 1000
-PenaltyBreakTemplateDeclaration: 10
+PenaltyBreakTemplateDeclaration: 0
 PenaltyExcessCharacter: 1000000
 PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 60
@@ -208,7 +208,7 @@ QualifierAlignment: Leave
 ReferenceAlignment: Pointer
 ReflowComments:  true
 RemoveBracesLLVM: false
-RemoveParentheses: ReturnStatement
+RemoveParentheses: Leave
 RemoveSemicolon: true
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
@@ -266,6 +266,56 @@ TabWidth:        4
 UseTab:          Never
 VerilogBreakBetweenInstancePorts: true
 WhitespaceSensitiveMacros:
+  - DECLARE_LOGGER
+  - DECLARE_LOGGER_GROUP
+  - REGISTER_LOGGER_GROUP
+  - USE_LOGGER
+  - LOG_TRACE
+  - LOG_TRACEthis
+  - LOG_DEBUG
+  - LOG_DEBUGthis
+  - LOG_INFO
+  - LOG_INFOthis
+  - LOG_WARNING
+  - LOG_WARNINGthis
+  - LOG_ERROR
+  - LOG_ERRORthis
+  - LOG_CRITICAL
+  - LOG_CRITICALthis
+  - LOG_THROW
+  - LOG_THROWthis
+  - LOG_SCOPE_CHANGE_TRACE
+  - LOG_SCOPE_CHANGE_TRACEthis
+  - LOG_SCOPE_CHANGE_DEBUG
+  - LOG_SCOPE_CHANGE_DEBUGthis
+  - LOG_SCOPE_CHANGE_INFO
+  - LOG_SCOPE_CHANGE_INFOthis
+  - LOG_SCOPE_CHANGE_WARNING
+  - LOG_SCOPE_CHANGE_WARNINGthis
+  - LOG_SCOPE_CHANGE_ERROR
+  - LOG_SCOPE_CHANGE_ERRORthis
+  - LOG_SCOPE_CHANGE_CRITICAL
+  - LOG_SCOPE_CHANGE_CRITICALthis
+  - LOG_FUNCTION_CALL_TRACE
+  - LOG_FUNCTION_CALL_TRACEthis
+  - LOG_FUNCTION_CALL_DEBUG
+  - LOG_FUNCTION_CALL_DEBUGthis
+  - LOG_FUNCTION_CALL_INFO
+  - LOG_FUNCTION_CALL_INFOthis
+  - LOG_FUNCTION_CALL_ERROR
+  - LOG_FUNCTION_CALL_ERRORthis
+  - LOG_FUNCTION_CALL_CRITICAL
+  - LOG_FUNCTION_CALL_CRITICALthis
+  - LOG_FUNCTION_SCOPE_TRACE
+  - LOG_FUNCTION_SCOPE_TRACEthis
+  - LOG_FUNCTION_SCOPE_DEBUG
+  - LOG_FUNCTION_SCOPE_DEBUGthis
+  - LOG_FUNCTION_SCOPE_INFO
+  - LOG_FUNCTION_SCOPE_INFOthis
+  - LOG_FUNCTION_SCOPE_ERROR
+  - LOG_FUNCTION_SCOPE_ERRORthis
+  - LOG_FUNCTION_SCOPE_CRITICAL
+  - LOG_FUNCTION_SCOPE_CRITICALthis
   - BOOST_PP_STRINGIZE
   - CF_SWIFT_NAME
   - NS_SWIFT_NAME
