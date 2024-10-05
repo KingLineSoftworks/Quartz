@@ -122,26 +122,23 @@ add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 
 # vulkan
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(VULKAN_INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include")
+    set(VULKAN_IMPORTED_LOCATION "${VENDOR_ROOT_DIR}/vulkan/linux/lib/libvulkan.so")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(
-        VULKAN_INTERFACE_INCLUDE_DIRECTORIES
-        "${VENDOR_ROOT_DIR}/vulkan/mac/moltenvk-headers/include"
-        "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include"
-    )
-    add_library(vulkan SHARED IMPORTED)
-    set_target_properties(
-        vulkan
-        PROPERTIES
-            IMPORTED_LOCATION
-                "${VENDOR_ROOT_DIR}/vulkan/mac/lib/libvulkan.dylib"
-            INTERFACE_INCLUDE_DIRECTORIES
-                "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
-    )
+    set(VULKAN_INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_ROOT_DIR}/vulkan/mac/moltenvk-headers/include" "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include")
+    set(VULKAN_IMPORTED_LOCATION "${VENDOR_ROOT_DIR}/vulkan/mac/lib/libvulkan.dylib")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(FATAL_ERROR "Quartz is not currently supporting a build for Windows platforms")
 else()
     message(FATAL_ERROR "Quartz does not recognize the current build platform")
 endif()
+add_library(vulkan SHARED IMPORTED)
+set_target_properties(
+    vulkan
+    PROPERTIES
+    IMPORTED_LOCATION "${VULKAN_IMPORTED_LOCATION}"
+    INTERFACE_INCLUDE_DIRECTORIES "${VULKAN_INTERFACE_INCLUDE_DIRECTORIES}"
+)
 
 #====================================================================
 # Define preprocessor directives for the Quartz libraries
