@@ -63,7 +63,7 @@ void quartz::Application::run() {
 
     std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
         {
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf",
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"),
             {
                 {-2.5f, 0.0f, 0.0f},
                 0.0f,
@@ -72,7 +72,7 @@ void quartz::Application::run() {
             }
         },
         {
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf",
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf"),
             {
                 {0.0f, 0.0f, 0.0f},
                 0.0f,
@@ -81,7 +81,7 @@ void quartz::Application::run() {
             }
         },
         {
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf",
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf"),
             {
                 {2.5f, 0.0f, 0.0f},
                 0.0f,
@@ -90,7 +90,7 @@ void quartz::Application::run() {
             }
         },
         {
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf",
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf"),
             {
                 {5.0f, 0.0f, 0.0f},
                 0.0f,
@@ -101,12 +101,12 @@ void quartz::Application::run() {
     };
 
     std::array<std::string, 6> skyBoxInformation = {
-        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posx.jpg",
-        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negx.jpg",
-        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posy.jpg",
-        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negy.jpg",
-        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/posz.jpg",
-        "/Users/keegankochis/Downloads/urban-skyboxes/Parliament/negz.jpg"
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/posx.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/negx.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/posy.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/negy.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/posz.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/negz.jpg")
     };
 
     std::vector<quartz::scene::PointLight> pointLights = {
