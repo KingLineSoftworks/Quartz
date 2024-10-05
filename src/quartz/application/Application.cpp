@@ -101,12 +101,12 @@ void quartz::Application::run() {
     };
 
     std::array<std::string, 6> skyBoxInformation = {
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/posx.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/negx.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/posy.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/negy.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/posz.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/skyboxes/parliament/negz.jpg")
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posx.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negx.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posy.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negy.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posz.jpg"),
+        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negz.jpg")
     };
 
     std::vector<quartz::scene::PointLight> pointLights = {
