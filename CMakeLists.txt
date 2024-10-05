@@ -26,6 +26,13 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/spv)
 file(MAKE_DIRECTORY ${CMAKE_SHADER_OUTPUT_DIRECTORY})
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS true)
+file(
+    CREATE_LINK 
+    "${CMAKE_BINARY_DIR}/compile_commands.json"
+    "${PROJECT_SOURCE_DIR}/compile_commands.json"
+)
+
 #====================================================================
 # Build type information
 #====================================================================
