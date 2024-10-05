@@ -9,8 +9,6 @@ include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WAR
 include(CompileShader) # Gives us compile_shaders function
 
 cmake_minimum_required(VERSION 3.14)
-set(CMAKE_C_COMPILER "clang")
-set(CMAKE_CXX_COMPILER "clang")
 
 project(
     ${PROJECT_NAME}
@@ -28,12 +26,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/spv)
 file(MAKE_DIRECTORY ${CMAKE_SHADER_OUTPUT_DIRECTORY})
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS true)
-file(
-    CREATE_LINK 
-    "${CMAKE_BINARY_DIR}/compile_commands.json"
-    "${PROJECT_SOURCE_DIR}/compile_commands.json"
-)
+if (EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
+    message(STATUS "Creating compile_commands.json link in project root directory")
+    file(
+        CREATE_LINK 
+        "${CMAKE_BINARY_DIR}/compile_commands.json"
+        "${PROJECT_SOURCE_DIR}/compile_commands.json"
+    )
+else ()
+    message(STATUS "CMake binary directory does not contain compile_commands.json file. This is probably the first time running cmake")
+endif ()
 
 #====================================================================
 # Build type information
@@ -43,6 +45,8 @@ file(
 #        will require us to have two different release mode macros (EX: QUARTZ_DEBUG , APP_DEBUG).
 #        This will be made easier when we move the application into it's own project which uses
 #        quartz as a submodule
+
+message(STATUS "Generator is set to ${CMAKE_GENERATOR}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding DEBUG definition")
@@ -123,17 +127,17 @@ include_directories("${VENDOR_ROOT_DIR}/stb")
 add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 
 # vulkan
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(VULKAN_INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include")
     set(VULKAN_IMPORTED_LOCATION "${VENDOR_ROOT_DIR}/vulkan/linux/lib/libvulkan.so")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(VULKAN_INTERFACE_INCLUDE_DIRECTORIES "${VENDOR_ROOT_DIR}/vulkan/mac/moltenvk-headers/include" "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include")
     set(VULKAN_IMPORTED_LOCATION "${VENDOR_ROOT_DIR}/vulkan/mac/lib/libvulkan.dylib")
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(FATAL_ERROR "Quartz is not currently supporting a build for Windows platforms")
-else()
+else ()
     message(FATAL_ERROR "Quartz does not recognize the current build platform")
-endif()
+endif ()
 add_library(vulkan SHARED IMPORTED)
 set_target_properties(
     vulkan
