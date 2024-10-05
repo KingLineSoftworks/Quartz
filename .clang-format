@@ -94,7 +94,7 @@ BreakConstructorInitializers: AfterColon
 BreakInheritanceList: AfterColon
 BreakStringLiterals: true
 # BreakFunctionDefinitionParameters: false
-ColumnLimit:     100
+ColumnLimit:     140
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerIndentWidth: 4
