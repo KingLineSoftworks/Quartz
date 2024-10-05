@@ -9,6 +9,8 @@ include(CustomPedanticFlags) # Gives us the QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WAR
 include(CompileShader) # Gives us compile_shaders function
 
 cmake_minimum_required(VERSION 3.14)
+set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CXX_COMPILER "clang")
 
 project(
     ${PROJECT_NAME}
