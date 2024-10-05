@@ -70,7 +70,7 @@ int main() {
         {"CAMERA", util::Logger::Level::info},
         {"DOODAD", util::Logger::Level::info},
         {"SCENE", util::Logger::Level::info},
-        {"SKYBOX", util::Logger::Level::trace},
+        {"SKYBOX", util::Logger::Level::info},
     });
 
     if (shouldLogPreamble) {

@@ -14,6 +14,18 @@ function(compile_shaders TARGET_NAME INPUT_DIR)
         message(FATAL_ERROR "Cannot compile shaders if none are given")
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(GLSLC_BINARY ${PROJECT_SOURCE_DIR}/vendor/vulkan/linux/bin/glslc)
+        message(STATUS "Quartz is not currently supporting a build for Windows platforms")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        set(GLSLC_BINARY ${PROJECT_SOURCE_DIR}/vendor/vulkan/mac/bin/glslc)
+        message(STATUS "Using glslc binary at ${GLSLC_BINARY}")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        message(FATAL_ERROR "Quartz is not currently supporting a build for Windows platforms")
+    else()
+        message(FATAL_ERROR "Quartz does not recognize the current build platform")
+    endif()
+
     set(SHADER_COMPILATION_BYPRODUCTS)
 
     foreach(SHADER_SOURCE_FILE IN LISTS SHADER_SOURCE_FILE_LIST)
@@ -38,7 +50,7 @@ function(compile_shaders TARGET_NAME INPUT_DIR)
                 sed -i.bkp "s/#define MAX_NUMBER_MATERIALS -1/#define MAX_NUMBER_MATERIALS ${MAX_NUMBER_MATERIALS}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 sed -i.bkp "s/#define MAX_NUMBER_POINT_LIGHTS -1/#define MAX_NUMBER_POINT_LIGHTS ${MAX_NUMBER_POINT_LIGHTS}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 sed -i.bkp "s/#define MAX_NUMBER_SPOT_LIGHTS -1/#define MAX_NUMBER_SPOT_LIGHTS ${MAX_NUMBER_SPOT_LIGHTS}/g" ${SHADER_SOURCE_FULL_TEMPFILE} &&
-                ${PROJECT_SOURCE_DIR}/vendor/vulkan/bin/glslc ${SHADER_SOURCE_FULL_TEMPFILE} -o ${SHADER_OUTPUT_FULL_FILE} &&
+                ${GLSLC_BINARY} ${SHADER_SOURCE_FULL_TEMPFILE} -o ${SHADER_OUTPUT_FULL_FILE} &&
                 rm ${SHADER_SOURCE_FULL_TEMPFILE} &&
                 rm ${SHADER_SOURCE_FULL_TEMPFILE}.bkp
             DEPENDS ${SHADER_SOURCE_FULL_FILE}
