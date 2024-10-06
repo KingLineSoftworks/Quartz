@@ -42,6 +42,10 @@ build/
 .test/
 .release/
 
+# ----- clangd stuff ----- #
+
+.cache/
+
 # ----- SPIR-V shader bytecode ----- #
 
 *.tempfile

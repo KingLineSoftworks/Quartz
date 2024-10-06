@@ -66,7 +66,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
     LOG_TRACE(INSTANCE, "{} extensions available", supportedLayerProperties.size());
 
     for (UNUSED const vk::LayerProperties& layerProperties : supportedLayerProperties) {
-        LOG_TRACE(INSTANCE, "  - {} [ version {} ]", layerProperties.layerName, layerProperties.specVersion);
+        LOG_TRACE(INSTANCE, "  - {} [ version {} ]", std::string(layerProperties.layerName), layerProperties.specVersion);
     }
 
     // ----- get the required validation layers ----- //
@@ -84,7 +84,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
 
         bool found = false;
         for (const vk::LayerProperties& layerProperties : supportedLayerProperties) {
-            if (layerProperties.layerName == std::string(requiredValidationLayerName)) {
+            if (std::string(layerProperties.layerName) == std::string(requiredValidationLayerName)) {
                 found = true;
                 break;
             }
@@ -111,7 +111,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
     LOG_TRACE(INSTANCE, "{} instance extensions available", availableInstanceExtensionProperties.size());
 
     for (UNUSED const vk::ExtensionProperties& extensionProperties : availableInstanceExtensionProperties) {
-        LOG_TRACE(INSTANCE, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
+        LOG_TRACE(INSTANCE, "  - {} [ version {} ]", std::string(extensionProperties.extensionName), extensionProperties.specVersion);
     }
 
     // ----- get the extensions required by glfw ----- //
@@ -143,7 +143,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
 
         bool found = false;
         for (const vk::ExtensionProperties& extensionProperties : availableInstanceExtensionProperties) {
-            if (extensionProperties.extensionName == std::string(requiredInstanceExtensionName)) {
+            if (std::string(extensionProperties.extensionName) == std::string(requiredInstanceExtensionName)) {
                 found = true;
                 break;
             }

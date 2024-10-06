@@ -17,7 +17,6 @@ public: // member functions
         const float attenuationLinearFactor_,
         const float attenuationQuadraticFactor_
     );
-    PointLight& operator=(const PointLight& other);
 
 public: // member variables
     alignas(16) glm::vec3 color;

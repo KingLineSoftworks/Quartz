@@ -109,14 +109,14 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
     LOG_TRACE(DEVICE, "{} physical device extensions available", availablePhysicalDeviceExtensionProperties.size());
 
     for (const vk::ExtensionProperties& extensionProperties : availablePhysicalDeviceExtensionProperties) {
-        LOG_TRACE(DEVICE, "  - {} [ version {} ]", extensionProperties.extensionName, extensionProperties.specVersion);
+        LOG_TRACE(DEVICE, "  - {} [ version {} ]", std::string(extensionProperties.extensionName), extensionProperties.specVersion);
 
-        if (extensionProperties.extensionName == std::string("VK_KHR_portability_subset")) {
+        if (std::string(extensionProperties.extensionName) == std::string("VK_KHR_portability_subset")) {
             LOG_TRACE(DEVICE, "    - portability subset extension found");
             requiredPhysicalDeviceExtensionNames.push_back("VK_KHR_portability_subset");
         }
 
-        if (extensionProperties.extensionName == std::string(VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
+        if (std::string(extensionProperties.extensionName) == std::string(VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
             LOG_TRACE(DEVICE, "    - swapchain extension found");
             swapchainExtensionFound = true;
         }

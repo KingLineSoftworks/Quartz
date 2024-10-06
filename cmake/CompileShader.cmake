@@ -16,15 +16,14 @@ function(compile_shaders TARGET_NAME INPUT_DIR)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(GLSLC_BINARY ${PROJECT_SOURCE_DIR}/vendor/vulkan/linux/bin/glslc)
-        message(STATUS "Quartz is not currently supporting a build for Windows platforms")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(GLSLC_BINARY ${PROJECT_SOURCE_DIR}/vendor/vulkan/mac/bin/glslc)
-        message(STATUS "Using glslc binary at ${GLSLC_BINARY}")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         message(FATAL_ERROR "Quartz is not currently supporting a build for Windows platforms")
     else()
         message(FATAL_ERROR "Quartz does not recognize the current build platform")
     endif()
+    message(STATUS "Using glslc binary at ${GLSLC_BINARY}")
 
     set(SHADER_COMPILATION_BYPRODUCTS)
 

@@ -95,7 +95,7 @@ public: // public static functions
     }
 
     static void setLevel(const std::string& loggerName, const util::Logger::Level desiredLevel);
-    static void setLevels(const std::vector<const util::Logger::RegistrationInfo>& loggerInfos);
+    static void setLevels(const std::vector<util::Logger::RegistrationInfo>& loggerInfos);
 
     /**
      * @brief Functions to actually log messages
@@ -310,10 +310,10 @@ private: // private static variables
 
 #define LOG_THROW(REGISTRATION_NAME, ERROR_TYPE, ...) \
     util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__); \
-    throw ERROR_TYPE(fmt::format(__VA_ARGS__))
+    throw ERROR_TYPE(std::format(__VA_ARGS__))
 #define LOG_THROWthis(ERROR_TYPE, ...) \
     util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__); \
-    throw ERROR_TYPE(fmt::format(__VA_ARGS__))
+    throw ERROR_TYPE(std::format(__VA_ARGS__))
 
 /**
  * @brief Log a scope change

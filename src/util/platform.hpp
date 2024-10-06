@@ -26,6 +26,17 @@
 #endif
 
 /**
+ * @brief linux
+ */
+#if defined __linux__
+
+#ifndef ON_LINUX
+#define ON_LINUX
+#endif
+
+#endif
+
+/**
  * @brief Macros defining where the project's source root lives and where the
  * compiled goods will be living.
  */
