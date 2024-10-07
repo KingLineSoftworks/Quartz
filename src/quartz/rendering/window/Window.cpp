@@ -321,6 +321,7 @@ quartz::rendering::Window::~Window() {
 
     LOG_TRACEthis("Terminating GLFW");
     glfwTerminate();
+    LOG_INFOthis("Successfully terminated GLFW");
 }
 
 void

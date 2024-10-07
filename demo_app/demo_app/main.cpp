@@ -15,7 +15,7 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
-    constexpr bool shouldLogPreamble = false;
+    constexpr bool shouldLogPreamble = true;
 
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
@@ -60,6 +60,7 @@ int main() {
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},
+        {"RENDERPASS", util::Logger::Level::info},
         {"SWAPCHAIN", util::Logger::Level::info},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
@@ -91,9 +92,11 @@ int main() {
         LOG_INFO(GENERAL, "On Mac ( ON_MAC )");
         LOG_INFO(GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
         LOG_INFO(GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
-#else
-        LOG_INFO(GENERAL, "Not on Mac ( ON_MAC )");
-#endif // ON_MAC
+#endif
+
+#ifdef ON_LINUX
+        LOG_INFO(GENERAL, "On Linux ( ON_LINUX )");
+#endif
     }
 
 #ifdef QUARTZ_RELEASE
