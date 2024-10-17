@@ -73,9 +73,6 @@ set(
     # -Wfuture-attribute-extensions
     -Wcxx-attribute-extension
     
-    # -Wc++23-default-comp-relaxed-constexpr
-    -Wc++2a-compat-pedantic
-    
     # -Wdelimited-escape-sequence-extension
     
     # -Wgeneric-type-extension
@@ -95,3 +92,15 @@ set(
     # -Winvalid-utf8
     -Winvalid-iboutlet
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    list(
+        APPEND
+        QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS
+    
+        # -Wc++23-default-comp-relaxed-constexpr
+        -Wc++20-compat-pedantic
+    )
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+endif ()

@@ -20,23 +20,3 @@ quartz::scene::SpotLight::SpotLight(
     attenuationQuadraticFactor(attenuationQuadraticFactor_)
 {}
 
-quartz::scene::SpotLight&
-quartz::scene::SpotLight::SpotLight::operator=(
-    const quartz::scene::SpotLight& other
-) {
-    if (this == &other) {
-        return *this;
-    }
-
-    color = other.color;
-    position = other.position;
-    direction = other.direction;
-
-    innerRadiusDegrees = other.innerRadiusDegrees;
-    outerRadiusDegrees = other.outerRadiusDegrees;
-
-    attenuationLinearFactor = other.attenuationLinearFactor;
-    attenuationQuadraticFactor = other.attenuationQuadraticFactor;
-
-    return *this;
-}

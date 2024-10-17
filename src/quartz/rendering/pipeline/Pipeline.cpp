@@ -224,7 +224,7 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(PIPELINE, "{} frames in flight", maxNumFramesInFlight);
 
-    std::vector<const vk::DescriptorSetLayout> descriptorSetLayouts(
+    const std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
         maxNumFramesInFlight,
         *p_descriptorSetLayout
     );

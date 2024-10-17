@@ -1,4 +1,5 @@
 #include <glm/vec4.hpp>
+#include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/texture/Texture.hpp"

@@ -14,19 +14,3 @@ quartz::scene::PointLight::PointLight(
     attenuationQuadraticFactor(attenuationQuadraticFactor_)
 {}
 
-quartz::scene::PointLight&
-quartz::scene::PointLight::PointLight::operator=(
-    const quartz::scene::PointLight& other
-) {
-    if (this == &other) {
-        return *this;
-    }
-
-    color = other.color;
-    position = other.position;
-
-    attenuationLinearFactor = other.attenuationLinearFactor;
-    attenuationQuadraticFactor = other.attenuationQuadraticFactor;
-
-    return *this;
-}

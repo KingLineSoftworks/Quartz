@@ -189,7 +189,7 @@ void util::Logger::setLevel(const std::string& loggerName, const util::Logger::L
 /**
  * @brief Attempt to update the logging levels for all of the desired loggers
  */
-void util::Logger::setLevels(const std::vector<const util::Logger::RegistrationInfo>& loggerInfos) {
+void util::Logger::setLevels(const std::vector<util::Logger::RegistrationInfo>& loggerInfos) {
     for (const util::Logger::RegistrationInfo& loggerInfo : loggerInfos) {
         util::Logger::setLevel(loggerInfo.loggerName, loggerInfo.level);
     }
