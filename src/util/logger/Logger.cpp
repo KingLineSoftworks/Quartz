@@ -314,7 +314,7 @@ util::Logger::Scoper::Scoper(const std::string& loggerName, const util::Logger::
     m_level(level)
 {
     if (m_level >= util::Logger::getLevel(m_loggerName)) {
-        util::Logger::log(m_loggerName, m_level, "{");
+        util::Logger::log(m_loggerName, m_level, "{{");
         util::Logger::Scoper::indentationCount++;
     }
 }
@@ -327,7 +327,7 @@ util::Logger::Scoper::Scoper(const std::string& loggerName, const util::Logger::
 util::Logger::Scoper::~Scoper() {
     if (m_level >= util::Logger::getLevel(m_loggerName)) {
         util::Logger::Scoper::indentationCount--;
-        util::Logger::log(m_loggerName, m_level, "}");
+        util::Logger::log(m_loggerName, m_level, "}}");
     }
 }
 
