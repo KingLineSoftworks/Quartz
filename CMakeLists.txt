@@ -110,7 +110,7 @@ add_library(mikktspace SHARED "${VENDOR_ROOT_DIR}/MikkTSpace/mikktspace.c")
 target_include_directories(mikktspace PUBLIC "${VENDOR_ROOT_DIR}/MikkTSpace")
 
 # spdlog
-set(SPDLOG_USE_STD_FORMAT ON CACHE BOOL "" FORCE)
+set(SPDLOG_USE_STD_FORMAT OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 
 # stb
