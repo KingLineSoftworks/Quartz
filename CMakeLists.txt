@@ -106,6 +106,7 @@ add_subdirectory("${VENDOR_ROOT_DIR}/glm")
 add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
 add_compile_definitions(GLM_FORCE_RADIANS)
+target_compile_options(glm INTERFACE -Wno-deprecated-declarations) # for sprintf
 
 # mikktspace
 add_library(mikktspace SHARED "${VENDOR_ROOT_DIR}/MikkTSpace/mikktspace.c")
@@ -125,7 +126,7 @@ include_directories("${VENDOR_ROOT_DIR}/stb")
 # set(TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE OFF CACHE INTERNAL "" FORCE)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
-target_compile_options(tinygltf PRIVATE -Wno-deprecated-declarations)
+target_compile_options(tinygltf PRIVATE -Wno-deprecated-declarations) # for sprintf
 
 # vulkan
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

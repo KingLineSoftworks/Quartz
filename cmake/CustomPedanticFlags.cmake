@@ -5,9 +5,6 @@
 set(
     QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS
 
-    # Stuff we actually want off
-    -Wno-deprecated-declarations
-
     # for nice printing :)
     -fcolor-diagnostics
 
