@@ -50,9 +50,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     add_compile_definitions(QUARTZ_TEST)
 
 elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-    message(
-        WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported. Using CMAKE_BUILD_TYPE=Release instead , adding RELEASE definition"
-    )
+    message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported , adding RELEASE definition")
     set(CMAKE_BUILD_TYPE "Release")
     add_compile_definitions(QUARTZ_RELEASE)
 

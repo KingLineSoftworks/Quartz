@@ -5,7 +5,7 @@
 # the cmake command
 #====================================================================
 
-set(CMAKE_GENERATOR "Unix Makefiles" CACHE INTERNAL "" FORCE)
+set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "" FORCE)
 
 set(CMAKE_C_COMPILER "clang" CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER "clang++" CACHE STRING "" FORCE)
