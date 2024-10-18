@@ -97,10 +97,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
 endif ()
 add_subdirectory("${VENDOR_ROOT_DIR}/glfw")
+# @todo: should these just be added to the glfw target?
 add_compile_definitions(GLFW_INCLUDE_NONE)
 
 # glm
 add_subdirectory("${VENDOR_ROOT_DIR}/glm")
+# @todo: should these just be added to the glm target? Seems like they're used in tinygltf examples
 add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
 add_compile_definitions(GLM_FORCE_RADIANS)
@@ -116,8 +118,10 @@ add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 # stb
 include_directories("${VENDOR_ROOT_DIR}/stb")
 
-# tinygltf set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE) set(TINYGLTF_NO_INCLUDE_STB_IMAGE OFF CACHE INTERNAL "" FORCE)
-# set(TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE OFF CACHE INTERNAL "" FORCE) set(TINYGLTF_USE_CPP14 ON CACHE INTERNAL "" FORCE)
+# tinygltf set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE) 
+#  set(TINYGLTF_USE_CPP14 ON CACHE INTERNAL "" FORCE)
+set(TINYGLTF_NO_INCLUDE_STB_IMAGE OFF CACHE INTERNAL "" FORCE)
+set(TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE OFF CACHE INTERNAL "" FORCE)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 
@@ -130,8 +134,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif ()
     set(VULKAN_LIBRARIES "${Vulkan_LIBRARIES}")
     set(VULKAN_INCLUDE_DIRS "${Vulkan_INCLUDE_DIRS}")
-    #set(VULKAN_LIBRARIES "/home/keegan/Downloads/1.2.198.1/x86_64/lib/libvulkan.so")
-    #set(VULKAN_INCLUDE_DIRS "${VENDOR_ROOT_DIR}/vulkan/vulkan-headers/include")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Using mac paths for vulkan includes and libraries")
     set(VULKAN_LIBRARIES "${VENDOR_ROOT_DIR}/vulkan/mac/lib/libvulkan.dylib")

@@ -5,6 +5,10 @@
 set(
     QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS
 
+    # Stuff we actually want off
+    -Wno-deprecated-declarations
+
+    # for nice printing :)
     -fcolor-diagnostics
 
     -Wc++11-extra-semi
@@ -98,12 +102,5 @@ set(
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    list(
-        APPEND
-        QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS
-    
-        # -Wc++23-default-comp-relaxed-constexpr
-        -Wc++20-compat-pedantic
-    )
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif ()
