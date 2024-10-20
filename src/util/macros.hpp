@@ -17,18 +17,25 @@
 #endif
 
 /**
- * @brief If we are in test mode we still want to have debug symbols for under the hood but we want
+ * @brief If we are in test mode we still want to have debug symbols (handled with -g flag) for under the hood but we want
  * our stuff to see we are in test mode and not debug mode
  */
 
 #if defined QUARTZ_TEST
 
-#if !defined DEBUG
-#define DEBUG
+// Undefine the first standard (?) debug macro
+#if defined DEBUG
+#undef DEBUG
 #endif
 
-#if !defined _DEBUG
-#define _DEBUG
+// Undefine the second standard (?) debug macro
+#if defined _DEBUG
+#undef _DEBUG
+#endif
+
+// Undefine the quartz debug macro
+#if defined QUARTZ_DEBUG
+#undef QUARTZ_DEBUG
 #endif
 
 #endif

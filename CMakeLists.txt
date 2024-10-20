@@ -45,25 +45,27 @@ message(STATUS "Quartz using ${CMAKE_SYSTEM_NAME} as a build platform")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding DEBUG definition")
+    add_compile_definitions(DEBUG)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
     
-    elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding TEST definition")
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_TEST)
     
-    elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported , adding RELEASE definition")
     set(CMAKE_BUILD_TYPE "Release")
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
     
-    elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding RELEASE definition")
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
     
-    else ()
+else ()
     if (CMAKE_BUILD_TYPE STREQUAL "")
         message(STATUS "CMAKE_BUILD_TYPE not provided. Using CMAKE_BUILD_TYPE=Debug instead , adding DEBUG definition")
         set(CMAKE_BUILD_TYPE Debug)
+        add_compile_definitions(DEBUG)
         list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
 
     else ()
