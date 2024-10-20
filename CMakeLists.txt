@@ -31,6 +31,8 @@ else ()
     message(STATUS "CMake binary directory does not contain compile_commands.json file. This is probably the first time running cmake")
 endif ()
 
+set(QUARTZ_COMPILE_DEFINITIONS "")
+
 # ====================================================================
 # Build type information
 # ====================================================================
@@ -43,25 +45,26 @@ message(STATUS "Quartz using ${CMAKE_SYSTEM_NAME} as a build platform")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding DEBUG definition")
-    add_compile_definitions(QUARTZ_DEBUG)
-
-elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
+    
+    elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding TEST definition")
-    add_compile_definitions(QUARTZ_TEST)
-
-elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_TEST)
+    
+    elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported , adding RELEASE definition")
     set(CMAKE_BUILD_TYPE "Release")
-    add_compile_definitions(QUARTZ_RELEASE)
-
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
+    
+    elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding RELEASE definition")
-    add_compile_definitions(QUARTZ_RELEASE)
-
-else ()
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
+    
+    else ()
     if (CMAKE_BUILD_TYPE STREQUAL "")
         message(STATUS "CMAKE_BUILD_TYPE not provided. Using CMAKE_BUILD_TYPE=Debug instead , adding DEBUG definition")
-        add_compile_definitions(QUARTZ_DEBUG)
+        set(CMAKE_BUILD_TYPE Debug)
+        list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
 
     else ()
         message(FATAL_ERROR " - CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} is unsupported , please use Debug, RelWithDebInfo, or Release")
@@ -102,10 +105,7 @@ add_compile_definitions(GLFW_INCLUDE_NONE)
 
 # glm
 add_subdirectory("${VENDOR_ROOT_DIR}/glm")
-# @todo: should these just be added to the glm target? Seems like they're used in tinygltf examples
-add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
-add_compile_definitions(GLM_FORCE_DEPTH_ZERO_TO_ONE)
-add_compile_definitions(GLM_FORCE_RADIANS)
+target_compile_definitions(glm INTERFACE GLM_FORCE_DEFAULT_ALIGNED_GENTYPES GLM_FORCE_DEPTH_ZERO_TO_ONE GLM_FORCE_RADIANS)
 target_compile_options(glm INTERFACE -Wno-deprecated-declarations) # for sprintf
 
 # mikktspace
@@ -120,11 +120,11 @@ add_subdirectory("${VENDOR_ROOT_DIR}/spdlog")
 include_directories("${VENDOR_ROOT_DIR}/stb")
 
 # tinygltf
-# set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE) 
-# set(TINYGLTF_USE_CPP14 ON CACHE INTERNAL "" FORCE)
-# set(TINYGLTF_NO_INCLUDE_STB_IMAGE OFF CACHE INTERNAL "" FORCE)
-# set(TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE OFF CACHE INTERNAL "" FORCE)
+set(TINYGLTF_NO_INCLUDE_STB_IMAGE OFF CACHE INTERNAL "" FORCE)
+set(TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE OFF CACHE INTERNAL "" FORCE)
+set(TINYGLTF_USE_CPP14 ON CACHE INTERNAL "" FORCE)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
+# set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE) 
 add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 target_compile_options(tinygltf PRIVATE -Wno-deprecated-declarations) # for sprintf
 
@@ -157,8 +157,10 @@ set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION "${VULKAN_LIBRARIES}" 
 # @todo: only add these for Quartz libraries. We don't want to be setting these for the vendor libraries. These should only be visible for
 # Quartz and application
 
-add_compile_definitions(
-    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}" PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
+list(
+    APPEND QUARTZ_COMPILE_DEFINITIONS
+    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
     SHADER_BINARY_DIR="${CMAKE_SHADER_OUTPUT_DIRECTORY}"
 )
 
@@ -168,7 +170,8 @@ set(MAX_NUMBER_MATERIALS 100)
 set(MAX_NUMBER_POINT_LIGHTS 20)
 set(MAX_NUMBER_SPOT_LIGHTS 20)
 
-add_compile_definitions(
+list(
+    APPEND QUARTZ_COMPILE_DEFINITIONS
     QUARTZ_NAME="${PROJECT_NAME}"
     QUARTZ_VERSION
     QUARTZ_MAJOR_VERSION=${QUARTZ_MAJOR_VERSION}
@@ -179,6 +182,11 @@ add_compile_definitions(
     QUARTZ_MAX_NUMBER_POINT_LIGHTS=${MAX_NUMBER_POINT_LIGHTS}
     QUARTZ_MAX_NUMBER_SPOT_LIGHTS=${MAX_NUMBER_SPOT_LIGHTS}
 )
+
+message(STATUS "Quartz specific compile definitions:")
+foreach(COMPILE_DEFINITION ${QUARTZ_COMPILE_DEFINITIONS})
+    message(STATUS "    ${COMPILE_DEFINITION}")
+endforeach()
 
 # ====================================================================
 # Utility and Quartz libraries

@@ -32,6 +32,11 @@ target_compile_options(
         PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
+target_compile_definitions(
+        QUARTZ_RENDERING_Model
+        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+)
+
 target_link_libraries(
         QUARTZ_RENDERING_Model
 
