@@ -19,6 +19,7 @@ compile_commands.json
 # ----- VS Code ----- #
 
 .vscode
+.*vscode
 
 # ----- CLion tings ----- #
 

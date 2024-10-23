@@ -44,32 +44,38 @@ message(STATUS "Generator is set to ${CMAKE_GENERATOR}")
 message(STATUS "Quartz using ${CMAKE_SYSTEM_NAME} as a build platform")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding DEBUG definition")
+    message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding DEBUG definition")
+    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
     add_compile_definitions(DEBUG)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
     
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding TEST definition")
+    message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding TEST definition")
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_TEST)
     
 elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-    message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported , adding RELEASE definition")
-    set(CMAKE_BUILD_TYPE "Release")
+    message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported, adding RELEASE definition")
+    set(CMAKE_BUILD_TYPE MinSizeRel)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
     
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} , adding RELEASE definition")
+    message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding RELEASE definition")
+    set(CMAKE_BUILD_TYPE Release)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
     
 else ()
     if (CMAKE_BUILD_TYPE STREQUAL "")
-        message(STATUS "CMAKE_BUILD_TYPE not provided. Using CMAKE_BUILD_TYPE=Debug instead , adding DEBUG definition")
+        message(STATUS "CMAKE_BUILD_TYPE not provided. Using CMAKE_BUILD_TYPE=Debug instead, adding DEBUG definition")
         set(CMAKE_BUILD_TYPE Debug)
+        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
         add_compile_definitions(DEBUG)
         list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
 
     else ()
-        message(FATAL_ERROR " - CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} is unsupported , please use Debug, RelWithDebInfo, or Release")
+        message(FATAL_ERROR " - CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} is unsupported, please use Debug, RelWithDebInfo, MinSizeRel, or Release")
 
     endif ()
 
@@ -88,6 +94,16 @@ set(QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS -Wall -Wextra -Werror)
 # Only set the c++ flags for Quartz and not for everything because we want the vendor libraries to be compiled normally
 set(QUARTZ_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS} ${QUARTZ_CMAKE_CXX_CUSTOM_PEDANTIC_WARNING_FLAGS})
 
+message(STATUS "CXX flags:")
+foreach(COMPILE_FLAG ${CMAKE_CXX_FLAGS})
+    message(STATUS "    ${COMPILE_FLAG}")
+endforeach()
+
+message(STATUS "Quartz specific CXX flags:")
+foreach(COMPILE_FLAG ${QUARTZ_CMAKE_CXX_FLAGS})
+    message(STATUS "    ${COMPILE_FLAG}")
+endforeach()
+
 # ====================================================================
 # Third party vendor libraries
 # ====================================================================
@@ -97,6 +113,7 @@ set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
     set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)

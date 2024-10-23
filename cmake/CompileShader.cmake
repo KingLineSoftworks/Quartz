@@ -5,7 +5,10 @@
 function(compile_shaders TARGET_NAME INPUT_DIR)
     set(SHADER_SOURCE_FILE_LIST ${ARGN}) # the rest of the arguments (beyond output dir)
 
-    message(STATUS "Compiling shaders: ${SHADER_SOURCE_FILE_LIST}")
+    message(STATUS "Compiling shaders:")
+    foreach(SHADER_FILE ${SHADER_SOURCE_FILE_LIST})
+        message(STATUS "    ${SHADER_FILE}")
+    endforeach()
 
     set(OUTPUT_DIR ${CMAKE_SHADER_OUTPUT_DIRECTORY})
     message(DEBUG "  Outputting compiled: shaders to ${OUTPUT_DIR}")
