@@ -20,6 +20,11 @@ quartz::rendering::Instance::vulkanDebugCallback(
             messageTypeString = "VALIDATION";
             break;
         case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
+#if defined QUARTZ_DEBUG
+            // don't want to be reporting a bunch of performance issues when we are iterating and debugging,
+            // only when we are doing testing or releasing so we can see where the profiling problems are
+            return VK_FALSE;
+#endif
             messageTypeString = "PERFORMANCE";
             break;
         default:

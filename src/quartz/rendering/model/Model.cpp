@@ -83,7 +83,7 @@ quartz::rendering::Model::loadTextures(
         tinygltf::Sampler gltfSampler;
         const int32_t samplerIndex = gltfTexture.sampler;
         if (samplerIndex == -1) {
-            LOG_WARNING(MODEL, "No gltf sampler specified. Using default one");
+            LOG_DEBUG(MODEL, "No gltf sampler specified. Using default one");
             gltfSampler.minFilter = -1;
             gltfSampler.magFilter = -1;
             gltfSampler.wrapS = -1;
