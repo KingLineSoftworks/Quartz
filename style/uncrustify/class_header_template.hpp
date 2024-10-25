@@ -1,0 +1,6 @@
+/**
+ * @class $(class)
+ * @brief 
+ * 
+ * @details
+ */
