@@ -57,48 +57,47 @@ void quartz::Application::run() {
 
     std::vector<quartz::scene::Doodad::Parameters> doodadInformations = {
         {
-           "/Users/keegankochis/Downloads/custom unit cube/glb/unit_cube.glb",
-           {
-               { 5.0f, 7.5f, 5.0f },
-               0.0f,
-               { 0.0f, 0.0f, 1.0f },
-               { 1.0f, 1.0f, 1.0f }
-           },
-           {
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_cube/glb/unit_cube.glb"),
+            {
+                { 5.0f, 7.5f, 5.0f },
+                0.0f,
+                { 0.0f, 0.0f, 1.0f },
+                { 1.0f, 1.0f, 1.0f }
+            },
+            {
                 reactphysics3d::BodyType::DYNAMIC,
                 true,
                 quartz::physics::BoxCollider::Parameters({1.0f, 1.0f, 1.0f})
-           }
-       },
-       {
-           "/Users/keegankochis/Downloads/custom unit sphere/glb/unit_sphere.glb",
-           {
-               { 5.0f, 10.0f, 0.0f },
-               0.0f,
-               { 0.0f, 0.0f, 1.0f },
-               { 1.0f, 1.0f, 1.0f }
-           },
-           {
+            }
+        },
+        {
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_sphere/glb/unit_sphere.glb"),
+            {
+                { 5.0f, 10.0f, 0.0f },
+                0.0f,
+                { 0.0f, 0.0f, 1.0f },
+                { 1.0f, 1.0f, 1.0f }
+            },
+            {
                 reactphysics3d::BodyType::DYNAMIC,
                 true,
                 quartz::physics::SphereCollider::Parameters(1.0)
-
-           }
+            }
         },
         {
-            "/Users/keegankochis/Development/!external/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf",
-           {
-               {0.0f, -5.0f, 0.0f},
-               0.0f,
-               {0.0f, 1.0f, 0.0f},
-               {25.0f, 1.0f, 25.0f}
-           },
-           {
+            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"),
+            {
+                {0.0f, -5.0f, 0.0f},
+                0.0f,
+                {0.0f, 1.0f, 0.0f},
+                {25.0f, 1.0f, 25.0f}
+            },
+            {
                 reactphysics3d::BodyType::STATIC,
                 false,
                 quartz::physics::BoxCollider::Parameters({25.0f, 1.0f, 25.0f})
-           }
-       },
+            }
+        },
     };
 
     std::array<std::string, 6> skyBoxInformation = {
