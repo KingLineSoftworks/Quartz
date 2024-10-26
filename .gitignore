@@ -71,3 +71,4 @@ build/
 *.external
 *.external.*
 *scratch.md*
+.ignore
