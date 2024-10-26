@@ -87,8 +87,8 @@ quartz::rendering::Window::createVulkanSurfacePtr(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
-#ifndef ON_MAC
-    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No support for non-mac platforms currently. Unable to create vk::SurfaceKHR");
+#if !defined ON_MAC && !defined ON_LINUX
+    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No support for non mac or linux platforms currently. Unable to create vk::SurfaceKHR");
 #endif
 
     VkSurfaceKHR rawVulkanSurface;
@@ -321,6 +321,7 @@ quartz::rendering::Window::~Window() {
 
     LOG_TRACEthis("Terminating GLFW");
     glfwTerminate();
+    LOG_INFOthis("Successfully terminated GLFW");
 }
 
 void

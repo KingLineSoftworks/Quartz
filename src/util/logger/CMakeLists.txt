@@ -13,6 +13,11 @@ target_compile_options(
     PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
+target_compile_definitions(
+    UTIL_Logger
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+)
+
 target_link_libraries(
     UTIL_Logger
 

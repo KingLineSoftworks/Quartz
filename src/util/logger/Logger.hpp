@@ -95,7 +95,7 @@ public: // public static functions
     }
 
     static void setLevel(const std::string& loggerName, const util::Logger::Level desiredLevel);
-    static void setLevels(const std::vector<const util::Logger::RegistrationInfo>& loggerInfos);
+    static void setLevels(const std::vector<util::Logger::RegistrationInfo>& loggerInfos);
 
     /**
      * @brief Functions to actually log messages
@@ -110,7 +110,7 @@ public: // public static functions
     static void trace(UNUSED const std::string& loggerName, UNUSED const std::string& format, UNUSED Args&&... args) {
         #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         assertInitialized();
-        util::Logger::loggerPtrMap[loggerName]->trace(util::Logger::createIndentationString() + format, args...);
+        util::Logger::loggerPtrMap[loggerName]->trace(fmt::runtime(util::Logger::createIndentationString() + format), args...);
         #endif
     }
 
@@ -118,7 +118,7 @@ public: // public static functions
     static void debug(UNUSED const std::string& loggerName, UNUSED const std::string& format, UNUSED Args&&... args) {
         #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         assertInitialized();
-        util::Logger::loggerPtrMap[loggerName]->debug(util::Logger::createIndentationString() + format, args...);
+        util::Logger::loggerPtrMap[loggerName]->debug(fmt::runtime(util::Logger::createIndentationString() + format), args...);
         #endif
     }
 
@@ -126,26 +126,26 @@ public: // public static functions
     static void info(UNUSED const std::string& loggerName, UNUSED const std::string& format, UNUSED Args&&... args) {
         #if defined(QUARTZ_DEBUG) || defined(QUARTZ_TEST)
         assertInitialized();
-        util::Logger::loggerPtrMap[loggerName]->info(util::Logger::createIndentationString() + format, args...);
+        util::Logger::loggerPtrMap[loggerName]->info(fmt::runtime(util::Logger::createIndentationString() + format), args...);
         #endif
     }
 
     template<typename... Args>
     static void warning(const std::string& loggerName, const std::string& format, Args&&... args) {
         assertInitialized();
-        util::Logger::loggerPtrMap[loggerName]->warn(util::Logger::createIndentationString() + format, args...);
+        util::Logger::loggerPtrMap[loggerName]->warn(fmt::runtime(util::Logger::createIndentationString() + format), args...);
     }
 
     template<typename... Args>
     static void error(const std::string& loggerName, const std::string& format, Args&&... args) {
         assertInitialized();
-        util::Logger::loggerPtrMap[loggerName]->error(util::Logger::createIndentationString() + format, args...);
+        util::Logger::loggerPtrMap[loggerName]->error(fmt::runtime(util::Logger::createIndentationString() + format), args...);
     }
 
     template<typename... Args>
     static void critical(const std::string& loggerName, const std::string& format, Args&&... args) {
         assertInitialized();
-        util::Logger::loggerPtrMap[loggerName]->critical(util::Logger::createIndentationString() + format, args...);
+        util::Logger::loggerPtrMap[loggerName]->critical(fmt::runtime(util::Logger::createIndentationString() + format), args...);
     }
 
     /**

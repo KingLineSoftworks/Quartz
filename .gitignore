@@ -5,6 +5,7 @@ CMakeCache.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
+compile_commands.json
 
 # ========================================
 # OS dependent stuff
@@ -18,6 +19,7 @@ cmake_install.cmake
 # ----- VS Code ----- #
 
 .vscode
+.*vscode
 
 # ----- CLion tings ----- #
 
@@ -40,6 +42,10 @@ build/
 .debug/
 .test/
 .release/
+
+# ----- clangd stuff ----- #
+
+.cache/
 
 # ----- SPIR-V shader bytecode ----- #
 
@@ -65,3 +71,4 @@ build/
 *.external
 *.external.*
 *scratch.md*
+.ignore

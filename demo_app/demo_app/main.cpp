@@ -15,7 +15,7 @@
 #include "demo_app/Loggers.hpp"
 
 int main() {
-    constexpr bool shouldLogPreamble = false;
+    constexpr bool shouldLogPreamble = true;
 
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
@@ -60,6 +60,7 @@ int main() {
         {"MODEL_NODE", util::Logger::Level::info},
         {"MODEL_SCENE", util::Logger::Level::info},
         {"PIPELINE", util::Logger::Level::info},
+        {"RENDERPASS", util::Logger::Level::info},
         {"SWAPCHAIN", util::Logger::Level::info},
         {"TEXTURE", util::Logger::Level::info},
         {"VULKAN", util::Logger::Level::info},
@@ -77,6 +78,19 @@ int main() {
         LOG_INFO(GENERAL, "Quartz version   : {}.{}.{}", QUARTZ_MAJOR_VERSION, QUARTZ_MINOR_VERSION, QUARTZ_PATCH_VERSION);
         LOG_INFO(GENERAL, "Demo app version : {}.{}.{}", APPLICATION_MAJOR_VERSION, APPLICATION_MINOR_VERSION, APPLICATION_PATCH_VERSION);
 
+#ifdef DEBUG
+        LOG_INFO(GENERAL, "Quartz built with DEBUG definition");
+#endif
+#ifdef _DEBUG
+        LOG_INFO(GENERAL, "Quartz built with _DEBUG definition");
+#endif
+#ifdef NDEBUG
+        LOG_INFO(GENERAL, "Quartz built with NDEBUG definition");
+#endif
+#ifdef RELEASE
+        LOG_INFO(GENERAL, "Quartz built with RELEASE definition");
+#endif
+
 #ifdef QUARTZ_DEBUG
         LOG_INFO(GENERAL, "Quartz built in debug mode ( QUARTZ_DEBUG )");
 #endif
@@ -91,9 +105,11 @@ int main() {
         LOG_INFO(GENERAL, "On Mac ( ON_MAC )");
         LOG_INFO(GENERAL, "*Bad* Mac version defined as {} ( MAC_VERSION_BAD )", MAC_VERSION_BAD);
         LOG_INFO(GENERAL, "Mac version defined as {} ( MAC_VERSION )", MAC_VERSION);
-#else
-        LOG_INFO(GENERAL, "Not on Mac ( ON_MAC )");
-#endif // ON_MAC
+#endif
+
+#ifdef ON_LINUX
+        LOG_INFO(GENERAL, "On Linux ( ON_LINUX )");
+#endif
     }
 
 #ifdef QUARTZ_RELEASE

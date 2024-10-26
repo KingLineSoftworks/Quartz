@@ -20,7 +20,6 @@ public: // member functions
         const float attenuationLinearFactor_,
         const float attenuationQuadraticFactor_
     );
-    SpotLight& operator=(const SpotLight& other);
 
 public: // member variables
     alignas(16) glm::vec3 color;
