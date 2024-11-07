@@ -67,6 +67,7 @@ void quartz::Application::run() {
             {
                 reactphysics3d::BodyType::DYNAMIC,
                 true,
+                math::Vec3(0.0, 1.0, 0.0),
                 quartz::physics::BoxCollider::Parameters({1.0f, 1.0f, 1.0f})
             }
         },
@@ -81,6 +82,7 @@ void quartz::Application::run() {
             {
                 reactphysics3d::BodyType::DYNAMIC,
                 true,
+                math::Vec3(0.0, 1.0, 0.0),
                 quartz::physics::SphereCollider::Parameters(1.0)
             }
         },
@@ -95,6 +97,7 @@ void quartz::Application::run() {
             {
                 reactphysics3d::BodyType::STATIC,
                 false,
+                math::Vec3(1.0, 1.0, 1.0),
                 quartz::physics::BoxCollider::Parameters({25.0f, 1.0f, 25.0f})
             }
         },

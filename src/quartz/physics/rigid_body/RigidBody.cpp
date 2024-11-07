@@ -1,4 +1,5 @@
 #include "quartz/physics/rigid_body/RigidBody.hpp"
+#include "math/transform/Vec3.hpp"
 
 std::string
 quartz::physics::RigidBody::Parameters::getBodyTypeString(
@@ -14,6 +15,7 @@ quartz::physics::RigidBody::createRigidBodyPtr(
     reactphysics3d::PhysicsWorld* p_physicsWorld,
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
+    const math::Vec3& angularLockAxisFactor,
     const math::Transform& transform
 ) {
     LOG_FUNCTION_SCOPE_TRACE(RIGIDBODY, "");
@@ -28,11 +30,11 @@ quartz::physics::RigidBody::createRigidBodyPtr(
     p_rigidBody->enableGravity(enableGravity);
     p_rigidBody->setLinearDamping(0.0);
     p_rigidBody->setAngularDamping(0.0);
+    p_rigidBody->setAngularLockAxisFactor(angularLockAxisFactor);
     p_rigidBody->setIsAllowedToSleep(true);
 
     return p_rigidBody;
 }
-
 
 std::optional<quartz::physics::Collider>
 quartz::physics::RigidBody::createCollider(
@@ -66,12 +68,14 @@ quartz::physics::RigidBody::RigidBody(
     reactphysics3d::PhysicsWorld* p_physicsWorld,
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
-    const math::Transform& transform
+    const math::Transform& transform,
+    const math::Vec3& angularLockAxisFactor
 ) :
     mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
         p_physicsWorld,
         bodyType,
         enableGravity,
+        angularLockAxisFactor,
         transform
     )),
     mo_collider()
@@ -83,12 +87,14 @@ quartz::physics::RigidBody::RigidBody(
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
     const math::Transform& transform,
+    const math::Vec3& angularLockAxisFactor,
     const quartz::physics::BoxCollider::Parameters& boxColliderParameters
 ) :
     mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
         p_physicsWorld,
         bodyType,
         enableGravity,
+        angularLockAxisFactor,
         transform
     )),
     mo_collider(quartz::physics::Collider::createBoxCollider(
@@ -104,12 +110,14 @@ quartz::physics::RigidBody::RigidBody(
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
     const math::Transform& transform,
+    const math::Vec3& angularLockAxisFactor,
     const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
 ) :
     mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
         p_physicsWorld,
         bodyType,
         enableGravity,
+        angularLockAxisFactor,
         transform
     )),
     mo_collider(quartz::physics::Collider::createSphereCollider(
@@ -129,6 +137,7 @@ quartz::physics::RigidBody::RigidBody(
         p_physicsWorld,
         parameters.bodyType,
         parameters.enableGravity,
+        parameters.angularLockAxisFactor,
         transform
     )),
     mo_collider(quartz::physics::RigidBody::createCollider(

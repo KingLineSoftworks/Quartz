@@ -62,7 +62,7 @@ quartz::scene::Doodad::~Doodad() {
 void
 quartz::scene::Doodad::fixedUpdate() {
     /**
-     * @todo 2024/06/20 Call the fixed update callback given to the doodad that actual contains
+     * @todo 2024/06/20 Call the fixed update callback given to the doodad which actually contains
      *    the logic that we execute here
      *
      * @todo 2024/06/21 Update m_currentTransform here????
@@ -77,6 +77,7 @@ quartz::scene::Doodad::update(
     UNUSED const double frameInterpolationFactor
 ) {
     math::Transform currentTransform;
+    /** @todo 2024/11/06 Ensure optional rigidbody is valid before trying to get its members */
     currentTransform.position = mo_rigidBody->getPosition();
     currentTransform.rotation = mo_rigidBody->getOrientation();
     currentTransform.scale = m_transform.scale;

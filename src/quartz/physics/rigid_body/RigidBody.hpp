@@ -7,6 +7,7 @@
 
 #include "math/transform/Transform.hpp"
 
+#include "math/transform/Vec3.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 #include "quartz/physics/Loggers.hpp"
@@ -26,15 +27,18 @@ public: // classes
         Parameters(
             const reactphysics3d::BodyType bodyType_,
             const bool enableGravity_,
+            const math::Vec3& angularAxisFactor_,
             const std::variant<std::monostate, quartz::physics::BoxCollider::Parameters, quartz::physics::SphereCollider::Parameters>& v_colliderParameters_
         ) :
             bodyType(bodyType_),
             enableGravity(enableGravity_),
+            angularLockAxisFactor(angularAxisFactor_),
             v_colliderParameters(v_colliderParameters_)
         {}
 
         reactphysics3d::BodyType bodyType;
         bool enableGravity;
+        math::Vec3 angularLockAxisFactor;
         std::variant<std::monostate, quartz::physics::BoxCollider::Parameters, quartz::physics::SphereCollider::Parameters> v_colliderParameters;
     };
 
@@ -44,7 +48,8 @@ public: // member functions
         reactphysics3d::PhysicsWorld* p_physicsWorld,
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
-        const math::Transform& transform
+        const math::Transform& transform,
+        const math::Vec3& angularLockAxisFactor
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
@@ -52,6 +57,7 @@ public: // member functions
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
         const math::Transform& transform,
+        const math::Vec3& angularLockAxisFactor,
         const quartz::physics::BoxCollider::Parameters& boxColliderParameters
     );
     RigidBody(
@@ -60,6 +66,7 @@ public: // member functions
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
         const math::Transform& transform,
+        const math::Vec3& angularLockAxisFactor,
         const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
     );
     RigidBody(
@@ -82,6 +89,7 @@ private: // static functions
         reactphysics3d::PhysicsWorld* p_physicsWorld,
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
+        const math::Vec3& angularLockAxisFactor,
         const math::Transform& transform
     );
     static std::optional<quartz::physics::Collider> createCollider(
