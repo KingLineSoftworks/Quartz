@@ -1,20 +1,14 @@
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include <GLFW/glfw3.h>
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
-#include "util/file_system/FileSystem.hpp"
 
 #include "quartz/Loggers.hpp"
 
 #include "quartz/application/Application.hpp"
 
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/instance/Instance.hpp"
-#include "quartz/rendering/pipeline/Pipeline.hpp"
-#include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
 quartz::Application::Application(
@@ -55,7 +49,7 @@ quartz::Application::~Application() {
 
     /**
      * @todo 2024/11/07 We shouldn't be manually destroying anything, ever. Perhaps we should use
-     * unique pointers so they automatically destruct when the Application class does
+     *    unique pointers so they automatically destruct when the Application class does
      */
     m_sceneManager.~SceneManager();
 }
@@ -116,6 +110,13 @@ void quartz::Application::run() {
     }
 
     LOG_INFOthis("Finishing");
+    /**
+     * @todo 2024/11/07 Create an unload function in the SceneManager that frees up all of the Vulkan resources.
+     *    This will make it so we don't have to manually destruct the SceneManager in the Application destructor.
+     *    If all of the Scene's vulkan information is freed up before we return from this function, then we can have
+     *    the SceneManager destruct normally and Vulkan won't care about destructing the Device first because there
+     *    will be no resources allocated.
+    */
     m_renderingContext.finish();
 }
 
