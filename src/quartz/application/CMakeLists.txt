@@ -25,8 +25,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_Application
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_Application
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
@@ -42,6 +42,7 @@ target_link_libraries(
     PUBLIC
     QUARTZ_MANAGERS_InputManager
     QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_MANAGERS_SceneManager
     QUARTZ_RENDERING_Context
     QUARTZ_SCENE_Scene
 )

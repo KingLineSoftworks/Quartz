@@ -26,8 +26,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_SCENE_Scene
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_SCENE_Scene
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(

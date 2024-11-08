@@ -10,6 +10,7 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
+#include "util/logger/Logger.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
 class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {
@@ -65,6 +66,22 @@ quartz::scene::Scene::loadDoodads(
     LOG_TRACE(SCENE, "Loaded {} doodads", doodads.size());
 
     return doodads;
+}
+
+quartz::scene::Scene::Scene(
+    quartz::scene::Scene&& other
+) :
+    mp_physicsWorld(std::move(other.mp_physicsWorld)),
+    m_camera(std::move(other.m_camera)),
+    m_doodads(std::move(other.m_doodads)),
+    m_skyBox(std::move(other.m_skyBox)),
+    m_ambientLight(std::move(other.m_ambientLight)),
+    m_directionalLight(std::move(other.m_directionalLight)),
+    m_pointLights(std::move(other.m_pointLights)),
+    m_spotLights(std::move(other.m_spotLights)),
+    m_screenClearColor(std::move(other.m_screenClearColor))
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
 }
 
 quartz::scene::Scene::~Scene() {

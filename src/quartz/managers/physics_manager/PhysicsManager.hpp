@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include <reactphysics3d/reactphysics3d.h>
 
 #include "math/transform/Vec3.hpp"

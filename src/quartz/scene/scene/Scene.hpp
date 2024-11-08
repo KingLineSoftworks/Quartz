@@ -29,8 +29,43 @@ namespace scene {
 }
 
 class quartz::scene::Scene {
+public: // classes
+    struct Parameters {
+        Parameters(
+            const std::string& name_,
+            const quartz::scene::Camera& camera_,
+            const quartz::scene::AmbientLight& ambientLight_,
+            const quartz::scene::DirectionalLight& directionalLight_,
+            const std::vector<quartz::scene::PointLight>& pointLights_,
+            const std::vector<quartz::scene::SpotLight>& spotLights_,
+            const math::Vec3& screenClearColor_,
+            const std::array<std::string, 6>& skyBoxInformation_,
+            const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations_
+        ) :
+            name(name_),
+            camera(camera_),
+            ambientLight(ambientLight_),
+            directionalLight(directionalLight_),
+            pointLights(pointLights_),
+            spotLights(spotLights_),
+            screenClearColor(screenClearColor_),
+            skyBoxInformation(skyBoxInformation_),
+            doodadInformations(doodadInformations_)
+        {}
+
+        std::string name;
+        quartz::scene::Camera camera;
+        quartz::scene::AmbientLight ambientLight;
+        quartz::scene::DirectionalLight directionalLight;
+        std::vector<quartz::scene::PointLight> pointLights;
+        std::vector<quartz::scene::SpotLight> spotLights;
+        math::Vec3 screenClearColor;
+        std::array<std::string, 6> skyBoxInformation;
+        std::vector<quartz::scene::Doodad::Parameters> doodadInformations;
+    };
 public: // member functions
     Scene() = default;
+    Scene(Scene&& other);
     ~Scene();
 
     USE_LOGGER(SCENE);

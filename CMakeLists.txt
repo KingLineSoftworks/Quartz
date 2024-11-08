@@ -56,26 +56,26 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_DEBUG)
     set(QUARTZ_DEBUG_MODE TRUE)
-    
+
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding TEST definition")
     set(CMAKE_BUILD_TYPE RelWithDebInfo)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_TEST)
     set(QUARTZ_TEST_MODE TRUE)
-    
+
 elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     message(WARNING "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} not supported, adding RELEASE definition")
     set(CMAKE_BUILD_TYPE MinSizeRel)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
     set(QUARTZ_RELEASE_MODE TRUE)
-    
+
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}, adding RELEASE definition")
     set(CMAKE_BUILD_TYPE Release)
     list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_RELEASE)
     set(QUARTZ_RELEASE_MODE TRUE)
-    
+
 else ()
     if (CMAKE_BUILD_TYPE STREQUAL "")
         message(STATUS "CMAKE_BUILD_TYPE not provided. Using CMAKE_BUILD_TYPE=Debug instead, adding DEBUG definition")
@@ -162,7 +162,7 @@ set(TINYGLTF_NO_INCLUDE_STB_IMAGE OFF CACHE INTERNAL "" FORCE)
 set(TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE OFF CACHE INTERNAL "" FORCE)
 set(TINYGLTF_USE_CPP14 ON CACHE INTERNAL "" FORCE)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF CACHE BOOL "" FORCE)
-# set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE) 
+# set(TINYGLTF_HEADER_ONLY ON CACHE INTERNAL "" FORCE)
 add_subdirectory("${VENDOR_ROOT_DIR}/tinygltf")
 target_compile_options(tinygltf PRIVATE -Wno-deprecated-declarations) # for sprintf
 
@@ -243,6 +243,7 @@ set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/application")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/managers/input_manager")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/managers/physics_manager")
+add_subdirectory("${QUARTZ_SOURCE_DIR}/managers/scene_manager")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/physics/collider")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/physics/rigid_body")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/rendering/buffer")

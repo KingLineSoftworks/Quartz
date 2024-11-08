@@ -23,7 +23,8 @@ quartz::Application::Application(
     const uint32_t applicationPatchVersion,
     const uint32_t windowWidthPixels,
     const uint32_t windowHeightPixels,
-    const bool validationLayersEnabled
+    const bool validationLayersEnabled,
+    const std::vector<quartz::scene::Scene::Parameters>& sceneParameters
 ) :
     m_applicationName(applicationName),
     m_majorVersion(applicationMajorVersion),
@@ -40,7 +41,7 @@ quartz::Application::Application(
     ),
     m_inputManager(quartz::managers::InputManager::Client::getInstance(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
     m_physicsManager(quartz::managers::PhysicsManager::Client::getInstance()),
-    m_scene(),
+    m_sceneManager(quartz::managers::SceneManager::Client::getInstance(sceneParameters)),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
     m_isPaused(false)
@@ -55,92 +56,14 @@ quartz::Application::~Application() {
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
-    std::vector<quartz::scene::Doodad::Parameters> doodadInformations = {
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_cube/glb/unit_cube.glb"),
-            {
-                { 5.0f, 7.5f, 5.0f },
-                0.0f,
-                { 0.0f, 0.0f, 1.0f },
-                { 1.0f, 1.0f, 1.0f }
-            },
-            {
-                reactphysics3d::BodyType::DYNAMIC,
-                true,
-                math::Vec3(0.0, 1.0, 0.0),
-                quartz::physics::BoxCollider::Parameters({1.0f, 1.0f, 1.0f})
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_sphere/glb/unit_sphere.glb"),
-            {
-                { 5.0f, 10.0f, 0.0f },
-                0.0f,
-                { 0.0f, 0.0f, 1.0f },
-                { 1.0f, 1.0f, 1.0f }
-            },
-            {
-                reactphysics3d::BodyType::DYNAMIC,
-                true,
-                math::Vec3(0.0, 1.0, 0.0),
-                quartz::physics::SphereCollider::Parameters(1.0)
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Cube/glTF/Cube.gltf"),
-            {
-                {0.0f, -5.0f, 0.0f},
-                0.0f,
-                {0.0f, 1.0f, 0.0f},
-                {25.0f, 1.0f, 25.0f}
-            },
-            {
-                reactphysics3d::BodyType::STATIC,
-                false,
-                math::Vec3(1.0, 1.0, 1.0),
-                quartz::physics::BoxCollider::Parameters({25.0f, 1.0f, 25.0f})
-            }
-        },
-    };
-
-    std::array<std::string, 6> skyBoxInformation = {
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posx.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negx.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posy.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negy.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posz.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negz.jpg")
-    };
-
-    std::vector<quartz::scene::PointLight> pointLights = {};
-
-    std::vector<quartz::scene::SpotLight> spotLights = {};
-
-    LOG_INFOthis("Loading scene");
-    m_scene.load(
+    LOG_INFOthis("Loading scene 0");
+    quartz::scene::Scene& currentScene = m_sceneManager.loadScene(
         m_renderingContext.getRenderingDevice(),
         m_physicsManager,
-        {
-            0.0f, // rotation around x-axis (up down)
-            -90.0f, // rotation around y-axis (left right)
-            0.0f,
-            75.0f,
-             { 1.25f, 0.0f, 10.0f }
-        },
-        {
-            { 0.1f, 0.1f, 0.1f }
-        },
-        {
-            { 0.5f, 0.5f, 0.5f },
-            { 3.0f, -2.0f, 2.0f }
-        },
-        pointLights,
-        spotLights,
-        {0.25f, 0.4f, 0.6f},
-        skyBoxInformation,
-        doodadInformations
+        0
     );
-    m_renderingContext.loadScene(m_scene);
+
+    m_renderingContext.loadScene(currentScene);
 
     const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
     double totalElapsedTime = 0.0;
@@ -169,7 +92,7 @@ void quartz::Application::run() {
 
         while (frameTimeAccumulator >= 0) {
             processInput();
-            m_scene.fixedUpdate(
+            currentScene.fixedUpdate(
                 m_inputManager,
                 m_physicsManager,
                 totalElapsedTime,
@@ -181,8 +104,8 @@ void quartz::Application::run() {
 
         double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
-        m_scene.update(m_renderingContext.getRenderingWindow(), currentFrameTimeDelta, frameInterpolationFactor);
-        m_renderingContext.draw(m_scene);
+        currentScene.update(m_renderingContext.getRenderingWindow(), currentFrameTimeDelta, frameInterpolationFactor);
+        m_renderingContext.draw(currentScene);
     }
 
     LOG_INFOthis("Finishing");

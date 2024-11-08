@@ -15,6 +15,7 @@
 
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
+#include "demo_app/SceneParameters.hpp"
 
 int main() {
     constexpr bool shouldLogPreamble = false;
@@ -35,62 +36,62 @@ int main() {
 
     util::Logger::setLevels({
         // demo app
-        {"GENERAL", util::Logger::Level::info},
+        {"GENERAL", util::Logger::Level::trace},
         {"BIGBOY", util::Logger::Level::trace},
 
         // math
-        {"TRANSFORM", util::Logger::Level::info},
+        {"TRANSFORM", util::Logger::Level::trace},
 
         // util
-        {"FILESYSTEM", util::Logger::Level::info},
+        {"FILESYSTEM", util::Logger::Level::trace},
 
         // quartz
-        {"APPLICATION", util::Logger::Level::info},
+        {"APPLICATION", util::Logger::Level::trace},
 
         // managers
-        {"INPUTMAN", util::Logger::Level::info},
-        {"PHYSICSMAN", util::Logger::Level::info},
+        {"INPUTMAN", util::Logger::Level::trace},
+        {"PHYSICSMAN", util::Logger::Level::trace},
 
         // physics
-        {"COLLIDER", util::Logger::Level::info},
-        {"COLLIDER_BOX", util::Logger::Level::info},
-        {"COLLIDER_SPHERE", util::Logger::Level::info},
-        {"RIGIDBODY", util::Logger::Level::info},
+        {"COLLIDER", util::Logger::Level::trace},
+        {"COLLIDER_BOX", util::Logger::Level::trace},
+        {"COLLIDER_SPHERE", util::Logger::Level::trace},
+        {"RIGIDBODY", util::Logger::Level::trace},
 
         // rendering
-        {"INPUTMAN", util::Logger::Level::info},
-        {"PHYSICSMAN", util::Logger::Level::info},
+        {"INPUTMAN", util::Logger::Level::trace},
+        {"PHYSICSMAN", util::Logger::Level::trace},
 
         // rendering
-        {"BUFFER", util::Logger::Level::info},
-        {"BUFFER_MAPPED", util::Logger::Level::info},
-        {"BUFFER_IMAGE", util::Logger::Level::info},
-        {"BUFFER_STAGED", util::Logger::Level::info},
-        {"CONTEXT", util::Logger::Level::info},
-        {"CUBEMAP", util::Logger::Level::info},
-        {"DEPTHBUFFER", util::Logger::Level::info},
-        {"DEVICE", util::Logger::Level::info},
-        {"IMAGE", util::Logger::Level::info},
-        {"INSTANCE", util::Logger::Level::info},
-        {"MATERIAL", util::Logger::Level::info},
-        {"MODEL", util::Logger::Level::info},
-        {"MODEL_MESH", util::Logger::Level::info},
+        {"BUFFER", util::Logger::Level::trace},
+        {"BUFFER_MAPPED", util::Logger::Level::trace},
+        {"BUFFER_IMAGE", util::Logger::Level::trace},
+        {"BUFFER_STAGED", util::Logger::Level::trace},
+        {"CONTEXT", util::Logger::Level::trace},
+        {"CUBEMAP", util::Logger::Level::trace},
+        {"DEPTHBUFFER", util::Logger::Level::trace},
+        {"DEVICE", util::Logger::Level::trace},
+        {"IMAGE", util::Logger::Level::trace},
+        {"INSTANCE", util::Logger::Level::trace},
+        {"MATERIAL", util::Logger::Level::trace},
+        {"MODEL", util::Logger::Level::trace},
+        {"MODEL_MESH", util::Logger::Level::trace},
         {"MODEL_PRIMITIVE", util::Logger::Level::trace},
-        {"MODEL_NODE", util::Logger::Level::info},
-        {"MODEL_SCENE", util::Logger::Level::info},
-        {"PIPELINE", util::Logger::Level::info},
-        {"RENDERPASS", util::Logger::Level::info},
-        {"SWAPCHAIN", util::Logger::Level::info},
-        {"TEXTURE", util::Logger::Level::info},
-        {"VULKAN", util::Logger::Level::info},
-        {"VULKANUTIL", util::Logger::Level::info},
-        {"WINDOW", util::Logger::Level::info},
+        {"MODEL_NODE", util::Logger::Level::trace},
+        {"MODEL_SCENE", util::Logger::Level::trace},
+        {"PIPELINE", util::Logger::Level::trace},
+        {"RENDERPASS", util::Logger::Level::trace},
+        {"SWAPCHAIN", util::Logger::Level::trace},
+        {"TEXTURE", util::Logger::Level::trace},
+        {"VULKAN", util::Logger::Level::trace},
+        {"VULKANUTIL", util::Logger::Level::trace},
+        {"WINDOW", util::Logger::Level::trace},
 
         // scene
-        {"CAMERA", util::Logger::Level::info},
+        {"CAMERA", util::Logger::Level::trace},
         {"DOODAD", util::Logger::Level::trace},
-        {"SCENE", util::Logger::Level::info},
-        {"SKYBOX", util::Logger::Level::info},
+        {"SCENE", util::Logger::Level::trace},
+        {"SKYBOX", util::Logger::Level::trace},
     });
 
     if (shouldLogPreamble) {
@@ -150,7 +151,8 @@ int main() {
         APPLICATION_PATCH_VERSION,
         800,
         600,
-        validationLayersEnabled
+        validationLayersEnabled,
+        getSceneParameters()
     );
 
     try {
