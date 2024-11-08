@@ -10,7 +10,7 @@ endfunction()
 
 # -----=====***** the versions *****=====----- #
 
-##### Major Version 0 #####
+# # # ## Major Version 0 #####
 
 # Minor Version 1 - Fundamental Rendering
 
@@ -27,4 +27,5 @@ endfunction()
 
 # Minor Version 2 - Fundamental Physics
 
-set_quartz_major_minor_patch_versions(0 2 0) # allow for physics in our scenes with JoltPhysics
+set_quartz_major_minor_patch_versions(0 2 0) # allow for physics in our scenes with reactphysics3d
+

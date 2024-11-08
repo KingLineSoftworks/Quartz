@@ -2,7 +2,6 @@
 
 #include <optional>
 #include <string>
-#include <variant>
 
 #include <reactphysics3d/reactphysics3d.h>
 
