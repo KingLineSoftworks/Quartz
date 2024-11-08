@@ -9,6 +9,10 @@ quartz::managers::SceneManager::SceneManager() :
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
+quartz::managers::SceneManager::~SceneManager() {
+    LOG_FUNCTION_CALL_TRACEthis("");
+}
+
 quartz::managers::SceneManager&
 quartz::managers::SceneManager::getInstance() {
     LOG_FUNCTION_SCOPE_TRACE(SCENEMAN, "");

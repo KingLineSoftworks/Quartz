@@ -63,6 +63,7 @@ public: // classes
         std::array<std::string, 6> skyBoxInformation;
         std::vector<quartz::scene::Doodad::Parameters> doodadInformations;
     };
+
 public: // member functions
     Scene() = default;
     Scene(Scene&& other);

@@ -35,6 +35,7 @@ public: // member functions
     SceneManager(SceneManager&& other) = delete;
     SceneManager& operator=(const SceneManager& other) = delete;
     SceneManager& operator=(SceneManager&& other) = delete;
+    ~SceneManager();
 
     USE_LOGGER(SCENEMAN);
 

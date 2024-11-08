@@ -4,6 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "util/file_system/FileSystem.hpp"
 
 #include "quartz/Loggers.hpp"
@@ -51,6 +52,12 @@ quartz::Application::Application(
 
 quartz::Application::~Application() {
     LOG_FUNCTION_CALL_TRACEthis("");
+
+    /**
+     * @todo 2024/11/07 We shouldn't be manually destroying anything, ever. Perhaps we should use
+     * unique pointers so they automatically destruct when the Application class does
+     */
+    m_sceneManager.~SceneManager();
 }
 
 void quartz::Application::run() {
