@@ -12,6 +12,7 @@
 
 #include "quartz/physics/Loggers.hpp"
 #include "quartz/physics/collider/Collider.hpp"
+#include "quartz/physics/realm/Realm.hpp"
 
 namespace quartz {
 namespace physics {
@@ -45,7 +46,7 @@ public: // classes
 public: // member functions
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        quartz::physics::Realm& physicsRealm,
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
         const math::Transform& transform,
@@ -53,7 +54,7 @@ public: // member functions
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        quartz::physics::Realm& physicsRealm,
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
         const math::Transform& transform,
@@ -62,7 +63,7 @@ public: // member functions
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        quartz::physics::Realm& physicsRealm,
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
         const math::Transform& transform,
@@ -71,7 +72,7 @@ public: // member functions
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        quartz::physics::Realm& physicsRealm,
         const math::Transform& transform,
         const quartz::physics::RigidBody::Parameters& parameters
     );
@@ -86,7 +87,7 @@ public: // member functions
 
 private: // static functions
     static reactphysics3d::RigidBody* createRigidBodyPtr(
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        quartz::physics::Realm& physicsRealm,
         const reactphysics3d::BodyType bodyType,
         const bool enableGravity,
         const math::Vec3& angularLockAxisFactor,

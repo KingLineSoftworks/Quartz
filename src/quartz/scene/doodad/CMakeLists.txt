@@ -26,8 +26,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_SCENE_Doodad
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_SCENE_Doodad
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
@@ -35,7 +35,6 @@ target_link_libraries(
 
     PUBLIC
     glm
-    reactphysics3d
 
     PUBLIC
     MATH_Algorithms
@@ -46,6 +45,7 @@ target_link_libraries(
 
     PUBLIC
     QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_PHYSICS_Realm
     QUARTZ_PHYSICS_RigidBody
     QUARTZ_RENDERING_Device
     QUARTZ_RENDERING_Model

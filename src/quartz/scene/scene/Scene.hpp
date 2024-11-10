@@ -114,7 +114,7 @@ private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        quartz::physics::Realm& physicsRealm,
         const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
     );
 

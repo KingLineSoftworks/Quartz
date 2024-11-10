@@ -29,7 +29,7 @@ std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::PhysicsWorld* p_physicsWorld,
+    quartz::physics::Realm& physicsRealm,
     const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
@@ -47,17 +47,13 @@ quartz::scene::Scene::loadDoodads(
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
         LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
         LOG_TRACE(SCENE, "  rigid body properties:");
-        // if (rigidBodyInformation) {
-            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(rigidBodyInformation.bodyType));
-            LOG_TRACE(SCENE, "    gravity enabled = {}", rigidBodyInformation.enableGravity);
-        // } else {
-        //     LOG_TRACE(SCENE, "    N/A");
-        // }
+        LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(rigidBodyInformation.bodyType));
+        LOG_TRACE(SCENE, "    gravity enabled = {}", rigidBodyInformation.enableGravity);
 
         doodads.emplace_back(
             renderingDevice,
             physicsManager,
-            p_physicsWorld,
+            physicsRealm,
             filepath,
             transform,
             rigidBodyInformation
@@ -142,10 +138,13 @@ quartz::scene::Scene::load(
     );
     LOG_TRACEthis("Loaded skybox");
 
+    /**
+     * @todo 2024/11/09 Allow for optional physics realm if we aren't creating a doodad with a rigidbody
+     */
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         physicsManager,
-        mo_physicsRealm->getPhysicsWorldPtr(),
+        *mo_physicsRealm,
         doodadInformations
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());

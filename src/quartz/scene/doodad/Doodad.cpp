@@ -5,6 +5,7 @@
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
+#include "quartz/physics/realm/Realm.hpp"
 
 #include "quartz/scene/doodad/Doodad.hpp"
 
@@ -24,7 +25,7 @@ quartz::scene::Doodad::fixTransform(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::PhysicsWorld* p_physicsWorld,
+    quartz::physics::Realm& physicsRealm,
     const std::string& objectFilepath,
     const math::Transform& transform,
     const quartz::physics::RigidBody::Parameters& rigidBodyParameters
@@ -35,7 +36,7 @@ quartz::scene::Doodad::Doodad(
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
-    mo_rigidBody({physicsManager, p_physicsWorld, m_transform, rigidBodyParameters})
+    mo_rigidBody({physicsManager, physicsRealm, m_transform, rigidBodyParameters})
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
