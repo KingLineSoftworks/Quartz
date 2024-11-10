@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "quartz/physics/realm/Realm.hpp"
 #include "util/file_system/FileSystem.hpp"
 
 #include "quartz/scene/scene/Scene.hpp"
@@ -82,6 +83,8 @@ std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
         util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negz.jpg")
     };
 
+    std::optional<quartz::physics::Realm::Parameters> o_realmParameters({{0.0, -1.0, 0.0}});
+
     return {
         { 
             "default_test_scene_00",
@@ -92,7 +95,9 @@ std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
             spotLights,
             screenClearColor,
             skyBoxInformation,
-            doodadInformations
+            doodadInformations,
+            o_realmParameters
         }
     };
 }
+

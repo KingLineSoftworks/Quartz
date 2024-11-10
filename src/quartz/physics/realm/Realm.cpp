@@ -26,6 +26,10 @@ quartz::physics::Realm::createPhysicsWorldPtr(
     return physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
 }
 
+quartz::physics::Realm::Realm() :
+    mp_physicsWorld(nullptr)
+{}
+
 quartz::physics::Realm::Realm(
     quartz::managers::PhysicsManager& physicsManager,
     const math::Vec3& gravity
@@ -47,3 +51,11 @@ quartz::physics::Realm::Realm(
 quartz::physics::Realm::~Realm() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
+
+void
+quartz::physics::Realm::fixedUpdate(
+    const double tickTimeDelta
+) {
+    mp_physicsWorld->update(tickTimeDelta);
+}
+

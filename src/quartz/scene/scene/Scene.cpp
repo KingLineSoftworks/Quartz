@@ -5,6 +5,7 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/realm/Realm.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -71,7 +72,7 @@ quartz::scene::Scene::loadDoodads(
 quartz::scene::Scene::Scene(
     quartz::scene::Scene&& other
 ) :
-    mp_physicsWorld(std::move(other.mp_physicsWorld)),
+    mo_physicsRealm(std::move(other.mo_physicsRealm)),
     m_camera(std::move(other.m_camera)),
     m_doodads(std::move(other.m_doodads)),
     m_skyBox(std::move(other.m_skyBox)),
@@ -101,29 +102,25 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
-    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations,
+    const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
 ) {
-   LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    LOG_TRACEthis("Creating physics world");
     /**
-     * @todo 2024/06/20 Create a class extending reactphysics3d::EventListener,
-     *    instantiate an instance of that class, and set that instance as the
-     *    physics world's event listener
+     * @todo 2024/11/09 Create a quartz::physics::EventListener class that allows for the
+     *    ability to inject functions, so the user doesn't have to implement their own class
+     *    extending the reactphysics3d::EventListener class.
+     *    We can allow the current scene to set the event listener's functions, so each scene
+     *    can handle the events in their own way.
      */
-    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
-    physicsWorldSettings.defaultVelocitySolverNbIterations = 10;
-    physicsWorldSettings.defaultPositionSolverNbIterations = 5;
-    physicsWorldSettings.isSleepingEnabled = true;
-    physicsWorldSettings.defaultTimeBeforeSleep = 1.0;      // seconds
-    physicsWorldSettings.defaultSleepLinearVelocity = 0.5;  // meters per second
-    physicsWorldSettings.defaultSleepAngularVelocity = 0.5; // meters per second
-//    physicsWorldSettings.gravity = math::Vec3(0, -9.81, 0);
-    physicsWorldSettings.gravity = math::Vec3(0, -1.0, 0);
-    mp_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
-
-    static DummyTestPhysicsEventListener el;
-    mp_physicsWorld->setEventListener(&el);
+    // static DummyTestPhysicsEventListener el;
+    // mp_physicsWorld->setEventListener(&el);
+    
+    if (o_realmParameters) {
+        LOG_TRACEthis("Initializing physics realm");
+        mo_physicsRealm.emplace(physicsManager, o_realmParameters->gravity);
+    }
 
     LOG_TRACEthis("Initializing master texture list");
     quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
@@ -148,7 +145,7 @@ quartz::scene::Scene::load(
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         physicsManager,
-        mp_physicsWorld,
+        mo_physicsRealm->getPhysicsWorldPtr(),
         doodadInformations
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
@@ -182,7 +179,9 @@ quartz::scene::Scene::fixedUpdate(
         doodad.fixedUpdate();
     }
 
-    mp_physicsWorld->update(tickTimeDelta);
+    if (mo_physicsRealm) {
+        mo_physicsRealm->fixedUpdate(tickTimeDelta);
+    }
 }
 
 void

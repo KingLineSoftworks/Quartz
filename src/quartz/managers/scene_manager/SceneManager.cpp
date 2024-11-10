@@ -77,7 +77,8 @@ quartz::managers::SceneManager::loadScene(
         sceneParameters.spotLights,
         sceneParameters.screenClearColor,
         sceneParameters.skyBoxInformation,
-        sceneParameters.doodadInformations
+        sceneParameters.doodadInformations,
+        sceneParameters.o_realmParameters
     );
 
     return m_scenes[index];

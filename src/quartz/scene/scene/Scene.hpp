@@ -10,6 +10,7 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/realm/Realm.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/Loggers.hpp"
@@ -40,7 +41,8 @@ public: // classes
             const std::vector<quartz::scene::SpotLight>& spotLights_,
             const math::Vec3& screenClearColor_,
             const std::array<std::string, 6>& skyBoxInformation_,
-            const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations_
+            const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations_,
+            const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters_
         ) :
             name(name_),
             camera(camera_),
@@ -50,7 +52,8 @@ public: // classes
             spotLights(spotLights_),
             screenClearColor(screenClearColor_),
             skyBoxInformation(skyBoxInformation_),
-            doodadInformations(doodadInformations_)
+            doodadInformations(doodadInformations_),
+            o_realmParameters(o_realmParameters_)
         {}
 
         std::string name;
@@ -62,6 +65,7 @@ public: // classes
         math::Vec3 screenClearColor;
         std::array<std::string, 6> skyBoxInformation;
         std::vector<quartz::scene::Doodad::Parameters> doodadInformations;
+        std::optional<quartz::physics::Realm::Parameters> o_realmParameters;
     };
 
 public: // member functions
@@ -90,7 +94,8 @@ public: // member functions
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
-        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations,
+        const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
     );
 
     void fixedUpdate(
@@ -114,7 +119,7 @@ private: // static functions
     );
 
 private: // member variables
-    reactphysics3d::PhysicsWorld* mp_physicsWorld;
+    std::optional<quartz::physics::Realm> mo_physicsRealm; // optional because we can have scenes without physics (main menu, etc.)
 
     quartz::scene::Camera m_camera;
 

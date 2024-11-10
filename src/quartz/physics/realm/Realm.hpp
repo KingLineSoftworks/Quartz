@@ -7,6 +7,7 @@
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 #include "quartz/physics/Loggers.hpp"
+#include "reactphysics3d/engine/PhysicsWorld.h"
 #include "util/logger/Logger.hpp"
 
 namespace quartz {
@@ -31,6 +32,7 @@ public: // classes
     };
 
 public: // member functions
+    Realm();
     Realm(
         quartz::managers::PhysicsManager& physicsManager,
         const math::Vec3& gravity_
@@ -39,6 +41,10 @@ public: // member functions
     ~Realm();
 
     USE_LOGGER(REALM);
+
+    reactphysics3d::PhysicsWorld* getPhysicsWorldPtr() { return mp_physicsWorld; }
+
+    void fixedUpdate(const double tickTimeDelta);
 
 private: // static functions
     static reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(
