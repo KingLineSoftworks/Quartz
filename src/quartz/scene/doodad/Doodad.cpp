@@ -55,7 +55,7 @@ quartz::scene::Doodad::Doodad(
         renderingDevice,
         doodadParameters.objectFilepath
     ),
-    m_transform(doodadParameters.transform),
+    m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
     m_transformationMatrix(),
     mo_rigidBody(physicsRealm.createRigidBody(physicsManager, m_transform, doodadParameters.rigidBodyParameters))
 {
