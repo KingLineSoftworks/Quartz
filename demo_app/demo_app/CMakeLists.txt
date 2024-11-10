@@ -12,6 +12,7 @@ add_executable(
 target_include_directories(
     ${APPLICATION_NAME}
     PRIVATE
+    ${QUARTZ_INCLUDE_DIRS}
     "${CMAKE_CURRENT_SOURCE_DIR}/.."
 )
 
@@ -38,7 +39,11 @@ target_link_libraries(
 
     # Vendor (leaving this commented section in here for ease of placement in the future when prototyping)
     PRIVATE
-    # some_lib
+    reactphysics3d
+
+    # Math
+    PRIVATE
+    MATH_Transform
 
     # Utility
     PRIVATE

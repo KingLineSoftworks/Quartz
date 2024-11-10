@@ -1,29 +1,47 @@
 #include <string>
 
-#include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
+
+#include "math/algorithms/Algorithms.hpp"
+#include "math/transform/Mat4.hpp"
+#include "math/transform/Quaternion.hpp"
 
 #include "quartz/scene/doodad/Doodad.hpp"
 
+math::Transform
+quartz::scene::Doodad::fixTransform(
+    const math::Transform& transform
+) {
+    math::Transform fixedTransform = transform;
+
+    if (fixedTransform.rotation.magnitude() == 0.0f) {
+        fixedTransform.rotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(0.0f, 1.0f, 0.0f), 0.0f);
+    }
+
+    return fixedTransform;
+}
+
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
+    reactphysics3d::PhysicsWorld* p_physicsWorld,
     const std::string& objectFilepath,
-    const quartz::scene::Transform& transform
+    const math::Transform& transform,
+    const quartz::physics::RigidBody::Parameters& rigidBodyParameters
 ) :
     m_model(
         renderingDevice,
         objectFilepath
     ),
-    m_transform(transform),
-    m_transformationMatrix()
+    m_transform(quartz::scene::Doodad::fixTransform(transform)),
+    m_transformationMatrix(),
+    mo_rigidBody({physicsManager, p_physicsWorld, m_transform, rigidBodyParameters})
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
-    LOG_TRACE(SCENE, "  position         = {}", glm::to_string(transform.position));
-    LOG_TRACE(SCENE, "  rotation degrees = {}", transform.rotationAmountDegrees);
-    LOG_TRACE(SCENE, "  rotation axis    = {}", glm::to_string(transform.rotationAxis));
-    LOG_TRACE(SCENE, "  scale            = {}", glm::to_string(transform.scale));
+    LOG_TRACE(SCENE, "  position = {}", transform.position.toString());
+    LOG_TRACE(SCENE, "  rotation = {}", transform.rotation.toString());
+    LOG_TRACE(SCENE, "  scale    = {}", transform.scale.toString());
 }
 
 quartz::scene::Doodad::Doodad(
@@ -31,7 +49,8 @@ quartz::scene::Doodad::Doodad(
 ) :
     m_model(std::move(other.m_model)),
     m_transform(other.m_transform),
-    m_transformationMatrix(other.m_transformationMatrix)
+    m_transformationMatrix(other.m_transformationMatrix),
+    mo_rigidBody(std::move(other.mo_rigidBody))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -41,24 +60,51 @@ quartz::scene::Doodad::~Doodad() {
 }
 
 void
+quartz::scene::Doodad::fixedUpdate() {
+    /**
+     * @todo 2024/06/20 Call the fixed update callback given to the doodad which actually contains
+     *    the logic that we execute here
+     *
+     * @todo 2024/06/21 Update m_currentTransform here????
+     */
+
+//    mp_rigidBody->applyLocalForceAtCenterOfMass({1.0, 0.0, 0.0});
+}
+
+void
 quartz::scene::Doodad::update(
-    UNUSED const double tickTimeDelta
+    UNUSED const double frameTimeDelta,
+    UNUSED const double frameInterpolationFactor
 ) {
-    m_transformationMatrix = glm::mat4(1.0f);
+    math::Transform currentTransform;
+    /** @todo 2024/11/06 Ensure optional rigidbody is valid before trying to get its members */
+    currentTransform.position = mo_rigidBody->getPosition();
+    currentTransform.rotation = mo_rigidBody->getOrientation();
+    currentTransform.scale = m_transform.scale;
 
-    m_transformationMatrix = glm::translate(
-        m_transformationMatrix,
-        m_transform.position
+    const math::Vec3 interpolatedPosition = math::lerp(
+        m_transform.position,
+        currentTransform.position,
+        frameInterpolationFactor
     );
 
-    m_transformationMatrix = glm::rotate(
-        m_transformationMatrix,
-        glm::radians(m_transform.rotationAmountDegrees),
-        m_transform.rotationAxis
+    const math::Quaternion interpolatedRotation = math::Quaternion::slerp(
+        m_transform.rotation.normalize(),
+        currentTransform.rotation.normalize(),
+        frameInterpolationFactor
     );
 
-    m_transformationMatrix = glm::scale(
-        m_transformationMatrix,
-        m_transform.scale
+    const math::Vec3 interpolatedScale = math::lerp(
+        m_transform.scale,
+        currentTransform.scale,
+        frameInterpolationFactor
     );
+
+    math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
+    math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
+    math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
+
+    m_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
+    m_transform = currentTransform;
 }

@@ -8,17 +8,31 @@
 #include "quartz/managers/Loggers.hpp"
 
 namespace quartz {
+
+class Application;
+
 namespace managers {
     class InputManager;
 }
 }
 
 class quartz::managers::InputManager {
-public: // member functions
-    InputManager(const InputManager& other) = delete;
-    void operator=(const InputManager& other) = delete;
+public: // classes
+    class Client {
+    public: // member functions
+        Client() = delete;
 
-    InputManager(InputManager&& other) = default;
+    private: // static functions
+        static quartz::managers::InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow) { return quartz::managers::InputManager::getInstance(p_glfwWindow); }
+
+    private: // friend classes
+        friend class quartz::Application;
+    };
+
+public: // member functions
+    InputManager(InputManager&& other); /** @todo 2024/06/15 See if we can make this private. Seems like insert needs access to this??? We don't want others to see this. */
+    InputManager(const InputManager& other) = delete;
+    InputManager& operator=(const InputManager& other) = delete;
 
     USE_LOGGER(INPUTMAN);
 
@@ -47,12 +61,7 @@ public: // member functions
     void setShouldCollectMouseInput(const bool shouldCollect);
     void setShouldCollectKeyInput(const bool shouldCollect);
 
-private: // member functions
-    InputManager(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
-
 public: // static functions
-    static std::shared_ptr<InputManager> getPtr(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
-
     static void mousePositionInputCallback(
         GLFWwindow* p_glfwWindow,
         double updatedMousePosition_x,
@@ -64,13 +73,14 @@ public: // static functions
         double scrollOffset_y
     );
 
-private: // static functions
+private: // member functions
+    static InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
+
+private: // member functions
+    InputManager(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
 private: // static variables
-    static std::map<
-        const GLFWwindow* const,
-        std::shared_ptr<quartz::managers::InputManager>
-    > inputManagerPtrMap;
+    static std::map<const GLFWwindow* const, quartz::managers::InputManager> inputManagerMap; // leaving this as member variable for the callbacks //
 
 private: // member variables
     std::shared_ptr<GLFWwindow> mp_glfwWindow;

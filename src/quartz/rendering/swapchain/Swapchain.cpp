@@ -2,10 +2,9 @@
 #include <queue>
 #include <vector>
 
-#include <glm/mat4x4.hpp>
-#include <glm/gtx/string_cast.hpp>
-
 #include <vulkan/vulkan.hpp>
+
+#include "math/transform/Mat4.hpp"
 
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
@@ -283,7 +282,7 @@ quartz::rendering::Swapchain::~Swapchain() {
 }
 
 void
-quartz::rendering::Swapchain::setScreenClearColor(const glm::vec3& screenClearColor) {
+quartz::rendering::Swapchain::setScreenClearColor(const math::Vec3& screenClearColor) {
     m_screenClearColor = screenClearColor;
 }
 
@@ -598,7 +597,7 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
             continue;
         }
 
-        glm::mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
+        math::Mat4 currentTransformationMatrix = doodad.getTransformationMatrix() * p_node->getTransformationMatrix();
         const quartz::rendering::PushConstantInfo& transformMatrixPushConstantInfo = doodadRenderingPipeline.getPushConstantInfos()[0];
         m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
             *doodadRenderingPipeline.getVulkanPipelineLayoutPtr(),

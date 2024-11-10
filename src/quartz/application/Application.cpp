@@ -3,16 +3,12 @@
 
 #include <GLFW/glfw3.h>
 
-#include "util/file_system/FileSystem.hpp"
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 #include "quartz/Loggers.hpp"
 
 #include "quartz/application/Application.hpp"
 
-#include "quartz/rendering/device/Device.hpp"
-#include "quartz/rendering/instance/Instance.hpp"
-#include "quartz/rendering/pipeline/Pipeline.hpp"
-#include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/window/Window.hpp"
 
 quartz::Application::Application(
@@ -22,7 +18,8 @@ quartz::Application::Application(
     const uint32_t applicationPatchVersion,
     const uint32_t windowWidthPixels,
     const uint32_t windowHeightPixels,
-    const bool validationLayersEnabled
+    const bool validationLayersEnabled,
+    const std::vector<quartz::scene::Scene::Parameters>& sceneParameters
 ) :
     m_applicationName(applicationName),
     m_majorVersion(applicationMajorVersion),
@@ -37,10 +34,9 @@ quartz::Application::Application(
         windowHeightPixels,
         validationLayersEnabled
     ),
-    mp_inputManager(quartz::managers::InputManager::getPtr(
-        m_renderingContext.getRenderingWindow().getGLFWwindowPtr()
-    )),
-    m_scene(),
+    m_inputManager(quartz::managers::InputManager::Client::getInstance(m_renderingContext.getRenderingWindow().getGLFWwindowPtr())),
+    m_physicsManager(quartz::managers::PhysicsManager::Client::getInstance()),
+    m_sceneManager(quartz::managers::SceneManager::Client::getInstance(sceneParameters)),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
     m_isPaused(false)
@@ -50,109 +46,43 @@ quartz::Application::Application(
 
 quartz::Application::~Application() {
     LOG_FUNCTION_CALL_TRACEthis("");
+
+    /**
+     * @todo 2024/11/07 We shouldn't be manually destroying anything, ever. Perhaps we should use
+     *    unique pointers so they automatically destruct when the Application class does
+     */
+    m_sceneManager.~SceneManager();
 }
 
 void quartz::Application::run() {
     LOG_FUNCTION_SCOPE_INFOthis("");
 
-    const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
-    UNUSED double currentFrameTimeDelta = 0.0;
-    UNUSED double previousFrameStartTime = 0.0f;
-    UNUSED double currentFrameStartTime = 0.0f;
-    UNUSED double frameTimeAccumulator = 0.0f;
-
-    std::vector<std::pair<std::string, quartz::scene::Transform>> doodadInformations = {
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf"),
-            {
-                {-2.5f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {20.0f, 20.0f, 20.0f}
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoomBoxWithAxes/glTF/BoomBoxWithAxes.gltf"),
-            {
-                {0.0f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {100.0f, 100.0f, 100.0f}
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/WaterBottle/glTF/WaterBottle.gltf"),
-            {
-                {2.5f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {10.0f, 10.0f, 10.0f}
-            }
-        },
-        {
-            util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/glTF-Sample-Models/2.0/BoxVertexColors/glTF/BoxVertexColors.gltf"),
-            {
-                {5.0f, 0.0f, 0.0f},
-                0.0f,
-                {0.0f, 0.0f, 1.0f},
-                {1.0f, 1.0f, 1.0f}
-            }
-        }
-    };
-
-    std::array<std::string, 6> skyBoxInformation = {
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posx.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negx.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posy.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negy.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/posz.jpg"),
-        util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/sky_boxes/parliament/negz.jpg")
-    };
-
-    std::vector<quartz::scene::PointLight> pointLights = {
-        {
-            {0.6500f, 0.6500f, 0.6500f},
-            {0.0f, 0.0f, -6.0f},
-            0.001f,
-            0.001f
-        },
-    };
-
-    std::vector<quartz::scene::SpotLight> spotLights = {
-        {
-            {0.7f, 0.7f, 0.7f},
-            {0.0f, 6.0f, 9.0f},
-            {0.0f, -2.0f, -3.0f},
-            10.0f, 15.0f,
-            0.005f,
-            0.01f
-        },
-    };
-
-    LOG_INFOthis("Loading scene");
-    m_scene.load(
+    LOG_INFOthis("Loading scene 0");
+    quartz::scene::Scene& currentScene = m_sceneManager.loadScene(
         m_renderingContext.getRenderingDevice(),
-        {
-            0.0f, // rotation around x-axis (up down)
-            -90.0f, // rotation around y-axis (left right)
-            0.0f,
-            75.0f,
-             { 1.25f, 0.0f, 5.0f }
-        },
-        {
-            { 0.01f, 0.01f, 0.01f }
-        },
-        {
-            { 0.05f, 0.05f, 0.05f },
-            { 3.0f, -2.0f, 0.0f }
-        },
-        pointLights,
-        spotLights,
-        {0.25f, 0.4f, 0.6f},
-        skyBoxInformation,
-        doodadInformations
+        m_physicsManager,
+        0
     );
-    m_renderingContext.loadScene(m_scene);
+
+    m_renderingContext.loadScene(currentScene);
+
+    const double targetTickTimeDelta = 1.0 / m_targetTicksPerSecond;
+    double totalElapsedTime = 0.0;
+    double currentFrameTimeDelta = 0.0;
+    double previousFrameStartTime = 0.0f;
+    double currentFrameStartTime = 0.0f;
+    double frameTimeAccumulator = 0.0f;
+
+    /**
+     * @brief When the article says to integrate between the previous state and the current state,
+     *    that means to advance the physics simulation by a certain time step. The current state is
+     *    represented by advancing the physics simulation by targetTickTimeDelta seconds. The previous
+     *    state is represented by advancing the physics simulation by 0 seconds. Interpolating between
+     *    0 and targetTickTimeDelta will give us the interpolation between the previous state and
+     *    the current state.
+     *
+     *    Maybe????
+     */
 
     LOG_INFOthis("Beginning main loop");
     while(!m_shouldQuit) {
@@ -160,40 +90,49 @@ void quartz::Application::run() {
         currentFrameTimeDelta = currentFrameStartTime - previousFrameStartTime;
         previousFrameStartTime = currentFrameStartTime;
         frameTimeAccumulator += currentFrameTimeDelta;
-        while (frameTimeAccumulator >= targetTickTimeDelta) {
-            processInput();
 
-            m_scene.update(
-                m_renderingContext.getRenderingWindow(),
-                mp_inputManager,
+        while (frameTimeAccumulator >= 0) {
+            processInput();
+            currentScene.fixedUpdate(
+                m_inputManager,
+                m_physicsManager,
+                totalElapsedTime,
                 targetTickTimeDelta
             );
-
+            totalElapsedTime += targetTickTimeDelta;
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
-        m_renderingContext.draw(m_scene);
+        double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
+
+        currentScene.update(m_renderingContext.getRenderingWindow(), currentFrameTimeDelta, frameInterpolationFactor);
+        m_renderingContext.draw(currentScene);
     }
 
     LOG_INFOthis("Finishing");
+    /**
+     * @todo 2024/11/07 Create an unload function in the SceneManager that frees up all of the Vulkan resources.
+     *    This will make it so we don't have to manually destruct the SceneManager in the Application destructor.
+     *    If all of the Scene's vulkan information is freed up before we return from this function, then we can have
+     *    the SceneManager destruct normally and Vulkan won't care about destructing the Device first because there
+     *    will be no resources allocated.
+    */
     m_renderingContext.finish();
 }
 
 void
 quartz::Application::processInput() {
-    mp_inputManager->collectInput();
+    m_inputManager.collectInput();
 
-    m_shouldQuit =
-        m_renderingContext.getRenderingWindow().shouldClose() ||
-        mp_inputManager->getKeyDown_q();
+    m_shouldQuit = m_renderingContext.getRenderingWindow().shouldClose() || m_inputManager.getKeyDown_q();
 
-    if (mp_inputManager->getKeyImpact_esc()) {
+    if (m_inputManager.getKeyImpact_esc()) {
         m_isPaused = !m_isPaused;
 
         LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));
 
         m_renderingContext.getRenderingWindow().setShouldDisplayCursor(m_isPaused);
-        mp_inputManager->setShouldCollectMouseInput(!m_isPaused);
-        mp_inputManager->setShouldCollectKeyInput(!m_isPaused);
+        m_inputManager.setShouldCollectMouseInput(!m_isPaused);
+        m_inputManager.setShouldCollectKeyInput(!m_isPaused);
     }
 }

@@ -2,35 +2,54 @@
 # The Scene Scene library
 #====================================================================
 add_library(
-        QUARTZ_SCENE_Scene
-        SHARED
-        Scene.hpp
-        Scene.cpp
+    QUARTZ_SCENE_Scene
+    SHARED
+    Scene.hpp
+    Scene.cpp
 )
 
+target_include_directories(
+    QUARTZ_SCENE_Scene
+    PUBLIC
+    ${QUARTZ_INCLUDE_DIRS}
+)
+
+
 target_compile_options(
-        QUARTZ_SCENE_Scene
-        PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+    QUARTZ_SCENE_Scene
+    PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_compile_definitions(
-        QUARTZ_SCENE_Scene
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_SCENE_Scene
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+)
+
+target_compile_definitions(
+    QUARTZ_SCENE_Scene
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
-        QUARTZ_SCENE_Scene
+    QUARTZ_SCENE_Scene
 
-        PUBLIC
-        UTIL_Logger
+    PUBLIC
+    reactphysics3d
 
-        PUBLIC
-        QUARTZ_MANAGERS_InputManager
-        QUARTZ_RENDERING_Device
-        QUARTZ_RENDERING_Texture
-        QUARTZ_RENDERING_Window
-        QUARTZ_SCENE_Camera
-        QUARTZ_SCENE_Doodad
-        QUARTZ_SCENE_Light
-        QUARTZ_SCENE_SkyBox
+    PUBLIC
+    MATH_Transform
+
+    PUBLIC
+    UTIL_Logger
+
+    PUBLIC
+    QUARTZ_MANAGERS_InputManager
+    QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_RENDERING_Device
+    QUARTZ_RENDERING_Texture
+    QUARTZ_RENDERING_Window
+    QUARTZ_SCENE_Camera
+    QUARTZ_SCENE_Doodad
+    QUARTZ_SCENE_Light
+    QUARTZ_SCENE_SkyBox
 )

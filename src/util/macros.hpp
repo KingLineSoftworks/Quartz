@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 /**
  * @brief Make sure all of the necessary preprocessor definitions are present if we are in debug mode
  */
@@ -103,6 +105,23 @@
 #define CONCAT(a, b) CONCAT_INNER(a, b)
 #define CONCAT_INNER(a, b) a ## b
 #define UNIQUE_NAME(baseName) CONCAT(baseName, __LINE__)
+
+/**
+ * @brief A macro allowing us to run time assert and output a message if we fail
+ *
+ * @todo 2024/06/20 Make this work with our logging system
+ */
+#if defined QUARTZ_DEBUG
+#define QUARTZ_ASSERT(condition, message)     \
+    do {                                      \
+        if (! (condition)) {                  \
+            std::cerr << "Assertion (" #condition ") failed in " << __FILE__ << " line " << __LINE__ << ": " << message << std::endl; \
+            std::terminate();                 \
+        }                                     \
+    } while (false)
+#else
+#define QUARTZ_ASSERT(condition, message) static_assert(true)
+#endif
 
 /**
  * @brief Macros determining the quanitity of things we can have in a scene. These

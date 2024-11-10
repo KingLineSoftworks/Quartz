@@ -1,14 +1,18 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+#include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Mat4.hpp"
+#include "math/transform/Transform.hpp"
+
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
 #include "quartz/scene/Loggers.hpp"
-#include "quartz/scene/doodad/Transform.hpp"
 
 namespace quartz {
 namespace scene {
@@ -17,11 +21,31 @@ namespace scene {
 }
 
 class quartz::scene::Doodad {
+public: // classes
+    struct Parameters {
+        Parameters(
+            std::string objectFilepath_,
+            math::Transform transform_,
+            quartz::physics::RigidBody::Parameters rigidBodyParameters_
+        ) :
+            objectFilepath(objectFilepath_),
+            transform(transform_),
+            rigidBodyParameters(rigidBodyParameters_)
+        {}
+
+        std::string objectFilepath;
+        math::Transform transform;
+        quartz::physics::RigidBody::Parameters rigidBodyParameters;
+    };
+
 public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
+        reactphysics3d::PhysicsWorld* p_physicsWorld,
         const std::string& objectFilepath,
-        const quartz::scene::Transform& transform
+        const math::Transform& transform,
+        const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     );
     Doodad(Doodad&& other);
     ~Doodad();
@@ -29,16 +53,22 @@ public: // member functions
     USE_LOGGER(DOODAD);
 
     const quartz::rendering::Model& getModel() const { return m_model; }
-    const glm::mat4& getTransformationMatrix() const { return m_transformationMatrix; }
+    const math::Mat4& getTransformationMatrix() const { return m_transformationMatrix; }
 
-    void update(const double tickTimeDelta);
+    void fixedUpdate();
+    void update(
+        const double frameTimeDelta,
+        const double frameInterpolationFactor
+    );
 
 private: // static functions
+    static math::Transform fixTransform(const math::Transform& transform);
 
 private: // member variables
     quartz::rendering::Model m_model;
 
-    quartz::scene::Transform m_transform;
+    math::Transform m_transform;
+    math::Mat4 m_transformationMatrix;
 
-    glm::mat4 m_transformationMatrix;
+    std::optional<quartz::physics::RigidBody> mo_rigidBody;
 };

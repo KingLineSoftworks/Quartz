@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/vec3.hpp>
+#include "math/transform/Vec3.hpp"
 
 namespace quartz {
 namespace scene {
@@ -12,9 +12,9 @@ struct quartz::scene::SpotLight {
 public: // member functions
     SpotLight() = default;
     SpotLight(
-        const glm::vec3& color_,
-        const glm::vec3& position_,
-        const glm::vec3& direction_,
+        const math::Vec3& color_,
+        const math::Vec3& position_,
+        const math::Vec3& direction_,
         const float innerRadiusDegrees_,
         const float outerRadiusDegrees_,
         const float attenuationLinearFactor_,
@@ -22,9 +22,9 @@ public: // member functions
     );
 
 public: // member variables
-    alignas(16) glm::vec3 color;
-    alignas(16) glm::vec3 position;
-    alignas(16) glm::vec3 direction;
+    alignas(16) math::Vec3 color;
+    alignas(16) math::Vec3 position;
+    alignas(16) math::Vec3 direction;
     alignas(4) float innerRadiusDegrees;
     alignas(4) float outerRadiusDegrees;
     alignas(4) float attenuationLinearFactor;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm/mat4x4.hpp>
+#include "math/transform/Mat4.hpp"
+#include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/scene/Loggers.hpp"
@@ -23,16 +24,16 @@ public: // classes
     public: // member functions
         UniformBufferObject() = default;
         UniformBufferObject(
-            const glm::vec3 position_,
-            const glm::mat4 viewMatrix_,
-            const glm::mat4 projectionMatrix_
+            const math::Vec3 position_,
+            const math::Mat4 viewMatrix_,
+            const math::Mat4 projectionMatrix_
         );
         UniformBufferObject(const Camera& camera);
 
     public: // member variables
-        alignas(16) glm::vec3 position;
-        alignas(16) glm::mat4 viewMatrix;
-        alignas(16) glm::mat4 projectionMatrix;
+        alignas(16) math::Vec3 position;
+        alignas(16) math::Mat4 viewMatrix;
+        alignas(16) math::Mat4 projectionMatrix;
     };
 
 public: // member functions
@@ -42,22 +43,23 @@ public: // member functions
         const double yaw,
         const double roll,
         const double fovDegrees,
-        const glm::vec3& worldPosition
+        const math::Vec3& worldPosition
     );
     Camera& operator=(const Camera& other);
     ~Camera();
 
     USE_LOGGER(CAMERA);
 
-    const glm::vec3& getWorldPosition() const { return m_worldPosition; }
-    const glm::mat4& getViewMatrix() const { return m_viewMatrix; }
-    const glm::mat4& getProjectionMatrix() const { return m_projectionMatrix; }
+    const math::Vec3& getWorldPosition() const { return m_worldPosition; }
+    const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
+    const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
 
+    void fixedUpdate(const quartz::managers::InputManager& inputManager);
     void update(
         const float windowWidth,
         const float windowHeight,
-        const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
-        const double tickTimeDelta
+        const double frameTimeDelta,
+        const double frameInterpolationFactor
     );
 
 private: // static functions
@@ -67,8 +69,8 @@ private: // member variables
     float m_yaw;
     UNUSED float m_roll;
     float m_fovDegrees;
-    glm::vec3 m_worldPosition;
+    math::Vec3 m_worldPosition;
 
-    glm::mat4 m_viewMatrix;
-    glm::mat4 m_projectionMatrix;
+    math::Mat4 m_viewMatrix;
+    math::Mat4 m_projectionMatrix;
 };

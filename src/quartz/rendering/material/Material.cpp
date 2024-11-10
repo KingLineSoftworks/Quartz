@@ -1,6 +1,3 @@
-#include <glm/vec4.hpp>
-#include "util/logger/Logger.hpp"
-
 #include "quartz/rendering/material/Material.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 
@@ -13,8 +10,8 @@ quartz::rendering::Material::UniformBufferObject::UniformBufferObject(
     const uint32_t normalTextureMasterIndex_,
     const uint32_t emissionTextureMasterIndex_,
     const uint32_t occlusionTextureMasterIndex_,
-    const glm::vec4& baseColorFactor_,
-    const glm::vec3& emissiveFactor_,
+    const math::Vec4& baseColorFactor_,
+    const math::Vec3& emissiveFactor_,
     const float metallicFactor_,
     const float roughnessFactor_,
     const uint32_t alphaMode_,
@@ -89,8 +86,8 @@ quartz::rendering::Material::createMaterial(
     const uint32_t normalTextureMasterIndex,
     const uint32_t emissionTextureMasterIndex,
     const uint32_t occlusionTextureMasterIndex,
-    const glm::vec4& baseColorFactor,
-    const glm::vec3& emissiveFactor,
+    const math::Vec4& baseColorFactor,
+    const math::Vec3& emissiveFactor,
     const float metallicFactor,
     const float roughnessFactor,
     const quartz::rendering::Material::AlphaMode alphaMode,
@@ -151,8 +148,8 @@ quartz::rendering::Material::initializeMasterMaterialList(const quartz::renderin
         quartz::rendering::Texture::getEmissionDefaultMasterIndex(),
         quartz::rendering::Texture::getOcclusionDefaultMasterIndex(),
 
-        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
+        math::Vec4(1.0f, 1.0f, 1.0f, 1.0f),
+        math::Vec3(0.0f, 0.0f, 0.0f),
         1.0f,
         1.0f,
 
@@ -212,8 +209,8 @@ quartz::rendering::Material::Material(
     const uint32_t normalTextureMasterIndex,
     const uint32_t emissionTextureMasterIndex,
     const uint32_t occlusionTextureMasterIndex,
-    const glm::vec4& baseColorFactor,
-    const glm::vec3& emissiveFactor,
+    const math::Vec4& baseColorFactor,
+    const math::Vec3& emissiveFactor,
     const float metallicFactor,
     const float roughnessFactor,
     const quartz::rendering::Material::AlphaMode alphaMode,

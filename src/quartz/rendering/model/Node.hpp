@@ -3,10 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-
 #include <tiny_gltf.h>
+
+#include "math/transform/Mat4.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/model/Mesh.hpp"
@@ -33,10 +32,10 @@ public: // member functions
 
     const Node* getParentPtr() const { return mp_parent; }
     const std::vector<std::shared_ptr<Node>>& getChildrenNodePtrs() const { return m_childrenPtrs; }
-    const glm::mat4& getLocalTransformationMatrix() const { return m_localTransformationMatrix; }
+    const math::Mat4& getLocalTransformationMatrix() const { return m_localTransformationMatrix; }
     const std::shared_ptr<quartz::rendering::Mesh>& getMeshPtr() const { return mp_mesh; }
 
-    glm::mat4 getTransformationMatrix() const;
+    math::Mat4 getTransformationMatrix() const;
 
 private: // static functions
     std::vector<std::shared_ptr<quartz::rendering::Node>> loadChildrenNodePtrs(
@@ -46,7 +45,7 @@ private: // static functions
         const std::vector<uint32_t>& materialMasterIndices
     );
 
-    glm::mat4 loadLocalTransformationMatrix(
+    math::Mat4 loadLocalTransformationMatrix(
         const tinygltf::Node& gltfNode
     );
 
@@ -74,7 +73,7 @@ private: // member variables
 
     const Node* mp_parent;
     std::vector<std::shared_ptr<Node>> m_childrenPtrs;
-    glm::mat4 m_localTransformationMatrix;
+    math::Mat4 m_localTransformationMatrix;
 
     std::shared_ptr<quartz::rendering::Mesh> mp_mesh;
 };

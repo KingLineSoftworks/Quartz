@@ -1,7 +1,9 @@
-#include <stdexcept>
 #include <cstdlib>
+#include <stdexcept>
 
-#include <glm/gtx/string_cast.hpp>
+#include <reactphysics3d/reactphysics3d.h>
+
+#include "math/Loggers.hpp"
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
@@ -13,18 +15,21 @@
 
 #include "demo_app/core.hpp"
 #include "demo_app/Loggers.hpp"
+#include "demo_app/SceneParameters.hpp"
 
 int main() {
-    constexpr bool shouldLogPreamble = true;
+    constexpr bool shouldLogPreamble = false;
 
     ASSERT_QUARTZ_VERSION();
     ASSERT_APPLICATION_VERSION();
 
     util::Logger::setShouldLogPreamble(shouldLogPreamble);
 
+    REGISTER_LOGGER_GROUP(MATH);
     REGISTER_LOGGER_GROUP(UTIL);
     REGISTER_LOGGER_GROUP(QUARTZ);
     REGISTER_LOGGER_GROUP(QUARTZ_MANAGERS);
+    REGISTER_LOGGER_GROUP(QUARTZ_PHYSICS);
     REGISTER_LOGGER_GROUP(QUARTZ_RENDERING);
     REGISTER_LOGGER_GROUP(QUARTZ_SCENE);
     REGISTER_LOGGER_GROUP(DEMO_APP);
@@ -32,6 +37,10 @@ int main() {
     util::Logger::setLevels({
         // demo app
         {"GENERAL", util::Logger::Level::info},
+        {"BIGBOY", util::Logger::Level::info},
+
+        // math
+        {"TRANSFORM", util::Logger::Level::info},
 
         // util
         {"FILESYSTEM", util::Logger::Level::info},
@@ -39,8 +48,20 @@ int main() {
         // quartz
         {"APPLICATION", util::Logger::Level::info},
 
+        // managers
+        {"INPUTMAN", util::Logger::Level::info},
+        {"PHYSICSMAN", util::Logger::Level::info},
+
+        // physics
+        {"COLLIDER", util::Logger::Level::info},
+        {"COLLIDER_BOX", util::Logger::Level::info},
+        {"COLLIDER_SPHERE", util::Logger::Level::info},
+        {"RIGIDBODY", util::Logger::Level::info},
+
         // rendering
         {"INPUTMAN", util::Logger::Level::info},
+        {"PHYSICSMAN", util::Logger::Level::info},
+        {"SCENEMAN", util::Logger::Level::info},
 
         // rendering
         {"BUFFER", util::Logger::Level::info},
@@ -131,7 +152,8 @@ int main() {
         APPLICATION_PATCH_VERSION,
         800,
         600,
-        validationLayersEnabled
+        validationLayersEnabled,
+        getSceneParameters()
     );
 
     try {
@@ -142,6 +164,7 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    LOG_TRACE(GENERAL, "Terminating");
+    LOG_TRACE(GENERAL, "Terminating application");
+
     return EXIT_SUCCESS;
 }

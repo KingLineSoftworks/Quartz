@@ -4,15 +4,18 @@
 #include <utility>
 #include <vector>
 
-#include <glm/vec3.hpp>
+#include <reactphysics3d/reactphysics3d.h>
+
+#include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/input_manager/InputManager.hpp"
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include "quartz/scene/doodad/Transform.hpp"
+#include "math/transform/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
@@ -26,8 +29,44 @@ namespace scene {
 }
 
 class quartz::scene::Scene {
+public: // classes
+    struct Parameters {
+        Parameters(
+            const std::string& name_,
+            const quartz::scene::Camera& camera_,
+            const quartz::scene::AmbientLight& ambientLight_,
+            const quartz::scene::DirectionalLight& directionalLight_,
+            const std::vector<quartz::scene::PointLight>& pointLights_,
+            const std::vector<quartz::scene::SpotLight>& spotLights_,
+            const math::Vec3& screenClearColor_,
+            const std::array<std::string, 6>& skyBoxInformation_,
+            const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations_
+        ) :
+            name(name_),
+            camera(camera_),
+            ambientLight(ambientLight_),
+            directionalLight(directionalLight_),
+            pointLights(pointLights_),
+            spotLights(spotLights_),
+            screenClearColor(screenClearColor_),
+            skyBoxInformation(skyBoxInformation_),
+            doodadInformations(doodadInformations_)
+        {}
+
+        std::string name;
+        quartz::scene::Camera camera;
+        quartz::scene::AmbientLight ambientLight;
+        quartz::scene::DirectionalLight directionalLight;
+        std::vector<quartz::scene::PointLight> pointLights;
+        std::vector<quartz::scene::SpotLight> spotLights;
+        math::Vec3 screenClearColor;
+        std::array<std::string, 6> skyBoxInformation;
+        std::vector<quartz::scene::Doodad::Parameters> doodadInformations;
+    };
+
 public: // member functions
     Scene() = default;
+    Scene(Scene&& other);
     ~Scene();
 
     USE_LOGGER(SCENE);
@@ -39,33 +78,44 @@ public: // member functions
     const quartz::scene::DirectionalLight& getDirectionalLight() const { return m_directionalLight; }
     const std::vector<quartz::scene::PointLight>& getPointLights() const { return m_pointLights; }
     const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
-    const glm::vec3& getScreenClearColor() const { return m_screenClearColor; }
+    const math::Vec3& getScreenClearColor() const { return m_screenClearColor; }
 
     void load(
         const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
         const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
         const std::vector<quartz::scene::PointLight>& pointLights,
         const std::vector<quartz::scene::SpotLight>& spotLights,
-        const glm::vec3& screenClearColor,
+        const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
-        const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
     );
 
+    void fixedUpdate(
+        const quartz::managers::InputManager& inputManager,
+        const quartz::managers::PhysicsManager& physicsManager,
+        const double totalElapsedTime,
+        const double tickTimeDelta
+    );
     void update(
         const quartz::rendering::Window& renderingWindow,
-        const std::shared_ptr<quartz::managers::InputManager>& p_inputManager,
-        const double tickTimeDelta
+        const double frameTimeDelta,
+        const double frameInterpolationFactor
     );
 
 private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
-        const std::vector<std::pair<std::string, quartz::scene::Transform>>& doodadInformations
+        quartz::managers::PhysicsManager& physicsManager,
+        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
     );
 
 private: // member variables
+    reactphysics3d::PhysicsWorld* mp_physicsWorld;
+
     quartz::scene::Camera m_camera;
 
     std::vector<quartz::scene::Doodad> m_doodads;
@@ -76,5 +126,5 @@ private: // member variables
     std::vector<quartz::scene::PointLight> m_pointLights;
     std::vector<quartz::scene::SpotLight> m_spotLights;
 
-    glm::vec3 m_screenClearColor;
+    math::Vec3 m_screenClearColor;
 };

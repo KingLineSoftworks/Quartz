@@ -1,10 +1,8 @@
-#include <glm/vec3.hpp>
-
 #include "quartz/scene/light/PointLight.hpp"
 
 quartz::scene::PointLight::PointLight(
-    const glm::vec3& color_,
-    const glm::vec3& position_,
+    const math::Vec3& color_,
+    const math::Vec3& position_,
     const float attenuationLinearFactor_,
     const float attenuationQuadraticFactor_
 ) :

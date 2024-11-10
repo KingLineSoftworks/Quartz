@@ -3,9 +3,13 @@
 #include "util/logger/Logger.hpp"
 
 DECLARE_LOGGER(INPUTMAN, trace);
+DECLARE_LOGGER(PHYSICSMAN, trace);
+DECLARE_LOGGER(SCENEMAN, trace);
 
 DECLARE_LOGGER_GROUP(
-        QUARTZ_MANAGERS,
-        1,
-        INPUTMAN
+    QUARTZ_MANAGERS,
+    3,
+    INPUTMAN,
+    PHYSICSMAN,
+    SCENEMAN
 );

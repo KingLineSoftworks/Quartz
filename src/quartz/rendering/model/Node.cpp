@@ -1,11 +1,7 @@
 #include <memory>
 #include <vector>
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include <tiny_gltf.h>
 
@@ -43,49 +39,49 @@ quartz::rendering::Node::loadChildrenNodePtrs(
     return childrenNodePtrs;
 }
 
-glm::mat4
+math::Mat4
 quartz::rendering::Node::loadLocalTransformationMatrix(
     const tinygltf::Node& gltfNode
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL_NODE, "");
 
-    glm::mat4 transformationMatrix = glm::mat4(1.0f);
+    math::Mat4 transformationMatrix = math::Mat4(1.0f);
 
     if (gltfNode.matrix.size() == 16) {
         transformationMatrix = glm::make_mat4x4(gltfNode.matrix.data());
 
         LOG_TRACE(MODEL_NODE, "Using local transformation matrix loaded directly from node");
-        LOG_TRACE(MODEL_NODE, "{}", glm::to_string(transformationMatrix));
+        LOG_TRACE(MODEL_NODE, "{}", transformationMatrix.toString());
 
         return transformationMatrix;
     }
 
     LOG_TRACE(MODEL_NODE, "Using TRS calculation from node");
 
-    glm::vec3 translation = glm::vec3(0.0f);
+    math::Vec3 translation(0.0f);
     if (gltfNode.translation.size() == 3) {
         translation = glm::make_vec3(gltfNode.translation.data());
-        LOG_TRACE(MODEL_NODE, "Loaded translation vector {}", glm::to_string(translation));
+        LOG_TRACE(MODEL_NODE, "Loaded translation vector {}", translation.toString());
     }
-    transformationMatrix = glm::translate(transformationMatrix, translation);
+    transformationMatrix.translate(translation);
 
-    glm::mat4 rotation = glm::mat4(1.0f);
+    math::Mat4 rotation = math::Mat4(1.0f);
     if (gltfNode.rotation.size() == 4) {
         glm::quat quaternion = glm::make_quat(gltfNode.rotation.data());
         LOG_TRACE(MODEL_NODE, "Loaded rotation quaternion {}", glm::to_string(quaternion));
-        rotation = glm::mat4(quaternion);
+        rotation = math::Mat4(quaternion);
     }
     transformationMatrix = transformationMatrix * rotation;
 
-    glm::vec3 scale = glm::vec3(1.0f);
+    math::Vec3 scale(1.0f);
     if (gltfNode.scale.size() == 3) {
         scale = glm::make_vec3(gltfNode.scale.data());
-        LOG_TRACE(MODEL_NODE, "Loaded scale vector {}", glm::to_string(scale));
+        LOG_TRACE(MODEL_NODE, "Loaded scale vector {}", scale.toString());
     }
-    transformationMatrix = glm::scale(transformationMatrix, scale);
+    transformationMatrix.scale(scale);
 
     LOG_TRACE(MODEL_NODE, "Calculated local transformation matrix");
-    LOG_TRACE(MODEL_NODE, "{}", glm::to_string(transformationMatrix));
+    LOG_TRACE(MODEL_NODE, "{}", transformationMatrix.toString());
 
     return transformationMatrix;
 }
@@ -177,31 +173,29 @@ quartz::rendering::Node::~Node() {
  *   then whenever we update our local transformation matrix we should update the
  *   transformation matrix as well.
  */
-glm::mat4
+math::Mat4
 quartz::rendering::Node::getTransformationMatrix() const {
-    glm::mat4 transformationMatrix = m_localTransformationMatrix;
+    math::Mat4 transformationMatrix = m_localTransformationMatrix;
 
     if (mp_parent) {
         transformationMatrix = mp_parent->getTransformationMatrix() * m_localTransformationMatrix;
     } else {
-
+#ifndef GLM_FORCE_QUAT_DATA_XYZW
         /**
          * @brief 2023/12/15 For some reason our gltf models are loading in upside down, so if this
          *   is a root node then we want to flip it upside down about the z axis. This will cause all
          *   children nodes to also be flipped (causing them to be rightside up).
          *
-         * @todo 2023/12/15 Figure out why this is happening. This fixes the problem but forces the
-         *   transformation matrices to be non identity matrices.
+         * @brief 2024/06/18 I think this was happening because the quaternions we were loading in are
+         *   represented as xyzw in gltf but were being stored as wxyz in glm. We found a preprocessor
+         *   macro which forces the quaternion to be stored as xyzw so this shouldn't happen anymore
          */
 
-        glm::mat4 rotationMatrix = glm::mat4(1.0);
-        rotationMatrix = glm::rotate(
-            rotationMatrix,
-            glm::radians(180.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f)
-        );
+        math::Mat4 rotationMatrix = math::Mat4(1.0);
+        rotationMatrix.rotate({0.0f, 0.0f, 1.0f}, glm::radians(180.0f));
 
         transformationMatrix = rotationMatrix * transformationMatrix;
+#endif
     }
 
     return transformationMatrix;

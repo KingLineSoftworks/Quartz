@@ -19,7 +19,7 @@ set(
     -Wempty-translation-unit
     -Wfixed-enum-extension
     -Wflexible-array-extensions
-    -Wgnu-anonymous-struct
+    # -Wgnu-anonymous-struct # Have to disable so we can make nice unions for glm to reactphysics3d mappings
     -Wgnu-auto-type
     -Wgnu-binary-literal
     -Wgnu-case-range
@@ -48,7 +48,7 @@ set(
     -Wmicrosoft-fixed-enum
     -Wmicrosoft-flexible-array
     -Wmicrosoft-redeclare-static
-    -Wnested-anon-types
+    # -Wnested-anon-types # Have to disable this for something in reactphysics3d
     -Wnullability-extension
     -Woverlength-strings
     -Wretained-language-linkage
