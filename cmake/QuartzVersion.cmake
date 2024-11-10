@@ -10,7 +10,7 @@ endfunction()
 
 # -----=====***** the versions *****=====----- #
 
-# # # # # Major Version 0 #####
+# ----- Major Version 0 ----- #
 
 # Minor Version 1 - Fundamental Rendering
 
@@ -28,4 +28,6 @@ endfunction()
 # Minor Version 2 - Fundamental Physics
 
 set_quartz_major_minor_patch_versions(0 2 0) # allow for physics in our scenes with reactphysics3d
+set_quartz_major_minor_patch_versions(0 2 1) # give physics properties to the scene, so each scene has custom physics
+set_quartz_major_minor_patch_versions(0 2 2) # implement game logic in the client's application via callbacks
 
