@@ -2,13 +2,15 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
-
-#include "quartz/physics/Loggers.hpp"
-#include "reactphysics3d/engine/PhysicsWorld.h"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
+#include "reactphysics3d/body/RigidBody.h"
 #include "util/logger/Logger.hpp"
+
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/Loggers.hpp"
 
 namespace quartz {
 namespace physics {
@@ -42,9 +44,44 @@ public: // member functions
 
     USE_LOGGER(REALM);
 
-    reactphysics3d::PhysicsWorld* getPhysicsWorldPtr() { return mp_physicsWorld; }
+    quartz::physics::RigidBody createRigidBody(
+        quartz::managers::PhysicsManager& physicsManager,
+        const math::Transform& transform,
+        const reactphysics3d::BodyType bodyType,
+        const bool enableGravity,
+        const math::Vec3& angularLockAxisFactor
+    );
+    quartz::physics::RigidBody createRigidBody(
+        quartz::managers::PhysicsManager& physicsManager,
+        const math::Transform& transform,
+        const reactphysics3d::BodyType bodyType,
+        const bool enableGravity,
+        const math::Vec3& angularLockAxisFactor,
+        const quartz::physics::BoxCollider::Parameters& boxColliderParameters
+    );
+    quartz::physics::RigidBody createRigidBody(
+        quartz::managers::PhysicsManager& physicsManager,
+        const math::Transform& transform,
+        const reactphysics3d::BodyType bodyType,
+        const bool enableGravity,
+        const math::Vec3& angularLockAxisFactor,
+        const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
+    );
+    quartz::physics::RigidBody createRigidBody(
+        quartz::managers::PhysicsManager& physicsManager,
+        const math::Transform& transform,
+        const quartz::physics::RigidBody::Parameters& parameters
+    );
 
     void fixedUpdate(const double tickTimeDelta);
+
+private: // member functions
+    reactphysics3d::RigidBody* createRigidBodyPtr(
+        const reactphysics3d::BodyType bodyType,
+        const bool enableGravity,
+        const math::Vec3& angularLockAxisFactor,
+        const math::Transform& transform
+    );
 
 private: // static functions
     static reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(

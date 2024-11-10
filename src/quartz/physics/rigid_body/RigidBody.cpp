@@ -1,6 +1,6 @@
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "math/transform/Vec3.hpp"
-#include "quartz/physics/realm/Realm.hpp"
+#include "reactphysics3d/engine/PhysicsWorld.h"
 
 std::string
 quartz::physics::RigidBody::Parameters::getBodyTypeString(
@@ -13,16 +13,16 @@ quartz::physics::RigidBody::Parameters::getBodyTypeString(
 
 reactphysics3d::RigidBody*
 quartz::physics::RigidBody::createRigidBodyPtr(
-    quartz::physics::Realm& physicsRealm,
+    reactphysics3d::PhysicsWorld* p_physicsWorld,
+    const math::Transform& transform,
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
-    const math::Vec3& angularLockAxisFactor,
-    const math::Transform& transform
+    const math::Vec3& angularLockAxisFactor
 ) {
     LOG_FUNCTION_SCOPE_TRACE(RIGIDBODY, "");
 
     const reactphysics3d::Transform rp3dTransform(transform.position, transform.rotation);
-    reactphysics3d::RigidBody* p_rigidBody = physicsRealm.getPhysicsWorldPtr()->createRigidBody(rp3dTransform);
+    reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(rp3dTransform);
 
     const std::string bodyTypeString = quartz::physics::RigidBody::Parameters::getBodyTypeString(bodyType);
     LOG_TRACE(RIGIDBODY, "Using body type : {}", bodyTypeString);
@@ -65,39 +65,18 @@ quartz::physics::RigidBody::createCollider(
 }
 
 quartz::physics::RigidBody::RigidBody(
-    UNUSED quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
-    const reactphysics3d::BodyType bodyType,
-    const bool enableGravity,
-    const math::Transform& transform,
-    const math::Vec3& angularLockAxisFactor
+    reactphysics3d::RigidBody* p_rigidBody
 ) :
-    mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
-        physicsRealm,
-        bodyType,
-        enableGravity,
-        angularLockAxisFactor,
-        transform
-    )),
+    mp_rigidBody(p_rigidBody),
     mo_collider()
 {}
 
 quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
-    const reactphysics3d::BodyType bodyType,
-    const bool enableGravity,
-    const math::Transform& transform,
-    const math::Vec3& angularLockAxisFactor,
+    reactphysics3d::RigidBody* p_rigidBody,
     const quartz::physics::BoxCollider::Parameters& boxColliderParameters
 ) :
-    mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
-        physicsRealm,
-        bodyType,
-        enableGravity,
-        angularLockAxisFactor,
-        transform
-    )),
+    mp_rigidBody(p_rigidBody),
     mo_collider(quartz::physics::Collider::createBoxCollider(
         physicsManager, 
         mp_rigidBody, 
@@ -107,20 +86,10 @@ quartz::physics::RigidBody::RigidBody(
 
 quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
-    const reactphysics3d::BodyType bodyType,
-    const bool enableGravity,
-    const math::Transform& transform,
-    const math::Vec3& angularLockAxisFactor,
+    reactphysics3d::RigidBody* p_rigidBody,
     const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
 ) :
-    mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
-        physicsRealm,
-        bodyType,
-        enableGravity,
-        angularLockAxisFactor,
-        transform
-    )),
+    mp_rigidBody(p_rigidBody),
     mo_collider(quartz::physics::Collider::createSphereCollider(
         physicsManager, 
         mp_rigidBody, 
@@ -130,17 +99,10 @@ quartz::physics::RigidBody::RigidBody(
 
 quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
-    const math::Transform& transform,
+    reactphysics3d::RigidBody* p_rigidBody,
     const quartz::physics::RigidBody::Parameters& parameters
 ) :
-    mp_rigidBody(quartz::physics::RigidBody::createRigidBodyPtr(
-        physicsRealm,
-        parameters.bodyType,
-        parameters.enableGravity,
-        parameters.angularLockAxisFactor,
-        transform
-    )),
+    mp_rigidBody(p_rigidBody),
     mo_collider(quartz::physics::RigidBody::createCollider(
         physicsManager,
         mp_rigidBody,

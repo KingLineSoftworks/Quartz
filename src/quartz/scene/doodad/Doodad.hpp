@@ -46,6 +46,12 @@ public: // member functions
         const math::Transform& transform,
         const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     );
+    Doodad(
+        const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
+        quartz::physics::Realm& physicsRealm,
+        quartz::scene::Doodad::Parameters& doodadParameters
+    );
     Doodad(Doodad&& other);
     ~Doodad();
 

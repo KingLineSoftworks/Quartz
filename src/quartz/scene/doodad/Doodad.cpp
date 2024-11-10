@@ -36,13 +36,34 @@ quartz::scene::Doodad::Doodad(
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
-    mo_rigidBody({physicsManager, physicsRealm, m_transform, rigidBodyParameters})
+    mo_rigidBody(physicsRealm.createRigidBody(physicsManager, m_transform, rigidBodyParameters))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
-    LOG_TRACE(SCENE, "  position = {}", transform.position.toString());
-    LOG_TRACE(SCENE, "  rotation = {}", transform.rotation.toString());
-    LOG_TRACE(SCENE, "  scale    = {}", transform.scale.toString());
+    LOG_TRACE(SCENE, "  position = {}", m_transform.position.toString());
+    LOG_TRACE(SCENE, "  rotation = {}", m_transform.rotation.toString());
+    LOG_TRACE(SCENE, "  scale    = {}", m_transform.scale.toString());
+}
+
+quartz::scene::Doodad::Doodad(
+    const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
+    quartz::physics::Realm& physicsRealm,
+    quartz::scene::Doodad::Parameters& doodadParameters
+) :
+    m_model(
+        renderingDevice,
+        doodadParameters.objectFilepath
+    ),
+    m_transform(doodadParameters.transform),
+    m_transformationMatrix(),
+    mo_rigidBody(physicsRealm.createRigidBody(physicsManager, m_transform, doodadParameters.rigidBodyParameters))
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+    LOG_TRACEthis("Constructing doodad with transform:");
+    LOG_TRACE(SCENE, "  position = {}", m_transform.position.toString());
+    LOG_TRACE(SCENE, "  rotation = {}", m_transform.rotation.toString());
+    LOG_TRACE(SCENE, "  scale    = {}", m_transform.scale.toString());
 }
 
 quartz::scene::Doodad::Doodad(

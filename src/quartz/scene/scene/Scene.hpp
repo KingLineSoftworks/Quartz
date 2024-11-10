@@ -97,6 +97,11 @@ public: // member functions
         const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations,
         const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
     );
+    void load(
+        const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
+        const quartz::scene::Scene::Parameters& sceneParameters
+    );
 
     void fixedUpdate(
         const quartz::managers::InputManager& inputManager,

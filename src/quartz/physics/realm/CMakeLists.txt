@@ -38,4 +38,5 @@ target_link_libraries(
 
     PUBLIC
     QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_PHYSICS_RigidBody
 )

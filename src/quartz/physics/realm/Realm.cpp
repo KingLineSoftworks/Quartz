@@ -1,5 +1,6 @@
 #include "quartz/physics/realm/Realm.hpp"
 #include "math/transform/Vec3.hpp"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "reactphysics3d/engine/PhysicsWorld.h"
 #include "util/logger/Logger.hpp"
 
@@ -50,6 +51,88 @@ quartz::physics::Realm::Realm(
 
 quartz::physics::Realm::~Realm() {
     LOG_FUNCTION_CALL_TRACEthis("");
+}
+
+quartz::physics::RigidBody
+quartz::physics::Realm::createRigidBody(
+    UNUSED quartz::managers::PhysicsManager& physicsManager,
+    const math::Transform& transform,
+    const reactphysics3d::BodyType bodyType,
+    const bool enableGravity,
+    const math::Vec3& angularLockAxisFactor
+) {
+    return {
+        quartz::physics::RigidBody::createRigidBodyPtr(
+            mp_physicsWorld,
+            transform,
+            bodyType,
+            enableGravity,
+            angularLockAxisFactor
+        )
+    };
+}
+
+quartz::physics::RigidBody
+quartz::physics::Realm::createRigidBody(
+    quartz::managers::PhysicsManager& physicsManager,
+    const math::Transform& transform,
+    const reactphysics3d::BodyType bodyType,
+    const bool enableGravity,
+    const math::Vec3& angularLockAxisFactor,
+    const quartz::physics::BoxCollider::Parameters& boxColliderParameters
+) {
+    return {
+        physicsManager,
+        quartz::physics::RigidBody::createRigidBodyPtr(
+            mp_physicsWorld,
+            transform,
+            bodyType,
+            enableGravity,
+            angularLockAxisFactor
+        ),
+        boxColliderParameters
+    };
+}
+
+quartz::physics::RigidBody
+quartz::physics::Realm::createRigidBody(
+    quartz::managers::PhysicsManager& physicsManager,
+    const math::Transform& transform,
+    const reactphysics3d::BodyType bodyType,
+    const bool enableGravity,
+    const math::Vec3& angularLockAxisFactor,
+    const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
+) {
+    return {
+        physicsManager,
+        quartz::physics::RigidBody::createRigidBodyPtr(
+            mp_physicsWorld,
+            transform,
+            bodyType,
+            enableGravity,
+            angularLockAxisFactor
+        ),
+        sphereColliderParameters
+    };
+}
+
+quartz::physics::RigidBody
+quartz::physics::Realm::createRigidBody(
+    quartz::managers::PhysicsManager& physicsManager,
+    const math::Transform& transform,
+    const quartz::physics::RigidBody::Parameters& parameters
+) {
+    return {
+        physicsManager,
+        quartz::physics::RigidBody::createRigidBodyPtr(
+            mp_physicsWorld,
+            transform,
+            parameters.bodyType,
+            parameters.enableGravity,
+            parameters.angularLockAxisFactor
+        ),
+        parameters
+    };
 }
 
 void

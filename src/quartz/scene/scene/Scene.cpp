@@ -165,6 +165,28 @@ quartz::scene::Scene::load(
     LOG_TRACEthis("Loaded screen clear color {}", m_screenClearColor.toString());
 }
 
+
+void
+quartz::scene::Scene::load(
+    const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
+    const quartz::scene::Scene::Parameters& sceneParameters
+) {
+    load(
+        renderingDevice,
+        physicsManager,
+        sceneParameters.camera,
+        sceneParameters.ambientLight,
+        sceneParameters.directionalLight,
+        sceneParameters.pointLights,
+        sceneParameters.spotLights,
+        sceneParameters.screenClearColor,
+        sceneParameters.skyBoxInformation,
+        sceneParameters.doodadInformations,
+        sceneParameters.o_realmParameters
+    );
+}
+
 void
 quartz::scene::Scene::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
