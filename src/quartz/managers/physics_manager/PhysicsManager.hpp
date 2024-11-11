@@ -8,7 +8,7 @@
 
 namespace quartz {
 
-class Application; // We must forward declare the application class here, so we can have its declaration for friending //
+class Application; // We must forward declare the application class here, so we can have its declaration for friending
 
 namespace managers {
     class PhysicsManager;

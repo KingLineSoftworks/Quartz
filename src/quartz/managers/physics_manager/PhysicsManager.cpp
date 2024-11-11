@@ -35,3 +35,4 @@ quartz::managers::PhysicsManager::createSphereShapePtr(
 ) {
     return m_physicsCommon.createSphereShape(radius);
 }
+

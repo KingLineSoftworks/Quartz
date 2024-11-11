@@ -8,9 +8,6 @@
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/managers/scene_manager/SceneManager.hpp"
 #include "quartz/rendering/context/Context.hpp"
-#include "quartz/rendering/texture/Texture.hpp"
-#include "quartz/scene/camera/Camera.hpp"
-#include "quartz/scene/doodad/Doodad.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
 namespace quartz {

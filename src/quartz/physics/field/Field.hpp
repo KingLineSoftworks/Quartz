@@ -5,10 +5,9 @@
 #include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/physics/rigid_body/RigidBody.hpp"
-#include "reactphysics3d/body/RigidBody.h"
 #include "util/logger/Logger.hpp"
 
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/Loggers.hpp"
 
@@ -18,11 +17,6 @@ namespace physics {
 }
 }
 
-/**
- * @todo 2024/11/09 Should we just have the physics manager create an instance of this for us?
- *    We can just pass these parameters to the physics manager and it can give us a Field
- *    that is properly set up for us to use
- */
 class quartz::physics::Field {
 public: // classes
     struct Parameters {

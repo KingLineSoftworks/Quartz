@@ -3,6 +3,8 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "util/logger/Logger.hpp"
+
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/field/Field.hpp"
@@ -11,7 +13,6 @@
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include "util/logger/Logger.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
 class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {

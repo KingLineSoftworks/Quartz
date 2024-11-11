@@ -5,8 +5,6 @@
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
-#include "quartz/Loggers.hpp"
-
 #include "quartz/application/Application.hpp"
 
 #include "quartz/rendering/window/Window.hpp"
