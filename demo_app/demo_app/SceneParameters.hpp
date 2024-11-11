@@ -8,7 +8,7 @@
 #include "quartz/scene/scene/Scene.hpp"
 
 std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
-    std::vector<quartz::scene::Doodad::Parameters> doodadInformations = {
+    std::vector<quartz::scene::Doodad::Parameters> doodadParameters = {
         {
             util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_cube/glb/unit_cube.glb"),
             {
@@ -95,7 +95,7 @@ std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
             spotLights,
             screenClearColor,
             skyBoxInformation,
-            doodadInformations,
+            doodadParameters,
             o_realmParameters
         }
     };

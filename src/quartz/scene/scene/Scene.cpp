@@ -30,16 +30,16 @@ quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Realm>& o_physicsRealm,
-    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
 
     std::vector<quartz::scene::Doodad> doodads;
 
-    for (const quartz::scene::Doodad::Parameters& doodadInformation : doodadInformations) {
-        const std::string& filepath = doodadInformation.objectFilepath;
-        const math::Transform& transform = doodadInformation.transform;
-        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = doodadInformation.o_rigidBodyParameters;
+    for (const quartz::scene::Doodad::Parameters& parameters : doodadParameters) {
+        const std::string& filepath = parameters.objectFilepath;
+        const math::Transform& transform = parameters.transform;
+        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = parameters.o_rigidBodyParameters;
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
         LOG_TRACE(SCENE, "  transform:");
@@ -102,7 +102,7 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
-    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations,
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters,
     const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
@@ -149,7 +149,7 @@ quartz::scene::Scene::load(
         renderingDevice,
         physicsManager,
         mo_physicsRealm,
-        doodadInformations
+        doodadParameters
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
 
@@ -186,7 +186,7 @@ quartz::scene::Scene::load(
         sceneParameters.spotLights,
         sceneParameters.screenClearColor,
         sceneParameters.skyBoxInformation,
-        sceneParameters.doodadInformations,
+        sceneParameters.doodadParameters,
         sceneParameters.o_realmParameters
     );
 }

@@ -41,7 +41,7 @@ public: // classes
             const std::vector<quartz::scene::SpotLight>& spotLights_,
             const math::Vec3& screenClearColor_,
             const std::array<std::string, 6>& skyBoxInformation_,
-            const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations_,
+            const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters_,
             const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters_
         ) :
             name(name_),
@@ -52,7 +52,7 @@ public: // classes
             spotLights(spotLights_),
             screenClearColor(screenClearColor_),
             skyBoxInformation(skyBoxInformation_),
-            doodadInformations(doodadInformations_),
+            doodadParameters(doodadParameters_),
             o_realmParameters(o_realmParameters_)
         {}
 
@@ -64,7 +64,7 @@ public: // classes
         std::vector<quartz::scene::SpotLight> spotLights;
         math::Vec3 screenClearColor;
         std::array<std::string, 6> skyBoxInformation;
-        std::vector<quartz::scene::Doodad::Parameters> doodadInformations;
+        std::vector<quartz::scene::Doodad::Parameters> doodadParameters;
         std::optional<quartz::physics::Realm::Parameters> o_realmParameters;
     };
 
@@ -94,7 +94,7 @@ public: // member functions
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
-        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations,
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters,
         const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
     );
     void load(
@@ -120,7 +120,7 @@ private: // static functions
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
         std::optional<quartz::physics::Realm>& o_physicsRealm,
-        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
     );
 
 private: // member variables

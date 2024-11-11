@@ -66,7 +66,7 @@ quartz::scene::Doodad::Doodad(
         (o_physicsRealm && doodadParameters.o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(o_physicsRealm->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
-)
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
