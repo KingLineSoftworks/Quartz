@@ -14,16 +14,16 @@
 
 namespace quartz {
 namespace physics {
-    class Realm;
+    class Field;
 }
 }
 
 /**
  * @todo 2024/11/09 Should we just have the physics manager create an instance of this for us?
- *    We can just pass these parameters to the physics manager and it can give us a Realm
+ *    We can just pass these parameters to the physics manager and it can give us a Field
  *    that is properly set up for us to use
  */
-class quartz::physics::Realm {
+class quartz::physics::Field {
 public: // classes
     struct Parameters {
         Parameters(const math::Vec3& gravity_) :
@@ -34,15 +34,15 @@ public: // classes
     };
 
 public: // member functions
-    Realm();
-    Realm(
+    Field();
+    Field(
         quartz::managers::PhysicsManager& physicsManager,
         const math::Vec3& gravity_
     );
-    Realm(Realm&& other);
-    ~Realm();
+    Field(Field&& other);
+    ~Field();
 
-    USE_LOGGER(REALM);
+    USE_LOGGER(FIELD);
 
     quartz::physics::RigidBody createRigidBody(
         quartz::managers::PhysicsManager& physicsManager,

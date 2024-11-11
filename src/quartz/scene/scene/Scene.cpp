@@ -5,7 +5,7 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
-#include "quartz/physics/realm/Realm.hpp"
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -29,7 +29,7 @@ std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    std::optional<quartz::physics::Realm>& o_physicsRealm,
+    std::optional<quartz::physics::Field>& o_field,
     const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
@@ -57,7 +57,7 @@ quartz::scene::Scene::loadDoodads(
         doodads.emplace_back(
             renderingDevice,
             physicsManager,
-            o_physicsRealm,
+            o_field,
             filepath,
             transform,
             o_rigidBodyInformation
@@ -72,7 +72,7 @@ quartz::scene::Scene::loadDoodads(
 quartz::scene::Scene::Scene(
     quartz::scene::Scene&& other
 ) :
-    mo_physicsRealm(std::move(other.mo_physicsRealm)),
+    mo_field(std::move(other.mo_field)),
     m_camera(std::move(other.m_camera)),
     m_doodads(std::move(other.m_doodads)),
     m_skyBox(std::move(other.m_skyBox)),
@@ -103,7 +103,7 @@ quartz::scene::Scene::load(
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
     const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters,
-    const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
+    const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
@@ -117,9 +117,9 @@ quartz::scene::Scene::load(
     // static DummyTestPhysicsEventListener el;
     // mp_physicsWorld->setEventListener(&el);
     
-    if (o_realmParameters) {
-        LOG_TRACEthis("Initializing physics realm");
-        mo_physicsRealm.emplace(physicsManager, o_realmParameters->gravity);
+    if (o_fieldParameters) {
+        LOG_TRACEthis("Initializing physics field");
+        mo_field.emplace(physicsManager, o_fieldParameters->gravity);
     }
 
     LOG_TRACEthis("Initializing master texture list");
@@ -142,13 +142,10 @@ quartz::scene::Scene::load(
     );
     LOG_TRACEthis("Loaded skybox");
 
-    /**
-     * @todo 2024/11/09 Allow for optional physics realm if we aren't creating a doodad with a rigidbody
-     */
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         physicsManager,
-        mo_physicsRealm,
+        mo_field,
         doodadParameters
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
@@ -187,7 +184,7 @@ quartz::scene::Scene::load(
         sceneParameters.screenClearColor,
         sceneParameters.skyBoxInformation,
         sceneParameters.doodadParameters,
-        sceneParameters.o_realmParameters
+        sceneParameters.o_fieldParameters
     );
 }
 
@@ -204,8 +201,8 @@ quartz::scene::Scene::fixedUpdate(
         doodad.fixedUpdate();
     }
 
-    if (mo_physicsRealm) {
-        mo_physicsRealm->fixedUpdate(tickTimeDelta);
+    if (mo_field) {
+        mo_field->fixedUpdate(tickTimeDelta);
     }
 }
 

@@ -6,7 +6,7 @@
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
-#include "quartz/physics/realm/Realm.hpp"
+#include "quartz/physics/field/Field.hpp"
 
 #include "quartz/scene/doodad/Doodad.hpp"
 
@@ -26,7 +26,7 @@ quartz::scene::Doodad::fixTransform(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    std::optional<quartz::physics::Realm>& o_physicsRealm,
+    std::optional<quartz::physics::Field>& o_field,
     const std::string& objectFilepath,
     const math::Transform& transform,
     const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
@@ -38,8 +38,8 @@ quartz::scene::Doodad::Doodad(
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
     mo_rigidBody(
-        (o_physicsRealm && o_rigidBodyParameters) ?
-            std::optional<quartz::physics::RigidBody>(o_physicsRealm->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
+        (o_field && o_rigidBodyParameters) ?
+            std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
     )
 {
@@ -53,7 +53,7 @@ quartz::scene::Doodad::Doodad(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    std::optional<quartz::physics::Realm>& o_physicsRealm,
+    std::optional<quartz::physics::Field>& o_field,
     quartz::scene::Doodad::Parameters& doodadParameters
 ) :
     m_model(
@@ -63,8 +63,8 @@ quartz::scene::Doodad::Doodad(
     m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
     m_transformationMatrix(),
     mo_rigidBody(
-        (o_physicsRealm && doodadParameters.o_rigidBodyParameters) ?
-            std::optional<quartz::physics::RigidBody>(o_physicsRealm->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
+        (o_field && doodadParameters.o_rigidBodyParameters) ?
+            std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
     )
 {

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -10,13 +9,12 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
-#include "quartz/physics/realm/Realm.hpp"
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include "math/transform/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
@@ -42,7 +40,7 @@ public: // classes
             const math::Vec3& screenClearColor_,
             const std::array<std::string, 6>& skyBoxInformation_,
             const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters_,
-            const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters_
+            const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters_
         ) :
             name(name_),
             camera(camera_),
@@ -53,7 +51,7 @@ public: // classes
             screenClearColor(screenClearColor_),
             skyBoxInformation(skyBoxInformation_),
             doodadParameters(doodadParameters_),
-            o_realmParameters(o_realmParameters_)
+            o_fieldParameters(o_fieldParameters_)
         {}
 
         std::string name;
@@ -65,7 +63,7 @@ public: // classes
         math::Vec3 screenClearColor;
         std::array<std::string, 6> skyBoxInformation;
         std::vector<quartz::scene::Doodad::Parameters> doodadParameters;
-        std::optional<quartz::physics::Realm::Parameters> o_realmParameters;
+        std::optional<quartz::physics::Field::Parameters> o_fieldParameters;
     };
 
 public: // member functions
@@ -95,7 +93,7 @@ public: // member functions
         const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
         const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters,
-        const std::optional<quartz::physics::Realm::Parameters>& o_realmParameters
+        const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters
     );
     void load(
         const quartz::rendering::Device& renderingDevice,
@@ -119,12 +117,12 @@ private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        std::optional<quartz::physics::Realm>& o_physicsRealm,
+        std::optional<quartz::physics::Field>& o_field,
         const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
     );
 
 private: // member variables
-    std::optional<quartz::physics::Realm> mo_physicsRealm; // optional because we can have scenes without physics (main menu, etc.)
+    std::optional<quartz::physics::Field> mo_field; // optional because we can have scenes without physics (main menu, etc.)
 
     quartz::scene::Camera m_camera;
 

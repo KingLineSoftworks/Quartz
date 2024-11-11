@@ -7,7 +7,7 @@
 #include "math/transform/Transform.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
-#include "quartz/physics/realm/Realm.hpp"
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
@@ -41,7 +41,7 @@ public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        std::optional<quartz::physics::Realm>& o_physicsRealm,
+        std::optional<quartz::physics::Field>& o_field,
         const std::string& objectFilepath,
         const math::Transform& transform,
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
@@ -49,7 +49,7 @@ public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        std::optional<quartz::physics::Realm>& o_physicsRealm,
+        std::optional<quartz::physics::Field>& o_field,
         quartz::scene::Doodad::Parameters& doodadParameters
     );
     Doodad(Doodad&& other);

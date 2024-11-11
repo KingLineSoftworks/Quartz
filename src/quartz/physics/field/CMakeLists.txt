@@ -1,31 +1,31 @@
 #====================================================================
-# The Physics Realm library
+# The Physics Field library
 #====================================================================
 add_library(
-    QUARTZ_PHYSICS_Realm
+    QUARTZ_PHYSICS_Field
     SHARED
-    Realm.hpp
-    Realm.cpp
+    Field.hpp
+    Field.cpp
 )
 
 target_include_directories(
-    QUARTZ_PHYSICS_Realm
+    QUARTZ_PHYSICS_Field
     PUBLIC
     ${QUARTZ_INCLUDE_DIRS}
 )
 
 target_compile_options(
-    QUARTZ_PHYSICS_Realm
+    QUARTZ_PHYSICS_Field
     PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_compile_definitions(
-    QUARTZ_PHYSICS_Realm
+    QUARTZ_PHYSICS_Field
     PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
-    QUARTZ_PHYSICS_Realm
+    QUARTZ_PHYSICS_Field
 
     PUBLIC
     reactphysics3d
