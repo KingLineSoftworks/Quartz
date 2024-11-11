@@ -23,33 +23,33 @@ class quartz::scene::Doodad {
 public: // classes
     struct Parameters {
         Parameters(
-            std::string objectFilepath_,
-            math::Transform transform_,
-            quartz::physics::RigidBody::Parameters rigidBodyParameters_
+            const std::string& objectFilepath_,
+            const math::Transform& transform_,
+            const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters_
         ) :
             objectFilepath(objectFilepath_),
             transform(transform_),
-            rigidBodyParameters(rigidBodyParameters_)
+            o_rigidBodyParameters(o_rigidBodyParameters_)
         {}
 
         std::string objectFilepath;
         math::Transform transform;
-        quartz::physics::RigidBody::Parameters rigidBodyParameters;
+        std::optional<quartz::physics::RigidBody::Parameters> o_rigidBodyParameters;
     };
 
 public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        quartz::physics::Realm& physicsRealm,
+        std::optional<quartz::physics::Realm>& o_physicsRealm,
         const std::string& objectFilepath,
         const math::Transform& transform,
-        const quartz::physics::RigidBody::Parameters& rigidBodyParameters
+        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
     );
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        quartz::physics::Realm& physicsRealm,
+        std::optional<quartz::physics::Realm>& o_physicsRealm,
         quartz::scene::Doodad::Parameters& doodadParameters
     );
     Doodad(Doodad&& other);

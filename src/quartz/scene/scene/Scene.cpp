@@ -29,7 +29,7 @@ std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
+    std::optional<quartz::physics::Realm>& o_physicsRealm,
     const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
@@ -39,7 +39,7 @@ quartz::scene::Scene::loadDoodads(
     for (const quartz::scene::Doodad::Parameters& doodadInformation : doodadInformations) {
         const std::string& filepath = doodadInformation.objectFilepath;
         const math::Transform& transform = doodadInformation.transform;
-        const quartz::physics::RigidBody::Parameters& rigidBodyInformation = doodadInformation.rigidBodyParameters;
+        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = doodadInformation.o_rigidBodyParameters;
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
         LOG_TRACE(SCENE, "  transform:");
@@ -47,16 +47,20 @@ quartz::scene::Scene::loadDoodads(
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
         LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
         LOG_TRACE(SCENE, "  rigid body properties:");
-        LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(rigidBodyInformation.bodyType));
-        LOG_TRACE(SCENE, "    gravity enabled = {}", rigidBodyInformation.enableGravity);
+        if (o_rigidBodyInformation) {
+            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(o_rigidBodyInformation->bodyType));
+            LOG_TRACE(SCENE, "    gravity enabled = {}", o_rigidBodyInformation->enableGravity);
+        } else {
+            LOG_TRACE(SCENE, "    none");
+        }
 
         doodads.emplace_back(
             renderingDevice,
             physicsManager,
-            physicsRealm,
+            o_physicsRealm,
             filepath,
             transform,
-            rigidBodyInformation
+            o_rigidBodyInformation
         );
     }
 
@@ -144,7 +148,7 @@ quartz::scene::Scene::load(
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         physicsManager,
-        *mo_physicsRealm,
+        mo_physicsRealm,
         doodadInformations
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());

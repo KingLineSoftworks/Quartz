@@ -1,3 +1,4 @@
+#include <optional>
 #include <string>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,10 +26,10 @@ quartz::scene::Doodad::fixTransform(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
+    std::optional<quartz::physics::Realm>& o_physicsRealm,
     const std::string& objectFilepath,
     const math::Transform& transform,
-    const quartz::physics::RigidBody::Parameters& rigidBodyParameters
+    const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
 ) :
     m_model(
         renderingDevice,
@@ -36,7 +37,11 @@ quartz::scene::Doodad::Doodad(
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
-    mo_rigidBody(physicsRealm.createRigidBody(physicsManager, m_transform, rigidBodyParameters))
+    mo_rigidBody(
+        (o_physicsRealm && o_rigidBodyParameters) ?
+            std::optional<quartz::physics::RigidBody>(o_physicsRealm->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
+            std::nullopt
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -48,7 +53,7 @@ quartz::scene::Doodad::Doodad(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    quartz::physics::Realm& physicsRealm,
+    std::optional<quartz::physics::Realm>& o_physicsRealm,
     quartz::scene::Doodad::Parameters& doodadParameters
 ) :
     m_model(
@@ -57,7 +62,11 @@ quartz::scene::Doodad::Doodad(
     ),
     m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
     m_transformationMatrix(),
-    mo_rigidBody(physicsRealm.createRigidBody(physicsManager, m_transform, doodadParameters.rigidBodyParameters))
+    mo_rigidBody(
+        (o_physicsRealm && doodadParameters.o_rigidBodyParameters) ?
+            std::optional<quartz::physics::RigidBody>(o_physicsRealm->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
+            std::nullopt
+)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -96,13 +105,16 @@ quartz::scene::Doodad::fixedUpdate() {
 void
 quartz::scene::Doodad::update(
     UNUSED const double frameTimeDelta,
-    UNUSED const double frameInterpolationFactor
+    const double frameInterpolationFactor
 ) {
     math::Transform currentTransform;
-    /** @todo 2024/11/06 Ensure optional rigidbody is valid before trying to get its members */
-    currentTransform.position = mo_rigidBody->getPosition();
-    currentTransform.rotation = mo_rigidBody->getOrientation();
-    currentTransform.scale = m_transform.scale;
+    if (mo_rigidBody) {
+        currentTransform.position = mo_rigidBody->getPosition();
+        currentTransform.rotation = mo_rigidBody->getOrientation();
+        currentTransform.scale = m_transform.scale;
+    } else {
+        currentTransform = m_transform;
+    }
 
     const math::Vec3 interpolatedPosition = math::lerp(
         m_transform.position,
