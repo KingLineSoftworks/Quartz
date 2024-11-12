@@ -3,14 +3,16 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "util/logger/Logger.hpp"
+
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include "util/logger/Logger.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
 class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {
@@ -28,17 +30,17 @@ std::vector<quartz::scene::Doodad>
 quartz::scene::Scene::loadDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::PhysicsWorld* p_physicsWorld,
-    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+    std::optional<quartz::physics::Field>& o_field,
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
 ) {
     LOG_FUNCTION_SCOPE_TRACE(SCENE, "");
 
     std::vector<quartz::scene::Doodad> doodads;
 
-    for (const quartz::scene::Doodad::Parameters& doodadInformation : doodadInformations) {
-        const std::string& filepath = doodadInformation.objectFilepath;
-        const math::Transform& transform = doodadInformation.transform;
-        const quartz::physics::RigidBody::Parameters& rigidBodyInformation = doodadInformation.rigidBodyParameters;
+    for (const quartz::scene::Doodad::Parameters& parameters : doodadParameters) {
+        const std::string& filepath = parameters.objectFilepath;
+        const math::Transform& transform = parameters.transform;
+        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = parameters.o_rigidBodyParameters;
 
         LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
         LOG_TRACE(SCENE, "  transform:");
@@ -46,20 +48,20 @@ quartz::scene::Scene::loadDoodads(
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
         LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
         LOG_TRACE(SCENE, "  rigid body properties:");
-        // if (rigidBodyInformation) {
-            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(rigidBodyInformation.bodyType));
-            LOG_TRACE(SCENE, "    gravity enabled = {}", rigidBodyInformation.enableGravity);
-        // } else {
-        //     LOG_TRACE(SCENE, "    N/A");
-        // }
+        if (o_rigidBodyInformation) {
+            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(o_rigidBodyInformation->bodyType));
+            LOG_TRACE(SCENE, "    gravity enabled = {}", o_rigidBodyInformation->enableGravity);
+        } else {
+            LOG_TRACE(SCENE, "    none");
+        }
 
         doodads.emplace_back(
             renderingDevice,
             physicsManager,
-            p_physicsWorld,
+            o_field,
             filepath,
             transform,
-            rigidBodyInformation
+            o_rigidBodyInformation
         );
     }
 
@@ -71,7 +73,7 @@ quartz::scene::Scene::loadDoodads(
 quartz::scene::Scene::Scene(
     quartz::scene::Scene&& other
 ) :
-    mp_physicsWorld(std::move(other.mp_physicsWorld)),
+    mo_field(std::move(other.mo_field)),
     m_camera(std::move(other.m_camera)),
     m_doodads(std::move(other.m_doodads)),
     m_skyBox(std::move(other.m_skyBox)),
@@ -101,29 +103,25 @@ quartz::scene::Scene::load(
     const std::vector<quartz::scene::SpotLight>& spotLights,
     const math::Vec3& screenClearColor,
     const std::array<std::string, 6>& skyBoxInformation,
-    const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+    const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters,
+    const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters
 ) {
-   LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    LOG_TRACEthis("Creating physics world");
     /**
-     * @todo 2024/06/20 Create a class extending reactphysics3d::EventListener,
-     *    instantiate an instance of that class, and set that instance as the
-     *    physics world's event listener
+     * @todo 2024/11/09 Create a quartz::physics::EventListener class that allows for the
+     *    ability to inject functions, so the user doesn't have to implement their own class
+     *    extending the reactphysics3d::EventListener class.
+     *    We can allow the current scene to set the event listener's functions, so each scene
+     *    can handle the events in their own way.
      */
-    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
-    physicsWorldSettings.defaultVelocitySolverNbIterations = 10;
-    physicsWorldSettings.defaultPositionSolverNbIterations = 5;
-    physicsWorldSettings.isSleepingEnabled = true;
-    physicsWorldSettings.defaultTimeBeforeSleep = 1.0;      // seconds
-    physicsWorldSettings.defaultSleepLinearVelocity = 0.5;  // meters per second
-    physicsWorldSettings.defaultSleepAngularVelocity = 0.5; // meters per second
-//    physicsWorldSettings.gravity = math::Vec3(0, -9.81, 0);
-    physicsWorldSettings.gravity = math::Vec3(0, -1.0, 0);
-    mp_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
-
-    static DummyTestPhysicsEventListener el;
-    mp_physicsWorld->setEventListener(&el);
+    // static DummyTestPhysicsEventListener el;
+    // mp_physicsWorld->setEventListener(&el);
+    
+    if (o_fieldParameters) {
+        LOG_TRACEthis("Initializing physics field");
+        mo_field.emplace(physicsManager, o_fieldParameters->gravity);
+    }
 
     LOG_TRACEthis("Initializing master texture list");
     quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
@@ -148,8 +146,8 @@ quartz::scene::Scene::load(
     m_doodads = quartz::scene::Scene::loadDoodads(
         renderingDevice,
         physicsManager,
-        mp_physicsWorld,
-        doodadInformations
+        mo_field,
+        doodadParameters
     );
     LOG_TRACEthis("Loaded {} doodads", m_doodads.size());
 
@@ -169,6 +167,28 @@ quartz::scene::Scene::load(
     LOG_TRACEthis("Loaded screen clear color {}", m_screenClearColor.toString());
 }
 
+
+void
+quartz::scene::Scene::load(
+    const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
+    const quartz::scene::Scene::Parameters& sceneParameters
+) {
+    load(
+        renderingDevice,
+        physicsManager,
+        sceneParameters.camera,
+        sceneParameters.ambientLight,
+        sceneParameters.directionalLight,
+        sceneParameters.pointLights,
+        sceneParameters.spotLights,
+        sceneParameters.screenClearColor,
+        sceneParameters.skyBoxInformation,
+        sceneParameters.doodadParameters,
+        sceneParameters.o_fieldParameters
+    );
+}
+
 void
 quartz::scene::Scene::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
@@ -182,7 +202,9 @@ quartz::scene::Scene::fixedUpdate(
         doodad.fixedUpdate();
     }
 
-    mp_physicsWorld->update(tickTimeDelta);
+    if (mo_field) {
+        mo_field->fixedUpdate(tickTimeDelta);
+    }
 }
 
 void

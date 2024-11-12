@@ -56,6 +56,7 @@ int main() {
         {"COLLIDER", util::Logger::Level::info},
         {"COLLIDER_BOX", util::Logger::Level::info},
         {"COLLIDER_SPHERE", util::Logger::Level::info},
+        {"FIELD", util::Logger::Level::info},
         {"RIGIDBODY", util::Logger::Level::info},
 
         // rendering

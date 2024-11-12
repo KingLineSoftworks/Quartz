@@ -3,12 +3,11 @@
 #include <optional>
 #include <string>
 
-#include <reactphysics3d/reactphysics3d.h>
-
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Transform.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Model.hpp"
@@ -24,28 +23,34 @@ class quartz::scene::Doodad {
 public: // classes
     struct Parameters {
         Parameters(
-            std::string objectFilepath_,
-            math::Transform transform_,
-            quartz::physics::RigidBody::Parameters rigidBodyParameters_
+            const std::string& objectFilepath_,
+            const math::Transform& transform_,
+            const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters_
         ) :
             objectFilepath(objectFilepath_),
             transform(transform_),
-            rigidBodyParameters(rigidBodyParameters_)
+            o_rigidBodyParameters(o_rigidBodyParameters_)
         {}
 
         std::string objectFilepath;
         math::Transform transform;
-        quartz::physics::RigidBody::Parameters rigidBodyParameters;
+        std::optional<quartz::physics::RigidBody::Parameters> o_rigidBodyParameters;
     };
 
 public: // member functions
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
+        std::optional<quartz::physics::Field>& o_field,
         const std::string& objectFilepath,
         const math::Transform& transform,
-        const quartz::physics::RigidBody::Parameters& rigidBodyParameters
+        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
+    );
+    Doodad(
+        const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
+        std::optional<quartz::physics::Field>& o_field,
+        quartz::scene::Doodad::Parameters& doodadParameters
     );
     Doodad(Doodad&& other);
     ~Doodad();

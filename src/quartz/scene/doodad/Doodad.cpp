@@ -1,3 +1,4 @@
+#include <optional>
 #include <string>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,6 +7,7 @@
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
 math::Transform
@@ -24,10 +26,10 @@ quartz::scene::Doodad::fixTransform(
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::PhysicsWorld* p_physicsWorld,
+    std::optional<quartz::physics::Field>& o_field,
     const std::string& objectFilepath,
     const math::Transform& transform,
-    const quartz::physics::RigidBody::Parameters& rigidBodyParameters
+    const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
 ) :
     m_model(
         renderingDevice,
@@ -35,13 +37,42 @@ quartz::scene::Doodad::Doodad(
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
-    mo_rigidBody({physicsManager, p_physicsWorld, m_transform, rigidBodyParameters})
+    mo_rigidBody(
+        (o_field && o_rigidBodyParameters) ?
+            std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
+            std::nullopt
+    )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
-    LOG_TRACE(SCENE, "  position = {}", transform.position.toString());
-    LOG_TRACE(SCENE, "  rotation = {}", transform.rotation.toString());
-    LOG_TRACE(SCENE, "  scale    = {}", transform.scale.toString());
+    LOG_TRACE(SCENE, "  position = {}", m_transform.position.toString());
+    LOG_TRACE(SCENE, "  rotation = {}", m_transform.rotation.toString());
+    LOG_TRACE(SCENE, "  scale    = {}", m_transform.scale.toString());
+}
+
+quartz::scene::Doodad::Doodad(
+    const quartz::rendering::Device& renderingDevice,
+    quartz::managers::PhysicsManager& physicsManager,
+    std::optional<quartz::physics::Field>& o_field,
+    quartz::scene::Doodad::Parameters& doodadParameters
+) :
+    m_model(
+        renderingDevice,
+        doodadParameters.objectFilepath
+    ),
+    m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
+    m_transformationMatrix(),
+    mo_rigidBody(
+        (o_field && doodadParameters.o_rigidBodyParameters) ?
+            std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
+            std::nullopt
+    )
+{
+    LOG_FUNCTION_CALL_TRACEthis("");
+    LOG_TRACEthis("Constructing doodad with transform:");
+    LOG_TRACE(SCENE, "  position = {}", m_transform.position.toString());
+    LOG_TRACE(SCENE, "  rotation = {}", m_transform.rotation.toString());
+    LOG_TRACE(SCENE, "  scale    = {}", m_transform.scale.toString());
 }
 
 quartz::scene::Doodad::Doodad(
@@ -74,13 +105,16 @@ quartz::scene::Doodad::fixedUpdate() {
 void
 quartz::scene::Doodad::update(
     UNUSED const double frameTimeDelta,
-    UNUSED const double frameInterpolationFactor
+    const double frameInterpolationFactor
 ) {
     math::Transform currentTransform;
-    /** @todo 2024/11/06 Ensure optional rigidbody is valid before trying to get its members */
-    currentTransform.position = mo_rigidBody->getPosition();
-    currentTransform.rotation = mo_rigidBody->getOrientation();
-    currentTransform.scale = m_transform.scale;
+    if (mo_rigidBody) {
+        currentTransform.position = mo_rigidBody->getPosition();
+        currentTransform.rotation = mo_rigidBody->getOrientation();
+        currentTransform.scale = m_transform.scale;
+    } else {
+        currentTransform = m_transform;
+    }
 
     const math::Vec3 interpolatedPosition = math::lerp(
         m_transform.position,

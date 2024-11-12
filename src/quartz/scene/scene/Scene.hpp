@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -10,12 +9,12 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/window/Window.hpp"
 #include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include "math/transform/Transform.hpp"
 #include "quartz/scene/light/AmbientLight.hpp"
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
@@ -40,7 +39,8 @@ public: // classes
             const std::vector<quartz::scene::SpotLight>& spotLights_,
             const math::Vec3& screenClearColor_,
             const std::array<std::string, 6>& skyBoxInformation_,
-            const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations_
+            const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters_,
+            const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters_
         ) :
             name(name_),
             camera(camera_),
@@ -50,7 +50,8 @@ public: // classes
             spotLights(spotLights_),
             screenClearColor(screenClearColor_),
             skyBoxInformation(skyBoxInformation_),
-            doodadInformations(doodadInformations_)
+            doodadParameters(doodadParameters_),
+            o_fieldParameters(o_fieldParameters_)
         {}
 
         std::string name;
@@ -61,7 +62,8 @@ public: // classes
         std::vector<quartz::scene::SpotLight> spotLights;
         math::Vec3 screenClearColor;
         std::array<std::string, 6> skyBoxInformation;
-        std::vector<quartz::scene::Doodad::Parameters> doodadInformations;
+        std::vector<quartz::scene::Doodad::Parameters> doodadParameters;
+        std::optional<quartz::physics::Field::Parameters> o_fieldParameters;
     };
 
 public: // member functions
@@ -90,7 +92,13 @@ public: // member functions
         const std::vector<quartz::scene::SpotLight>& spotLights,
         const math::Vec3& screenClearColor,
         const std::array<std::string, 6>& skyBoxInformation,
-        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters,
+        const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters
+    );
+    void load(
+        const quartz::rendering::Device& renderingDevice,
+        quartz::managers::PhysicsManager& physicsManager,
+        const quartz::scene::Scene::Parameters& sceneParameters
     );
 
     void fixedUpdate(
@@ -109,12 +117,12 @@ private: // static functions
     static std::vector<quartz::scene::Doodad> loadDoodads(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
-        const std::vector<quartz::scene::Doodad::Parameters>& doodadInformations
+        std::optional<quartz::physics::Field>& o_field,
+        const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
     );
 
 private: // member variables
-    reactphysics3d::PhysicsWorld* mp_physicsWorld;
+    std::optional<quartz::physics::Field> mo_field; // optional because we can have scenes without physics (main menu, etc.)
 
     quartz::scene::Camera m_camera;
 
