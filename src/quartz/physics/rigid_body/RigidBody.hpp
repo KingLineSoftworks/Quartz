@@ -3,16 +3,14 @@
 #include <optional>
 #include <variant>
 
-#include <reactphysics3d/reactphysics3d.h>
+#include <reactphysics3d/body/RigidBody.h>
 
 #include "math/transform/Transform.hpp"
-
 #include "math/transform/Vec3.hpp"
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/Loggers.hpp"
 #include "quartz/physics/collider/Collider.hpp"
-#include "reactphysics3d/body/RigidBody.h"
 
 namespace quartz {
 namespace physics {

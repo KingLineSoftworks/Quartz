@@ -7,9 +7,9 @@
 
 #include "util/logger/Logger.hpp"
 
-#include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/Loggers.hpp"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 
 namespace quartz {
 namespace physics {

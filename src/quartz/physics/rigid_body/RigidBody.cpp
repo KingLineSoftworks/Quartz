@@ -1,6 +1,8 @@
-#include "quartz/physics/rigid_body/RigidBody.hpp"
+#include <reactphysics3d/engine/PhysicsWorld.h>
+
 #include "math/transform/Vec3.hpp"
-#include "reactphysics3d/engine/PhysicsWorld.h"
+
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 
 std::string
 quartz::physics::RigidBody::Parameters::getBodyTypeString(

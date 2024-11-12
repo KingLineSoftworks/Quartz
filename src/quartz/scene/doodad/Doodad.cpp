@@ -6,8 +6,8 @@
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
-#include "quartz/physics/field/Field.hpp"
 
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
 math::Transform
