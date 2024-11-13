@@ -22,7 +22,8 @@ namespace scene {
 
 class quartz::scene::Doodad {
 public: // aliases
-    using UpdateCallback = std::function<void()>;
+    using FixedUpdateCallback = std::function<void(Doodad* const p_this)>;
+    using UpdateCallback = std::function<void(Doodad* const p_this, const double frameTimeDelta, const double frameInterpolationFactor)>;
 
 public: // classes
     struct Parameters {
@@ -81,6 +82,6 @@ private: // member variables
 
     std::optional<quartz::physics::RigidBody> mo_rigidBody;
 
-    UpdateCallback m_fixedUpdateCallback;
+    FixedUpdateCallback m_fixedUpdateCallback;
     UpdateCallback m_updateCallback;
 };
