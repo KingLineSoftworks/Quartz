@@ -41,7 +41,9 @@ quartz::scene::Doodad::Doodad(
         (o_field && o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
-    )
+    ),
+    m_fixedUpdateCallback(),
+    m_updateCallback()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -66,7 +68,9 @@ quartz::scene::Doodad::Doodad(
         (o_field && doodadParameters.o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
-    )
+    ),
+    m_fixedUpdateCallback(),
+    m_updateCallback()
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -81,7 +85,9 @@ quartz::scene::Doodad::Doodad(
     m_model(std::move(other.m_model)),
     m_transform(other.m_transform),
     m_transformationMatrix(other.m_transformationMatrix),
-    mo_rigidBody(std::move(other.mo_rigidBody))
+    mo_rigidBody(std::move(other.mo_rigidBody)),
+    m_fixedUpdateCallback(std::move(other.m_fixedUpdateCallback)),
+    m_updateCallback(std::move(other.m_updateCallback))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -93,11 +99,13 @@ quartz::scene::Doodad::~Doodad() {
 void
 quartz::scene::Doodad::fixedUpdate() {
     /**
-     * @todo 2024/06/20 Call the fixed update callback given to the doodad which actually contains
-     *    the logic that we execute here
-     *
      * @todo 2024/06/21 Update m_currentTransform here????
      */
+
+    if (m_fixedUpdateCallback) {
+        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(); };
+        safeFixedUpdateCallback();
+    }
 
 //    mp_rigidBody->applyLocalForceAtCenterOfMass({1.0, 0.0, 0.0});
 }
@@ -107,6 +115,11 @@ quartz::scene::Doodad::update(
     UNUSED const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
+    if (m_updateCallback) {
+        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(); };
+        safeUpdateCallback();
+    }
+
     math::Transform currentTransform;
     if (mo_rigidBody) {
         currentTransform.position = mo_rigidBody->getPosition();

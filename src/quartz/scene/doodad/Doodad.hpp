@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -20,6 +21,9 @@ namespace scene {
 }
 
 class quartz::scene::Doodad {
+public: // aliases
+    using UpdateCallback = std::function<void()>;
+
 public: // classes
     struct Parameters {
         Parameters(
@@ -76,4 +80,7 @@ private: // member variables
     math::Mat4 m_transformationMatrix;
 
     std::optional<quartz::physics::RigidBody> mo_rigidBody;
+
+    UpdateCallback m_fixedUpdateCallback;
+    UpdateCallback m_updateCallback;
 };
