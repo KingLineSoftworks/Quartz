@@ -29,7 +29,9 @@ quartz::scene::Doodad::Doodad(
     std::optional<quartz::physics::Field>& o_field,
     const std::string& objectFilepath,
     const math::Transform& transform,
-    const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
+    const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
+    const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
+    const quartz::scene::Doodad::UpdateCallback& updateCallback
 ) :
     m_model(
         renderingDevice,
@@ -42,8 +44,8 @@ quartz::scene::Doodad::Doodad(
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
     ),
-    m_fixedUpdateCallback(),
-    m_updateCallback()
+    m_fixedUpdateCallback(fixedUpdateCallback),
+    m_updateCallback(updateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -56,7 +58,7 @@ quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
-    quartz::scene::Doodad::Parameters& doodadParameters
+    const quartz::scene::Doodad::Parameters& doodadParameters
 ) :
     m_model(
         renderingDevice,
@@ -69,8 +71,8 @@ quartz::scene::Doodad::Doodad(
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
     ),
-    m_fixedUpdateCallback(),
-    m_updateCallback()
+    m_fixedUpdateCallback(doodadParameters.fixedUpdateCallback),
+    m_updateCallback(doodadParameters.updateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");

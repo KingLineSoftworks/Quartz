@@ -30,16 +30,22 @@ public: // classes
         Parameters(
             const std::string& objectFilepath_,
             const math::Transform& transform_,
-            const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters_
+            const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters_,
+            const FixedUpdateCallback& fixedUpdateCallback_,
+            const UpdateCallback& updateCallback_
         ) :
             objectFilepath(objectFilepath_),
             transform(transform_),
-            o_rigidBodyParameters(o_rigidBodyParameters_)
+            o_rigidBodyParameters(o_rigidBodyParameters_),
+            fixedUpdateCallback(fixedUpdateCallback_),
+            updateCallback(updateCallback_)
         {}
 
         std::string objectFilepath;
         math::Transform transform;
         std::optional<quartz::physics::RigidBody::Parameters> o_rigidBodyParameters;
+        FixedUpdateCallback fixedUpdateCallback;
+        UpdateCallback updateCallback;
     };
 
 public: // member functions
@@ -49,13 +55,15 @@ public: // member functions
         std::optional<quartz::physics::Field>& o_field,
         const std::string& objectFilepath,
         const math::Transform& transform,
-        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
+        const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
+        const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
+        const quartz::scene::Doodad::UpdateCallback& updateCallback
     );
     Doodad(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
         std::optional<quartz::physics::Field>& o_field,
-        quartz::scene::Doodad::Parameters& doodadParameters
+        const quartz::scene::Doodad::Parameters& doodadParameters
     );
     Doodad(Doodad&& other);
     ~Doodad();
