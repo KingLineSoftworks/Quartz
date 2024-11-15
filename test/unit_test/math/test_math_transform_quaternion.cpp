@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "math/Loggers.hpp"
 #include "math/transform/Quaternion.hpp"
 

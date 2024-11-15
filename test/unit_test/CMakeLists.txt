@@ -15,17 +15,56 @@ target_include_directories(UNITTEST_Util PRIVATE ${QUARTZ_UNIT_TEST_INCLUDE_DIRS
 target_link_libraries(UNITTEST_Util PUBLIC UTIL_Logger)
 
 #====================================================================
+# Functionality for easily creating unit tests
+#====================================================================
+
+function(create_unit_test unit_test_name unit_test_main_file unit_test_link_libraries)
+    add_executable(${unit_test_name} ${unit_test_main_file})
+    target_compile_definitions(${unit_test_name} PRIVATE ${QUARTZ_COMPILE_DEFINITIONS})
+    target_compile_options(${unit_test_name} PRIVATE ${QUARTZ_CMAKE_CXX_FLAGS})
+    target_include_directories(${unit_test_name} PRIVATE ${QUARTZ_UNIT_TEST_INCLUDE_DIRS} )
+    target_link_libraries(${unit_test_name} PRIVATE ${unit_test_link_libraries})
+    add_test(NAME ${unit_test_name} COMMAND ${unit_test_name})
+endfunction()
+
+#====================================================================
 # Math unit tests
 #====================================================================
 
 set(MATH_UNIT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/math")
 
-add_executable(test_math_transform_quaternion "${MATH_UNIT_TEST_DIR}/test_math_transform_quaternion.cpp")
-target_compile_definitions(test_math_transform_quaternion PRIVATE ${QUARTZ_COMPILE_DEFINITIONS})
-target_compile_options(test_math_transform_quaternion PRIVATE ${QUARTZ_CMAKE_CXX_FLAGS})
-target_include_directories(test_math_transform_quaternion PRIVATE ${QUARTZ_UNIT_TEST_INCLUDE_DIRS} )
-target_link_libraries(test_math_transform_quaternion PRIVATE MATH_Transform)
-add_test(NAME test_math_transform_quaternion COMMAND test_math_transform_quaternion)
+# add_executable(test_math_transform_quaternion "${MATH_UNIT_TEST_DIR}/test_math_transform_quaternion.cpp")
+# target_compile_definitions(test_math_transform_quaternion PRIVATE ${QUARTZ_COMPILE_DEFINITIONS})
+# target_compile_options(test_math_transform_quaternion PRIVATE ${QUARTZ_CMAKE_CXX_FLAGS})
+# target_include_directories(test_math_transform_quaternion PRIVATE ${QUARTZ_UNIT_TEST_INCLUDE_DIRS} )
+# target_link_libraries(test_math_transform_quaternion PRIVATE MATH_Transform)
+# add_test(NAME test_math_transform_quaternion COMMAND test_math_transform_quaternion)
 
+create_unit_test(
+    test_math_transform_quaternion
+    "${MATH_UNIT_TEST_DIR}/test_math_transform_quaternion.cpp"
+    MATH_Transform
+)
 
+#====================================================================
+# Quartz unit tests
+#====================================================================
 
+SET(QUARTZ_UNIT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/quartz")
+
+#-------------------------------------------------------------------
+# Quartz Scene unit tests
+#-------------------------------------------------------------------
+
+set(QUARTZ_SCENE_UNIT_TEST_DIR "${QUARTZ_UNIT_TEST_DIR}/scene")
+
+list(APPEND test_doodad_rigidbody_collider_transforms_link_libraries
+    QUARTZ_PHYSICS_Collider
+    QUARTZ_PHYSICS_RigidBody
+    QUARTZ_SCENE_Doodad
+)
+create_unit_test(
+    test_doodad_rigidbody_collider_transforms
+    "${QUARTZ_SCENE_UNIT_TEST_DIR}/doodad/test_doodad_rigidbody_collider_transforms.cpp"
+    "${test_doodad_rigidbody_collider_transforms_link_libraries}"
+)
