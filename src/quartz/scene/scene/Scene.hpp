@@ -109,6 +109,7 @@ public: // member functions
     );
     void update(
         const quartz::rendering::Window& renderingWindow,
+        const quartz::managers::InputManager& inputManager,
         const double frameTimeDelta,
         const double frameInterpolationFactor
     );

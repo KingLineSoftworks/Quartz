@@ -7,6 +7,7 @@
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Transform.hpp"
 
+#include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
@@ -22,8 +23,16 @@ namespace scene {
 
 class quartz::scene::Doodad {
 public: // aliases
-    using FixedUpdateCallback = std::function<void(Doodad* const p_this)>;
-    using UpdateCallback = std::function<void(Doodad* const p_this, const double frameTimeDelta, const double frameInterpolationFactor)>;
+    using FixedUpdateCallback = std::function<void(
+        Doodad* const p_doodad,
+        const quartz::managers::InputManager& inputManager
+    )>;
+    using UpdateCallback = std::function<void(
+        Doodad* const p_doodad,
+        const quartz::managers::InputManager& inputManager,
+        const double frameTimeDelta,
+        const double frameInterpolationFactor
+    )>;
 
 public: // classes
     struct Parameters {
@@ -71,10 +80,15 @@ public: // member functions
     USE_LOGGER(DOODAD);
 
     const quartz::rendering::Model& getModel() const { return m_model; }
+    const math::Transform& getTransform() const { return m_transform; }
     const math::Mat4& getTransformationMatrix() const { return m_transformationMatrix; }
+    const std::optional<quartz::physics::RigidBody>& getRigidBodyOptional() const { return mo_rigidBody; }
 
-    void fixedUpdate();
+    std::optional<quartz::physics::RigidBody>& getRigidBodyOptionalReference() { return mo_rigidBody; }
+
+    void fixedUpdate(const quartz::managers::InputManager& inputManager);
     void update(
+        const quartz::managers::InputManager& inputManager,
         const double frameTimeDelta,
         const double frameInterpolationFactor
     );

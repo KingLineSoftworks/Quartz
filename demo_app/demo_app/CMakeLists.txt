@@ -6,7 +6,14 @@ set(APPLICATION_NAME "Demo_App_The_Sequel")
 include(ApplicationVersion)
 
 add_executable(
-    ${APPLICATION_NAME} ${APPLICATION_SOURCE_DIR}/main.cpp
+    ${APPLICATION_NAME}
+    main.cpp
+    SceneParameters.hpp
+    SceneParameters.cpp
+    player/Player.hpp
+    player/Player.cpp
+    player/PlayerMovement.hpp
+    player/PlayerMovement.cpp
 )
 
 target_include_directories(

@@ -64,8 +64,12 @@ public: // member functions
 
     USE_LOGGER(RIGIDBODY);
 
-    math::Vec3 getPosition() { return mp_rigidBody->getTransform().getPosition(); }
-    math::Quaternion getOrientation() { return mp_rigidBody->getTransform().getOrientation(); }
+    math::Vec3 getPosition() const { return mp_rigidBody->getTransform().getPosition(); }
+    math::Vec3 getLinearVelocity() const { return mp_rigidBody->getLinearVelocity(); }
+    math::Quaternion getOrientation() const { return mp_rigidBody->getTransform().getOrientation(); }
+
+    void setLinearVelocity(const math::Vec3& linearVelocity);
+    void applyLocalForceToCenterOfMass(const math::Vec3& force);
 
 public: // static functions
     static reactphysics3d::RigidBody* createRigidBodyPtr(

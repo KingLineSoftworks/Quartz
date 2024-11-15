@@ -120,3 +120,18 @@ quartz::physics::RigidBody::RigidBody(
 {}
 
 quartz::physics::RigidBody::~RigidBody() {}
+
+void
+quartz::physics::RigidBody::setLinearVelocity(
+    const math::Vec3& linearVelocity
+) {
+    mp_rigidBody->setLinearVelocity(linearVelocity);
+}
+
+void
+quartz::physics::RigidBody::applyLocalForceToCenterOfMass(
+    const math::Vec3& force
+) {
+    mp_rigidBody->applyLocalForceAtCenterOfMass(force);
+}
+

@@ -203,7 +203,7 @@ quartz::scene::Scene::fixedUpdate(
     m_camera.fixedUpdate(inputManager);
 
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.fixedUpdate();
+        doodad.fixedUpdate(inputManager);
     }
 
     if (mo_field) {
@@ -214,6 +214,7 @@ quartz::scene::Scene::fixedUpdate(
 void
 quartz::scene::Scene::update(
     const quartz::rendering::Window& renderingWindow,
+    const quartz::managers::InputManager& inputManager,
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
@@ -225,6 +226,6 @@ quartz::scene::Scene::update(
     );
 
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.update(frameTimeDelta, frameInterpolationFactor);
+        doodad.update(inputManager, frameTimeDelta, frameInterpolationFactor);
     }
 }

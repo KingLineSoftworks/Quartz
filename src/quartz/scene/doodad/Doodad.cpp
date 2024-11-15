@@ -99,13 +99,15 @@ quartz::scene::Doodad::~Doodad() {
 }
 
 void
-quartz::scene::Doodad::fixedUpdate() {
+quartz::scene::Doodad::fixedUpdate(
+    const quartz::managers::InputManager& inputManager
+) {
     /**
      * @todo 2024/06/21 Update m_currentTransform here????
      */
 
     if (m_fixedUpdateCallback) {
-        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this); };
+        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this, inputManager); };
         safeFixedUpdateCallback();
     }
 
@@ -114,11 +116,12 @@ quartz::scene::Doodad::fixedUpdate() {
 
 void
 quartz::scene::Doodad::update(
+    const quartz::managers::InputManager& inputManager,
     UNUSED const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
     if (m_updateCallback) {
-        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, frameTimeDelta, frameInterpolationFactor); };
+        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, inputManager, frameTimeDelta, frameInterpolationFactor); };
         safeUpdateCallback();
     }
 
