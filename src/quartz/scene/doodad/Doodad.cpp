@@ -27,15 +27,16 @@ quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
-    const std::string& objectFilepath,
+    const std::optional<std::string>& o_objectFilepath,
     const math::Transform& transform,
     const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
     const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
     const quartz::scene::Doodad::UpdateCallback& updateCallback
 ) :
-    m_model(
-        renderingDevice,
-        objectFilepath
+    mo_model(
+        o_objectFilepath ?
+            std::optional<quartz::rendering::Model>(quartz::rendering::Model(renderingDevice, *o_objectFilepath)) :
+            std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
@@ -55,14 +56,15 @@ quartz::scene::Doodad::Doodad(
 }
 
 quartz::scene::Doodad::Doodad(
-    const quartz::rendering::Device& renderingDevice,
+    UNUSED const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
     const quartz::scene::Doodad::Parameters& doodadParameters
 ) :
-    m_model(
-        renderingDevice,
-        doodadParameters.objectFilepath
+    mo_model(
+        doodadParameters.o_objectFilepath ?
+            std::optional<quartz::rendering::Model>(quartz::rendering::Model(renderingDevice, *doodadParameters.o_objectFilepath)) :
+            std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
     m_transformationMatrix(),
@@ -84,7 +86,7 @@ quartz::scene::Doodad::Doodad(
 quartz::scene::Doodad::Doodad(
     quartz::scene::Doodad&& other
 ) :
-    m_model(std::move(other.m_model)),
+    mo_model(std::move(other.mo_model)),
     m_transform(other.m_transform),
     m_transformationMatrix(other.m_transformationMatrix),
     mo_rigidBody(std::move(other.mo_rigidBody)),

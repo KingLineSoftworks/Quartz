@@ -37,20 +37,20 @@ public: // aliases
 public: // classes
     struct Parameters {
         Parameters(
-            const std::string& objectFilepath_,
+            const std::optional<std::string>& o_objectFilepath_,
             const math::Transform& transform_,
             const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters_,
             const FixedUpdateCallback& fixedUpdateCallback_,
             const UpdateCallback& updateCallback_
         ) :
-            objectFilepath(objectFilepath_),
+            o_objectFilepath(o_objectFilepath_),
             transform(transform_),
             o_rigidBodyParameters(o_rigidBodyParameters_),
             fixedUpdateCallback(fixedUpdateCallback_),
             updateCallback(updateCallback_)
         {}
 
-        std::string objectFilepath;
+        std::optional<std::string> o_objectFilepath;
         math::Transform transform;
         std::optional<quartz::physics::RigidBody::Parameters> o_rigidBodyParameters;
         FixedUpdateCallback fixedUpdateCallback;
@@ -62,7 +62,7 @@ public: // member functions
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
         std::optional<quartz::physics::Field>& o_field,
-        const std::string& objectFilepath,
+        const std::optional<std::string>& o_objectFilepath,
         const math::Transform& transform,
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
         const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
@@ -79,7 +79,7 @@ public: // member functions
 
     USE_LOGGER(DOODAD);
 
-    const quartz::rendering::Model& getModel() const { return m_model; }
+    const std::optional<quartz::rendering::Model>& getModelOptional() const { return mo_model; }
     const math::Transform& getTransform() const { return m_transform; }
     const math::Mat4& getTransformationMatrix() const { return m_transformationMatrix; }
     const std::optional<quartz::physics::RigidBody>& getRigidBodyOptional() const { return mo_rigidBody; }
@@ -97,7 +97,7 @@ private: // static functions
     static math::Transform fixTransform(const math::Transform& transform);
 
 private: // member variables
-    quartz::rendering::Model m_model;
+    std::optional<quartz::rendering::Model> mo_model;
 
     math::Transform m_transform;
     math::Mat4 m_transformationMatrix;

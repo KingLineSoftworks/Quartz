@@ -38,13 +38,14 @@ quartz::scene::Scene::loadDoodads(
     std::vector<quartz::scene::Doodad> doodads;
 
     for (const quartz::scene::Doodad::Parameters& parameters : doodadParameters) {
-        const std::string& filepath = parameters.objectFilepath;
+        const std::optional<std::string>& o_filepath = parameters.o_objectFilepath;
         const math::Transform& transform = parameters.transform;
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = parameters.o_rigidBodyParameters;
         const quartz::scene::Doodad::FixedUpdateCallback fixedUpdateCallback = parameters.fixedUpdateCallback;
         const quartz::scene::Doodad::UpdateCallback updateCallback = parameters.updateCallback;
 
-        LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
+        LOG_TRACE(SCENE, "Loading doodad with information:");
+        LOG_TRACE(SCENE, "  model: {}", o_filepath ? *o_filepath : "none");
         LOG_TRACE(SCENE, "  transform:");
         LOG_TRACE(SCENE, "    position = {}", transform.position.toString());
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
@@ -61,7 +62,7 @@ quartz::scene::Scene::loadDoodads(
             renderingDevice,
             physicsManager,
             o_field,
-            filepath,
+            o_filepath,
             transform,
             o_rigidBodyInformation,
             fixedUpdateCallback,
