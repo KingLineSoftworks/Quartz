@@ -26,7 +26,7 @@ int test_Quaternion_fromAxisAngleRotation() {
 
         const math::Quaternion outputQuat2 = math::Quaternion::fromAxisAngleRotation(outputAxis, outputAngleDegrees);
 
-        CHECK_EQUAL(outputQuat1, outputQuat2);
+        UT_CHECK_EQUAL(outputQuat1, outputQuat2);
     }
 
     {
@@ -43,7 +43,7 @@ int test_Quaternion_fromAxisAngleRotation() {
 
         const math::Quaternion outputQuat2 = math::Quaternion::fromAxisAngleRotation(outputAxis, outputAngleDegrees);
 
-        CHECK_EQUAL(outputQuat1, outputQuat2);
+        UT_CHECK_EQUAL(outputQuat1, outputQuat2);
     }
 
     return result;

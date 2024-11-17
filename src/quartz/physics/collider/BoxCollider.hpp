@@ -37,7 +37,6 @@ public: // member functions
     USE_LOGGER(COLLIDER_BOX);
 
     math::Vec3 getExtents() const;
-    math::Transform getTransform() const;
 
 private: // member variables
     reactphysics3d::BoxShape* mp_colliderShape;

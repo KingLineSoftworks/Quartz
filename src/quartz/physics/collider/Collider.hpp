@@ -4,11 +4,14 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Quaternion.hpp"
+#include "math/transform/Transform.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 #include "quartz/physics/Loggers.hpp"
 #include "quartz/physics/collider/BoxCollider.hpp"
 #include "quartz/physics/collider/SphereCollider.hpp"
+#include "util/logger/Logger.hpp"
 
 namespace quartz {
 namespace physics {
@@ -33,7 +36,13 @@ public: // member functions
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
 
+    USE_LOGGER(COLLIDER);
+
     const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
+    math::Vec3 getLocalPosition() const;
+    math::Quaternion getLocalOrientation() const;
+    math::Vec3 getWorldPosition() const;
+    math::Quaternion getWorldOrientation() const;
 
 private: // static functions
     static reactphysics3d::Collider* createColliderPtr(

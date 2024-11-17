@@ -37,7 +37,7 @@ DECLARE_LOGGER_GROUP(
     return result;               \
     REQUIRE_SEMICOLON
 
-#define CHECK_EQUAL(a, b)       \
+#define UT_CHECK_EQUAL(a, b)    \
     if (a != b) {               \
         std::ostringstream ssA; \
         ssA << a;               \
@@ -48,3 +48,9 @@ DECLARE_LOGGER_GROUP(
     }                           \
     REQUIRE_SEMICOLON
 
+#define UT_REQUIRE(a)                                   \
+    if (!a) {                                           \
+        LOG_CRITICAL(UNIT_TEST, "{} is not valid", #a); \
+        result = 1;                                     \
+    }                                                   \
+    REQUIRE_SEMICOLON

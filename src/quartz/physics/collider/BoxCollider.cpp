@@ -29,13 +29,6 @@ quartz::physics::BoxCollider::operator=(
 
 math::Vec3
 quartz::physics::BoxCollider::getExtents() const {
-    // Get the extents from our shape
-    return {};
+    return mp_colliderShape->getHalfExtents();
 }
 
-math::Transform
-quartz::physics::BoxCollider::getTransform() const {
-    // Get extents from the shape so we can determine our scale
-
-    return {};
-}
