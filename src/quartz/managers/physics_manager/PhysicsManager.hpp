@@ -10,6 +10,10 @@ namespace quartz {
 
 class Application; // We must forward declare the application class here, so we can have its declaration for friending
 
+namespace unit_test {
+    class UnitTestClient;
+}
+
 namespace managers {
     class PhysicsManager;
 }
@@ -26,6 +30,7 @@ public: // classes
 
     private: // friend classes
         friend class quartz::Application;
+        friend class quartz::unit_test::UnitTestClient;
     };
 
 public: // member functions

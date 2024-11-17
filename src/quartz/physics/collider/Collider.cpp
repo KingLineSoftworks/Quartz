@@ -53,8 +53,8 @@ quartz::physics::Collider::Collider(
     mo_sphereCollider(std::move(other.mo_sphereCollider))
 {}
 
-reactphysics3d::CollisionShape*
-quartz::physics::Collider::getCollisionShapePtr() {
+const reactphysics3d::CollisionShape*
+quartz::physics::Collider::getCollisionShapePtr() const {
     if (mo_boxCollider) {
         return mo_boxCollider->mp_colliderShape;
     }

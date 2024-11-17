@@ -10,16 +10,18 @@
 #include "util/macros.hpp"
 
 bool
+math::Quaternion::operator==(const math::Quaternion& other) const {
+    bool xEquals = std::abs(x - other.x) <= std::numeric_limits<float>::epsilon();
+    bool yEquals = std::abs(y - other.y) <= std::numeric_limits<float>::epsilon();
+    bool zEquals = std::abs(z - other.z) <= std::numeric_limits<float>::epsilon();
+    bool wEquals = std::abs(w - other.w) <= std::numeric_limits<float>::epsilon();
+
+    return xEquals && yEquals && zEquals && wEquals;
+}
+
+bool
 math::Quaternion::operator!=(const math::Quaternion& other) const {
-    bool xNEquals = x - other.x > std::numeric_limits<float>::epsilon();
-
-    bool yNEquals = y - other.y > std::numeric_limits<float>::epsilon();
-
-    bool zNEquals = z - other.z > std::numeric_limits<float>::epsilon();
-
-    bool wNEquals = w - other.w > std::numeric_limits<float>::epsilon();
-
-    return xNEquals || yNEquals || zNEquals || wNEquals;
+    return !(*this == other);
 }
 
 float

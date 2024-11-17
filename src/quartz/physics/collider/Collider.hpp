@@ -33,7 +33,7 @@ public: // member functions
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
 
-    reactphysics3d::CollisionShape* getCollisionShapePtr();
+    const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
 
 private: // static functions
     static reactphysics3d::Collider* createColliderPtr(

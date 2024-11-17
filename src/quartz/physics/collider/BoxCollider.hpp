@@ -2,10 +2,10 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
+#include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
-
 #include "quartz/physics/Loggers.hpp"
 
 namespace quartz {
@@ -36,9 +36,13 @@ public: // member functions
 
     USE_LOGGER(COLLIDER_BOX);
 
+    math::Vec3 getExtents() const;
+    math::Transform getTransform() const;
+
 private: // member variables
     reactphysics3d::BoxShape* mp_colliderShape;
 
 private: // friend classes
     friend class quartz::physics::Collider;
 };
+

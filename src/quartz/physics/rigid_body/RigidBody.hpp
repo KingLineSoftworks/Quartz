@@ -67,6 +67,7 @@ public: // member functions
     math::Vec3 getPosition() const { return mp_rigidBody->getTransform().getPosition(); }
     math::Vec3 getLinearVelocity() const { return mp_rigidBody->getLinearVelocity(); }
     math::Quaternion getOrientation() const { return mp_rigidBody->getTransform().getOrientation(); }
+    const std::optional<quartz::physics::Collider>& getColliderOptional() const { return mo_collider; }
 
     void setLinearVelocity(const math::Vec3& linearVelocity);
     void applyLocalForceToCenterOfMass(const math::Vec3& force);

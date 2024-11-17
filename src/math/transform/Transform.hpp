@@ -1,5 +1,7 @@
 #pragma once
 
+#include <reactphysics3d/mathematics/Transform.h>
+
 #include "math/transform/Vec3.hpp"
 #include "math/transform/Quaternion.hpp"
 
@@ -20,6 +22,9 @@ public: // public methods
         const math::Vec3& position_,
         const math::Quaternion& rotation_,
         const math::Vec3& scale_
+    );
+    Transform(
+        const reactphysics3d::Transform& other
     );
     ~Transform() = default;
 

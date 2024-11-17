@@ -1,4 +1,5 @@
 #include "quartz/physics/collider/BoxCollider.hpp"
+#include "math/transform/Transform.hpp"
 
 quartz::physics::BoxCollider::BoxCollider(
     quartz::managers::PhysicsManager& physicsManager,
@@ -26,3 +27,15 @@ quartz::physics::BoxCollider::operator=(
     return *this;
 }
 
+math::Vec3
+quartz::physics::BoxCollider::getExtents() const {
+    // Get the extents from our shape
+    return {};
+}
+
+math::Transform
+quartz::physics::BoxCollider::getTransform() const {
+    // Get extents from the shape so we can determine our scale
+
+    return {};
+}
