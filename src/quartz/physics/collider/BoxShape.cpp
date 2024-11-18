@@ -1,22 +1,22 @@
-#include "quartz/physics/collider/BoxCollider.hpp"
+#include "quartz/physics/collider/BoxShape.hpp"
 #include "math/transform/Transform.hpp"
 
-quartz::physics::BoxCollider::BoxCollider(
+quartz::physics::BoxShape::BoxShape(
     quartz::managers::PhysicsManager& physicsManager,
     const math::Vec3& halfExtents
 ) :
     mp_colliderShape(physicsManager.createBoxShapePtr(halfExtents))
 {}
 
-quartz::physics::BoxCollider::BoxCollider(
-    quartz::physics::BoxCollider&& other
+quartz::physics::BoxShape::BoxShape(
+    quartz::physics::BoxShape&& other
 ) :
     mp_colliderShape(std::move(other.mp_colliderShape))
 {}
 
-quartz::physics::BoxCollider&
-quartz::physics::BoxCollider::operator=(
-    quartz::physics::BoxCollider&& other
+quartz::physics::BoxShape&
+quartz::physics::BoxShape::operator=(
+    quartz::physics::BoxShape&& other
 ) {
     if (this == &other) {
         return *this;
@@ -28,7 +28,7 @@ quartz::physics::BoxCollider::operator=(
 }
 
 math::Vec3
-quartz::physics::BoxCollider::getExtents() const {
+quartz::physics::BoxShape::getExtents() const {
     return mp_colliderShape->getHalfExtents();
 }
 

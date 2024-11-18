@@ -7,11 +7,11 @@ add_library(
     Collider.hpp
     Collider.cpp
 
-    BoxCollider.hpp
-    BoxCollider.cpp
+    BoxShape.hpp
+    BoxShape.cpp
 
-    SphereCollider.hpp
-    SphereCollider.cpp
+    SphereShape.hpp
+    SphereShape.cpp
 )
 
 target_include_directories(

@@ -44,7 +44,7 @@ int test_transforms_DoodadConstruction() {
 
     // box collider parameters
     LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
-    quartz::physics::BoxCollider::Parameters boxColliderParameters(
+    quartz::physics::BoxShape::Parameters boxShapeParameters(
         {1.0f, 1.0f, 1.0f}
     );
 
@@ -54,7 +54,7 @@ int test_transforms_DoodadConstruction() {
         reactphysics3d::BodyType::DYNAMIC,
         true,
         {0.0, 0.0, 0.0},
-        boxColliderParameters
+        boxShapeParameters
     );
 
     // construct a doodad
@@ -104,9 +104,9 @@ int test_transforms_DoodadConstruction() {
     // get the rigidbody's collider's extents and make sure they match the scale
     LOG_INFO(UNIT_TEST, "Checking box shape's extent correctness");
     const math::Vec3 expectedHalfExtents(
-        boxColliderParameters.halfExtents.x * scale.x,
-        boxColliderParameters.halfExtents.y * scale.y,
-        boxColliderParameters.halfExtents.z * scale.z
+        boxShapeParameters.halfExtents.x * scale.x,
+        boxShapeParameters.halfExtents.y * scale.y,
+        boxShapeParameters.halfExtents.z * scale.z
     );
     const math::Vec3 boxShapeHalfExtents = p_boxShape->getHalfExtents();
     UT_CHECK_EQUAL(boxShapeHalfExtents, expectedHalfExtents);

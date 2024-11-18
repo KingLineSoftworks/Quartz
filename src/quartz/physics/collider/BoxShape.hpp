@@ -11,11 +11,11 @@
 namespace quartz {
 namespace physics {
     class Collider;
-    class BoxCollider;
+    class BoxShape;
 }
 }
 
-class quartz::physics::BoxCollider {
+class quartz::physics::BoxShape {
 public: // classes
     struct Parameters {
         Parameters(const math::Vec3& halfExtents_) :
@@ -26,13 +26,13 @@ public: // classes
     };
 
 public: // member functions
-    BoxCollider(
+    BoxShape(
         quartz::managers::PhysicsManager& physicsManager,
         const math::Vec3& halfExtents
     );
-    BoxCollider(const BoxCollider& other) = delete;
-    BoxCollider(BoxCollider&& other);
-    BoxCollider& operator=(BoxCollider&& other);
+    BoxShape(const BoxShape& other) = delete;
+    BoxShape(BoxShape&& other);
+    BoxShape& operator=(BoxShape&& other);
 
     USE_LOGGER(COLLIDER_BOX);
 

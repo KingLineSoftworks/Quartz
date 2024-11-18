@@ -9,8 +9,8 @@
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 #include "quartz/physics/Loggers.hpp"
-#include "quartz/physics/collider/BoxCollider.hpp"
-#include "quartz/physics/collider/SphereCollider.hpp"
+#include "quartz/physics/collider/BoxShape.hpp"
+#include "quartz/physics/collider/SphereShape.hpp"
 #include "util/logger/Logger.hpp"
 
 namespace quartz {
@@ -24,12 +24,12 @@ public: // static factory functions
     static Collider createBoxCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::BoxCollider::Parameters& parameters
+        const quartz::physics::BoxShape::Parameters& parameters
     );
     static Collider createSphereCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::SphereCollider::Parameters& parameters
+        const quartz::physics::SphereShape::Parameters& parameters
     );
     
 public: // member functions
@@ -54,8 +54,8 @@ private: // member functions
     Collider();
 
 private: // member variables
-    std::optional<quartz::physics::BoxCollider> mo_boxCollider;
-    std::optional<quartz::physics::SphereCollider> mo_sphereCollider;
+    std::optional<quartz::physics::BoxShape> mo_boxShape;
+    std::optional<quartz::physics::SphereShape> mo_sphereCollider;
 
     reactphysics3d::Collider* mp_collider;
 };

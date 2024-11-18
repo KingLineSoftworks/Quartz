@@ -82,7 +82,7 @@ quartz::physics::Field::createRigidBody(
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
     const math::Vec3& angularLockAxisFactor,
-    const quartz::physics::BoxCollider::Parameters& boxColliderParameters
+    const quartz::physics::BoxShape::Parameters& boxShapeParameters
 ) {
     return {
         physicsManager,
@@ -93,7 +93,7 @@ quartz::physics::Field::createRigidBody(
             enableGravity,
             angularLockAxisFactor
         ),
-        boxColliderParameters
+        boxShapeParameters
     };
 }
 
@@ -104,7 +104,7 @@ quartz::physics::Field::createRigidBody(
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
     const math::Vec3& angularLockAxisFactor,
-    const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
+    const quartz::physics::SphereShape::Parameters& sphereColliderParameters
 ) {
     return {
         physicsManager,

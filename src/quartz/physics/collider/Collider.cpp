@@ -9,13 +9,13 @@ quartz::physics::Collider
 quartz::physics::Collider::createBoxCollider(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::BoxCollider::Parameters& parameters
+    const quartz::physics::BoxShape::Parameters& parameters
 ) {
     quartz::physics::Collider collider;
 
-    collider.mo_boxCollider = quartz::physics::BoxCollider(physicsManager, parameters.halfExtents);
+    collider.mo_boxShape = quartz::physics::BoxShape(physicsManager, parameters.halfExtents);
 
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_boxCollider->mp_colliderShape);
+    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_boxShape->mp_colliderShape);
 
     return collider;
 }
@@ -24,11 +24,11 @@ quartz::physics::Collider
 quartz::physics::Collider::createSphereCollider(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::SphereCollider::Parameters& parameters
+    const quartz::physics::SphereShape::Parameters& parameters
 ) {
     quartz::physics::Collider collider;
 
-    collider.mo_sphereCollider = quartz::physics::SphereCollider(physicsManager, parameters.radius);
+    collider.mo_sphereCollider = quartz::physics::SphereShape(physicsManager, parameters.radius);
 
     collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_sphereCollider->mp_colliderShape);
 
@@ -47,21 +47,21 @@ quartz::physics::Collider::createColliderPtr(
 }
 
 quartz::physics::Collider::Collider() :
-    mo_boxCollider(),
+    mo_boxShape(),
     mo_sphereCollider()
 {}
 
 quartz::physics::Collider::Collider(
     quartz::physics::Collider&& other
 ) :
-    mo_boxCollider(std::move(other.mo_boxCollider)),
+    mo_boxShape(std::move(other.mo_boxShape)),
     mo_sphereCollider(std::move(other.mo_sphereCollider))
 {}
 
 const reactphysics3d::CollisionShape*
 quartz::physics::Collider::getCollisionShapePtr() const {
-    if (mo_boxCollider) {
-        return mo_boxCollider->mp_colliderShape;
+    if (mo_boxShape) {
+        return mo_boxShape->mp_colliderShape;
     }
     if (mo_sphereCollider) {
         return mo_sphereCollider->mp_colliderShape;
