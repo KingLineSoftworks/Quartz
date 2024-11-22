@@ -17,42 +17,17 @@ int test_collider_from_constructor_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
-    // create the physics field so we can give it to the doodad's constructor
-    LOG_TRACE(UNIT_TEST, "Creating physics manager");
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
-    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
-    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
+    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(reactphysics3d::PhysicsWorld::WorldSettings());
     UT_REQUIRE(p_physicsWorld);
 
-    // create the inputTransform that we are using for the doodad
-    LOG_TRACE(UNIT_TEST, "Creating transform");
-    const math::Vec3 position(42.0f, 69.0f, -100.0f);
-    const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
-    const math::Vec3 scale(1.0f, 3.0f, 5.0f);
-    const math::Transform inputTransform(position, rotation, scale);
-
-    // create reactphysics3d::RigidBody*
-    LOG_TRACE(UNIT_TEST, "Creating rigid body pointer");
-    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(
-        p_physicsWorld,
-        inputTransform,
-        reactphysics3d::BodyType::DYNAMIC,
-        true,
-        {0, 0, 0}
-    );
+    const math::Transform inputTransform({0, 0, 0}, {}, {1, 1, 1});
+    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(p_physicsWorld, inputTransform, reactphysics3d::BodyType::DYNAMIC, true, {0, 0, 0});
     UT_REQUIRE(p_rigidBody);
 
-    // box collider parameters
-    LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
-    const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
-
-    // creating box shape pointer
-    LOG_TRACE(UNIT_TEST, "Creating box shape pointer");
-    reactphysics3d::BoxShape* p_boxShape = physicsManager.createBoxShapePtr(boxShapeParameters.halfExtents);
+    reactphysics3d::BoxShape* p_boxShape = physicsManager.createBoxShapePtr({1.0f, 1.0f, 1.0f});
     UT_REQUIRE(p_boxShape);
 
-    // creating collider pointer
-    LOG_TRACE(UNIT_TEST, "Creating collider pointer");
     reactphysics3d::Collider* p_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, p_boxShape);
     UT_REQUIRE(p_collider);
 
@@ -78,45 +53,17 @@ int test_collider_from_boxshape_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
-    // create the physics field so we can give it to the doodad's constructor
-    LOG_TRACE(UNIT_TEST, "Creating physics manager");
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
-    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
-    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
+    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(reactphysics3d::PhysicsWorld::WorldSettings());
     UT_REQUIRE(p_physicsWorld);
 
-    // create the inputTransform that we are using for the doodad
-    LOG_TRACE(UNIT_TEST, "Creating transform");
-    const math::Vec3 position(42.0f, 69.0f, -100.0f);
-    const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
-    const math::Vec3 scale(1.0f, 3.0f, 5.0f);
-    const math::Transform inputTransform(position, rotation, scale);
-
-    // create reactphysics3d::RigidBody*
-    LOG_TRACE(UNIT_TEST, "Creating rigid body pointer");
-    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(
-        p_physicsWorld,
-        inputTransform,
-        reactphysics3d::BodyType::DYNAMIC,
-        true,
-        {0, 0, 0}
-    );
+    const math::Transform inputTransform({0, 0, 0}, {}, {1, 1, 1});
+    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(p_physicsWorld, inputTransform, reactphysics3d::BodyType::DYNAMIC, true, {0, 0, 0});
     UT_REQUIRE(p_rigidBody);
 
-    // box collider parameters
-    LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
     const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
+    const quartz::physics::Collider collider = quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, boxShapeParameters);
 
-    // create the box collider
-    LOG_TRACE(UNIT_TEST, "Creating collider");
-    const quartz::physics::Collider collider = quartz::physics::Collider::createBoxCollider(
-        physicsManager,
-        p_rigidBody,
-        boxShapeParameters
-    );
-
-    // get the collider pointer
-    LOG_TRACE(UNIT_TEST, "Getting collider pointer");
     const reactphysics3d::Collider* p_collider = collider.getColliderPtr();
     UT_REQUIRE(p_collider);
 
@@ -143,46 +90,18 @@ int test_collider_optional_from_boxshape_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
-    // create the physics field so we can give it to the doodad's constructor
-    LOG_TRACE(UNIT_TEST, "Creating physics manager");
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
-    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
-    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
+    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(reactphysics3d::PhysicsWorld::WorldSettings());
     UT_REQUIRE(p_physicsWorld);
 
-    // create the inputTransform that we are using for the doodad
-    LOG_TRACE(UNIT_TEST, "Creating transform");
-    const math::Vec3 position(42.0f, 69.0f, -100.0f);
-    const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
-    const math::Vec3 scale(1.0f, 3.0f, 5.0f);
-    const math::Transform inputTransform(position, rotation, scale);
-
-    // create reactphysics3d::RigidBody*
-    LOG_TRACE(UNIT_TEST, "Creating rigid body pointer");
-    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(
-        p_physicsWorld,
-        inputTransform,
-        reactphysics3d::BodyType::DYNAMIC,
-        true,
-        {0, 0, 0}
-    );
+    const math::Transform inputTransform({0, 0, 0}, {}, {1, 1, 1});
+    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(p_physicsWorld, inputTransform, reactphysics3d::BodyType::DYNAMIC, true, {0, 0, 0});
     UT_REQUIRE(p_rigidBody);
 
-    // box collider parameters
-    LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
     const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
-
-    // create the box collider
-    LOG_TRACE(UNIT_TEST, "Creating collider");
-    const std::optional<quartz::physics::Collider> o_collider = quartz::physics::Collider::createBoxCollider(
-        physicsManager,
-        p_rigidBody,
-        boxShapeParameters
-    );
+    const std::optional<quartz::physics::Collider> o_collider = quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, boxShapeParameters);
     UT_REQUIRE(o_collider);
 
-    // get the collider pointer
-    LOG_TRACE(UNIT_TEST, "Getting collider pointer");
     const reactphysics3d::Collider* p_collider = o_collider->getColliderPtr();
     UT_REQUIRE(p_collider);
 
@@ -208,46 +127,20 @@ int test_rigidbody_from_constructor_collider_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
-    // create the physics field so we can give it to the doodad's constructor
-    LOG_TRACE(UNIT_TEST, "Creating physics manager");
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
-    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
-    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
+    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(reactphysics3d::PhysicsWorld::WorldSettings());
     UT_REQUIRE(p_physicsWorld);
 
-    // create the inputTransform that we are using for the doodad
-    LOG_TRACE(UNIT_TEST, "Creating transform");
-    const math::Vec3 position(42.0f, 69.0f, -100.0f);
-    const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
-    const math::Vec3 scale(1.0f, 3.0f, 5.0f);
-    const math::Transform inputTransform(position, rotation, scale);
-
-    // create reactphysics3d::RigidBody*
-    LOG_TRACE(UNIT_TEST, "Creating rigid body pointer");
-    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(
-        p_physicsWorld,
-        inputTransform,
-        reactphysics3d::BodyType::DYNAMIC,
-        true,
-        {0, 0, 0}
-    );
+    const math::Transform inputTransform({0, 0, 0}, {}, {1, 1, 1});
+    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(p_physicsWorld, inputTransform, reactphysics3d::BodyType::DYNAMIC, true, {0, 0, 0});
     UT_REQUIRE(p_rigidBody);
 
-    // box collider parameters
-    LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
     const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
-    
-    // create quartz rigidbody
-    LOG_TRACE(UNIT_TEST, "Creating rigid body");
     const quartz::physics::RigidBody rigidBody(physicsManager, p_rigidBody, boxShapeParameters);
     
-    // get the collider
-    LOG_TRACE(UNIT_TEST, "Getting collider");
     const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
     UT_REQUIRE(o_collider);
 
-    // get the collider pointer
-    LOG_TRACE(UNIT_TEST, "Getting collider pointer");
     const reactphysics3d::Collider* p_collider = o_collider->getColliderPtr();
     UT_REQUIRE(p_collider);
 
