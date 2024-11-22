@@ -9,6 +9,10 @@
 #include "unit_test/Util.hpp"
 #include "util/logger/Logger.hpp"
 
+/**
+ * @brief We want to validate that when we create a reactphysics3d::Collider* manually,
+ *    that it contains a valid mBody pointing to our rigidbody
+ */
 int test_collider_from_constructor_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
@@ -65,6 +69,11 @@ int test_collider_from_constructor_mbody_pointer() {
     return result;
 }
 
+/**
+ * @brief We want to validate that when we create a quartz::physics::Collider from the
+ *    quartz::physics::Collider::createBoxCollider factory function, that the Collider's
+ *    reactphysics3d::Collider* has a valid mBody
+ */
 int test_collider_from_boxshape_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
@@ -124,6 +133,77 @@ int test_collider_from_boxshape_mbody_pointer() {
     return result;
 }
 
+/**
+ * @brief We want to validate that when we create a quartz::physics::Collider from the
+ *    quartz::physics::Collider::createBoxCollider factory function - stored inside
+ *    of a std::optional like the quartz::physics::RigidBody, that the Collider's
+ *    reactphysics3d::Collider* has a valid mBody
+ */
+int test_collider_optional_from_boxshape_mbody_pointer() {
+    LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
+    int result = 0;
+
+    // create the physics field so we can give it to the doodad's constructor
+    LOG_TRACE(UNIT_TEST, "Creating physics manager");
+    quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
+    reactphysics3d::PhysicsWorld::WorldSettings physicsWorldSettings;
+    reactphysics3d::PhysicsWorld* p_physicsWorld = physicsManager.createPhysicsWorldPtr(physicsWorldSettings);
+    UT_REQUIRE(p_physicsWorld);
+
+    // create the inputTransform that we are using for the doodad
+    LOG_TRACE(UNIT_TEST, "Creating transform");
+    const math::Vec3 position(42.0f, 69.0f, -100.0f);
+    const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
+    const math::Vec3 scale(1.0f, 3.0f, 5.0f);
+    const math::Transform inputTransform(position, rotation, scale);
+
+    // create reactphysics3d::RigidBody*
+    LOG_TRACE(UNIT_TEST, "Creating rigid body pointer");
+    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(
+        p_physicsWorld,
+        inputTransform,
+        reactphysics3d::BodyType::DYNAMIC,
+        true,
+        {0, 0, 0}
+    );
+    UT_REQUIRE(p_rigidBody);
+
+    // box collider parameters
+    LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
+    const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
+
+    // create the box collider
+    LOG_TRACE(UNIT_TEST, "Creating collider");
+    const std::optional<quartz::physics::Collider> o_collider = quartz::physics::Collider::createBoxCollider(
+        physicsManager,
+        p_rigidBody,
+        boxShapeParameters
+    );
+    UT_REQUIRE(o_collider);
+
+    // get the collider pointer
+    LOG_TRACE(UNIT_TEST, "Getting collider pointer");
+    const reactphysics3d::Collider* p_collider = o_collider->getColliderPtr();
+    UT_REQUIRE(p_collider);
+
+    // ------------------------------------------------------------
+    // The important tests
+    // ------------------------------------------------------------
+    
+    // check that the collider has a body
+    UT_REQUIRE(p_collider->getBody());
+
+    // check that the collider's body is the same as our rigidbody
+    UT_CHECK_EQUAL(p_collider->getBody(), p_rigidBody);
+
+    return result;
+}
+
+/**
+ * @brief We want to validate that when we create a quartz::physics::Collider from 
+ *    within the quartz::physics::RigidBody constructor, that the Collider's
+ *    reactphysics3d::Collider* has a valid mBody
+ */
 int test_rigidbody_from_constructor_collider_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
@@ -184,6 +264,12 @@ int test_rigidbody_from_constructor_collider_mbody_pointer() {
     return result;
 }
 
+/**
+ * @brief We want to validate that when we create a quartz::physics::Collider from 
+ *    within the quartz::physics::RigidBody constructor invoked from the
+ *    quartz::physics::Field::createRigidBody function that the RigidBody's Collider's
+ *    reactphysics3d::Collider* has a valid mBody
+ */
 int test_rigidody_from_field_collider_mbody_pointer() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
@@ -238,6 +324,7 @@ int main() {
 
     return test_collider_from_constructor_mbody_pointer() ||
         test_collider_from_boxshape_mbody_pointer() ||
+        test_collider_optional_from_boxshape_mbody_pointer() ||
         test_rigidbody_from_constructor_collider_mbody_pointer() ||
         test_rigidody_from_field_collider_mbody_pointer();
 }
