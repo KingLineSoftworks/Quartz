@@ -54,8 +54,8 @@ int main() {
 
         // physics
         {"COLLIDER", util::Logger::Level::info},
-        {"COLLIDER_BOX", util::Logger::Level::info},
-        {"COLLIDER_SPHERE", util::Logger::Level::info},
+        {"SHAPE_BOX", util::Logger::Level::info},
+        {"SHAPE_SPHERE", util::Logger::Level::info},
         {"FIELD", util::Logger::Level::info},
         {"RIGIDBODY", util::Logger::Level::info},
 

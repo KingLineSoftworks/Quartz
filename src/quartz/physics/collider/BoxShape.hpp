@@ -34,7 +34,7 @@ public: // member functions
     BoxShape(BoxShape&& other);
     BoxShape& operator=(BoxShape&& other);
 
-    USE_LOGGER(COLLIDER_BOX);
+    USE_LOGGER(SHAPE_BOX);
 
     math::Vec3 getExtents() const;
 

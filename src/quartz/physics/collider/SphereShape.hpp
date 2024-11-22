@@ -34,7 +34,7 @@ public: // member functions
     SphereShape(SphereShape&& other);
     SphereShape& operator=(SphereShape&& other);
 
-    USE_LOGGER(COLLIDER_SPHERE);
+    USE_LOGGER(SHAPE_SPHERE);
 
 private: // member variables
     reactphysics3d::SphereShape* mp_colliderShape;

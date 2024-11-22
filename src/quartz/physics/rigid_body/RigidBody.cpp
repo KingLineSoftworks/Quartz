@@ -54,7 +54,8 @@ quartz::physics::RigidBody::createCollider(
 
     if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters represent box collider parameters. Creating box collider");
-        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, std::get<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters));
+        quartz::physics::Collider boxCollider = quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, std::get<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters));
+        return boxCollider;
     }
 
     if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(parameters.v_colliderParameters)) {
@@ -89,13 +90,13 @@ quartz::physics::RigidBody::RigidBody(
 quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::SphereShape::Parameters& sphereColliderParameters
+    const quartz::physics::SphereShape::Parameters& sphereShapeParameters
 ) :
     mp_rigidBody(p_rigidBody),
     mo_collider(quartz::physics::Collider::createSphereCollider(
         physicsManager, 
         mp_rigidBody, 
-        sphereColliderParameters.radius
+        sphereShapeParameters.radius
     ))
 {}
 

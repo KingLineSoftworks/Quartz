@@ -95,8 +95,10 @@ int test_transforms_DoodadConstruction() {
     const math::Vec3 expectedLocalPosition(0, 0, 0);
     const math::Quaternion expectedLocalOrientation(0, 0, 0, 1);
     LOG_TRACE(UNIT_TEST, "1");
+    UT_REQUIRE(o_collider);
     UT_CHECK_EQUAL(o_collider->getLocalPosition(), expectedLocalPosition);
     LOG_TRACE(UNIT_TEST, "2");
+    UT_REQUIRE(o_collider);
     UT_CHECK_EQUAL(o_collider->getWorldOrientation(), expectedLocalOrientation);
     
     // get the rigidbody's collider's world transform and compare it to the inputTransform

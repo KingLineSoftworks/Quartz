@@ -41,13 +41,6 @@ endfunction()
 
 set(MATH_UNIT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/math")
 
-# add_executable(test_math_transform_quaternion "${MATH_UNIT_TEST_DIR}/test_math_transform_quaternion.cpp")
-# target_compile_definitions(test_math_transform_quaternion PRIVATE ${QUARTZ_COMPILE_DEFINITIONS})
-# target_compile_options(test_math_transform_quaternion PRIVATE ${QUARTZ_CMAKE_CXX_FLAGS})
-# target_include_directories(test_math_transform_quaternion PRIVATE ${QUARTZ_UNIT_TEST_INCLUDE_DIRS} )
-# target_link_libraries(test_math_transform_quaternion PRIVATE MATH_Transform)
-# add_test(NAME test_math_transform_quaternion COMMAND test_math_transform_quaternion)
-
 create_unit_test(
     test_math_transform_quaternion
     "${MATH_UNIT_TEST_DIR}/test_math_transform_quaternion.cpp"
@@ -59,6 +52,23 @@ create_unit_test(
 #====================================================================
 
 SET(QUARTZ_UNIT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/quartz")
+
+#-------------------------------------------------------------------
+# Quartz Physics unit tests
+#-------------------------------------------------------------------
+
+set(QUARTZ_PHYSICS_UNIT_TEST_DIR "${QUARTZ_UNIT_TEST_DIR}/physics")
+
+list(APPEND test_rigidbody_collider_pointers_link_libraries
+    QUARTZ_PHYSICS_Collider
+    QUARTZ_PHYSICS_Field
+    QUARTZ_PHYSICS_RigidBody
+)
+create_unit_test(
+    test_rigidbody_collider_pointers
+    "${QUARTZ_PHYSICS_UNIT_TEST_DIR}/rigid_body/test_rigidbody_collider_pointers.cpp"
+    "${test_rigidbody_collider_pointers_link_libraries}"
+)
 
 #-------------------------------------------------------------------
 # Quartz Scene unit tests

@@ -51,7 +51,7 @@ public: // member functions
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::SphereShape::Parameters& sphereColliderParameters
+        const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,

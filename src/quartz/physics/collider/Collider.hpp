@@ -24,12 +24,12 @@ public: // static factory functions
     static Collider createBoxCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::BoxShape::Parameters& parameters
+        const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     static Collider createSphereCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::SphereShape::Parameters& parameters
+        const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     
 public: // member functions
@@ -44,7 +44,7 @@ public: // member functions
     math::Vec3 getWorldPosition() const;
     math::Quaternion getWorldOrientation() const;
 
-private: // static functions
+public: // static functions
     static reactphysics3d::Collider* createColliderPtr(
         reactphysics3d::RigidBody* p_rigidBody,
         reactphysics3d::CollisionShape* p_collisionShape
@@ -55,7 +55,7 @@ private: // member functions
 
 private: // member variables
     std::optional<quartz::physics::BoxShape> mo_boxShape;
-    std::optional<quartz::physics::SphereShape> mo_sphereCollider;
+    std::optional<quartz::physics::SphereShape> mo_sphereShape;
 
     reactphysics3d::Collider* mp_collider;
 };
