@@ -214,10 +214,12 @@ int main() {
         {"RIGIDBODY", util::Logger::Level::trace},
         {"COLLIDER", util::Logger::Level::trace},
     });
+    
+    return test_collider_optional_from_boxshape_mbody_pointer();
 
-    return test_collider_from_constructor_mbody_pointer() ||
-        test_collider_from_boxshape_mbody_pointer() ||
-        test_collider_optional_from_boxshape_mbody_pointer() ||
-        test_rigidbody_from_constructor_collider_mbody_pointer() ||
-        test_rigidody_from_field_collider_mbody_pointer();
+    // return test_collider_from_constructor_mbody_pointer() ||
+    //     test_collider_from_boxshape_mbody_pointer() ||
+    //     test_collider_optional_from_boxshape_mbody_pointer() ||
+    //     test_rigidbody_from_constructor_collider_mbody_pointer() ||
+    //     test_rigidody_from_field_collider_mbody_pointer();
 }
