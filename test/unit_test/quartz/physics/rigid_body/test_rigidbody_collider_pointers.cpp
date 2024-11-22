@@ -166,6 +166,21 @@ int test_rigidbody_from_constructor_collider_mbody_pointer() {
     const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
     UT_REQUIRE(o_collider);
 
+    // get the collider pointer
+    LOG_TRACE(UNIT_TEST, "Getting collider pointer");
+    const reactphysics3d::Collider* p_collider = o_collider->getColliderPtr();
+    UT_REQUIRE(p_collider);
+
+    // ------------------------------------------------------------
+    // The important tests
+    // ------------------------------------------------------------
+    
+    // check that the collider has a body
+    UT_REQUIRE(p_collider->getBody());
+
+    // check that the collider's body is the same as our rigidbody
+    UT_CHECK_EQUAL(p_collider->getBody(), p_rigidBody);
+
     return result;
 }
 
