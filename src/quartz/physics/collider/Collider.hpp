@@ -3,15 +3,16 @@
 #include <optional>
 
 #include <reactphysics3d/reactphysics3d.h>
+#include "reactphysics3d/collision/Collider.h"
 
 #include "math/transform/Quaternion.hpp"
-#include "math/transform/Transform.hpp"
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
+#include "util/logger/Logger.hpp"
+
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/Loggers.hpp"
 #include "quartz/physics/collider/BoxShape.hpp"
 #include "quartz/physics/collider/SphereShape.hpp"
-#include "util/logger/Logger.hpp"
 
 namespace quartz {
 namespace physics {
@@ -39,6 +40,7 @@ public: // member functions
     USE_LOGGER(COLLIDER);
 
     const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
+    const reactphysics3d::Collider* getColliderPtr() const { return mp_collider; }
     math::Vec3 getLocalPosition() const;
     math::Quaternion getLocalOrientation() const;
     math::Vec3 getWorldPosition() const;

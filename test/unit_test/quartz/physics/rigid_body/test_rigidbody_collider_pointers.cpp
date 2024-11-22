@@ -52,6 +52,10 @@ int test_collider_from_constructor_mbody_pointer() {
     reactphysics3d::Collider* p_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, p_boxShape);
     UT_REQUIRE(p_collider);
 
+    // ------------------------------------------------------------
+    // The important tests
+    // ------------------------------------------------------------
+
     // check that the collider has a body
     UT_REQUIRE(p_collider->getBody());
 
@@ -96,11 +100,26 @@ int test_collider_from_boxshape_mbody_pointer() {
 
     // create the box collider
     LOG_TRACE(UNIT_TEST, "Creating collider");
-    UNUSED const quartz::physics::Collider collider = quartz::physics::Collider::createBoxCollider(
+    const quartz::physics::Collider collider = quartz::physics::Collider::createBoxCollider(
         physicsManager,
         p_rigidBody,
         boxShapeParameters
     );
+
+    // get the collider pointer
+    LOG_TRACE(UNIT_TEST, "Getting collider pointer");
+    const reactphysics3d::Collider* p_collider = collider.getColliderPtr();
+    UT_REQUIRE(p_collider);
+
+    // ------------------------------------------------------------
+    // The important tests
+    // ------------------------------------------------------------
+    
+    // check that the collider has a body
+    UT_REQUIRE(p_collider->getBody());
+
+    // check that the collider's body is the same as our rigidbody
+    UT_CHECK_EQUAL(p_collider->getBody(), p_rigidBody);
 
     return result;
 }
