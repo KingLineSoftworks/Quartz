@@ -197,6 +197,16 @@ int test_rigidody_from_field_collider_mbody_pointer() {
     const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
     UT_REQUIRE(o_collider);
 
+    const reactphysics3d::Collider* p_collider = o_collider->getColliderPtr();
+    UT_REQUIRE(p_collider);
+
+    // ------------------------------------------------------------
+    // The important tests
+    // ------------------------------------------------------------
+    
+    // check that the collider has a body
+    UT_REQUIRE(p_collider->getBody());
+
     return result;
 }
 
