@@ -54,8 +54,7 @@ quartz::physics::RigidBody::createCollider(
 
     if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters represent box collider parameters. Creating box collider");
-        quartz::physics::Collider boxCollider = quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, std::get<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters));
-        return boxCollider;
+        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, std::get<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters));
     }
 
     if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(parameters.v_colliderParameters)) {

@@ -99,8 +99,7 @@ int test_collider_optional_from_boxshape_mbody_pointer() {
     UT_REQUIRE(p_rigidBody);
 
     const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
-    const std::optional<quartz::physics::Collider> o_collider = quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, boxShapeParameters);
-    UT_REQUIRE(o_collider);
+    const std::optional<quartz::physics::Collider> o_collider = quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, boxShapeParameters);    UT_REQUIRE(o_collider);
 
     const reactphysics3d::Collider* p_collider = o_collider->getColliderPtr();
     UT_REQUIRE(p_collider);
@@ -215,11 +214,9 @@ int main() {
         {"COLLIDER", util::Logger::Level::trace},
     });
     
-    return test_collider_optional_from_boxshape_mbody_pointer();
-
-    // return test_collider_from_constructor_mbody_pointer() ||
-    //     test_collider_from_boxshape_mbody_pointer() ||
-    //     test_collider_optional_from_boxshape_mbody_pointer() ||
-    //     test_rigidbody_from_constructor_collider_mbody_pointer() ||
-    //     test_rigidody_from_field_collider_mbody_pointer();
+    return test_collider_from_constructor_mbody_pointer() ||
+        test_collider_from_boxshape_mbody_pointer() ||
+        test_collider_optional_from_boxshape_mbody_pointer() ||
+        test_rigidbody_from_constructor_collider_mbody_pointer() ||
+        test_rigidody_from_field_collider_mbody_pointer();
 }

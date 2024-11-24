@@ -37,6 +37,8 @@ public: // member functions
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
 
+    Collider& operator=(Collider&& other);
+
     USE_LOGGER(COLLIDER);
 
     const reactphysics3d::CollisionShape* getCollisionShapePtr() const;

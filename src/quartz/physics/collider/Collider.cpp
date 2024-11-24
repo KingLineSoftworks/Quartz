@@ -54,15 +54,35 @@ quartz::physics::Collider::createColliderPtr(
 
 quartz::physics::Collider::Collider() :
     mo_boxShape(),
-    mo_sphereShape()
+    mo_sphereShape(),
+    mp_collider()
 {}
 
 quartz::physics::Collider::Collider(
     quartz::physics::Collider&& other
 ) :
     mo_boxShape(std::move(other.mo_boxShape)),
-    mo_sphereShape(std::move(other.mo_sphereShape))
+    mo_sphereShape(std::move(other.mo_sphereShape)),
+    mp_collider(std::move(other.mp_collider))
 {}
+
+quartz::physics::Collider&
+quartz::physics::Collider::operator=(
+    quartz::physics::Collider&& other
+) {
+    LOG_FUNCTION_CALL_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    mo_boxShape = std::move(other.mo_boxShape);
+    mo_sphereShape = std::move(other.mo_sphereShape);
+
+    mp_collider = std::move(other.mp_collider);
+
+    return *this;
+}
 
 const reactphysics3d::CollisionShape*
 quartz::physics::Collider::getCollisionShapePtr() const {
@@ -78,38 +98,11 @@ quartz::physics::Collider::getCollisionShapePtr() const {
 
 math::Vec3
 quartz::physics::Collider::getLocalPosition() const {
-    LOG_INFOthis("mp_collider: {}", reinterpret_cast<void*>(mp_collider));
-    if (!mp_collider) {
-        LOG_ERRORthis("mp_collider is not good");
-    } else {
-        LOG_INFOthis("mp_collider is valid");
-    }
-
-    reactphysics3d::Body* p_body = mp_collider->getBody();
-    LOG_INFOthis("p_body: {}", reinterpret_cast<void*>(p_body));
-    if (!p_body) {
-        LOG_ERRORthis("p_body is not good");
-    } else {
-        LOG_INFOthis("p_body is valid");
-    }
-
-    const reactphysics3d::Transform rp3dTransform = mp_collider->getLocalToBodyTransform();
-    LOG_INFOthis("Got rp3d transform from mp_collider");
-    const reactphysics3d::Vector3 rp3dPosition = rp3dTransform.getPosition();
-    LOG_INFOthis("Got position from rp3d transform");
-    const math::Vec3 position = rp3dPosition;
-    LOG_INFOthis("Converted position to math::Vec3 from rp3d transform");
-
-    return position;
+    return mp_collider->getLocalToBodyTransform().getPosition();
 }
 
 math::Quaternion
 quartz::physics::Collider::getLocalOrientation() const {
-    if (!mp_collider) {
-        LOG_ERRORthis("mp_collider is not good");
-    } else {
-        LOG_INFOthis("mp_collider is valid");
-    }
     return mp_collider->getLocalToBodyTransform().getOrientation();
 }
 
