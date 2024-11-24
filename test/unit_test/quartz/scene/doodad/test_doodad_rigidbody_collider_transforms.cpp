@@ -18,46 +18,20 @@ int test_transforms_DoodadConstruction() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
-    // create the rendering instance and device so we can give these to the doodad's constructor
-    LOG_TRACE(UNIT_TEST, "Creating rendering instance");
     quartz::rendering::Instance renderingInstance("testing", 0, 0, 0, false);
-    LOG_TRACE(UNIT_TEST, "Creating rendering device");
     quartz::rendering::Device renderingDevice(renderingInstance);
 
-    // create the physics field so we can give it to the doodad's constructor
-    LOG_TRACE(UNIT_TEST, "Creating physics manager");
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
-    LOG_TRACE(UNIT_TEST, "Creating physics field");
     std::optional<quartz::physics::Field> o_field = quartz::physics::Field(physicsManager, math::Vec3(0.0, -9.81, 0.0));
     UT_REQUIRE(o_field);
 
-    // create the inputTransform that we are using for the doodad
-    LOG_TRACE(UNIT_TEST, "Creating transform");
-    const math::Vec3 position(42.0f, 69.0f, -100.0f);
-    const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
+    const math::Vec3 worldPosition(42.0f, 69.0f, -100.0f);
+    const math::Quaternion worldOrientation = math::Quaternion::fromAxisAngleRotation({1.0f, 0.0f, 0.0f}, 45.0f);
     const math::Vec3 scale(1.0f, 3.0f, 5.0f);
-    const math::Transform inputTransform(
-        position,
-        rotation,
-        scale
-    );
+    const math::Transform inputTransform(worldPosition, worldOrientation, scale);
 
-    // box collider parameters
-    LOG_TRACE(UNIT_TEST, "Creating box collider parameters");
-    quartz::physics::BoxShape::Parameters boxShapeParameters(
-        {1.0f, 1.0f, 1.0f}
-    );
-
-    // rigid body parameters
-    LOG_TRACE(UNIT_TEST, "Creating rigidbody parameters");
-    quartz::physics::RigidBody::Parameters rigidBodyParameters(
-        reactphysics3d::BodyType::DYNAMIC,
-        true,
-        {0.0, 0.0, 0.0},
-        boxShapeParameters
-    );
-
-    // construct a doodad
+    quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
+    quartz::physics::RigidBody::Parameters rigidBodyParameters(reactphysics3d::BodyType::DYNAMIC, true, {0.0, 0.0, 0.0}, boxShapeParameters);
     LOG_TRACE(UNIT_TEST, "Creating doodad");
     quartz::scene::Doodad doodad(
         renderingDevice,
@@ -70,41 +44,40 @@ int test_transforms_DoodadConstruction() {
         {}
     );
 
-    // ensure the doodad's transform is correct
-    LOG_INFO(UNIT_TEST, "Checking doodad transform correctness");
+    const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
+    UT_REQUIRE(o_rigidBody);
+    const std::optional<quartz::physics::Collider>& o_collider = o_rigidBody->getColliderOptional();
+    UT_REQUIRE(o_collider);
+    const reactphysics3d::CollisionShape* p_collisionShape = o_collider->getCollisionShapePtr();
+    UT_REQUIRE(p_collisionShape);
+    const reactphysics3d::BoxShape* p_boxShape = reinterpret_cast<const reactphysics3d::BoxShape*>(p_collisionShape);
+    UT_REQUIRE(p_boxShape);
+
+
+    // ------------------------------------------------------------
+    // Check the transforms
+    // ------------------------------------------------------------
+
     const math::Transform& doodadTransform = doodad.getTransform();
     UT_CHECK_EQUAL(doodadTransform.position, inputTransform.position);
     UT_CHECK_EQUAL(doodadTransform.rotation, inputTransform.rotation);
     UT_CHECK_EQUAL(doodadTransform.scale, inputTransform.scale);
 
-    // get the rigidbody's collider
-    LOG_TRACE(UNIT_TEST, "Getting collider from doodad's rigidbody");
-    const std::optional<quartz::physics::Collider>& o_collider = doodad.getRigidBodyOptional()->getColliderOptional();
-    UT_REQUIRE(o_collider);
-    LOG_TRACE(UNIT_TEST, "Getting collision shape pointer from doodad's rigidbody");
-    const reactphysics3d::CollisionShape* p_collisionShape = o_collider->getCollisionShapePtr();
-    UT_REQUIRE(p_collisionShape);
-    LOG_TRACE(UNIT_TEST, "Getting box shape pointer from doodad's rigidbody");
-    const reactphysics3d::BoxShape* p_boxShape = reinterpret_cast<const reactphysics3d::BoxShape*>(p_collisionShape);
-    UT_REQUIRE(p_boxShape);
-
     // get the rigidbody's transform and compare it to the inputTransform
+    UT_CHECK_EQUAL(o_rigidBody->getPosition(), inputTransform.position);
+    UT_CHECK_EQUAL(o_rigidBody->getOrientation(), inputTransform.rotation);
     
     // get the rigidbody's collider's local transform and compare it to the inputTransform
-    LOG_TRACE(UNIT_TEST, "Checking collider's local position and orientation");
     const math::Vec3 expectedLocalPosition(0, 0, 0);
     const math::Quaternion expectedLocalOrientation(0, 0, 0, 1);
-    LOG_TRACE(UNIT_TEST, "1");
-    UT_REQUIRE(o_collider);
     UT_CHECK_EQUAL(o_collider->getLocalPosition(), expectedLocalPosition);
-    LOG_TRACE(UNIT_TEST, "2");
-    UT_REQUIRE(o_collider);
-    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), expectedLocalOrientation);
+    UT_CHECK_EQUAL(o_collider->getLocalOrientation(), expectedLocalOrientation);
     
     // get the rigidbody's collider's world transform and compare it to the inputTransform
+    UT_CHECK_EQUAL(o_collider->getWorldPosition(), inputTransform.position);
+    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), inputTransform.rotation);
     
     // get the rigidbody's collider's extents and make sure they match the scale
-    LOG_INFO(UNIT_TEST, "Checking box shape's extent correctness");
     const math::Vec3 expectedHalfExtents(
         boxShapeParameters.halfExtents.x * scale.x,
         boxShapeParameters.halfExtents.y * scale.y,
