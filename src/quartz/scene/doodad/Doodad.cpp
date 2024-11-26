@@ -101,6 +101,16 @@ quartz::scene::Doodad::~Doodad() {
 }
 
 void
+quartz::scene::Doodad::snapToRigidBody() {
+    if (!mo_rigidBody) {
+        return;
+    }
+
+    m_transform.position = mo_rigidBody->getPosition();
+    m_transform.rotation = mo_rigidBody->getOrientation();
+}
+
+void
 quartz::scene::Doodad::fixedUpdate(
     const quartz::managers::InputManager& inputManager
 ) {

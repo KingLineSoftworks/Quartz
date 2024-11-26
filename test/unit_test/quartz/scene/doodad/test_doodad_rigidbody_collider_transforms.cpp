@@ -1,3 +1,6 @@
+#include "quartz/scene/camera/Camera.hpp"
+#include "quartz/scene/light/AmbientLight.hpp"
+#include "quartz/scene/light/DirectionalLight.hpp"
 #include "reactphysics3d/components/RigidBodyComponents.h"
 
 #include "math/transform/Quaternion.hpp"
@@ -63,8 +66,9 @@ int test_transforms_DoodadConstruction() {
     const math::Vec3 scale(1.0f, 3.0f, 5.0f);
     const math::Transform inputTransform(worldPosition, worldOrientation, scale);
 
-    quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
-    quartz::physics::RigidBody::Parameters rigidBodyParameters(reactphysics3d::BodyType::DYNAMIC, true, {0.0, 0.0, 0.0}, boxShapeParameters);
+    const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
+    const quartz::physics::RigidBody::Parameters rigidBodyParameters(reactphysics3d::BodyType::DYNAMIC, true, {0.0, 0.0, 0.0}, boxShapeParameters);
+    const quartz::scene::Doodad::Parameters doodadParameters({}, inputTransform, rigidBodyParameters, testFixedUpdateCallback, testUpdateCallback);
     quartz::scene::Doodad doodad(renderingDevice, physicsManager, o_field, std::nullopt, inputTransform, rigidBodyParameters, testFixedUpdateCallback, testUpdateCallback);
 
     const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
@@ -121,6 +125,7 @@ int test_transforms_DoodadConstruction() {
     // order that it is done in quartz::scene::Scene::fixedUpdate
     doodad.fixedUpdate(inputManager);
     o_field->fixedUpdate(0.5); // using tick of 0.5 seconds for large physics increments
+    doodad.snapToRigidBody();
     
     const math::Transform& doodadFixedUpdateTransform = doodad.getTransform();
 

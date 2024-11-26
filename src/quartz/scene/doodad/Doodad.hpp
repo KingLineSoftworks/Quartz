@@ -90,6 +90,7 @@ public: // member functions
      * @todo 2024/11/25 Make these update functions private and allow the quartz::scene::Scene class
      *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::UnitTestClient)
      */ 
+    void snapToRigidBody();
     void fixedUpdate(const quartz::managers::InputManager& inputManager);
     void update(
         const quartz::managers::InputManager& inputManager,
@@ -111,3 +112,4 @@ private: // member variables
     FixedUpdateCallback m_fixedUpdateCallback;
     UpdateCallback m_updateCallback;
 };
+

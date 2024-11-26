@@ -82,6 +82,11 @@ public: // member functions
     const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
     const math::Vec3& getScreenClearColor() const { return m_screenClearColor; }
 
+    /**
+     * @todo 2024/11/26 We should have a way to create a scene without rendering information for testing
+     *    purposes. See test_doodad_rigidbody_collider_transforms.cpp to see that we need to duplicate
+     *    scene functionality for testing purposes.
+     */
     void load(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,

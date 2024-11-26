@@ -203,12 +203,21 @@ quartz::scene::Scene::fixedUpdate(
 ) {
     m_camera.fixedUpdate(inputManager);
 
+    // The doodad's fixedUpdate will make changes to the rigidBody and its transform, so
+    // there is no need to manually snap the rigidBody to the doodad
     for (quartz::scene::Doodad& doodad : m_doodads) {
         doodad.fixedUpdate(inputManager);
     }
 
+    // This is only going to update the rigid bodies, not the doodads
     if (mo_field) {
         mo_field->fixedUpdate(tickTimeDelta);
+    }
+
+    // We want to move the doodad to the rigid body's new transform after it got updated by
+    // the physics field
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.snapToRigidBody();
     }
 
     /**
