@@ -38,11 +38,14 @@ quartz::scene::Scene::loadDoodads(
     std::vector<quartz::scene::Doodad> doodads;
 
     for (const quartz::scene::Doodad::Parameters& parameters : doodadParameters) {
-        const std::string& filepath = parameters.objectFilepath;
+        const std::optional<std::string>& o_filepath = parameters.o_objectFilepath;
         const math::Transform& transform = parameters.transform;
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = parameters.o_rigidBodyParameters;
+        const quartz::scene::Doodad::FixedUpdateCallback fixedUpdateCallback = parameters.fixedUpdateCallback;
+        const quartz::scene::Doodad::UpdateCallback updateCallback = parameters.updateCallback;
 
-        LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
+        LOG_TRACE(SCENE, "Loading doodad with information:");
+        LOG_TRACE(SCENE, "  model: {}", o_filepath ? *o_filepath : "none");
         LOG_TRACE(SCENE, "  transform:");
         LOG_TRACE(SCENE, "    position = {}", transform.position.toString());
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
@@ -59,9 +62,11 @@ quartz::scene::Scene::loadDoodads(
             renderingDevice,
             physicsManager,
             o_field,
-            filepath,
+            o_filepath,
             transform,
-            o_rigidBodyInformation
+            o_rigidBodyInformation,
+            fixedUpdateCallback,
+            updateCallback
         );
     }
 
@@ -198,18 +203,34 @@ quartz::scene::Scene::fixedUpdate(
 ) {
     m_camera.fixedUpdate(inputManager);
 
+    // The doodad's fixedUpdate will make changes to the rigidBody and its transform, so
+    // there is no need to manually snap the rigidBody to the doodad
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.fixedUpdate();
+        doodad.fixedUpdate(inputManager);
     }
 
+    // This is only going to update the rigid bodies, not the doodads
     if (mo_field) {
         mo_field->fixedUpdate(tickTimeDelta);
     }
+
+    // We want to move the doodad to the rigid body's new transform after it got updated by
+    // the physics field
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.snapToRigidBody();
+    }
+
+    /**
+     * @todo 2024/11/25 Update the transforms of the doodads based on the rigid bodies'
+     *    transforms. We updated the rigid bodies transforms in mo_field->fixedUpdate so
+     *    we need to update the Doodads to reflect this
+     */
 }
 
 void
 quartz::scene::Scene::update(
     const quartz::rendering::Window& renderingWindow,
+    const quartz::managers::InputManager& inputManager,
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
@@ -221,6 +242,6 @@ quartz::scene::Scene::update(
     );
 
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.update(frameTimeDelta, frameInterpolationFactor);
+        doodad.update(inputManager, frameTimeDelta, frameInterpolationFactor);
     }
 }

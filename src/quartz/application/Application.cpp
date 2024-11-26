@@ -91,19 +91,14 @@ void quartz::Application::run() {
 
         while (frameTimeAccumulator >= 0) {
             processInput();
-            currentScene.fixedUpdate(
-                m_inputManager,
-                m_physicsManager,
-                totalElapsedTime,
-                targetTickTimeDelta
-            );
+            currentScene.fixedUpdate(m_inputManager, m_physicsManager, totalElapsedTime, targetTickTimeDelta);
             totalElapsedTime += targetTickTimeDelta;
             frameTimeAccumulator -= targetTickTimeDelta;
         }
 
         double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
-        currentScene.update(m_renderingContext.getRenderingWindow(), currentFrameTimeDelta, frameInterpolationFactor);
+        currentScene.update(m_renderingContext.getRenderingWindow(), m_inputManager, currentFrameTimeDelta, frameInterpolationFactor);
         m_renderingContext.draw(currentScene);
     }
 

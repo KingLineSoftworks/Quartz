@@ -43,6 +43,10 @@ build/
 .test/
 .release/
 
+# ----- quartz logs ----- #
+
+QUARTZlog.*
+
 # ----- clangd stuff ----- #
 
 .cache/

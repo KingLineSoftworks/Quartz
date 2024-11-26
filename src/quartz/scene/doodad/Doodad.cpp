@@ -27,13 +27,16 @@ quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
-    const std::string& objectFilepath,
+    const std::optional<std::string>& o_objectFilepath,
     const math::Transform& transform,
-    const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters
+    const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
+    const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
+    const quartz::scene::Doodad::UpdateCallback& updateCallback
 ) :
-    m_model(
-        renderingDevice,
-        objectFilepath
+    mo_model(
+        o_objectFilepath ?
+            std::optional<quartz::rendering::Model>(quartz::rendering::Model(renderingDevice, *o_objectFilepath)) :
+            std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
     m_transformationMatrix(),
@@ -41,7 +44,9 @@ quartz::scene::Doodad::Doodad(
         (o_field && o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
-    )
+    ),
+    m_fixedUpdateCallback(fixedUpdateCallback),
+    m_updateCallback(updateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -51,14 +56,15 @@ quartz::scene::Doodad::Doodad(
 }
 
 quartz::scene::Doodad::Doodad(
-    const quartz::rendering::Device& renderingDevice,
+    UNUSED const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
-    quartz::scene::Doodad::Parameters& doodadParameters
+    const quartz::scene::Doodad::Parameters& doodadParameters
 ) :
-    m_model(
-        renderingDevice,
-        doodadParameters.objectFilepath
+    mo_model(
+        doodadParameters.o_objectFilepath ?
+            std::optional<quartz::rendering::Model>(quartz::rendering::Model(renderingDevice, *doodadParameters.o_objectFilepath)) :
+            std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
     m_transformationMatrix(),
@@ -66,7 +72,9 @@ quartz::scene::Doodad::Doodad(
         (o_field && doodadParameters.o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
-    )
+    ),
+    m_fixedUpdateCallback(doodadParameters.fixedUpdateCallback),
+    m_updateCallback(doodadParameters.updateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -78,10 +86,12 @@ quartz::scene::Doodad::Doodad(
 quartz::scene::Doodad::Doodad(
     quartz::scene::Doodad&& other
 ) :
-    m_model(std::move(other.m_model)),
+    mo_model(std::move(other.mo_model)),
     m_transform(other.m_transform),
     m_transformationMatrix(other.m_transformationMatrix),
-    mo_rigidBody(std::move(other.mo_rigidBody))
+    mo_rigidBody(std::move(other.mo_rigidBody)),
+    m_fixedUpdateCallback(std::move(other.m_fixedUpdateCallback)),
+    m_updateCallback(std::move(other.m_updateCallback))
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -91,22 +101,42 @@ quartz::scene::Doodad::~Doodad() {
 }
 
 void
-quartz::scene::Doodad::fixedUpdate() {
+quartz::scene::Doodad::snapToRigidBody() {
+    if (!mo_rigidBody) {
+        return;
+    }
+
+    m_transform.position = mo_rigidBody->getPosition();
+    m_transform.rotation = mo_rigidBody->getOrientation();
+}
+
+void
+quartz::scene::Doodad::fixedUpdate(
+    const quartz::managers::InputManager& inputManager
+) {
     /**
-     * @todo 2024/06/20 Call the fixed update callback given to the doodad which actually contains
-     *    the logic that we execute here
-     *
      * @todo 2024/06/21 Update m_currentTransform here????
      */
+
+    if (m_fixedUpdateCallback) {
+        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this, inputManager); };
+        safeFixedUpdateCallback();
+    }
 
 //    mp_rigidBody->applyLocalForceAtCenterOfMass({1.0, 0.0, 0.0});
 }
 
 void
 quartz::scene::Doodad::update(
+    const quartz::managers::InputManager& inputManager,
     UNUSED const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
+    if (m_updateCallback) {
+        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, inputManager, frameTimeDelta, frameInterpolationFactor); };
+        safeUpdateCallback();
+    }
+
     math::Transform currentTransform;
     if (mo_rigidBody) {
         currentTransform.position = mo_rigidBody->getPosition();

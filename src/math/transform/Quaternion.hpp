@@ -16,7 +16,7 @@ namespace math {
 }
 
 union math::Quaternion {
-    Quaternion() : glmQuat() {}
+    Quaternion() : glmQuat(0, 0, 0, 1) {}
     Quaternion(const float x, const float y, const float z, const float w) : glmQuat(x, y, z, w) {}
 
     Quaternion(const Quaternion& other) : glmQuat(other.glmQuat) {}
@@ -82,7 +82,7 @@ union math::Quaternion {
     Quaternion& operator*=(const glm::quat& other)                  { glmQuat *= other;            return *this; }
     Quaternion& operator*=(const reactphysics3d::Quaternion& other) { rp3dQuat = rp3dQuat * other; return *this; }
 
-    bool operator==(const Quaternion& other) const { return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w); }
+    bool operator==(const Quaternion& other) const;
     bool operator==(const glm::quat& other)  const { return glmQuat == other; }
 
     bool operator!=(const Quaternion& other) const;
