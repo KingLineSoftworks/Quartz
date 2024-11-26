@@ -6,6 +6,7 @@
 #include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
+#include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 namespace quartz {
@@ -16,6 +17,7 @@ namespace unit_test {
 
 class quartz::unit_test::UnitTestClient {
 public:
+    static quartz::managers::InputManager& getInputManagerDummyInstance();
     static quartz::managers::PhysicsManager& getPhysicsManagerInstance();
 };
 

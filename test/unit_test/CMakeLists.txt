@@ -19,6 +19,7 @@ target_link_libraries(
     UTIL_Logger
 
     PUBLIC
+    QUARTZ_MANAGERS_InputManager
     QUARTZ_MANAGERS_PhysicsManager
 )
 

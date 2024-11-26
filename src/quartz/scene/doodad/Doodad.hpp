@@ -85,7 +85,11 @@ public: // member functions
     const std::optional<quartz::physics::RigidBody>& getRigidBodyOptional() const { return mo_rigidBody; }
 
     std::optional<quartz::physics::RigidBody>& getRigidBodyOptionalReference() { return mo_rigidBody; }
-
+    
+    /**
+     * @todo 2024/11/25 Make these update functions private and allow the quartz::scene::Scene class
+     *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::UnitTestClient)
+     */ 
     void fixedUpdate(const quartz::managers::InputManager& inputManager);
     void update(
         const quartz::managers::InputManager& inputManager,

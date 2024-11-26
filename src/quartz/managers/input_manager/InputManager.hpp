@@ -11,6 +11,10 @@ namespace quartz {
 
 class Application;
 
+namespace unit_test {
+    class UnitTestClient;
+}
+
 namespace managers {
     class InputManager;
 }
@@ -27,10 +31,11 @@ public: // classes
 
     private: // friend classes
         friend class quartz::Application;
+        friend class quartz::unit_test::UnitTestClient;
     };
 
 public: // member functions
-    InputManager(InputManager&& other); /** @todo 2024/06/15 See if we can make this private. Seems like insert needs access to this??? We don't want others to see this. */
+    InputManager(InputManager&& other); /** @todo 2024/06/15 See if we can make this private and add a friend class. Seems like insert needs access to this??? We don't want others to see this. */
     InputManager(const InputManager& other) = delete;
     InputManager& operator=(const InputManager& other) = delete;
 

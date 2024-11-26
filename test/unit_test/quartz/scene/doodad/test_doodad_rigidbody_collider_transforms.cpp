@@ -13,13 +13,46 @@
 
 #include "unit_test/Util.hpp"
 #include "util/logger/Logger.hpp"
+#include <optional>
 
+/**
+ * @brief The fixedUpdate callback we are going to give to the doodad in our testing scenarios
+ */
+void testFixedUpdateCallback(
+    UNUSED quartz::scene::Doodad* const p_doodad,
+    UNUSED const quartz::managers::InputManager& inputManager
+) {
+    std::optional<quartz::physics::RigidBody>& o_rigidBody = p_doodad->getRigidBodyOptionalReference();
+
+    o_rigidBody->setLinearVelocity({100.0f, 0.0f, 0.0f});
+    o_rigidBody->applyLocalForceToCenterOfMass({0.0f, 10.0f, 0.0f});
+}
+
+/**
+ * @brief The udpate callback we are going to give to the doodad in our testing scenarios
+ */
+void testUpdateCallback(
+    UNUSED quartz::scene::Doodad* const p_doodad,
+    UNUSED const quartz::managers::InputManager& inputManager,
+    UNUSED const double frameTimeDelta,
+    UNUSED const double frameInterpolationFactor
+) {
+
+}
+
+/**
+ * @brief Ensure the Doodad, RigidBody, and Collider are all correctly positioned upon construction,
+ *    after being updated with the fixedUpdate function, and after being updated with the regular
+ *    update function.
+ */
 int test_transforms_DoodadConstruction() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
     quartz::rendering::Instance renderingInstance("testing", 0, 0, 0, false);
     quartz::rendering::Device renderingDevice(renderingInstance);
+
+    quartz::managers::InputManager& inputManager = quartz::unit_test::UnitTestClient::getInputManagerDummyInstance();
 
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::UnitTestClient::getPhysicsManagerInstance();
     std::optional<quartz::physics::Field> o_field = quartz::physics::Field(physicsManager, math::Vec3(0.0, -9.81, 0.0));
@@ -32,17 +65,7 @@ int test_transforms_DoodadConstruction() {
 
     quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
     quartz::physics::RigidBody::Parameters rigidBodyParameters(reactphysics3d::BodyType::DYNAMIC, true, {0.0, 0.0, 0.0}, boxShapeParameters);
-    LOG_TRACE(UNIT_TEST, "Creating doodad");
-    quartz::scene::Doodad doodad(
-        renderingDevice,
-        physicsManager,
-        o_field,
-        std::nullopt,
-        inputTransform,
-        rigidBodyParameters,
-        {},
-        {}
-    );
+    quartz::scene::Doodad doodad(renderingDevice, physicsManager, o_field, std::nullopt, inputTransform, rigidBodyParameters, testFixedUpdateCallback, testUpdateCallback);
 
     const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
     UT_REQUIRE(o_rigidBody);
@@ -53,15 +76,14 @@ int test_transforms_DoodadConstruction() {
     const reactphysics3d::BoxShape* p_boxShape = reinterpret_cast<const reactphysics3d::BoxShape*>(p_collisionShape);
     UT_REQUIRE(p_boxShape);
 
-
     // ------------------------------------------------------------
-    // Check the transforms
+    // Check the transforms after contruction
     // ------------------------------------------------------------
 
-    const math::Transform& doodadTransform = doodad.getTransform();
-    UT_CHECK_EQUAL(doodadTransform.position, inputTransform.position);
-    UT_CHECK_EQUAL(doodadTransform.rotation, inputTransform.rotation);
-    UT_CHECK_EQUAL(doodadTransform.scale, inputTransform.scale);
+    const math::Transform& doodadConstructedTransform = doodad.getTransform();
+    UT_CHECK_EQUAL(doodadConstructedTransform.position, inputTransform.position);
+    UT_CHECK_EQUAL(doodadConstructedTransform.rotation, inputTransform.rotation);
+    UT_CHECK_EQUAL(doodadConstructedTransform.scale, inputTransform.scale);
 
     // get the rigidbody's transform and compare it to the inputTransform
     UT_CHECK_EQUAL(o_rigidBody->getPosition(), inputTransform.position);
@@ -85,6 +107,30 @@ int test_transforms_DoodadConstruction() {
     );
     const math::Vec3 boxShapeHalfExtents = p_boxShape->getHalfExtents();
     UT_CHECK_EQUAL(boxShapeHalfExtents, expectedHalfExtents);
+
+    // ------------------------------------------------------------
+    // Check the transforms after updating the scene with fixedUpdate 
+    // ------------------------------------------------------------
+    
+    /**
+     * @todo 2024/11/25 Update the Doodad's transform after the scene invokes
+     *    fixedUpdate on the rigid bodies.
+     */
+    
+    // Call fixedUpdate on the doodad, then fixedUpdate on the field, to mimic the
+    // order that it is done in quartz::scene::Scene::fixedUpdate
+    doodad.fixedUpdate(inputManager);
+    o_field->fixedUpdate(0.5); // using tick of 0.5 seconds for large physics increments
+    
+    const math::Transform& doodadFixedUpdateTransform = doodad.getTransform();
+
+    // get the rigidbody's transform and compare it to the inputTransform
+    UT_CHECK_EQUAL(o_rigidBody->getPosition(), doodadFixedUpdateTransform.position);
+    UT_CHECK_EQUAL(o_rigidBody->getOrientation(), doodadFixedUpdateTransform.rotation);
+    
+    // get the rigidbody's collider's world transform and compare it to the inputTransform
+    UT_CHECK_EQUAL(o_collider->getWorldPosition(), doodadFixedUpdateTransform.position);
+    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), doodadFixedUpdateTransform.rotation);
 
     return result;
 }
