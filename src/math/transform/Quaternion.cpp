@@ -57,7 +57,7 @@ math::Quaternion::slerp(
 ) {
     QUARTZ_ASSERT(normalizedA.isNormalized(), "A is not normalized");
     QUARTZ_ASSERT(normalizedB.isNormalized(), "B is not normalized");
-    QUARTZ_ASSERT(t >= 0.0 && t <= 1.0, "t " + std::to_string(t) + " is not between 0.0 and 1.0");
+    QUARTZ_ASSERT(t >= 0.0 && t <= 1.0, "t " + std::to_string(t) + " is not between 0.0 and 1.0. Values outside of these bounds denote extrapolation.");
 
     return glm::slerp(normalizedA.glmQuat, normalizedB.glmQuat, t);
 }

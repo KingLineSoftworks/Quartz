@@ -8,6 +8,7 @@
 #include "math/transform/Quaternion.hpp"
 
 #include "quartz/physics/field/Field.hpp"
+#include "util/logger/Logger.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
 math::Transform
@@ -122,20 +123,32 @@ quartz::scene::Doodad::fixedUpdate(
         auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this, inputManager); };
         safeFixedUpdateCallback();
     }
-
-//    mp_rigidBody->applyLocalForceAtCenterOfMass({1.0, 0.0, 0.0});
 }
 
 void
 quartz::scene::Doodad::update(
     const quartz::managers::InputManager& inputManager,
-    UNUSED const double frameTimeDelta,
+    const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
     if (m_updateCallback) {
         auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, inputManager, frameTimeDelta, frameInterpolationFactor); };
         safeUpdateCallback();
     }
+
+    /**
+     * @todo 2024/11/29 Rethink how we are interpolating between our doodad's position and our
+     *    rigid body's position. We want this function to be for graphical updates, not physics updates.
+     *    We also need to think about the relation between the doodad position and the rigid body position,
+     *    because when we update where the doodad is, we also want the rigidbody to be updated.
+     *
+     *    An idea: do not move the rigid body here (only move it in fixedUpdate when we update the field).
+     *      But i don't know if this would work. If we have something in m_updateCallback that says, "move
+     *      the doodad to position x,y,z" then we should want the rigidbody to be in that position as well.
+     *
+     *    Perhaps we snap the rigid body to the doodad after the invocation of m_updateCallback just so it
+     *      is at the same location as the doodad?
+     */
 
     math::Transform currentTransform;
     if (mo_rigidBody) {

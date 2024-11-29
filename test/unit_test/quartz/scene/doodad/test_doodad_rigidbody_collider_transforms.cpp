@@ -1,11 +1,12 @@
-#include "quartz/scene/camera/Camera.hpp"
-#include "quartz/scene/light/AmbientLight.hpp"
-#include "quartz/scene/light/DirectionalLight.hpp"
+#include <optional>
+
 #include "reactphysics3d/components/RigidBodyComponents.h"
 
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
+
+#include "util/logger/Logger.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/field/Field.hpp"
@@ -15,14 +16,12 @@
 #include "quartz/scene/doodad/Doodad.hpp"
 
 #include "unit_test/Util.hpp"
-#include "util/logger/Logger.hpp"
-#include <optional>
 
 /**
  * @brief The fixedUpdate callback we are going to give to the doodad in our testing scenarios
  */
 void testFixedUpdateCallback(
-    UNUSED quartz::scene::Doodad* const p_doodad,
+    quartz::scene::Doodad* const p_doodad,
     UNUSED const quartz::managers::InputManager& inputManager
 ) {
     std::optional<quartz::physics::RigidBody>& o_rigidBody = p_doodad->getRigidBodyOptionalReference();
@@ -80,6 +79,10 @@ int test_transforms_DoodadConstruction() {
     const reactphysics3d::BoxShape* p_boxShape = reinterpret_cast<const reactphysics3d::BoxShape*>(p_collisionShape);
     UT_REQUIRE(p_boxShape);
 
+    const double targetTickTimeDelta = 1.0;
+    const double currentFrameTimeDelta = 0.25;
+    double frameInterpolationFactor = 0.5;
+
     // ------------------------------------------------------------
     // Check the transforms after contruction
     // ------------------------------------------------------------
@@ -115,28 +118,46 @@ int test_transforms_DoodadConstruction() {
     // ------------------------------------------------------------
     // Check the transforms after updating the scene with fixedUpdate 
     // ------------------------------------------------------------
-    
-    /**
-     * @todo 2024/11/25 Update the Doodad's transform after the scene invokes
-     *    fixedUpdate on the rigid bodies.
-     */
-    
+   
     // Call fixedUpdate on the doodad, then fixedUpdate on the field, to mimic the
     // order that it is done in quartz::scene::Scene::fixedUpdate
     doodad.fixedUpdate(inputManager);
-    o_field->fixedUpdate(0.5); // using tick of 0.5 seconds for large physics increments
+    o_field->fixedUpdate(targetTickTimeDelta);
     doodad.snapToRigidBody();
     
     const math::Transform& doodadFixedUpdateTransform = doodad.getTransform();
 
-    // get the rigidbody's transform and compare it to the inputTransform
+    // get the rigidbody's transform and compare it to the doodad's updated transform
     UT_CHECK_EQUAL(o_rigidBody->getPosition(), doodadFixedUpdateTransform.position);
     UT_CHECK_EQUAL(o_rigidBody->getOrientation(), doodadFixedUpdateTransform.rotation);
     
-    // get the rigidbody's collider's world transform and compare it to the inputTransform
+    // get the rigidbody's collider's world transform and compare it to the doodad's transform
     UT_CHECK_EQUAL(o_collider->getWorldPosition(), doodadFixedUpdateTransform.position);
     UT_CHECK_EQUAL(o_collider->getWorldOrientation(), doodadFixedUpdateTransform.rotation);
 
+    // ------------------------------------------------------------
+    // Check the transforms after updating the doodad with update
+    // ------------------------------------------------------------
+
+    LOG_TRACE(UNIT_TEST, "");
+    LOG_TRACE(UNIT_TEST, "");
+    LOG_TRACE(UNIT_TEST, "");
+    LOG_TRACE(UNIT_TEST, "");
+    LOG_TRACE(UNIT_TEST, "Checking transforms after update");
+    LOG_TRACE(UNIT_TEST, "");
+    
+    doodad.update(inputManager, currentFrameTimeDelta, frameInterpolationFactor);
+
+    const math::Transform& doodadUpdateTransform = doodad.getTransform();
+
+    // get the rigidbody's transform and compare it to the doodad's updated transform
+    UT_CHECK_EQUAL(o_rigidBody->getPosition(), doodadUpdateTransform.position);
+    UT_CHECK_EQUAL(o_rigidBody->getOrientation(), doodadUpdateTransform.rotation);
+    
+    // get the rigidbody's collider's world transform and compare it to the doodad's transform
+    UT_CHECK_EQUAL(o_collider->getWorldPosition(), doodadUpdateTransform.position);
+    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), doodadUpdateTransform.rotation);
+   
     return result;
 }
 

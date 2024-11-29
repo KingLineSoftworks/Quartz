@@ -219,12 +219,6 @@ quartz::scene::Scene::fixedUpdate(
     for (quartz::scene::Doodad& doodad : m_doodads) {
         doodad.snapToRigidBody();
     }
-
-    /**
-     * @todo 2024/11/25 Update the transforms of the doodads based on the rigid bodies'
-     *    transforms. We updated the rigid bodies transforms in mo_field->fixedUpdate so
-     *    we need to update the Doodads to reflect this
-     */
 }
 
 void
