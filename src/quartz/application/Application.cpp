@@ -98,7 +98,7 @@ void quartz::Application::run() {
 
         double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
-        currentScene.update(m_renderingContext.getRenderingWindow(), m_inputManager, currentFrameTimeDelta, frameInterpolationFactor);
+        currentScene.update(m_renderingContext.getRenderingWindow(), m_inputManager, totalElapsedTime, currentFrameTimeDelta, frameInterpolationFactor);
         m_renderingContext.draw(currentScene);
     }
 

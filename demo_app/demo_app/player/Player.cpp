@@ -6,7 +6,8 @@
 
 void playerFixedUpdateCallback(
     quartz::scene::Doodad* const p_doodad,
-    const quartz::managers::InputManager& inputManager
+    const quartz::managers::InputManager& inputManager,
+    UNUSED const double totalElapsedTime
 ) {
     playerMovementFixedUpdate(p_doodad, inputManager);
 }

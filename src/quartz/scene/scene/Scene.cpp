@@ -198,7 +198,7 @@ void
 quartz::scene::Scene::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
     UNUSED const quartz::managers::PhysicsManager& physicsManager,
-    UNUSED const double totalElapsedTime,
+    const double totalElapsedTime,
     const double tickTimeDelta
 ) {
     m_camera.fixedUpdate(inputManager);
@@ -206,7 +206,7 @@ quartz::scene::Scene::fixedUpdate(
     // The doodad's fixedUpdate will make changes to the rigidBody and its transform, so
     // there is no need to manually snap the rigidBody to the doodad
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.fixedUpdate(inputManager);
+        doodad.fixedUpdate(inputManager, totalElapsedTime);
     }
 
     // This is only going to update the rigid bodies, not the doodads
@@ -225,6 +225,7 @@ void
 quartz::scene::Scene::update(
     const quartz::rendering::Window& renderingWindow,
     const quartz::managers::InputManager& inputManager,
+    const double totalElapsedTime,
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
@@ -236,6 +237,15 @@ quartz::scene::Scene::update(
     );
 
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.update(inputManager, frameTimeDelta, frameInterpolationFactor);
+        doodad.update(inputManager, totalElapsedTime, frameTimeDelta, frameInterpolationFactor);
     }
+
+    /**
+     * @todo 2024/12/01 Snap the rigid body to the doodad's position. We are not going
+     *    to be doing any physics updates until the next fixedUpdate call, so we don't need
+     *    to worry about it having any physics implications.
+     *    If things get weird as a result of this, that is the fault of the client. Don't be
+     *    tampering with physics stuff outside of fixedUpdate. If you don't care about physics
+     *    or if you don't have a rigid body, then feel free to do whatever you want here
+     */
 }

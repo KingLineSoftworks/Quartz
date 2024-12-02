@@ -102,6 +102,39 @@ quartz::scene::Doodad::~Doodad() {
 }
 
 void
+quartz::scene::Doodad::setPosition(
+    const math::Vec3& position
+) {
+    m_transform.position = position;
+
+    if (mo_rigidBody) {
+        mo_rigidBody->setPosition(position);
+    }
+}
+
+void
+quartz::scene::Doodad::setRotation(
+    const math::Quaternion& rotation
+) {
+    m_transform.rotation = rotation;
+
+    if (mo_rigidBody) {
+        mo_rigidBody->setRotation(rotation);
+    }
+}
+
+void
+quartz::scene::Doodad::setScale(
+    const math::Vec3& scale
+) {
+    m_transform.scale = scale;
+
+    if (mo_rigidBody) {
+        mo_rigidBody->setScale(scale);
+    }
+}
+
+void
 quartz::scene::Doodad::snapToRigidBody() {
     if (!mo_rigidBody) {
         return;
@@ -113,14 +146,11 @@ quartz::scene::Doodad::snapToRigidBody() {
 
 void
 quartz::scene::Doodad::fixedUpdate(
-    const quartz::managers::InputManager& inputManager
+    const quartz::managers::InputManager& inputManager,
+    const double totalElapsedTime
 ) {
-    /**
-     * @todo 2024/06/21 Update m_currentTransform here????
-     */
-
     if (m_fixedUpdateCallback) {
-        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this, inputManager); };
+        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this, inputManager, totalElapsedTime); };
         safeFixedUpdateCallback();
     }
 }
@@ -128,26 +158,23 @@ quartz::scene::Doodad::fixedUpdate(
 void
 quartz::scene::Doodad::update(
     const quartz::managers::InputManager& inputManager,
+    const double totalElapsedTime,
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
     if (m_updateCallback) {
-        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, inputManager, frameTimeDelta, frameInterpolationFactor); };
+        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, inputManager, totalElapsedTime, frameTimeDelta, frameInterpolationFactor); };
         safeUpdateCallback();
     }
 
     /**
-     * @todo 2024/11/29 Rethink how we are interpolating between our doodad's position and our
-     *    rigid body's position. We want this function to be for graphical updates, not physics updates.
-     *    We also need to think about the relation between the doodad position and the rigid body position,
-     *    because when we update where the doodad is, we also want the rigidbody to be updated.
-     *
-     *    An idea: do not move the rigid body here (only move it in fixedUpdate when we update the field).
-     *      But i don't know if this would work. If we have something in m_updateCallback that says, "move
-     *      the doodad to position x,y,z" then we should want the rigidbody to be in that position as well.
-     *
-     *    Perhaps we snap the rigid body to the doodad after the invocation of m_updateCallback just so it
-     *      is at the same location as the doodad?
+     * @detail 2024/12/01 We want to update the rigid body's positon and rotation when we update the doodad's
+     *    position and rotation in the update callback. This will set the currentTransform to be exactly the
+     *    same as our m_transform. This will cause the interpolation between currentTransform and m_transform
+     *    to be the same as just choosing one, because they will be equal.
+     *    So, we want to still interpolate between the rigid body's transform and our m_transform,
+     *    in case we did not update our transform directly via the update callback. If we didn't update our
+     *    transform directly via the update callback then we will 
      */
 
     math::Transform currentTransform;

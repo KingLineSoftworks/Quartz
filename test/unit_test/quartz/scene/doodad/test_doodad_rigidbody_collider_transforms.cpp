@@ -22,7 +22,8 @@
  */
 void testFixedUpdateCallback(
     quartz::scene::Doodad* const p_doodad,
-    UNUSED const quartz::managers::InputManager& inputManager
+    UNUSED const quartz::managers::InputManager& inputManager,
+    UNUSED const double totalElapsedTime
 ) {
     std::optional<quartz::physics::RigidBody>& o_rigidBody = p_doodad->getRigidBodyOptionalReference();
 
@@ -34,12 +35,30 @@ void testFixedUpdateCallback(
  * @brief The udpate callback we are going to give to the doodad in our testing scenarios
  */
 void testUpdateCallback(
-    UNUSED quartz::scene::Doodad* const p_doodad,
+    quartz::scene::Doodad* const p_doodad,
     UNUSED const quartz::managers::InputManager& inputManager,
+    UNUSED const double totalElapsedTime,
     UNUSED const double frameTimeDelta,
     UNUSED const double frameInterpolationFactor
 ) {
+    LOG_FUNCTION_CALL_INFO(UNIT_TEST, "");
 
+    const math::Vec3 position(3.3, 4.4, 5.5);
+    LOG_TRACE(UNIT_TEST, "Setting doodad's position to {}", position.toString());
+    p_doodad->setPosition(position);
+
+    position.normalize();
+    LOG_TRACE(UNIT_TEST, "Normalized position {}", position.toString());
+
+    const math::Quaternion rotation(1.0f, 1.0f, 1.0f, 45.0f);
+    LOG_TRACE(UNIT_TEST, "Creating inital rotation with quaternion of {}", rotation.toString());
+    rotation.normalize();
+    LOG_TRACE(UNIT_TEST, "Setting doodad's rotation to {}", rotation.toString());
+    p_doodad->setRotation(rotation);
+
+    const math::Vec3 scale(42, 666, 9);
+    LOG_TRACE(UNIT_TEST, "Setting doodad's scale to {}", scale.toString());
+    p_doodad->setScale(scale);
 }
 
 /**
@@ -79,6 +98,7 @@ int test_transforms_DoodadConstruction() {
     const reactphysics3d::BoxShape* p_boxShape = reinterpret_cast<const reactphysics3d::BoxShape*>(p_collisionShape);
     UT_REQUIRE(p_boxShape);
 
+    const double totalElapsedTime = 15.0;
     const double targetTickTimeDelta = 1.0;
     const double currentFrameTimeDelta = 0.25;
     double frameInterpolationFactor = 0.5;
@@ -121,7 +141,7 @@ int test_transforms_DoodadConstruction() {
    
     // Call fixedUpdate on the doodad, then fixedUpdate on the field, to mimic the
     // order that it is done in quartz::scene::Scene::fixedUpdate
-    doodad.fixedUpdate(inputManager);
+    doodad.fixedUpdate(inputManager, totalElapsedTime);
     o_field->fixedUpdate(targetTickTimeDelta);
     doodad.snapToRigidBody();
     
@@ -146,7 +166,7 @@ int test_transforms_DoodadConstruction() {
     LOG_TRACE(UNIT_TEST, "Checking transforms after update");
     LOG_TRACE(UNIT_TEST, "");
     
-    doodad.update(inputManager, currentFrameTimeDelta, frameInterpolationFactor);
+    doodad.update(inputManager, totalElapsedTime + 1.0, currentFrameTimeDelta, frameInterpolationFactor);
 
     const math::Transform& doodadUpdateTransform = doodad.getTransform();
 
@@ -157,6 +177,14 @@ int test_transforms_DoodadConstruction() {
     // get the rigidbody's collider's world transform and compare it to the doodad's transform
     UT_CHECK_EQUAL(o_collider->getWorldPosition(), doodadUpdateTransform.position);
     UT_CHECK_EQUAL(o_collider->getWorldOrientation(), doodadUpdateTransform.rotation);
+
+    const math::Vec3 expectedHalfExtentsUpdated(
+        boxShapeParameters.halfExtents.x * doodadUpdateTransform.scale.x,
+        boxShapeParameters.halfExtents.y * doodadUpdateTransform.scale.y,
+        boxShapeParameters.halfExtents.z * doodadUpdateTransform.scale.z
+    );
+    const math::Vec3 boxShapeHalfExtentsUpdated = p_boxShape->getHalfExtents();
+    UT_CHECK_EQUAL(boxShapeHalfExtentsUpdated, expectedHalfExtentsUpdated);
    
     return result;
 }

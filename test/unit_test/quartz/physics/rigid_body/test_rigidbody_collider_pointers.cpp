@@ -1,13 +1,15 @@
+#include "reactphysics3d/body/RigidBody.h"
+#include "reactphysics3d/components/RigidBodyComponents.h"
+#include "reactphysics3d/engine/PhysicsWorld.h"
+
+#include "util/logger/Logger.hpp"
+
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/collider/Collider.hpp"
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 
-#include "reactphysics3d/body/RigidBody.h"
-#include "reactphysics3d/components/RigidBodyComponents.h"
-#include "reactphysics3d/engine/PhysicsWorld.h"
 #include "unit_test/Util.hpp"
-#include "util/logger/Logger.hpp"
 
 /**
  * @brief We want to validate that when we create a reactphysics3d::Collider* manually,

@@ -1,6 +1,7 @@
 #include <reactphysics3d/engine/PhysicsWorld.h>
 
 #include "math/transform/Vec3.hpp"
+#include "reactphysics3d/mathematics/Transform.h"
 
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 
@@ -120,6 +121,35 @@ quartz::physics::RigidBody::RigidBody(
 {}
 
 quartz::physics::RigidBody::~RigidBody() {}
+
+void
+quartz::physics::RigidBody::setPosition(
+    const math::Vec3& position 
+) {
+    reactphysics3d::Transform currentTransform = mp_rigidBody->getTransform();
+    
+    currentTransform.setPosition(position);
+    
+    mp_rigidBody->setTransform(currentTransform);
+}
+
+void
+quartz::physics::RigidBody::setRotation(
+    const math::Quaternion& rotation
+) {
+    reactphysics3d::Transform currentTransform = mp_rigidBody->getTransform();
+
+    currentTransform.setOrientation(rotation);
+
+    mp_rigidBody->setTransform(currentTransform);
+}
+
+void
+quartz::physics::RigidBody::setScale(
+    UNUSED const math::Vec3& scale
+) {
+    /** @todfo 2024/12/01 Set the scale of the collider here */
+}
 
 void
 quartz::physics::RigidBody::setLinearVelocity(

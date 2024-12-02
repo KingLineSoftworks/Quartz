@@ -69,6 +69,9 @@ public: // member functions
     math::Quaternion getOrientation() const { return mp_rigidBody->getTransform().getOrientation(); }
     const std::optional<quartz::physics::Collider>& getColliderOptional() const { return mo_collider; }
 
+    void setPosition(const math::Vec3& position);
+    void setRotation(const math::Quaternion& rotation);
+    void setScale(const math::Vec3& scale);
     void setLinearVelocity(const math::Vec3& linearVelocity);
     void applyLocalForceToCenterOfMass(const math::Vec3& force);
 
