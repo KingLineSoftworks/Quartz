@@ -40,50 +40,12 @@ endfunction()
 # Math unit tests
 #====================================================================
 
-set(MATH_UNIT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/math")
-
-create_unit_test(
-    test_math_transform_quaternion
-    "${MATH_UNIT_TEST_DIR}/test_math_transform_quaternion.cpp"
-    MATH_Transform
-)
+add_subdirectory("math/transform")
 
 #====================================================================
 # Quartz unit tests
 #====================================================================
 
-SET(QUARTZ_UNIT_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/quartz")
+add_subdirectory("quartz/physics/rigid_body")
+add_subdirectory("quartz/scene/doodad")
 
-#-------------------------------------------------------------------
-# Quartz Physics unit tests
-#-------------------------------------------------------------------
-
-set(QUARTZ_PHYSICS_UNIT_TEST_DIR "${QUARTZ_UNIT_TEST_DIR}/physics")
-
-list(APPEND test_rigidbody_collider_pointers_link_libraries
-    QUARTZ_PHYSICS_Collider
-    QUARTZ_PHYSICS_Field
-    QUARTZ_PHYSICS_RigidBody
-)
-create_unit_test(
-    test_rigidbody_collider_pointers
-    "${QUARTZ_PHYSICS_UNIT_TEST_DIR}/rigid_body/test_rigidbody_collider_pointers.cpp"
-    "${test_rigidbody_collider_pointers_link_libraries}"
-)
-
-#-------------------------------------------------------------------
-# Quartz Scene unit tests
-#-------------------------------------------------------------------
-
-set(QUARTZ_SCENE_UNIT_TEST_DIR "${QUARTZ_UNIT_TEST_DIR}/scene")
-
-list(APPEND test_doodad_rigidbody_collider_transforms_link_libraries
-    QUARTZ_PHYSICS_Collider
-    QUARTZ_PHYSICS_RigidBody
-    QUARTZ_SCENE_Doodad
-)
-create_unit_test(
-    test_doodad_rigidbody_collider_transforms
-    "${QUARTZ_SCENE_UNIT_TEST_DIR}/doodad/test_doodad_rigidbody_collider_transforms.cpp"
-    "${test_doodad_rigidbody_collider_transforms_link_libraries}"
-)

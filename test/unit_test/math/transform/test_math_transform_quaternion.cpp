@@ -50,6 +50,7 @@ int test_Quaternion_fromAxisAngleRotation() {
 }
 
 int main() {
+    util::Logger::setShouldLogPreamble(false);
     REGISTER_LOGGER_GROUP(TEST);
     REGISTER_LOGGER_GROUP(MATH);
     util::Logger::setLevels({
