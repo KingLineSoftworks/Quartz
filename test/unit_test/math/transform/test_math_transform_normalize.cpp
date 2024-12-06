@@ -24,6 +24,16 @@ float magnitude_helper(UNUSED T input) {
 }
 
 template<>
+float magnitude_helper<math::Quaternion>(math::Quaternion input) {
+    return std::sqrt(
+        input.x * input.x +
+        input.y * input.y +
+        input.z * input.z +
+        input.w * input.w
+    );
+}
+
+template<>
 float magnitude_helper<math::Vec2>(math::Vec2 input) {
     return std::sqrt(
         input.x * input.x +
@@ -67,6 +77,7 @@ int normalize_helper(T input) {
     LOG_DEBUG(UNIT_TEST, "Created const copy of input: {}", copy.toString());
     copy.normalize();
     LOG_DEBUG(UNIT_TEST, "Copy after normalize: {}", copy.toString());
+    UT_CHECK_EQUAL(copy, input);
     UT_CHECK_EQUAL(copy.normalize(), expected);
 
     input.normalize();
@@ -81,7 +92,16 @@ int normalize_helper(T input) {
 // --------------------------------------------------
 
 int test_quaternion_normalization() {
-    return 0;
+    LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
+
+    return normalize_helper<math::Quaternion>({1, 0, 0, 0}) ||
+        normalize_helper<math::Quaternion>({0, -1, 0, 0}) ||
+        normalize_helper<math::Quaternion>({0, 0, 0.372, 0}) ||
+        normalize_helper<math::Quaternion>({0, 0, 0, -21971.33}) ||
+
+        normalize_helper<math::Quaternion>({1, 1, 0, 2001.11}) ||
+        normalize_helper<math::Quaternion>({7314.333, -21881.11, 0.33, -901992.1})
+    ;
 }
 
 // --------------------------------------------------
@@ -136,7 +156,16 @@ int test_vec3_normalization() {
 // --------------------------------------------------
 
 int test_vec4_normalization() {
-    return 0;
+    LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
+
+    return
+        normalize_helper<math::Vec4>({1, 0, 0, 0}) ||
+        normalize_helper<math::Vec4>({0, -1, 0, 0}) ||
+        normalize_helper<math::Vec4>({0, 0, 0.372, 0}) ||
+        normalize_helper<math::Vec4>({0, 0, 0, -21971.33}) ||
+        normalize_helper<math::Vec4>({1, 1, 0, 2001.11}) ||
+        normalize_helper<math::Vec4>({7314.333, -21881.11, 0.33, -901992.1})
+    ;
 }
 
 // --------------------------------------------------
