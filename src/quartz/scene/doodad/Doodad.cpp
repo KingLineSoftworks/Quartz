@@ -141,7 +141,7 @@ quartz::scene::Doodad::snapToRigidBody() {
     }
 
     m_transform.position = mo_rigidBody->getPosition();
-    m_transform.rotation = mo_rigidBody->getOrientation();
+    m_transform.rotation = mo_rigidBody->getRotation();
 }
 
 void
@@ -180,7 +180,7 @@ quartz::scene::Doodad::update(
     math::Transform currentTransform;
     if (mo_rigidBody) {
         currentTransform.position = mo_rigidBody->getPosition();
-        currentTransform.rotation = mo_rigidBody->getOrientation();
+        currentTransform.rotation = mo_rigidBody->getRotation();
         currentTransform.scale = m_transform.scale;
     } else {
         currentTransform = m_transform;

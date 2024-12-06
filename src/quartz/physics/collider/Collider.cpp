@@ -102,8 +102,8 @@ quartz::physics::Collider::getLocalPosition() const {
 }
 
 math::Quaternion
-quartz::physics::Collider::getLocalOrientation() const {
-    return mp_collider->getLocalToBodyTransform().getOrientation();
+quartz::physics::Collider::getLocalRotation() const {
+    return math::Quaternion(mp_collider->getLocalToBodyTransform().getOrientation()).normalize();
 }
 
 math::Vec3
@@ -112,7 +112,7 @@ quartz::physics::Collider::getWorldPosition() const {
 }
 
 math::Quaternion
-quartz::physics::Collider::getWorldOrientation() const {
-    return mp_collider->getLocalToWorldTransform().getOrientation();
+quartz::physics::Collider::getWorldRotation() const {
+    return math::Quaternion(mp_collider->getLocalToWorldTransform().getOrientation()).normalize();
 }
 

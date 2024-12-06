@@ -159,6 +159,13 @@ quartz::physics::RigidBody::setLinearVelocity(
 }
 
 void
+quartz::physics::RigidBody::setAngularVelocity(
+    const math::Vec3& angularVelocity 
+) {
+    mp_rigidBody->setAngularVelocity(angularVelocity);
+}
+
+void
 quartz::physics::RigidBody::applyLocalForceToCenterOfMass(
     const math::Vec3& force
 ) {

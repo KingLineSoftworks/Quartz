@@ -29,6 +29,7 @@ void testFixedUpdateCallback(
 
     o_rigidBody->setLinearVelocity({100.0f, 0.0f, 0.0f});
     o_rigidBody->applyLocalForceToCenterOfMass({0.0f, 10.0f, 0.0f});
+    o_rigidBody->setAngularVelocity({-2788, 388, 190.101});
 }
 
 /**
@@ -66,7 +67,7 @@ void testUpdateCallback(
  *    after being updated with the fixedUpdate function, and after being updated with the regular
  *    update function.
  */
-int test_transforms_DoodadConstruction() {
+int test_transforms() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
     int result = 0;
 
@@ -114,17 +115,17 @@ int test_transforms_DoodadConstruction() {
 
     // get the rigidbody's transform and compare it to the inputTransform
     UT_CHECK_EQUAL(o_rigidBody->getPosition(), inputTransform.position);
-    UT_CHECK_EQUAL(o_rigidBody->getOrientation(), inputTransform.rotation);
+    UT_CHECK_EQUAL(o_rigidBody->getRotation(), inputTransform.rotation);
     
     // get the rigidbody's collider's local transform and compare it to the inputTransform
     const math::Vec3 expectedLocalPosition(0, 0, 0);
     const math::Quaternion expectedLocalOrientation(0, 0, 0, 1);
     UT_CHECK_EQUAL(o_collider->getLocalPosition(), expectedLocalPosition);
-    UT_CHECK_EQUAL(o_collider->getLocalOrientation(), expectedLocalOrientation);
+    UT_CHECK_EQUAL(o_collider->getLocalRotation(), expectedLocalOrientation);
     
     // get the rigidbody's collider's world transform and compare it to the inputTransform
     UT_CHECK_EQUAL(o_collider->getWorldPosition(), inputTransform.position);
-    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), inputTransform.rotation);
+    UT_CHECK_EQUAL(o_collider->getWorldRotation(), inputTransform.rotation);
     
     // get the rigidbody's collider's extents and make sure they match the scale
     const math::Vec3 expectedHalfExtents(
@@ -149,22 +150,15 @@ int test_transforms_DoodadConstruction() {
 
     // get the rigidbody's transform and compare it to the doodad's updated transform
     UT_CHECK_EQUAL(o_rigidBody->getPosition(), doodadFixedUpdateTransform.position);
-    UT_CHECK_EQUAL(o_rigidBody->getOrientation(), doodadFixedUpdateTransform.rotation);
+    UT_CHECK_EQUAL(o_rigidBody->getRotation(), doodadFixedUpdateTransform.rotation);
     
     // get the rigidbody's collider's world transform and compare it to the doodad's transform
     UT_CHECK_EQUAL(o_collider->getWorldPosition(), doodadFixedUpdateTransform.position);
-    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), doodadFixedUpdateTransform.rotation);
+    UT_CHECK_EQUAL(o_collider->getWorldRotation(), doodadFixedUpdateTransform.rotation);
 
     // ------------------------------------------------------------
     // Check the transforms after updating the doodad with update
     // ------------------------------------------------------------
-
-    LOG_TRACE(UNIT_TEST, "");
-    LOG_TRACE(UNIT_TEST, "");
-    LOG_TRACE(UNIT_TEST, "");
-    LOG_TRACE(UNIT_TEST, "");
-    LOG_TRACE(UNIT_TEST, "Checking transforms after update");
-    LOG_TRACE(UNIT_TEST, "");
     
     doodad.update(inputManager, totalElapsedTime + 1.0, currentFrameTimeDelta, frameInterpolationFactor);
 
@@ -172,11 +166,11 @@ int test_transforms_DoodadConstruction() {
 
     // get the rigidbody's transform and compare it to the doodad's updated transform
     UT_CHECK_EQUAL(o_rigidBody->getPosition(), doodadUpdateTransform.position);
-    UT_CHECK_EQUAL(o_rigidBody->getOrientation(), doodadUpdateTransform.rotation);
+    UT_CHECK_EQUAL(o_rigidBody->getRotation(), doodadUpdateTransform.rotation);
     
     // get the rigidbody's collider's world transform and compare it to the doodad's transform
     UT_CHECK_EQUAL(o_collider->getWorldPosition(), doodadUpdateTransform.position);
-    UT_CHECK_EQUAL(o_collider->getWorldOrientation(), doodadUpdateTransform.rotation);
+    UT_CHECK_EQUAL(o_collider->getWorldRotation(), doodadUpdateTransform.rotation);
 
     const math::Vec3 expectedHalfExtentsUpdated(
         boxShapeParameters.halfExtents.x * doodadUpdateTransform.scale.x,
@@ -187,14 +181,6 @@ int test_transforms_DoodadConstruction() {
     UT_CHECK_EQUAL(boxShapeHalfExtentsUpdated, expectedHalfExtentsUpdated);
    
     return result;
-}
-
-int test_transforms_DoodadUpdate() {
-    return 0;
-}
-
-int test_transforms_RigidBodyUpdate() {
-    return 0;
 }
 
 int main() {
@@ -218,8 +204,5 @@ int main() {
         {"INSTANCE", util::Logger::Level::info},
     });
 
-    return
-        test_transforms_DoodadConstruction() ||
-        test_transforms_DoodadUpdate() ||
-        test_transforms_RigidBodyUpdate();
+    return test_transforms();
 }

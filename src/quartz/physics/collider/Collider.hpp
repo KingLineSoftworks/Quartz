@@ -44,9 +44,9 @@ public: // member functions
     const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
     const reactphysics3d::Collider* getColliderPtr() const { return mp_collider; }
     math::Vec3 getLocalPosition() const;
-    math::Quaternion getLocalOrientation() const;
+    math::Quaternion getLocalRotation() const;
     math::Vec3 getWorldPosition() const;
-    math::Quaternion getWorldOrientation() const;
+    math::Quaternion getWorldRotation() const;
 
 public: // static functions
     static reactphysics3d::Collider* createColliderPtr(

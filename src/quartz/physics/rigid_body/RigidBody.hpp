@@ -66,13 +66,14 @@ public: // member functions
 
     math::Vec3 getPosition() const { return mp_rigidBody->getTransform().getPosition(); }
     math::Vec3 getLinearVelocity() const { return mp_rigidBody->getLinearVelocity(); }
-    math::Quaternion getOrientation() const { return mp_rigidBody->getTransform().getOrientation(); }
+    math::Quaternion getRotation() const { return math::Quaternion(mp_rigidBody->getTransform().getOrientation()).normalize(); }
     const std::optional<quartz::physics::Collider>& getColliderOptional() const { return mo_collider; }
 
     void setPosition(const math::Vec3& position);
     void setRotation(const math::Quaternion& rotation);
     void setScale(const math::Vec3& scale);
     void setLinearVelocity(const math::Vec3& linearVelocity);
+    void setAngularVelocity(const math::Vec3& angularVelocity);
     void applyLocalForceToCenterOfMass(const math::Vec3& force);
 
 public: // static functions
