@@ -37,7 +37,7 @@ int main() {
     util::Logger::setLevels({
         // demo app
         {"GENERAL", util::Logger::Level::info},
-        {"BIGBOY", util::Logger::Level::info},
+        {"PLAYER", util::Logger::Level::info},
 
         // math
         {"TRANSFORM", util::Logger::Level::info},

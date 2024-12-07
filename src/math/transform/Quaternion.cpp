@@ -2,6 +2,7 @@
 
 #include <glm/ext/quaternion_trigonometric.hpp>
 
+#include "glm/geometric.hpp"
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
@@ -22,6 +23,35 @@ math::Quaternion::operator==(const math::Quaternion& other) const {
 bool
 math::Quaternion::operator!=(const math::Quaternion& other) const {
     return !(*this == other);
+}
+
+math::Quaternion&
+math::Quaternion::normalize() {
+    if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
+        return *this;
+    }
+
+    glmQuat = glm::normalize(glmQuat);
+
+    return *this;
+}
+
+math::Quaternion
+math::Quaternion::normalize() const {
+    if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
+        return {0.0, 0.0, 0.0, 0.0};
+    }
+    
+    return glm::normalize(glmQuat);
+}
+
+bool
+math::Quaternion::isNormalized() const {
+    if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
+        return true;
+    }
+
+    return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
 }
 
 float

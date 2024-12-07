@@ -39,6 +39,13 @@ DECLARE_LOGGER_GROUP(
     return result;               \
     REQUIRE_SEMICOLON
 
+/**
+ * @todo 2024/12/05 The error reporting in these UT macros should report the line and function of which
+ *    they were invoked so it is easier to track down where things are going wrong. There should be
+ *    portable macros allowing us to get a string containing those values (I believe we are leveraging
+ *    one or both of them in our macro to generate a unique variable name)
+ */
+
 #define UT_CHECK_EQUAL(a, b)                                                                       \
     if (a != b) {                                                                                  \
         std::ostringstream ssA;                                                                    \

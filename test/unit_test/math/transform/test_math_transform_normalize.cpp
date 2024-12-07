@@ -70,7 +70,7 @@ int normalize_helper(T input) {
     const float magnitude = magnitude_helper(input);
     LOG_DEBUG(UNIT_TEST, "Input has magnitude of: {}", magnitude);
 
-    const T expected = input / magnitude;
+    const T expected = (input == T(0.0)) ? input : input / magnitude;
     LOG_DEBUG(UNIT_TEST, "Manually calculated expected normalized vector: {}", expected.toString());
 
     const T copy = input;
@@ -78,11 +78,15 @@ int normalize_helper(T input) {
     copy.normalize();
     LOG_DEBUG(UNIT_TEST, "Copy after normalize: {}", copy.toString());
     UT_CHECK_EQUAL(copy, input);
+    UT_CHECK_EQUAL(copy.isNormalized(), input.isNormalized());
     UT_CHECK_EQUAL(copy.normalize(), expected);
+    UT_CHECK_EQUAL(copy.normalize().isNormalized(), true);
 
     input.normalize();
     LOG_DEBUG(UNIT_TEST, "Input after normalize: {}", input.toString());
     UT_CHECK_EQUAL(input, expected);
+    UT_CHECK_EQUAL(input.isNormalized(), true);
+    UT_CHECK_EQUAL(input.x, input.x); // to ensure not NaN
 
     return result;
 }
@@ -98,6 +102,8 @@ int test_quaternion_normalization() {
         normalize_helper<math::Quaternion>({0, -1, 0, 0}) ||
         normalize_helper<math::Quaternion>({0, 0, 0.372, 0}) ||
         normalize_helper<math::Quaternion>({0, 0, 0, -21971.33}) ||
+
+        normalize_helper<math::Quaternion>({0, 0, 0, 0}) ||
 
         normalize_helper<math::Quaternion>({1, 1, 0, 2001.11}) ||
         normalize_helper<math::Quaternion>({7314.333, -21881.11, 0.33, -901992.1})
@@ -118,7 +124,8 @@ int test_vec2_normalization() {
         normalize_helper<math::Vec2>({-0.3684, -0.0418}) ||
         normalize_helper<math::Vec2>({1.0, 0}) ||
         normalize_helper<math::Vec2>({0.88, 0.88}) ||
-        normalize_helper<math::Vec2>({0, -0.04})
+        normalize_helper<math::Vec2>({0, -0.04}) ||
+        normalize_helper<math::Vec2>({0, 0})
     ;
 }
 
@@ -132,6 +139,8 @@ int test_vec3_normalization() {
     return normalize_helper<math::Vec3>({1, 0, 0}) ||
         normalize_helper<math::Vec3>({0, 739, 0}) ||
         normalize_helper<math::Vec3>({0, 0, -0.1683}) ||
+
+        normalize_helper<math::Vec3>({0, 0, 0}) ||
 
         normalize_helper<math::Vec3>({1793, 38.08, 0}) ||
         normalize_helper<math::Vec3>({0, 1000, 0.1683}) ||
@@ -159,6 +168,7 @@ int test_vec4_normalization() {
     LOG_FUNCTION_SCOPE_INFO(UNIT_TEST, "");
 
     return
+        normalize_helper<math::Vec4>({0, 0, 0, 0}) ||
         normalize_helper<math::Vec4>({1, 0, 0, 0}) ||
         normalize_helper<math::Vec4>({0, -1, 0, 0}) ||
         normalize_helper<math::Vec4>({0, 0, 0.372, 0}) ||
