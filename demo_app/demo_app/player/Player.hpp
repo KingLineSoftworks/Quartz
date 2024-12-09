@@ -10,6 +10,9 @@ public: // member functions
     void fixedUpdateCallback(
         quartz::scene::Doodad::FixedUpdateCallbackParameters parameters 
     );
+    void updateCallback(
+        quartz::scene::Doodad::UpdateCallbackParameters parameters
+    );
 
 private: // member functions
 

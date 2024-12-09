@@ -54,3 +54,9 @@ Player::fixedUpdateCallback(
     this->movementFixedUpdate(parameters.p_doodad, parameters.inputManager);
 }
 
+void
+Player::updateCallback(
+    UNUSED quartz::scene::Doodad::UpdateCallbackParameters parameters
+) {
+
+}

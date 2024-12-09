@@ -11,6 +11,16 @@
 #include "util/logger/Logger.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
+void
+quartz::scene::Doodad::noopFixedUpdateCallback(
+    UNUSED quartz::scene::Doodad::FixedUpdateCallbackParameters parameters
+) {}
+
+void
+quartz::scene::Doodad::noopUpdateCallback(
+    UNUSED quartz::scene::Doodad::UpdateCallbackParameters parameters
+) {}
+
 math::Transform
 quartz::scene::Doodad::fixTransform(
     const math::Transform& transform
@@ -46,8 +56,8 @@ quartz::scene::Doodad::Doodad(
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
     ),
-    m_fixedUpdateCallback(fixedUpdateCallback),
-    m_updateCallback(updateCallback)
+    m_fixedUpdateCallback(fixedUpdateCallback ? fixedUpdateCallback : quartz::scene::Doodad::noopFixedUpdateCallback),
+    m_updateCallback(updateCallback ? updateCallback : quartz::scene::Doodad::noopUpdateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -74,8 +84,8 @@ quartz::scene::Doodad::Doodad(
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
     ),
-    m_fixedUpdateCallback(doodadParameters.fixedUpdateCallback),
-    m_updateCallback(doodadParameters.updateCallback)
+    m_fixedUpdateCallback(doodadParameters.fixedUpdateCallback ? doodadParameters.fixedUpdateCallback : quartz::scene::Doodad::noopFixedUpdateCallback),
+    m_updateCallback(doodadParameters.updateCallback ? doodadParameters.updateCallback : quartz::scene::Doodad::noopUpdateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
     LOG_TRACEthis("Constructing doodad with transform:");
@@ -149,10 +159,7 @@ quartz::scene::Doodad::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
     const double totalElapsedTime
 ) {
-    if (m_fixedUpdateCallback) {
-        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback({this, inputManager, totalElapsedTime}); };
-        safeFixedUpdateCallback();
-    }
+    m_fixedUpdateCallback({this, inputManager, totalElapsedTime});
 }
 
 void
@@ -162,10 +169,7 @@ quartz::scene::Doodad::update(
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
-    if (m_updateCallback) {
-        auto safeUpdateCallback = [&] () noexcept { m_updateCallback({this, inputManager, totalElapsedTime, frameTimeDelta, frameInterpolationFactor}); };
-        safeUpdateCallback();
-    }
+    m_updateCallback({this, inputManager, totalElapsedTime, frameTimeDelta, frameInterpolationFactor});
 
     /**
      * @detail 2024/12/01 We want to update the rigid body's positon and rotation when we update the doodad's
@@ -212,3 +216,4 @@ quartz::scene::Doodad::update(
 
     m_transform = currentTransform;
 }
+

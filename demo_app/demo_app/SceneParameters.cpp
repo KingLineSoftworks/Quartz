@@ -10,7 +10,7 @@
 
 quartz::scene::Scene::Parameters
 createDemoLevelSceneParameters(
-    UNUSED Player& player
+    Player& player
 ) {
     std::vector<quartz::scene::Doodad::Parameters> doodadParameters = {
         {
@@ -28,7 +28,7 @@ createDemoLevelSceneParameters(
                 quartz::physics::BoxShape::Parameters({1.0f, 1.0f, 1.0f})
             }},
             [&player] (quartz::scene::Doodad::FixedUpdateCallbackParameters parameters) { player.fixedUpdateCallback(parameters); },
-            {}
+            [&player] (quartz::scene::Doodad::UpdateCallbackParameters parameters) { player.updateCallback(parameters); }
         },
         {
             util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_sphere/glb/unit_sphere.glb"),

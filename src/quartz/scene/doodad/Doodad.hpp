@@ -137,6 +137,8 @@ public: // member functions
     );
 
 private: // static functions
+    static void noopFixedUpdateCallback(FixedUpdateCallbackParameters parameters);
+    static void noopUpdateCallback(UpdateCallbackParameters parameters);
     static math::Transform fixTransform(const math::Transform& transform);
 
 private: // member variables
