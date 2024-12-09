@@ -8,12 +8,12 @@ include(ApplicationVersion)
 add_executable(
     ${APPLICATION_NAME}
     main.cpp
+    Boilerplate.hpp
+    Boilerplate.cpp
     SceneParameters.hpp
     SceneParameters.cpp
     player/Player.hpp
     player/Player.cpp
-    player/PlayerMovement.hpp
-    player/PlayerMovement.cpp
 )
 
 target_include_directories(

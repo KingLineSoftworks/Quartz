@@ -4,4 +4,8 @@
 
 #include "quartz/scene/scene/Scene.hpp"
 
-std::vector<quartz::scene::Scene::Parameters> getSceneParameters();
+#include "demo_app/player/Player.hpp"
+
+quartz::scene::Scene::Parameters createDemoLevelSceneParameters(
+    Player& player
+);

@@ -8,7 +8,10 @@
 #include "demo_app/SceneParameters.hpp"
 #include "demo_app/player/Player.hpp"
 
-std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
+quartz::scene::Scene::Parameters
+createDemoLevelSceneParameters(
+    UNUSED Player& player
+) {
     std::vector<quartz::scene::Doodad::Parameters> doodadParameters = {
         {
             util::FileSystem::getAbsoluteFilepathInProjectDirectory("assets/models/unit_models/unit_cube/glb/unit_cube.glb"),
@@ -24,7 +27,13 @@ std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
                 math::Vec3(0.0, 1.0, 0.0),
                 quartz::physics::BoxShape::Parameters({1.0f, 1.0f, 1.0f})
             }},
-            playerFixedUpdateCallback,
+            [&player] (
+                quartz::scene::Doodad* const p_doodad,
+                const quartz::managers::InputManager& inputManager,
+                const double totalElapsedTime
+            ) {
+                player.fixedUpdateCallback(p_doodad, inputManager, totalElapsedTime);
+            },
             {}
         },
         {
@@ -92,19 +101,17 @@ std::vector<quartz::scene::Scene::Parameters> getSceneParameters() {
 
     std::optional<quartz::physics::Field::Parameters> o_fieldParameters({{0.0, -1.0, 0.0}});
 
-    return {
-        { 
-            "default_test_scene_00",
-            camera,
-            ambientLight,
-            directionalLight,
-            pointLights,
-            spotLights,
-            screenClearColor,
-            skyBoxInformation,
-            doodadParameters,
-            o_fieldParameters
-        }
+    return { 
+        "default_test_scene_00",
+        camera,
+        ambientLight,
+        directionalLight,
+        pointLights,
+        spotLights,
+        screenClearColor,
+        skyBoxInformation,
+        doodadParameters,
+        o_fieldParameters
     };
 }
 
