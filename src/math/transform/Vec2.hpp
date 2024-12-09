@@ -118,11 +118,11 @@ union math::Vec2 {
     float dot(const glm::vec2& other)               const { return glm::dot(glmVec, other); }
     float dot(const reactphysics3d::Vector2& other) const { return rp3dVec.dot(other); }
 
-    Vec2& normalize() { glmVec = glm::normalize(glmVec); return *this; }
-    Vec2 normalize() const { return {glm::normalize(glmVec)}; }
+    Vec2& normalize();
+    Vec2 normalize() const;
 
     float magnitude() const { return glm::length(glmVec); }
-    bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
+    bool isNormalized() const;
 
     /**
      * -------------------------------------------------------------------------------------

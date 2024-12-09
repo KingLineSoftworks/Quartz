@@ -576,12 +576,16 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
     const quartz::scene::Doodad& doodad,
     const uint32_t inFlightFrameIndex
 ) {
+    if (!doodad.getModelOptional()) {
+        return;
+    }
+
     const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
 
     std::queue<std::shared_ptr<quartz::rendering::Node>> nodeQueue(
         std::deque(
-            doodad.getModel().getDefaultScene().getRootNodePtrs().begin(),
-            doodad.getModel().getDefaultScene().getRootNodePtrs().end()
+            doodad.getModelOptional()->getDefaultScene().getRootNodePtrs().begin(),
+            doodad.getModelOptional()->getDefaultScene().getRootNodePtrs().end()
         )
     );
 

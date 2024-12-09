@@ -124,11 +124,11 @@ union math::Vec3 {
     Vec3 cross(const glm::vec3& other)               const { return glm::cross(glmVec, other); }
     Vec3 cross(const reactphysics3d::Vector3& other) const { return rp3dVec.cross(other); }
 
-    Vec3& normalize() { glmVec = glm::normalize(glmVec); return *this; }
-    Vec3 normalize() const { return {glm::normalize(glmVec)}; }
+    Vec3& normalize();
+    Vec3 normalize() const;
 
     float magnitude() const { return glm::length(glmVec); }
-    bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
+    bool isNormalized() const;
 
     /**
      * -------------------------------------------------------------------------------------

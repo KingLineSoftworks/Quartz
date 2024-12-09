@@ -27,7 +27,7 @@ public: // classes
             const reactphysics3d::BodyType bodyType_,
             const bool enableGravity_,
             const math::Vec3& angularAxisFactor_,
-            const std::variant<std::monostate, quartz::physics::BoxCollider::Parameters, quartz::physics::SphereCollider::Parameters>& v_colliderParameters_
+            const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_colliderParameters_
         ) :
             bodyType(bodyType_),
             enableGravity(enableGravity_),
@@ -38,7 +38,7 @@ public: // classes
         reactphysics3d::BodyType bodyType;
         bool enableGravity;
         math::Vec3 angularLockAxisFactor;
-        std::variant<std::monostate, quartz::physics::BoxCollider::Parameters, quartz::physics::SphereCollider::Parameters> v_colliderParameters;
+        std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_colliderParameters;
     };
 
 public: // member functions
@@ -46,12 +46,12 @@ public: // member functions
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::BoxCollider::Parameters& boxColliderParameters
+        const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
+        const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
@@ -64,8 +64,17 @@ public: // member functions
 
     USE_LOGGER(RIGIDBODY);
 
-    math::Vec3 getPosition() { return mp_rigidBody->getTransform().getPosition(); }
-    math::Quaternion getOrientation() { return mp_rigidBody->getTransform().getOrientation(); }
+    math::Vec3 getPosition() const { return mp_rigidBody->getTransform().getPosition(); }
+    math::Vec3 getLinearVelocity() const { return mp_rigidBody->getLinearVelocity(); }
+    math::Quaternion getRotation() const { return math::Quaternion(mp_rigidBody->getTransform().getOrientation()).normalize(); }
+    const std::optional<quartz::physics::Collider>& getColliderOptional() const { return mo_collider; }
+
+    void setPosition(const math::Vec3& position);
+    void setRotation(const math::Quaternion& rotation);
+    void setScale(const math::Vec3& scale);
+    void setLinearVelocity(const math::Vec3& linearVelocity);
+    void setAngularVelocity(const math::Vec3& angularVelocity);
+    void applyLocalForceToCenterOfMass(const math::Vec3& force);
 
 public: // static functions
     static reactphysics3d::RigidBody* createRigidBodyPtr(
