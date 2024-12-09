@@ -21,11 +21,9 @@
  * @brief The fixedUpdate callback we are going to give to the doodad in our testing scenarios
  */
 void testFixedUpdateCallback(
-    quartz::scene::Doodad* const p_doodad,
-    UNUSED const quartz::managers::InputManager& inputManager,
-    UNUSED const double totalElapsedTime
+    quartz::scene::Doodad::FixedUpdateCallbackParameters parameters
 ) {
-    std::optional<quartz::physics::RigidBody>& o_rigidBody = p_doodad->getRigidBodyOptionalReference();
+    std::optional<quartz::physics::RigidBody>& o_rigidBody = parameters.p_doodad->getRigidBodyOptionalReference();
 
     o_rigidBody->setLinearVelocity({100.0f, 0.0f, 0.0f});
     o_rigidBody->applyLocalForceToCenterOfMass({0.0f, 10.0f, 0.0f});
@@ -36,17 +34,13 @@ void testFixedUpdateCallback(
  * @brief The udpate callback we are going to give to the doodad in our testing scenarios
  */
 void testUpdateCallback(
-    quartz::scene::Doodad* const p_doodad,
-    UNUSED const quartz::managers::InputManager& inputManager,
-    UNUSED const double totalElapsedTime,
-    UNUSED const double frameTimeDelta,
-    UNUSED const double frameInterpolationFactor
+    quartz::scene::Doodad::UpdateCallbackParameters parameters
 ) {
     LOG_FUNCTION_CALL_INFO(UNIT_TEST, "");
 
     const math::Vec3 position(3.3, 4.4, 5.5);
     LOG_TRACE(UNIT_TEST, "Setting doodad's position to {}", position.toString());
-    p_doodad->setPosition(position);
+    parameters.p_doodad->setPosition(position);
 
     position.normalize();
     LOG_TRACE(UNIT_TEST, "Normalized position {}", position.toString());
@@ -55,11 +49,11 @@ void testUpdateCallback(
     LOG_TRACE(UNIT_TEST, "Creating inital rotation with quaternion of {}", rotation.toString());
     rotation.normalize();
     LOG_TRACE(UNIT_TEST, "Setting doodad's rotation to {}", rotation.toString());
-    p_doodad->setRotation(rotation);
+    parameters.p_doodad->setRotation(rotation);
 
     const math::Vec3 scale(42, 666, 9);
     LOG_TRACE(UNIT_TEST, "Setting doodad's scale to {}", scale.toString());
-    p_doodad->setScale(scale);
+    parameters.p_doodad->setScale(scale);
 }
 
 /**

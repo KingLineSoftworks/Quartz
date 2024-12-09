@@ -27,13 +27,7 @@ createDemoLevelSceneParameters(
                 math::Vec3(0.0, 1.0, 0.0),
                 quartz::physics::BoxShape::Parameters({1.0f, 1.0f, 1.0f})
             }},
-            [&player] (
-                quartz::scene::Doodad* const p_doodad,
-                const quartz::managers::InputManager& inputManager,
-                const double totalElapsedTime
-            ) {
-                player.fixedUpdateCallback(p_doodad, inputManager, totalElapsedTime);
-            },
+            [&player] (quartz::scene::Doodad::FixedUpdateCallbackParameters parameters) { player.fixedUpdateCallback(parameters); },
             {}
         },
         {

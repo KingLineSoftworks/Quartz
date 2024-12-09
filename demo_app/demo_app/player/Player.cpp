@@ -49,10 +49,8 @@ Player::Player() :
 
 void
 Player::fixedUpdateCallback(
-    quartz::scene::Doodad* const p_doodad,
-    const quartz::managers::InputManager& inputManager,
-    UNUSED const double totalElapsedTime
+    quartz::scene::Doodad::FixedUpdateCallbackParameters parameters
 ) {
-    this->movementFixedUpdate(p_doodad, inputManager);
+    this->movementFixedUpdate(parameters.p_doodad, parameters.inputManager);
 }
 

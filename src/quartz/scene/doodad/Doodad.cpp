@@ -150,7 +150,7 @@ quartz::scene::Doodad::fixedUpdate(
     const double totalElapsedTime
 ) {
     if (m_fixedUpdateCallback) {
-        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback(this, inputManager, totalElapsedTime); };
+        auto safeFixedUpdateCallback = [&] () { m_fixedUpdateCallback({this, inputManager, totalElapsedTime}); };
         safeFixedUpdateCallback();
     }
 }
@@ -163,7 +163,7 @@ quartz::scene::Doodad::update(
     const double frameInterpolationFactor
 ) {
     if (m_updateCallback) {
-        auto safeUpdateCallback = [&] () noexcept { m_updateCallback(this, inputManager, totalElapsedTime, frameTimeDelta, frameInterpolationFactor); };
+        auto safeUpdateCallback = [&] () noexcept { m_updateCallback({this, inputManager, totalElapsedTime, frameTimeDelta, frameInterpolationFactor}); };
         safeUpdateCallback();
     }
 

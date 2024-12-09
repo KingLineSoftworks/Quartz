@@ -8,9 +8,7 @@ public: // member functions
     Player();
 
     void fixedUpdateCallback(
-        quartz::scene::Doodad* const p_doodad,
-        const quartz::managers::InputManager& inputManager,
-        const double totalElapsedTime
+        quartz::scene::Doodad::FixedUpdateCallbackParameters parameters 
     );
 
 private: // member functions
