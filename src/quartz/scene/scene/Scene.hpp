@@ -121,7 +121,7 @@ public: // member functions
     );
 
 private: // static functions
-    static std::vector<quartz::scene::Doodad> loadDoodads(
+    static std::vector<quartz::scene::Doodad> constructDoodads(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
         std::optional<quartz::physics::Field>& o_field,

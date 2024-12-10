@@ -27,7 +27,7 @@ public:
 };
 
 std::vector<quartz::scene::Doodad>
-quartz::scene::Scene::loadDoodads(
+quartz::scene::Scene::constructDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
@@ -41,6 +41,7 @@ quartz::scene::Scene::loadDoodads(
         const std::optional<std::string>& o_filepath = parameters.o_objectFilepath;
         const math::Transform& transform = parameters.transform;
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = parameters.o_rigidBodyParameters;
+        const quartz::scene::Doodad::AwakenCallback awakenCallback = parameters.awakenCallback;
         const quartz::scene::Doodad::FixedUpdateCallback fixedUpdateCallback = parameters.fixedUpdateCallback;
         const quartz::scene::Doodad::UpdateCallback updateCallback = parameters.updateCallback;
 
@@ -55,7 +56,7 @@ quartz::scene::Scene::loadDoodads(
             LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(o_rigidBodyInformation->bodyType));
             LOG_TRACE(SCENE, "    gravity enabled = {}", o_rigidBodyInformation->enableGravity);
         } else {
-            LOG_TRACE(SCENE, "    none");
+            LOG_TRACE(SCENE, "    no rigid body");
         }
 
         doodads.emplace_back(
@@ -65,6 +66,7 @@ quartz::scene::Scene::loadDoodads(
             o_filepath,
             transform,
             o_rigidBodyInformation,
+            awakenCallback,
             fixedUpdateCallback,
             updateCallback
         );
@@ -148,7 +150,7 @@ quartz::scene::Scene::load(
     );
     LOG_TRACEthis("Loaded skybox");
 
-    m_doodads = quartz::scene::Scene::loadDoodads(
+    m_doodads = quartz::scene::Scene::constructDoodads(
         renderingDevice,
         physicsManager,
         mo_field,
@@ -170,6 +172,11 @@ quartz::scene::Scene::load(
 
     m_screenClearColor = screenClearColor;
     LOG_TRACEthis("Loaded screen clear color {}", m_screenClearColor.toString());
+
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.awaken();
+    }
+    LOG_TRACEthis("Awoke all doodads");
 }
 
 

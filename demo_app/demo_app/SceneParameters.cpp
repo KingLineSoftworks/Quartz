@@ -27,6 +27,7 @@ createDemoLevelSceneParameters(
                 math::Vec3(0.0, 1.0, 0.0),
                 quartz::physics::BoxShape::Parameters({1.0f, 1.0f, 1.0f})
             }},
+            {},
             [&player] (quartz::scene::Doodad::FixedUpdateCallbackParameters parameters) { player.fixedUpdateCallback(parameters); },
             [&player] (quartz::scene::Doodad::UpdateCallbackParameters parameters) { player.updateCallback(parameters); }
         },
@@ -45,6 +46,7 @@ createDemoLevelSceneParameters(
                 quartz::physics::SphereShape::Parameters(1.0)
             }},
             {},
+            {},
             {}
         },
         {
@@ -61,6 +63,7 @@ createDemoLevelSceneParameters(
                 math::Vec3(1.0, 1.0, 1.0),
                 quartz::physics::BoxShape::Parameters({25.0f, 1.0f, 25.0f})
             }},
+            {},
             {},
             {}
         },

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "quartz/managers/input_manager/InputManager.hpp"
+#include "quartz/scene/camera/Camera.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
 class Player {
@@ -30,5 +31,8 @@ private: // member functions
 
 private: // member variables
     double m_movementSpeed;
+
+    UNUSED double m_distanceToCamera;
+    UNUSED quartz::scene::Camera m_camera;
 };
 

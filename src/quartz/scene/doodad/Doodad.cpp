@@ -12,6 +12,11 @@
 #include "quartz/scene/doodad/Doodad.hpp"
 
 void
+quartz::scene::Doodad::noopAwakenCallback(
+    UNUSED quartz::scene::Doodad::AwakenCallbackParameters parameters
+) {}
+
+void
 quartz::scene::Doodad::noopFixedUpdateCallback(
     UNUSED quartz::scene::Doodad::FixedUpdateCallbackParameters parameters
 ) {}
@@ -41,6 +46,7 @@ quartz::scene::Doodad::Doodad(
     const std::optional<std::string>& o_objectFilepath,
     const math::Transform& transform,
     const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
+    const quartz::scene::Doodad::AwakenCallback& awakenCallback,
     const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
     const quartz::scene::Doodad::UpdateCallback& updateCallback
 ) :
@@ -56,6 +62,7 @@ quartz::scene::Doodad::Doodad(
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
     ),
+    m_awakenCallback(awakenCallback ? awakenCallback : quartz::scene::Doodad::noopAwakenCallback),
     m_fixedUpdateCallback(fixedUpdateCallback ? fixedUpdateCallback : quartz::scene::Doodad::noopFixedUpdateCallback),
     m_updateCallback(updateCallback ? updateCallback : quartz::scene::Doodad::noopUpdateCallback)
 {
@@ -84,6 +91,7 @@ quartz::scene::Doodad::Doodad(
             std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
     ),
+    m_awakenCallback(doodadParameters.awakenCallback ? doodadParameters.awakenCallback : quartz::scene::Doodad::noopAwakenCallback),
     m_fixedUpdateCallback(doodadParameters.fixedUpdateCallback ? doodadParameters.fixedUpdateCallback : quartz::scene::Doodad::noopFixedUpdateCallback),
     m_updateCallback(doodadParameters.updateCallback ? doodadParameters.updateCallback : quartz::scene::Doodad::noopUpdateCallback)
 {
@@ -101,6 +109,7 @@ quartz::scene::Doodad::Doodad(
     m_transform(other.m_transform),
     m_transformationMatrix(other.m_transformationMatrix),
     mo_rigidBody(std::move(other.mo_rigidBody)),
+    m_awakenCallback(std::move(other.m_awakenCallback)),
     m_fixedUpdateCallback(std::move(other.m_fixedUpdateCallback)),
     m_updateCallback(std::move(other.m_updateCallback))
 {
@@ -152,6 +161,12 @@ quartz::scene::Doodad::snapToRigidBody() {
 
     m_transform.position = mo_rigidBody->getPosition();
     m_transform.rotation = mo_rigidBody->getRotation();
+}
+
+void
+quartz::scene::Doodad::awaken() {
+    LOG_FUNCTION_CALL_DEBUGthis("");
+    m_awakenCallback({});
 }
 
 void

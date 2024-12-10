@@ -23,6 +23,10 @@ namespace scene {
 
 class quartz::scene::Doodad {
 public: // aliases
+    struct AwakenCallbackParameters {
+        AwakenCallbackParameters() {}
+    };
+
     struct FixedUpdateCallbackParameters {
         FixedUpdateCallbackParameters(
             Doodad* const p_doodad_,
@@ -61,6 +65,7 @@ public: // aliases
         const double frameInterpolationFactor;
     };
 
+    using AwakenCallback = std::function<void(AwakenCallbackParameters parameters)>;
     using FixedUpdateCallback = std::function<void(FixedUpdateCallbackParameters parameters)>;
     using UpdateCallback = std::function<void(UpdateCallbackParameters parameters)>;
 
@@ -70,12 +75,14 @@ public: // classes
             const std::optional<std::string>& o_objectFilepath_,
             const math::Transform& transform_,
             const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters_,
+            const AwakenCallback& awakenCallback_,
             const FixedUpdateCallback& fixedUpdateCallback_,
             const UpdateCallback& updateCallback_
         ) :
             o_objectFilepath(o_objectFilepath_),
             transform(transform_),
             o_rigidBodyParameters(o_rigidBodyParameters_),
+            awakenCallback(awakenCallback_),
             fixedUpdateCallback(fixedUpdateCallback_),
             updateCallback(updateCallback_)
         {}
@@ -83,6 +90,7 @@ public: // classes
         std::optional<std::string> o_objectFilepath;
         math::Transform transform;
         std::optional<quartz::physics::RigidBody::Parameters> o_rigidBodyParameters;
+        AwakenCallback awakenCallback;
         FixedUpdateCallback fixedUpdateCallback;
         UpdateCallback updateCallback;
     };
@@ -95,6 +103,7 @@ public: // member functions
         const std::optional<std::string>& o_objectFilepath,
         const math::Transform& transform,
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyParameters,
+        const quartz::scene::Doodad::AwakenCallback& awakenCallback,
         const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
         const quartz::scene::Doodad::UpdateCallback& updateCallback
     );
@@ -119,12 +128,13 @@ public: // member functions
     void setPosition(const math::Vec3& position);
     void setRotation(const math::Quaternion& rotation);
     void setScale(const math::Vec3& scale);
+    void snapToRigidBody();
     
     /**
      * @todo 2024/11/25 Make these update functions private and allow the quartz::scene::Scene class
      *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::UnitTestClient)
-     */ 
-    void snapToRigidBody();
+     */
+    void awaken();
     void fixedUpdate(
         const quartz::managers::InputManager& inputManager,
         const double totalElapsedTime
@@ -137,6 +147,7 @@ public: // member functions
     );
 
 private: // static functions
+    static void noopAwakenCallback(AwakenCallbackParameters parameters);
     static void noopFixedUpdateCallback(FixedUpdateCallbackParameters parameters);
     static void noopUpdateCallback(UpdateCallbackParameters parameters);
     static math::Transform fixTransform(const math::Transform& transform);
@@ -149,6 +160,7 @@ private: // member variables
 
     std::optional<quartz::physics::RigidBody> mo_rigidBody;
 
+    AwakenCallback m_awakenCallback;
     FixedUpdateCallback m_fixedUpdateCallback;
     UpdateCallback m_updateCallback;
 };

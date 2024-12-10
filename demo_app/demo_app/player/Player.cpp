@@ -10,6 +10,9 @@ math::Vec3
 Player::determineLateralMovementDirection(
     const quartz::managers::InputManager& inputManager
 ) {
+    // Take into account the direction that the player is facing and ensure that
+    //   the w key is moving forwards along that direction
+
     math::Vec3 movementDirection(0.0f, 0.0f, 0.0f);
     if (inputManager.getKeyDown_w()) {
         movementDirection.x += 1.0f;
@@ -44,7 +47,9 @@ Player::movementFixedUpdate(
 }
 
 Player::Player() :
-    m_movementSpeed(5.0)
+    m_movementSpeed(5.0),
+    m_distanceToCamera(5.0),
+    m_camera()
 {}
 
 void
@@ -58,5 +63,12 @@ void
 Player::updateCallback(
     UNUSED quartz::scene::Doodad::UpdateCallbackParameters parameters
 ) {
+    // Rotate the camera horizontally based on the lateral mouse input
+    //   (rotate the camera around the player's y location)
+    
+    // Move the camera vertically based on the vertical mouse input
 
+    // Ensure the player is facing in the same direction as the camera
+    //   (rotate player around y axis based on the rotation of the camera)
 }
+
