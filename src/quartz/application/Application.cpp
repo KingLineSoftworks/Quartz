@@ -129,3 +129,4 @@ quartz::Application::processInput() {
         m_inputManager.setShouldCollectKeyInput(!m_isPaused);
     }
 }
+

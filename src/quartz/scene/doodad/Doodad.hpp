@@ -17,6 +17,7 @@
 
 namespace quartz {
 namespace scene {
+    class Scene; // need this declaration so we can use it in our awaken functions
     class Doodad;
 }
 }
@@ -24,7 +25,13 @@ namespace scene {
 class quartz::scene::Doodad {
 public: // aliases
     struct AwakenCallbackParameters {
-        AwakenCallbackParameters() {}
+        AwakenCallbackParameters(
+            quartz::scene::Scene* const p_scene_
+        ) :
+            p_scene(p_scene_)
+        {}
+
+        quartz::scene::Scene* const p_scene;
     };
 
     struct FixedUpdateCallbackParameters {
@@ -134,7 +141,9 @@ public: // member functions
      * @todo 2024/11/25 Make these update functions private and allow the quartz::scene::Scene class
      *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::UnitTestClient)
      */
-    void awaken();
+    void awaken(
+        quartz::scene::Scene* const p_scene
+    );
     void fixedUpdate(
         const quartz::managers::InputManager& inputManager,
         const double totalElapsedTime

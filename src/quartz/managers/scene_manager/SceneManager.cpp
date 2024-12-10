@@ -70,7 +70,6 @@ quartz::managers::SceneManager::loadScene(
     m_scenes[index].load(
         renderingDevice,
         physicsManager,
-        sceneParameters.camera,
         sceneParameters.ambientLight,
         sceneParameters.directionalLight,
         sceneParameters.pointLights,

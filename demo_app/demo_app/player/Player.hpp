@@ -8,12 +8,9 @@ class Player {
 public: // member functions
     Player();
 
-    void fixedUpdateCallback(
-        quartz::scene::Doodad::FixedUpdateCallbackParameters parameters 
-    );
-    void updateCallback(
-        quartz::scene::Doodad::UpdateCallbackParameters parameters
-    );
+    void awakenCallback(quartz::scene::Doodad::AwakenCallbackParameters parameters);
+    void fixedUpdateCallback(quartz::scene::Doodad::FixedUpdateCallbackParameters parameters);
+    void updateCallback(quartz::scene::Doodad::UpdateCallbackParameters parameters);
 
 private: // member functions
 

@@ -54,7 +54,7 @@ public: // member functions
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
     const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
 
-    void fixedUpdate(const quartz::managers::InputManager& inputManager);
+    // void fixedUpdate(const quartz::managers::InputManager& inputManager);
     void update(
         const float windowWidth,
         const float windowHeight,

@@ -27,7 +27,7 @@ createDemoLevelSceneParameters(
                 math::Vec3(0.0, 1.0, 0.0),
                 quartz::physics::BoxShape::Parameters({1.0f, 1.0f, 1.0f})
             }},
-            {},
+            [&player] (quartz::scene::Doodad::AwakenCallbackParameters parameters) { player.awakenCallback(parameters); },
             [&player] (quartz::scene::Doodad::FixedUpdateCallbackParameters parameters) { player.fixedUpdateCallback(parameters); },
             [&player] (quartz::scene::Doodad::UpdateCallbackParameters parameters) { player.updateCallback(parameters); }
         },
@@ -69,14 +69,6 @@ createDemoLevelSceneParameters(
         },
     };
 
-    quartz::scene::Camera camera(
-        0.0f, // rotation around x-axis (up down)
-        -90.0f, // rotation around y-axis (left right)
-        0.0f,
-        75.0f,
-        { 1.25f, 0.0f, 10.0f }
-    );
-
     quartz::scene::AmbientLight ambientLight({ 0.1f, 0.1f, 0.1f });
 
     quartz::scene::DirectionalLight directionalLight({ 0.5f, 0.5f, 0.5f }, { 3.0f, -2.0f, 2.0f });
@@ -100,7 +92,6 @@ createDemoLevelSceneParameters(
 
     return { 
         "default_test_scene_00",
-        camera,
         ambientLight,
         directionalLight,
         pointLights,

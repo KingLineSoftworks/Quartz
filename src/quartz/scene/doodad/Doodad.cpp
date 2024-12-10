@@ -164,9 +164,11 @@ quartz::scene::Doodad::snapToRigidBody() {
 }
 
 void
-quartz::scene::Doodad::awaken() {
+quartz::scene::Doodad::awaken(
+    quartz::scene::Scene* p_scene
+) {
     LOG_FUNCTION_CALL_DEBUGthis("");
-    m_awakenCallback({});
+    m_awakenCallback({p_scene});
 }
 
 void

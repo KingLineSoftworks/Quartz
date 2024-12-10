@@ -2,7 +2,7 @@
 
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
-#include <mach/notify.h>
+#include "quartz/scene/scene/Scene.hpp"
 
 #include "demo_app/player/Player.hpp"
 
@@ -49,8 +49,21 @@ Player::movementFixedUpdate(
 Player::Player() :
     m_movementSpeed(5.0),
     m_distanceToCamera(5.0),
-    m_camera()
+    m_camera(
+        0.0f, // rotation around x-axis (up down)
+        -90.0f, // rotation around y-axis (left right)
+        0.0f,
+        75.0f,
+        { 1.25f, 0.0f, 10.0f }
+    )
 {}
+
+void
+Player::awakenCallback(
+    quartz::scene::Doodad::AwakenCallbackParameters parameters
+) {
+    parameters.p_scene->setCamera(m_camera);
+}
 
 void
 Player::fixedUpdateCallback(

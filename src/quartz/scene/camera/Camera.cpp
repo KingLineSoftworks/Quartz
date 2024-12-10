@@ -32,9 +32,7 @@ quartz::scene::Camera::Camera() :
     ),
     m_viewMatrix(),
     m_projectionMatrix()
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
+{}
 
 quartz::scene::Camera::Camera(
     const double pitch,
@@ -78,49 +76,49 @@ quartz::scene::Camera::~Camera() {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
 
-void
-quartz::scene::Camera::fixedUpdate(
-    const quartz::managers::InputManager& inputManager
-) {
-    // ----- update orientation ----- //
-
-    const float mouseSensitivity = 0.25f;
-
-    const float calibratedMousePositionOffset_x = inputManager.getMousePositionOffset_x() * mouseSensitivity;
-    const float calibratedMousePositionOffset_y = inputManager.getMousePositionOffset_y() * mouseSensitivity;
-
-    m_pitch += calibratedMousePositionOffset_y;
-    if (m_pitch > 89.5f) {
-        m_pitch = 89.5f;
-    } else if (m_pitch < -89.5f) {
-        m_pitch = -89.5f;
-    }
-
-    m_yaw = glm::mod(m_yaw - calibratedMousePositionOffset_x, 360.0f);
-
-    const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
-
-    math::Vec3 currentLookVector;
-    currentLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector.y = sin(glm::radians(m_pitch));
-    currentLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector.normalize();
-
-    math::Vec3 currentRightVector = currentLookVector.cross(worldUpVector).normalize();
-
-    math::Vec3 currentUpVector = currentRightVector.cross(currentLookVector).normalize();
-
-    // ----- update fov ----- //
-
-    const float scrollSensitivity = 1.0f;
-
-    m_fovDegrees -= inputManager.getScrollOffset_y() * scrollSensitivity;
-
-    if (m_fovDegrees < 5.0f) {
-        m_fovDegrees = 5.0f;
-    } else if (m_fovDegrees > 85.0f) {
-        m_fovDegrees = 85.0f;
-    }
+// void
+// quartz::scene::Camera::fixedUpdate(
+//     const quartz::managers::InputManager& inputManager
+// ) {
+//     // ----- update orientation ----- //
+// 
+//     const float mouseSensitivity = 0.25f;
+// 
+//     const float calibratedMousePositionOffset_x = inputManager.getMousePositionOffset_x() * mouseSensitivity;
+//     const float calibratedMousePositionOffset_y = inputManager.getMousePositionOffset_y() * mouseSensitivity;
+// 
+//     m_pitch += calibratedMousePositionOffset_y;
+//     if (m_pitch > 89.5f) {
+//         m_pitch = 89.5f;
+//     } else if (m_pitch < -89.5f) {
+//         m_pitch = -89.5f;
+//     }
+// 
+//     m_yaw = glm::mod(m_yaw - calibratedMousePositionOffset_x, 360.0f);
+// 
+//     const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
+// 
+//     math::Vec3 currentLookVector;
+//     currentLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+//     currentLookVector.y = sin(glm::radians(m_pitch));
+//     currentLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+//     currentLookVector.normalize();
+// 
+//     math::Vec3 currentRightVector = currentLookVector.cross(worldUpVector).normalize();
+// 
+//     math::Vec3 currentUpVector = currentRightVector.cross(currentLookVector).normalize();
+// 
+//     // ----- update fov ----- //
+// 
+//     const float scrollSensitivity = 1.0f;
+// 
+//     m_fovDegrees -= inputManager.getScrollOffset_y() * scrollSensitivity;
+// 
+//     if (m_fovDegrees < 5.0f) {
+//         m_fovDegrees = 5.0f;
+//     } else if (m_fovDegrees > 85.0f) {
+//         m_fovDegrees = 85.0f;
+//     }
 
     // ----- update position ----- //
 
@@ -147,7 +145,7 @@ quartz::scene::Camera::fixedUpdate(
     // if (inputManager.getKeyDown_shift()) {
     //     m_worldPosition -= movementSpeedAdjusted * worldUpVector;
     // }
-}
+// }
 
 void
 quartz::scene::Camera::update(
