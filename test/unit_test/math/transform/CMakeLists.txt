@@ -12,3 +12,8 @@ create_unit_test(
     test_math_transform_quaternion.cpp
     MATH_Transform
 )
+create_unit_test(
+    test_math_transform_vec3
+    test_math_transform_vec3.cpp
+    MATH_Transform
+)

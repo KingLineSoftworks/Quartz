@@ -1,5 +1,6 @@
 #pragma once
 
+#include "glm/ext/vector_float3.hpp"
 #include <string>
 
 #include <glm/vec3.hpp>
@@ -149,6 +150,20 @@ union math::Vec3 {
 
     /**
      * -------------------------------------------------------------------------------------
+     * @brief Core directions
+     * -------------------------------------------------------------------------------------
+     */
+
+    static const Vec3 Forward;
+    static const Vec3 Up;
+    static const Vec3 Right;
+
+    static const Vec3 Backward;
+    static const Vec3 Down;
+    static const Vec3 Left;
+
+    /**
+     * -------------------------------------------------------------------------------------
      * @brief the actual union
      * -------------------------------------------------------------------------------------
      */
@@ -171,3 +186,4 @@ union math::Vec3 {
     glm::vec3 glmVec;
     reactphysics3d::Vector3 rp3dVec;
 };
+
