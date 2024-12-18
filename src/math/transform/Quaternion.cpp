@@ -8,6 +8,7 @@
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 
+#include "math/transform/Vec3.hpp"
 #include "util/macros.hpp"
 
 bool
@@ -54,13 +55,18 @@ math::Quaternion::isNormalized() const {
     return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
 }
 
+math::Vec3
+math::Quaternion::getDirectionVector() const {
+    return {};
+}
+
 float
 math::Quaternion::getAngleDegrees() const {
     return glm::angle(glmQuat);
 }
 
 math::Vec3
-math::Quaternion::getAxis() const {
+math::Quaternion::getAxisVector() const {
     return glm::axis(glmQuat);
 }
 

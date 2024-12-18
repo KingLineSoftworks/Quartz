@@ -18,6 +18,7 @@
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
 #include "quartz/scene/light/SpotLight.hpp"
+#include "util/logger/Logger.hpp"
 
 quartz::rendering::Pipeline
 quartz::rendering::Context::createSkyBoxRenderingPipeline(
@@ -309,6 +310,8 @@ quartz::rendering::Context::draw(
 
     // update skybox pipeline //
 
+    const quartz::scene::Camera& camera = scene.getCamera();
+    LOG_INFOthis("Updating camera UBO with camera {} at {}", camera.getId(), camera.getWorldPosition().toString());
     quartz::scene::Camera::UniformBufferObject cameraUBO(scene.getCamera());
     m_skyBoxRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
 

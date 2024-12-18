@@ -22,7 +22,7 @@ int test_Quaternion_fromAxisAngleRotation() {
         const math::Quaternion outputQuat1 = math::Quaternion::fromAxisAngleRotation(inputAxis, inputAngleDegrees);
 
         const float outputAngleDegrees = outputQuat1.getAngleDegrees();
-        const math::Vec3 outputAxis = outputQuat1.getAxis().normalize();
+        const math::Vec3 outputAxis = outputQuat1.getAxisVector().normalize();
 
         const math::Quaternion outputQuat2 = math::Quaternion::fromAxisAngleRotation(outputAxis, outputAngleDegrees);
 
@@ -39,7 +39,7 @@ int test_Quaternion_fromAxisAngleRotation() {
         const math::Quaternion outputQuat1 = math::Quaternion::fromAxisAngleRotation(inputAxis, inputAngleDegrees);
 
         const float outputAngleDegrees = outputQuat1.getAngleDegrees();
-        const math::Vec3 outputAxis = outputQuat1.getAxis().normalize();
+        const math::Vec3 outputAxis = outputQuat1.getAxisVector().normalize();
 
         const math::Quaternion outputQuat2 = math::Quaternion::fromAxisAngleRotation(outputAxis, outputAngleDegrees);
 

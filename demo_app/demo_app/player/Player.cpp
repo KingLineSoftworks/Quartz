@@ -3,8 +3,47 @@
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 #include "quartz/scene/scene/Scene.hpp"
+#include "util/logger/Logger.hpp"
 
 #include "demo_app/player/Player.hpp"
+
+Player::Player() :
+    m_movementSpeed(5.0),
+    m_distanceToCamera(5.0),
+    m_camera(
+        0.0f, // rotation around x-axis (up down)
+        -90.0f, // rotation around y-axis (left right)
+        0.0f,
+        75.0f,
+        { 1.25f, 0.0f, 10.0f }
+    )
+{}
+
+void
+Player::awakenCallback(
+    quartz::scene::Doodad::AwakenCallbackParameters parameters
+) {
+    LOG_FUNCTION_SCOPE_INFOthis("");
+    LOG_INFOthis("Setting the scene's camera to be ours with an id of {}", m_camera.getId());
+    parameters.p_scene->setCamera(m_camera);
+}
+
+void
+Player::fixedUpdateCallback(
+    quartz::scene::Doodad::FixedUpdateCallbackParameters parameters
+) {
+    this->movementFixedUpdate(parameters.p_doodad, parameters.inputManager);
+}
+
+void
+Player::updateCallback(
+    quartz::scene::Doodad::UpdateCallbackParameters parameters
+) {
+    LOG_FUNCTION_SCOPE_INFOthis("");
+    LOG_INFOthis("Inside of doodad's update callback");
+    cameraUpdate(parameters.p_doodad);
+    LOG_INFOthis("Camera {} actual position: {}", m_camera.getId(), m_camera.getWorldPosition().toString());
+}
 
 math::Vec3
 Player::determineLateralMovementDirection(
@@ -46,42 +85,66 @@ Player::movementFixedUpdate(
     o_rigidBody->setLinearVelocity(updatedVelocity);
 }
 
-Player::Player() :
-    m_movementSpeed(5.0),
-    m_distanceToCamera(5.0),
-    m_camera(
-        0.0f, // rotation around x-axis (up down)
-        -90.0f, // rotation around y-axis (left right)
-        0.0f,
-        75.0f,
-        { 1.25f, 0.0f, 10.0f }
-    )
-{}
-
 void
-Player::awakenCallback(
-    quartz::scene::Doodad::AwakenCallbackParameters parameters
+Player::placeCameraBehindDoodad(
+    quartz::scene::Doodad* const p_doodad
 ) {
-    parameters.p_scene->setCamera(m_camera);
-}
+    LOG_FUNCTION_SCOPE_INFOthis("");
+    // Get the direction the doodad is facing
+    UNUSED const math::Quaternion& doodadRotation = p_doodad->getTransform().rotation;
 
-void
-Player::fixedUpdateCallback(
-    quartz::scene::Doodad::FixedUpdateCallbackParameters parameters
-) {
-    this->movementFixedUpdate(parameters.p_doodad, parameters.inputManager);
-}
+    // Get the distance the camera should be behind the doodad
+    //    Get the direction vector from the doodad's rotation
+    const math::Vec3 doodadForwardDirection = doodadRotation * math::Vec3::Forward;
+    LOG_INFOthis("Doodad forward direction           : {}", doodadForwardDirection.toString());
 
-void
-Player::updateCallback(
-    UNUSED quartz::scene::Doodad::UpdateCallbackParameters parameters
-) {
-    // Rotate the camera horizontally based on the lateral mouse input
-    //   (rotate the camera around the player's y location)
+    //    Get the horizontal direction vector projected onto the xz plane so it is strictly horizontal, then normalize it
+    const math::Vec3 horizontalPlane(1, 0, 1);
+    horizontalPlane.normalize();
+    math::Vec3 doodadHorizontalDirection = doodadForwardDirection.dot(horizontalPlane);
+    LOG_INFOthis("Doodad horizontal forward direction: {}", doodadHorizontalDirection.toString());
+    doodadHorizontalDirection.normalize();
+    doodadHorizontalDirection = doodadForwardDirection;
+
+    //    Get the offset position via multiplying direction vector by (-1 * horizontal direction vector)
+    const math::Vec3 cameraOffsetDirection = -1 * doodadHorizontalDirection;
+    LOG_INFOthis("Camera offset direction: {}", cameraOffsetDirection.toString());
+    const math::Vec3 cameraPositionOffset = m_distanceToCamera * cameraOffsetDirection;
+    LOG_INFOthis("Camera offset distance : {}", m_distanceToCamera);
+    LOG_INFOthis("Camera position offset : {}", cameraPositionOffset.toString());
     
-    // Move the camera vertically based on the vertical mouse input
+    // Set the transform of the camera to be behind the doodad
+    const math::Vec3& doodadPosition = p_doodad->getTransform().position;
+    LOG_INFOthis("Doodad position          : {}", doodadPosition.toString());
+    const math::Vec3 cameraPosition = doodadPosition + cameraPositionOffset;
+    LOG_INFOthis("Camera {} position       : {}", m_camera.getId(), cameraPosition.toString());
+    m_camera.setPosition(cameraPosition);
+    LOG_INFOthis("Camera {} actual position: {}", m_camera.getId(), m_camera.getWorldPosition().toString());
 
-    // Ensure the player is facing in the same direction as the camera
-    //   (rotate player around y axis based on the rotation of the camera)
+    // Make the camera look at the doodad's position
 }
 
+void
+Player::rotateCameraYaw() {
+
+}
+
+void
+Player::rotateDoodadYaw() {
+
+}
+
+void
+Player::rotateCameraPitch() {
+
+}
+
+void
+Player::cameraUpdate(
+    quartz::scene::Doodad* const p_doodad
+) {
+    this->placeCameraBehindDoodad(p_doodad);
+    this->rotateCameraYaw();
+    this->rotateDoodadYaw();
+    this->rotateCameraPitch();
+}

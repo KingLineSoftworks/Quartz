@@ -79,7 +79,7 @@ public: // member functions
     const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
     const math::Vec3& getScreenClearColor() const { return m_screenClearColor; }
 
-    void setCamera(const quartz::scene::Camera& camera) { m_camera = camera; }
+    void setCamera(const quartz::scene::Camera& camera);
 
     /**
      * @todo 2024/11/26 We should have a way to create a scene without rendering information for testing
@@ -137,7 +137,7 @@ private: // static variables
 private: // member variables
     std::optional<quartz::physics::Field> mo_field; // optional because we can have scenes without physics (main menu, etc.)
 
-    quartz::scene::Camera&  m_camera;
+    quartz::scene::Camera& m_camera;
 
     std::vector<quartz::scene::Doodad> m_doodads;
 

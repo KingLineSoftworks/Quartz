@@ -114,6 +114,18 @@ quartz::scene::Scene::~Scene() {
 }
 
 void
+quartz::scene::Scene::setCamera(
+    const quartz::scene::Camera& camera
+) {
+    LOG_FUNCTION_SCOPE_INFOthis("");
+    LOG_INFOthis("Current camera: {}", m_camera.getId());
+    
+    m_camera = camera;
+    
+    LOG_INFOthis("Updated camera: {}", m_camera.getId());
+}
+
+void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
@@ -243,6 +255,8 @@ quartz::scene::Scene::update(
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
+    LOG_FUNCTION_SCOPE_WARNINGthis("");
+
     for (quartz::scene::Doodad& doodad : m_doodads) {
         doodad.update(
             inputManager,
@@ -252,6 +266,7 @@ quartz::scene::Scene::update(
         );
     }
 
+    LOG_WARNINGthis("Updating camera {} with current position {}", m_camera.getId(), m_camera.getWorldPosition().toString());
     m_camera.update(
         static_cast<float>(renderingWindow.getVulkanExtent().width),
         static_cast<float>(renderingWindow.getVulkanExtent().height),
@@ -267,5 +282,12 @@ quartz::scene::Scene::update(
      *    tampering with physics stuff outside of fixedUpdate. If you don't care about physics
      *    or if you don't have a rigid body, then feel free to do whatever you want here
      */
+
+    LOG_WARNINGthis("");
+    LOG_WARNINGthis("");
+    LOG_WARNINGthis("");
+    LOG_WARNINGthis("");
+    LOG_WARNINGthis("");
+    LOG_WARNINGthis("");
 }
 

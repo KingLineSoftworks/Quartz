@@ -1,15 +1,17 @@
 #pragma once
 
-#include "glm/ext/vector_float3.hpp"
 #include <string>
 
 #include <glm/vec3.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <reactphysics3d/mathematics/Vector3.h>
 
 namespace math {
     union Vec3;
+
+    union Quaternion;
 
     union Mat4;
 }

@@ -8,7 +8,9 @@
 
 #include <reactphysics3d/mathematics/Quaternion.h>
 
+#include "glm/ext/vector_float3.hpp"
 #include "math/transform/Vec3.hpp"
+#include "reactphysics3d/mathematics/Vector3.h"
 
 namespace math {
     union Quaternion;
@@ -61,6 +63,16 @@ union math::Quaternion {
 
     /**
      * -------------------------------------------------------------------------------------
+     * @brief Vec3 operators
+     * -------------------------------------------------------------------------------------
+     */
+
+    math::Vec3 operator*(const math::Vec3& other) const { return glmQuat * other.glmVec; }
+    math::Vec3 operator*(const glm::vec3& other) const { return glmQuat * other; }
+    math::Vec3 operator*(const reactphysics3d::Vector3& other) const { return *this * math::Vec3(other).glmVec; }
+
+    /**
+     * -------------------------------------------------------------------------------------
      * @brief Quaternion operators
      * -------------------------------------------------------------------------------------
      */
@@ -104,8 +116,10 @@ union math::Quaternion {
     float magnitude() const { return glm::length(glmQuat); }
     bool isNormalized() const;
 
+    math::Vec3 getDirectionVector() const;
+
     float getAngleDegrees() const;
-    math::Vec3 getAxis() const;
+    math::Vec3 getAxisVector() const;
 
     math::Mat4 getRotationMatrix() const;
 

@@ -50,9 +50,12 @@ public: // member functions
 
     USE_LOGGER(CAMERA);
 
+    uint32_t getId() const { return m_id; }
     const math::Vec3& getWorldPosition() const { return m_worldPosition; }
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
     const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
+
+    void setPosition(const math::Vec3& position) { m_worldPosition = position; }
 
     // void fixedUpdate(const quartz::managers::InputManager& inputManager);
     void update(
@@ -62,9 +65,12 @@ public: // member functions
         const double frameInterpolationFactor
     );
 
-private: // static functions
+private: // static variables
+    static uint32_t cameraCount;
 
 private: // member variables
+    uint32_t m_id;
+
     float m_pitch;
     float m_yaw;
     UNUSED float m_roll;
@@ -74,3 +80,4 @@ private: // member variables
     math::Mat4 m_viewMatrix;
     math::Mat4 m_projectionMatrix;
 };
+
