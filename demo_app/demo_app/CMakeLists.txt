@@ -61,4 +61,3 @@ target_link_libraries(
     QUARTZ_Application
 )
 
-add_executable(reference_test reference_test.cpp)
