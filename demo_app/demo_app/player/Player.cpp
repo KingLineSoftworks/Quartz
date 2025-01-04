@@ -24,7 +24,6 @@ Player::awakenCallback(
     quartz::scene::Doodad::AwakenCallbackParameters parameters
 ) {
     LOG_FUNCTION_SCOPE_INFOthis("");
-    LOG_INFOthis("Setting the scene's camera to be ours with an id of {}", m_camera.getId());
     parameters.p_scene->setCamera(m_camera);
 }
 
@@ -40,9 +39,7 @@ Player::updateCallback(
     quartz::scene::Doodad::UpdateCallbackParameters parameters
 ) {
     LOG_FUNCTION_SCOPE_INFOthis("");
-    LOG_INFOthis("Inside of doodad's update callback");
     cameraUpdate(parameters.p_doodad);
-    LOG_INFOthis("Camera {} actual position: {}", m_camera.getId(), m_camera.getWorldPosition().toString());
 }
 
 math::Vec3
@@ -91,12 +88,11 @@ Player::placeCameraBehindDoodad(
 ) {
     LOG_FUNCTION_SCOPE_INFOthis("");
     // Get the direction the doodad is facing
-    UNUSED const math::Quaternion& doodadRotation = p_doodad->getTransform().rotation;
+    const math::Quaternion& doodadRotation = p_doodad->getTransform().rotation;
 
     // Get the distance the camera should be behind the doodad
     //    Get the direction vector from the doodad's rotation
     const math::Vec3 doodadForwardDirection = doodadRotation * math::Vec3::Forward;
-    LOG_INFOthis("Doodad forward direction           : {}", doodadForwardDirection.toString());
 
     //    Get the horizontal direction vector projected onto the xz plane so it is strictly horizontal, then normalize it
     const math::Vec3 horizontalPlane(1, 0, 1);

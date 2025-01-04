@@ -160,7 +160,6 @@ quartz::scene::Camera::update(
     UNUSED const double frameTimeDelta,
     UNUSED const double frameInterpolationFactor
 ) {
-    LOG_FUNCTION_SCOPE_DEBUGthis("");
     const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
 
     math::Vec3 currentLookVector;
@@ -175,7 +174,6 @@ quartz::scene::Camera::update(
 
     // ----- update view and projection matrices ----- //
 
-    LOG_DEBUGthis("Camera {} world position: {}", m_id, m_worldPosition.toString());
     m_viewMatrix = m_worldPosition.look(currentLookVector, currentUpVector);
 
     m_projectionMatrix = math::Mat4::createPerspective(

@@ -91,9 +91,9 @@ DoBoilerplateStuff(
         {"WINDOW", util::Logger::Level::info},
 
         // scene
-        {"CAMERA", util::Logger::Level::debug},
-        {"DOODAD", util::Logger::Level::debug},
-        {"SCENE", util::Logger::Level::debug},
+        {"CAMERA", util::Logger::Level::info},
+        {"DOODAD", util::Logger::Level::info},
+        {"SCENE", util::Logger::Level::info},
         {"SKYBOX", util::Logger::Level::info},
     });
 

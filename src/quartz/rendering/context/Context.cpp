@@ -310,8 +310,6 @@ quartz::rendering::Context::draw(
 
     // update skybox pipeline //
 
-    const quartz::scene::Camera& camera = scene.getCamera();
-    LOG_INFOthis("Updating camera UBO with camera {} at {}", camera.getId(), camera.getWorldPosition().toString());
     quartz::scene::Camera::UniformBufferObject cameraUBO(scene.getCamera());
     m_skyBoxRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
 
