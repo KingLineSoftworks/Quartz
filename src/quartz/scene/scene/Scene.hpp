@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -70,7 +71,7 @@ public: // member functions
 
     USE_LOGGER(SCENE);
 
-    const quartz::scene::Camera& getCamera() const { return m_camera; }
+    const quartz::scene::Camera& getCamera() const { return mr_camera; }
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
     const quartz::scene::SkyBox& getSkyBox() const { return m_skyBox; }
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
@@ -79,7 +80,7 @@ public: // member functions
     const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
     const math::Vec3& getScreenClearColor() const { return m_screenClearColor; }
 
-    void setCamera(const quartz::scene::Camera& camera);
+    void setCamera(quartz::scene::Camera& camera);
 
     /**
      * @todo 2024/11/26 We should have a way to create a scene without rendering information for testing
@@ -129,15 +130,15 @@ private: // static functions
 private: // static variables
     /**
      * @todo 2024/12/10 Figure out how to make this const. Currently we cannot make this const
-     *    because we need m_camera to be const if we want to assign this to that reference, but
-     *    m_camera cannot be const because we need to be able to mutate it.
+     *    because we need mr_camera to be const if we want to assign this to that reference, but
+     *    mr_camera cannot be const because we need to be able to mutate it.
      */
     static quartz::scene::Camera defaultCamera; 
 
 private: // member variables
     std::optional<quartz::physics::Field> mo_field; // optional because we can have scenes without physics (main menu, etc.)
 
-    quartz::scene::Camera& m_camera;
+    std::reference_wrapper<quartz::scene::Camera> mr_camera;
 
     std::vector<quartz::scene::Doodad> m_doodads;
 

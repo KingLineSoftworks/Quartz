@@ -115,7 +115,7 @@ Player::placeCameraBehindDoodad(
     
     // Set the transform of the camera to be behind the doodad
     const math::Vec3& doodadPosition = p_doodad->getTransform().position;
-    LOG_INFOthis("Doodad position          : {}", doodadPosition.toString());
+    LOG_INFOthis("Doodad position         : {}", doodadPosition.toString());
     const math::Vec3 cameraPosition = doodadPosition + cameraPositionOffset;
     LOG_INFOthis("Camera {} position       : {}", m_camera.getId(), cameraPosition.toString());
     m_camera.setPosition(cameraPosition);

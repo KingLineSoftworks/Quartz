@@ -81,7 +81,7 @@ quartz::scene::Scene::constructDoodads(
 
 quartz::scene::Scene::Scene() :
     mo_field(),
-    m_camera(quartz::scene::Scene::defaultCamera),
+    mr_camera(quartz::scene::Scene::defaultCamera),
     m_doodads(),
     m_skyBox(),
     m_ambientLight(),
@@ -95,7 +95,7 @@ quartz::scene::Scene::Scene(
     quartz::scene::Scene&& other
 ) :
     mo_field(std::move(other.mo_field)),
-    m_camera(other.m_camera), // don't need to move a reference
+    mr_camera(other.mr_camera), // don't need to move a reference
     m_doodads(std::move(other.m_doodads)),
     m_skyBox(std::move(other.m_skyBox)),
     m_ambientLight(std::move(other.m_ambientLight)),
@@ -115,14 +115,18 @@ quartz::scene::Scene::~Scene() {
 
 void
 quartz::scene::Scene::setCamera(
-    const quartz::scene::Camera& camera
+    quartz::scene::Camera& camera
 ) {
     LOG_FUNCTION_SCOPE_INFOthis("");
-    LOG_INFOthis("Current camera: {}", m_camera.getId());
+    LOG_INFOthis("Current camera:");
+    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
+    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
     
-    m_camera = camera;
+    mr_camera = camera;
     
-    LOG_INFOthis("Updated camera: {}", m_camera.getId());
+    LOG_INFOthis("Updated camera:");
+    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
+    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
 }
 
 void
@@ -195,10 +199,12 @@ quartz::scene::Scene::load(
     m_screenClearColor = screenClearColor;
     LOG_TRACEthis("Loaded screen clear color {}", m_screenClearColor.toString());
 
+    LOG_DEBUGthis("Camera {} with position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
     for (quartz::scene::Doodad& doodad : m_doodads) {
         doodad.awaken(this);
     }
     LOG_TRACEthis("Awoke all doodads");
+    LOG_DEBUGthis("Camera {} with position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
 }
 
 
@@ -266,8 +272,8 @@ quartz::scene::Scene::update(
         );
     }
 
-    LOG_WARNINGthis("Updating camera {} with current position {}", m_camera.getId(), m_camera.getWorldPosition().toString());
-    m_camera.update(
+    LOG_DEBUGthis("Updating camera {} with current position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
+    mr_camera.get().update(
         static_cast<float>(renderingWindow.getVulkanExtent().width),
         static_cast<float>(renderingWindow.getVulkanExtent().height),
         frameTimeDelta,
@@ -283,11 +289,11 @@ quartz::scene::Scene::update(
      *    or if you don't have a rigid body, then feel free to do whatever you want here
      */
 
-    LOG_WARNINGthis("");
-    LOG_WARNINGthis("");
-    LOG_WARNINGthis("");
-    LOG_WARNINGthis("");
-    LOG_WARNINGthis("");
-    LOG_WARNINGthis("");
+    LOG_DEBUGthis("");
+    LOG_DEBUGthis("");
+    LOG_DEBUGthis("");
+    LOG_DEBUGthis("");
+    LOG_DEBUGthis("");
+    LOG_DEBUGthis("");
 }
 

@@ -41,7 +41,7 @@ private: // member functions
 private: // member variables
     double m_movementSpeed;
 
-    UNUSED double m_distanceToCamera;
-    UNUSED quartz::scene::Camera m_camera;
+    double m_distanceToCamera;
+    quartz::scene::Camera m_camera;
 };
 
