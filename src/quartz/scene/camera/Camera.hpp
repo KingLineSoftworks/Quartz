@@ -39,9 +39,6 @@ public: // classes
 public: // member functions
     Camera();
     Camera(
-        // const double pitch,
-        // const double yaw,
-        // const double roll,
         const double fovDegrees,
         const math::Vec3& worldPosition,
         const math::Vec3& lookDirection
@@ -73,9 +70,6 @@ private: // static variables
 private: // member variables
     uint32_t m_id;
 
-    // float m_pitch;
-    // float m_yaw;
-    // UNUSED float m_roll;
     float m_fovDegrees;
     math::Vec3 m_worldPosition;
     math::Vec3 m_lookDirection;
