@@ -11,11 +11,12 @@ Player::Player() :
     m_movementSpeed(5.0),
     m_distanceToCamera(5.0),
     m_camera(
-        0.0f, // rotation around x-axis (up down)
-        -90.0f, // rotation around y-axis (left right)
-        0.0f,
+        // 0.0f, // rotation around x-axis (up down)
+        // -90.0f, // rotation around y-axis (left right)
+        // 0.0f,
         75.0f,
-        { 1.25f, 0.0f, 10.0f }
+        { 1.25f, 0.0f, 10.0f },
+        math::Vec3::Forward
     )
 {}
 
