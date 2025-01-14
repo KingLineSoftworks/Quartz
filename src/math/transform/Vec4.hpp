@@ -99,11 +99,11 @@ union math::Vec4 {
     float dot(const Vec4& other)      const { return glm::dot(glmVec, other.glmVec); }
     float dot(const glm::vec4& other) const { return glm::dot(glmVec, other); }
 
-    Vec4& normalize() { glmVec = glm::normalize(glmVec); return *this; }
-    Vec4 normalize() const { return {glm::normalize(glmVec)}; }
+    Vec4& normalize();
+    Vec4 normalize() const;
 
     float magnitude() const { return glm::length(glmVec); }
-    bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
+    bool isNormalized() const;
 
     /**
      * -------------------------------------------------------------------------------------

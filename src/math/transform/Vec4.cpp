@@ -53,6 +53,35 @@ math::Vec4::operator!=(const math::Vec4& other) const {
     return xNEquals || yNEquals || zNEquals || wNEquals;
 }
 
+math::Vec4&
+math::Vec4::normalize() {
+    if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
+        return *this;
+    }
+
+    glmVec = glm::normalize(glmVec);
+
+    return *this;
+}
+
+math::Vec4
+math::Vec4::normalize() const {
+    if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
+        return {0.0, 0.0, 0.0, 0.0};
+    }
+    
+    return glm::normalize(glmVec);
+}
+
+bool
+math::Vec4::isNormalized() const {
+    if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
+        return true;
+    }
+
+    return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
+}
+
 std::string
 math::Vec4::toString() const {
     std::ostringstream ss;

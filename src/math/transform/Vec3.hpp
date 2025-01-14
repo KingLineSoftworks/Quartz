@@ -3,12 +3,15 @@
 #include <string>
 
 #include <glm/vec3.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <reactphysics3d/mathematics/Vector3.h>
 
 namespace math {
     union Vec3;
+
+    union Quaternion;
 
     union Mat4;
 }
@@ -124,11 +127,11 @@ union math::Vec3 {
     Vec3 cross(const glm::vec3& other)               const { return glm::cross(glmVec, other); }
     Vec3 cross(const reactphysics3d::Vector3& other) const { return rp3dVec.cross(other); }
 
-    Vec3& normalize() { glmVec = glm::normalize(glmVec); return *this; }
-    Vec3 normalize() const { return {glm::normalize(glmVec)}; }
+    Vec3& normalize();
+    Vec3 normalize() const;
 
     float magnitude() const { return glm::length(glmVec); }
-    bool isNormalized() const { return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon(); }
+    bool isNormalized() const;
 
     /**
      * -------------------------------------------------------------------------------------
@@ -146,6 +149,20 @@ union math::Vec3 {
 
     std::string toString() const;
     friend std::ostream& operator<<(std::ostream& os, const math::Vec3& vec) { return os << vec.toString(); }
+
+    /**
+     * -------------------------------------------------------------------------------------
+     * @brief Core directions
+     * -------------------------------------------------------------------------------------
+     */
+
+    static const Vec3 Forward;
+    static const Vec3 Up;
+    static const Vec3 Right;
+
+    static const Vec3 Backward;
+    static const Vec3 Down;
+    static const Vec3 Left;
 
     /**
      * -------------------------------------------------------------------------------------
@@ -171,3 +188,4 @@ union math::Vec3 {
     glm::vec3 glmVec;
     reactphysics3d::Vector3 rp3dVec;
 };
+

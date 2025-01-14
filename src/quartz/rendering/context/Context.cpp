@@ -18,6 +18,7 @@
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
 #include "quartz/scene/light/SpotLight.hpp"
+#include "util/logger/Logger.hpp"
 
 quartz::rendering::Pipeline
 quartz::rendering::Context::createSkyBoxRenderingPipeline(

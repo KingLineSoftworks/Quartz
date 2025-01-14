@@ -9,11 +9,11 @@
 namespace quartz {
 namespace physics {
     class Collider;
-    class SphereCollider;
+    class SphereShape;
 }
 }
 
-class quartz::physics::SphereCollider {
+class quartz::physics::SphereShape {
 public: // classes
     struct Parameters {
         Parameters(
@@ -26,15 +26,15 @@ public: // classes
     };
 
 public: // member functions
-    SphereCollider(
+    SphereShape(
         quartz::managers::PhysicsManager& physicsManager,
         const double radius
     );
-    SphereCollider(const SphereCollider& other) = delete;
-    SphereCollider(SphereCollider&& other);
-    SphereCollider& operator=(SphereCollider&& other);
+    SphereShape(const SphereShape& other) = delete;
+    SphereShape(SphereShape&& other);
+    SphereShape& operator=(SphereShape&& other);
 
-    USE_LOGGER(COLLIDER_SPHERE);
+    USE_LOGGER(SHAPE_SPHERE);
 
 private: // member variables
     reactphysics3d::SphereShape* mp_colliderShape;

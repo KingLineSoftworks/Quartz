@@ -26,8 +26,10 @@ public:
     }
 };
 
+quartz::scene::Camera quartz::scene::Scene::defaultCamera;
+
 std::vector<quartz::scene::Doodad>
-quartz::scene::Scene::loadDoodads(
+quartz::scene::Scene::constructDoodads(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
@@ -38,11 +40,15 @@ quartz::scene::Scene::loadDoodads(
     std::vector<quartz::scene::Doodad> doodads;
 
     for (const quartz::scene::Doodad::Parameters& parameters : doodadParameters) {
-        const std::string& filepath = parameters.objectFilepath;
+        const std::optional<std::string>& o_filepath = parameters.o_objectFilepath;
         const math::Transform& transform = parameters.transform;
         const std::optional<quartz::physics::RigidBody::Parameters>& o_rigidBodyInformation = parameters.o_rigidBodyParameters;
+        const quartz::scene::Doodad::AwakenCallback awakenCallback = parameters.awakenCallback;
+        const quartz::scene::Doodad::FixedUpdateCallback fixedUpdateCallback = parameters.fixedUpdateCallback;
+        const quartz::scene::Doodad::UpdateCallback updateCallback = parameters.updateCallback;
 
-        LOG_TRACE(SCENE, "Loading doodad with model from {} and transform:", filepath);
+        LOG_TRACE(SCENE, "Loading doodad with information:");
+        LOG_TRACE(SCENE, "  model: {}", o_filepath ? *o_filepath : "none");
         LOG_TRACE(SCENE, "  transform:");
         LOG_TRACE(SCENE, "    position = {}", transform.position.toString());
         LOG_TRACE(SCENE, "    rotation = {}", transform.rotation.toString());
@@ -52,16 +58,19 @@ quartz::scene::Scene::loadDoodads(
             LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(o_rigidBodyInformation->bodyType));
             LOG_TRACE(SCENE, "    gravity enabled = {}", o_rigidBodyInformation->enableGravity);
         } else {
-            LOG_TRACE(SCENE, "    none");
+            LOG_TRACE(SCENE, "    no rigid body");
         }
 
         doodads.emplace_back(
             renderingDevice,
             physicsManager,
             o_field,
-            filepath,
+            o_filepath,
             transform,
-            o_rigidBodyInformation
+            o_rigidBodyInformation,
+            awakenCallback,
+            fixedUpdateCallback,
+            updateCallback
         );
     }
 
@@ -70,11 +79,23 @@ quartz::scene::Scene::loadDoodads(
     return doodads;
 }
 
+quartz::scene::Scene::Scene() :
+    mo_field(),
+    mr_camera(quartz::scene::Scene::defaultCamera),
+    m_doodads(),
+    m_skyBox(),
+    m_ambientLight(),
+    m_directionalLight(),
+    m_pointLights(),
+    m_spotLights(),
+    m_screenClearColor()
+{}
+
 quartz::scene::Scene::Scene(
     quartz::scene::Scene&& other
 ) :
     mo_field(std::move(other.mo_field)),
-    m_camera(std::move(other.m_camera)),
+    mr_camera(other.mr_camera), // don't need to move a reference
     m_doodads(std::move(other.m_doodads)),
     m_skyBox(std::move(other.m_skyBox)),
     m_ambientLight(std::move(other.m_ambientLight)),
@@ -93,10 +114,25 @@ quartz::scene::Scene::~Scene() {
 }
 
 void
+quartz::scene::Scene::setCamera(
+    quartz::scene::Camera& camera
+) {
+    LOG_FUNCTION_SCOPE_INFOthis("");
+    LOG_INFOthis("Current camera:");
+    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
+    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
+    
+    mr_camera = camera;
+    
+    LOG_INFOthis("Updated camera:");
+    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
+    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
+}
+
+void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
-    const quartz::scene::Camera& camera,
     const quartz::scene::AmbientLight& ambientLight,
     const quartz::scene::DirectionalLight& directionalLight,
     const std::vector<quartz::scene::PointLight>& pointLights,
@@ -129,9 +165,6 @@ quartz::scene::Scene::load(
     LOG_TRACEthis("Initializing master material list");
     quartz::rendering::Material::initializeMasterMaterialList(renderingDevice);
 
-    m_camera = camera;
-    LOG_TRACEthis("Loaded camera at position {}", m_camera.getWorldPosition().toString());
-
     m_skyBox = quartz::scene::SkyBox(
         renderingDevice,
         skyBoxInformation[0],
@@ -143,7 +176,7 @@ quartz::scene::Scene::load(
     );
     LOG_TRACEthis("Loaded skybox");
 
-    m_doodads = quartz::scene::Scene::loadDoodads(
+    m_doodads = quartz::scene::Scene::constructDoodads(
         renderingDevice,
         physicsManager,
         mo_field,
@@ -165,6 +198,13 @@ quartz::scene::Scene::load(
 
     m_screenClearColor = screenClearColor;
     LOG_TRACEthis("Loaded screen clear color {}", m_screenClearColor.toString());
+
+    LOG_DEBUGthis("Camera {} with position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.awaken(this);
+    }
+    LOG_TRACEthis("Awoke all doodads");
+    LOG_DEBUGthis("Camera {} with position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
 }
 
 
@@ -177,7 +217,6 @@ quartz::scene::Scene::load(
     load(
         renderingDevice,
         physicsManager,
-        sceneParameters.camera,
         sceneParameters.ambientLight,
         sceneParameters.directionalLight,
         sceneParameters.pointLights,
@@ -193,34 +232,58 @@ void
 quartz::scene::Scene::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
     UNUSED const quartz::managers::PhysicsManager& physicsManager,
-    UNUSED const double totalElapsedTime,
+    const double totalElapsedTime,
     const double tickTimeDelta
 ) {
-    m_camera.fixedUpdate(inputManager);
-
+    // The doodad's fixedUpdate will make changes to the rigidBody and its transform, so
+    // there is no need to manually snap the rigidBody to the doodad
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.fixedUpdate();
+        doodad.fixedUpdate(inputManager, totalElapsedTime);
     }
 
+    // This is only going to update the rigid bodies, not the doodads
     if (mo_field) {
         mo_field->fixedUpdate(tickTimeDelta);
+    }
+
+    // We want to move the doodad to the rigid body's new transform after it got updated by
+    // the physics field
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.snapToRigidBody();
     }
 }
 
 void
 quartz::scene::Scene::update(
-    const quartz::rendering::Window& renderingWindow,
+    UNUSED const quartz::rendering::Window& renderingWindow,
+    const quartz::managers::InputManager& inputManager,
+    const double totalElapsedTime,
     const double frameTimeDelta,
     const double frameInterpolationFactor
 ) {
-    m_camera.update(
+    for (quartz::scene::Doodad& doodad : m_doodads) {
+        doodad.update(
+            inputManager,
+            totalElapsedTime,
+            frameTimeDelta,
+            frameInterpolationFactor
+        );
+    }
+
+    mr_camera.get().update(
         static_cast<float>(renderingWindow.getVulkanExtent().width),
         static_cast<float>(renderingWindow.getVulkanExtent().height),
         frameTimeDelta,
         frameInterpolationFactor
     );
 
-    for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.update(frameTimeDelta, frameInterpolationFactor);
-    }
+    /**
+     * @todo 2024/12/01 Snap the rigid body to the doodad's position. We are not going
+     *    to be doing any physics updates until the next fixedUpdate call, so we don't need
+     *    to worry about it having any physics implications.
+     *    If things get weird as a result of this, that is the fault of the client. Don't be
+     *    tampering with physics stuff outside of fixedUpdate. If you don't care about physics
+     *    or if you don't have a rigid body, then feel free to do whatever you want here
+     */
 }
+

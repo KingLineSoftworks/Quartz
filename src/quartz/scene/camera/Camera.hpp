@@ -39,22 +39,24 @@ public: // classes
 public: // member functions
     Camera();
     Camera(
-        const double pitch,
-        const double yaw,
-        const double roll,
         const double fovDegrees,
-        const math::Vec3& worldPosition
+        const math::Vec3& worldPosition,
+        const math::Vec3& lookDirection
     );
     Camera& operator=(const Camera& other);
     ~Camera();
 
     USE_LOGGER(CAMERA);
 
+    uint32_t getId() const { return m_id; }
     const math::Vec3& getWorldPosition() const { return m_worldPosition; }
+    const math::Vec3& getLookDirection() const { return m_lookDirection; }
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
     const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
 
-    void fixedUpdate(const quartz::managers::InputManager& inputManager);
+    void setPosition(const math::Vec3& position) { m_worldPosition = position; }
+    void lookAtPosition(const math::Vec3& position);
+
     void update(
         const float windowWidth,
         const float windowHeight,
@@ -62,15 +64,17 @@ public: // member functions
         const double frameInterpolationFactor
     );
 
-private: // static functions
+private: // static variables
+    static uint32_t cameraCount;
 
 private: // member variables
-    float m_pitch;
-    float m_yaw;
-    UNUSED float m_roll;
+    uint32_t m_id;
+
     float m_fovDegrees;
     math::Vec3 m_worldPosition;
+    math::Vec3 m_lookDirection;
 
     math::Mat4 m_viewMatrix;
     math::Mat4 m_projectionMatrix;
 };
+

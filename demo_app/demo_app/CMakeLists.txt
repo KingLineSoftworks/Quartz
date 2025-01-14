@@ -6,7 +6,14 @@ set(APPLICATION_NAME "Demo_App_The_Sequel")
 include(ApplicationVersion)
 
 add_executable(
-    ${APPLICATION_NAME} ${APPLICATION_SOURCE_DIR}/main.cpp
+    ${APPLICATION_NAME}
+    main.cpp
+    Boilerplate.hpp
+    Boilerplate.cpp
+    SceneParameters.hpp
+    SceneParameters.cpp
+    player/Player.hpp
+    player/Player.cpp
 )
 
 target_include_directories(
@@ -53,3 +60,4 @@ target_link_libraries(
     PRIVATE
     QUARTZ_Application
 )
+

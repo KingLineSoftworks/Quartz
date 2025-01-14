@@ -32,3 +32,4 @@ math::Transform::Transform(
     rotation(rotation_),
     scale(scale_)
 {}
+

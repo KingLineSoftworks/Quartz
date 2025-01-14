@@ -132,6 +132,13 @@ quartz::managers::InputManager::getInstance(
         quartz::managers::InputManager(p_glfwWindow)
     });
 
+    // We want to allow a nullptr p_glfwWindow so we can construct a "dummy" input manager for the sake
+    // of testing without having a window or rendering capabilities
+    if (!p_glfwWindow) {
+        LOG_INFO(INPUTMAN, "Getting dummy input manager with GLFW Window pointer at {}", static_cast<const void*>(p_glfwWindow.get()));
+        return quartz::managers::InputManager::inputManagerMap.at(p_glfwWindow.get());
+    }
+
     glfwSetInputMode(
         p_glfwWindow.get(),
         GLFW_CURSOR,

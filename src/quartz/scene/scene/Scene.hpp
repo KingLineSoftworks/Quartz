@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -32,7 +33,6 @@ public: // classes
     struct Parameters {
         Parameters(
             const std::string& name_,
-            const quartz::scene::Camera& camera_,
             const quartz::scene::AmbientLight& ambientLight_,
             const quartz::scene::DirectionalLight& directionalLight_,
             const std::vector<quartz::scene::PointLight>& pointLights_,
@@ -43,7 +43,6 @@ public: // classes
             const std::optional<quartz::physics::Field::Parameters>& o_fieldParameters_
         ) :
             name(name_),
-            camera(camera_),
             ambientLight(ambientLight_),
             directionalLight(directionalLight_),
             pointLights(pointLights_),
@@ -55,7 +54,6 @@ public: // classes
         {}
 
         std::string name;
-        quartz::scene::Camera camera;
         quartz::scene::AmbientLight ambientLight;
         quartz::scene::DirectionalLight directionalLight;
         std::vector<quartz::scene::PointLight> pointLights;
@@ -67,13 +65,13 @@ public: // classes
     };
 
 public: // member functions
-    Scene() = default;
+    Scene();
     Scene(Scene&& other);
     ~Scene();
 
     USE_LOGGER(SCENE);
 
-    const quartz::scene::Camera& getCamera() const { return m_camera; }
+    const quartz::scene::Camera& getCamera() const { return mr_camera; }
     const std::vector<quartz::scene::Doodad>& getDoodads() const { return m_doodads; }
     const quartz::scene::SkyBox& getSkyBox() const { return m_skyBox; }
     const quartz::scene::AmbientLight& getAmbientLight() const { return m_ambientLight; }
@@ -82,10 +80,16 @@ public: // member functions
     const std::vector<quartz::scene::SpotLight>& getSpotLights() const { return m_spotLights; }
     const math::Vec3& getScreenClearColor() const { return m_screenClearColor; }
 
+    void setCamera(quartz::scene::Camera& camera);
+
+    /**
+     * @todo 2024/11/26 We should have a way to create a scene without rendering information for testing
+     *    purposes. See test_doodad_rigidbody_collider_transforms.cpp to see that we need to duplicate
+     *    scene functionality for testing purposes.
+     */
     void load(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
-        const quartz::scene::Camera& camera,
         const quartz::scene::AmbientLight& ambientLight,
         const quartz::scene::DirectionalLight& directionalLight,
         const std::vector<quartz::scene::PointLight>& pointLights,
@@ -109,22 +113,32 @@ public: // member functions
     );
     void update(
         const quartz::rendering::Window& renderingWindow,
+        const quartz::managers::InputManager& inputManager,
+        const double totalElapsedTime,
         const double frameTimeDelta,
         const double frameInterpolationFactor
     );
 
 private: // static functions
-    static std::vector<quartz::scene::Doodad> loadDoodads(
+    static std::vector<quartz::scene::Doodad> constructDoodads(
         const quartz::rendering::Device& renderingDevice,
         quartz::managers::PhysicsManager& physicsManager,
         std::optional<quartz::physics::Field>& o_field,
         const std::vector<quartz::scene::Doodad::Parameters>& doodadParameters
     );
 
+private: // static variables
+    /**
+     * @todo 2024/12/10 Figure out how to make this const. Currently we cannot make this const
+     *    because we need mr_camera to be const if we want to assign this to that reference, but
+     *    mr_camera cannot be const because we need to be able to mutate it.
+     */
+    static quartz::scene::Camera defaultCamera; 
+
 private: // member variables
     std::optional<quartz::physics::Field> mo_field; // optional because we can have scenes without physics (main menu, etc.)
 
-    quartz::scene::Camera m_camera;
+    std::reference_wrapper<quartz::scene::Camera> mr_camera;
 
     std::vector<quartz::scene::Doodad> m_doodads;
 

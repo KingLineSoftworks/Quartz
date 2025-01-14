@@ -10,6 +10,7 @@ The `CMakeLists.txt` also tells GLFW to use Wayland instead of Xorg if the detec
 - [GLTF 2.0 models](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html)
 - [PBR Materials via metallic-roughness model](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#materials)
 - [Right handed coordinate system](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units)
+    - Forward = `(0,0,1)`, Up = `(0,1,0)`, Right = `(-1,0,0)`
 
 ## Physics Documentation
 - Speeds are measured in meters / second
@@ -23,3 +24,9 @@ Pick up an issue, put on some [acid techno](https://soundcloud.com/intercell/kik
 ### Merging vs Rebasing
 If your branch is out of date with master (or any other branch) please do a rebase instead of a merge. We want a linear commit history, for ease of auditing. If you're not familiar with rebasing, it is not hard. Google is your friend.
 Do `git rebase master your_branch` to take all of the commits on `your_branch` and appy them on top of master.
+
+## Using Quartz
+If you desire to use Quartz for your own application, the Quartz Demo App (in `demo_app/demo_app`) might provide a good starting point.
+
+Additionally, the [Pole Position Simulator](https://github.com/KingLineSoftworks/PolePosition) provides a great example for how to include Quartz into your own project.
+

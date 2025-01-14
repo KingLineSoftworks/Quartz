@@ -1,3 +1,4 @@
+#include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/engine/PhysicsWorld.h>
 
 #include "math/transform/Vec3.hpp"
@@ -82,7 +83,7 @@ quartz::physics::Field::createRigidBody(
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
     const math::Vec3& angularLockAxisFactor,
-    const quartz::physics::BoxCollider::Parameters& boxColliderParameters
+    const quartz::physics::BoxShape::Parameters& boxShapeParameters
 ) {
     return {
         physicsManager,
@@ -93,7 +94,7 @@ quartz::physics::Field::createRigidBody(
             enableGravity,
             angularLockAxisFactor
         ),
-        boxColliderParameters
+        boxShapeParameters
     };
 }
 
@@ -104,7 +105,7 @@ quartz::physics::Field::createRigidBody(
     const reactphysics3d::BodyType bodyType,
     const bool enableGravity,
     const math::Vec3& angularLockAxisFactor,
-    const quartz::physics::SphereCollider::Parameters& sphereColliderParameters
+    const quartz::physics::SphereShape::Parameters& sphereShapeParameters
 ) {
     return {
         physicsManager,
@@ -115,7 +116,7 @@ quartz::physics::Field::createRigidBody(
             enableGravity,
             angularLockAxisFactor
         ),
-        sphereColliderParameters
+        sphereShapeParameters
     };
 }
 
@@ -125,15 +126,16 @@ quartz::physics::Field::createRigidBody(
     const math::Transform& transform,
     const quartz::physics::RigidBody::Parameters& parameters
 ) {
+    reactphysics3d::RigidBody* p_rigidBody = quartz::physics::RigidBody::createRigidBodyPtr(
+        mp_physicsWorld,
+        transform,
+        parameters.bodyType,
+        parameters.enableGravity,
+        parameters.angularLockAxisFactor
+    );
     return {
         physicsManager,
-        quartz::physics::RigidBody::createRigidBodyPtr(
-            mp_physicsWorld,
-            transform,
-            parameters.bodyType,
-            parameters.enableGravity,
-            parameters.angularLockAxisFactor
-        ),
+        p_rigidBody,
         parameters
     };
 }

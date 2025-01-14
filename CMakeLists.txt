@@ -20,18 +20,21 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/spv)
-file(MAKE_DIRECTORY ${CMAKE_SHADER_OUTPUT_DIRECTORY})
+if(PROJECT_IS_TOP_LEVEL)
 
-if (EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
-    message(STATUS "Creating compile_commands.json link in project root directory")
-    file(CREATE_LINK "${CMAKE_BINARY_DIR}/compile_commands.json" "${PROJECT_SOURCE_DIR}/compile_commands.json")
-else ()
-    message(STATUS "CMake binary directory does not contain compile_commands.json file. This is probably the first time running cmake")
-endif ()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+    set(CMAKE_SHADER_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/spv)
+    file(MAKE_DIRECTORY ${CMAKE_SHADER_OUTPUT_DIRECTORY})
+
+    if (EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
+        message(STATUS "Creating compile_commands.json link in project root directory")
+        file(CREATE_LINK "${CMAKE_BINARY_DIR}/compile_commands.json" "${PROJECT_SOURCE_DIR}/compile_commands.json")
+    else ()
+        message(STATUS "CMake binary directory does not contain compile_commands.json file. This is probably the first time running cmake")
+    endif ()
+endif()
 
 set(QUARTZ_COMPILE_DEFINITIONS "")
 
@@ -280,7 +283,12 @@ add_subdirectory("${QUARTZ_TEST_DIR}/unit_test")
 #====================================================================
 # The demo application
 # ====================================================================
-set(APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
+set(DEMO_APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
 
-set(APPLICATION_SOURCE_DIR "${APPLICATION_ROOT_DIR}/demo_app")
-add_subdirectory("${APPLICATION_SOURCE_DIR}")
+set(DEMO_APPLICATION_SOURCE_DIR "${DEMO_APPLICATION_ROOT_DIR}/demo_app")
+if (QUARTZ_COMPILE_DEMO_APPLICATION)
+    message(STATUS "Adding Quartz's demo application")
+    add_subdirectory("${DEMO_APPLICATION_SOURCE_DIR}")
+else()
+    message(STATUS "Not adding Quart'z demo application")
+endif()

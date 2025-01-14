@@ -1,5 +1,7 @@
 #pragma once
 
+#include <reactphysics3d/mathematics/Transform.h>
+
 #include "math/transform/Vec3.hpp"
 #include "math/transform/Quaternion.hpp"
 

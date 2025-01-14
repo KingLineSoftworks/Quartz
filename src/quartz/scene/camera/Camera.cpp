@@ -1,6 +1,10 @@
-#include <chrono>
+#include <cmath>
 
 #include "quartz/scene/camera/Camera.hpp"
+#include "math/transform/Vec3.hpp"
+#include "util/logger/Logger.hpp"
+
+uint32_t quartz::scene::Camera::cameraCount = 0;
 
 quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
     const math::Vec3 position_,
@@ -21,33 +25,27 @@ quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
 {}
 
 quartz::scene::Camera::Camera() :
-    m_pitch(0.0f),
-    m_yaw(0.0f),
-    m_roll(0.0f),
+    m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(60.0f),
     m_worldPosition(
         0.0f,
         0.0f,
         0.0f
     ),
+    m_lookDirection(math::Vec3::Forward),
     m_viewMatrix(),
     m_projectionMatrix()
-{
-    LOG_FUNCTION_CALL_TRACEthis("");
-}
+{}
 
 quartz::scene::Camera::Camera(
-    const double pitch,
-    const double yaw,
-    const double roll,
     const double fovDegrees,
-    const math::Vec3& worldPosition
+    const math::Vec3& worldPosition,
+    const math::Vec3& lookDirection
 ) :
-    m_pitch(pitch),
-    m_yaw(yaw),
-    m_roll(roll),
+    m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(fovDegrees),
     m_worldPosition(worldPosition),
+    m_lookDirection(lookDirection),
     m_viewMatrix(),
     m_projectionMatrix()
 {
@@ -64,11 +62,10 @@ quartz::scene::Camera::operator=(
         return *this;
     }
 
-    m_pitch = other.m_pitch;
-    m_yaw = other.m_yaw;
-    m_roll = other.m_roll;
+    m_id = other.m_id;
     m_fovDegrees = other.m_fovDegrees;
     m_worldPosition = other.m_worldPosition;
+    m_lookDirection = other.m_lookDirection;
     m_viewMatrix = other.m_viewMatrix;
 
     return *this;
@@ -79,74 +76,10 @@ quartz::scene::Camera::~Camera() {
 }
 
 void
-quartz::scene::Camera::fixedUpdate(
-    const quartz::managers::InputManager& inputManager
+quartz::scene::Camera::lookAtPosition(
+    const math::Vec3& position 
 ) {
-    // ----- update orientation ----- //
-
-    const float mouseSensitivity = 0.25f;
-
-    const float calibratedMousePositionOffset_x = inputManager.getMousePositionOffset_x() * mouseSensitivity;
-    const float calibratedMousePositionOffset_y = inputManager.getMousePositionOffset_y() * mouseSensitivity;
-
-    m_pitch += calibratedMousePositionOffset_y;
-    if (m_pitch > 89.5f) {
-        m_pitch = 89.5f;
-    } else if (m_pitch < -89.5f) {
-        m_pitch = -89.5f;
-    }
-
-    m_yaw = glm::mod(m_yaw - calibratedMousePositionOffset_x, 360.0f);
-
-    const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
-
-    math::Vec3 currentLookVector;
-    currentLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector.y = sin(glm::radians(m_pitch));
-    currentLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector.normalize();
-
-    math::Vec3 currentRightVector = currentLookVector.cross(worldUpVector).normalize();
-
-    math::Vec3 currentUpVector = currentRightVector.cross(currentLookVector).normalize();
-
-    // ----- update fov ----- //
-
-    const float scrollSensitivity = 1.0f;
-
-    m_fovDegrees -= inputManager.getScrollOffset_y() * scrollSensitivity;
-
-    if (m_fovDegrees < 5.0f) {
-        m_fovDegrees = 5.0f;
-    } else if (m_fovDegrees > 85.0f) {
-        m_fovDegrees = 85.0f;
-    }
-
-    // ----- update position ----- //
-
-    const float movementSpeedMPS = 2.0f;
-    const float movementSpeedAdjusted = movementSpeedMPS * 0.01666666666;
-
-    if (inputManager.getKeyDown_w()) {
-        m_worldPosition += movementSpeedAdjusted * currentLookVector;
-    }
-    if (inputManager.getKeyDown_s()) {
-        m_worldPosition -= movementSpeedAdjusted * currentLookVector;
-    }
-
-    if (inputManager.getKeyDown_d()) {
-        m_worldPosition += movementSpeedAdjusted * currentRightVector;
-    }
-    if (inputManager.getKeyDown_a()) {
-        m_worldPosition -= movementSpeedAdjusted * currentRightVector;
-    }
-
-    if (inputManager.getKeyDown_space()) {
-        m_worldPosition += movementSpeedAdjusted * worldUpVector;
-    }
-    if (inputManager.getKeyDown_shift()) {
-        m_worldPosition -= movementSpeedAdjusted * worldUpVector;
-    }
+    m_lookDirection = (position - m_worldPosition).normalize();
 }
 
 void
@@ -156,21 +89,13 @@ quartz::scene::Camera::update(
     UNUSED const double frameTimeDelta,
     UNUSED const double frameInterpolationFactor
 ) {
-    const math::Vec3 worldUpVector{0.0f, 1.0f, 0.0f};
+    math::Vec3 currentRightVector = m_lookDirection.cross(math::Vec3::Up).normalize();
 
-    math::Vec3 currentLookVector;
-    currentLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector.y = sin(glm::radians(m_pitch));
-    currentLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currentLookVector.normalize();
-
-    math::Vec3 currentRightVector = currentLookVector.cross(worldUpVector).normalize();
-
-    math::Vec3 currentUpVector = currentRightVector.cross(currentLookVector).normalize();
+    math::Vec3 currentUpVector = currentRightVector.cross(m_lookDirection).normalize();
 
     // ----- update view and projection matrices ----- //
 
-    m_viewMatrix = m_worldPosition.look(currentLookVector, currentUpVector);
+    m_viewMatrix = m_worldPosition.look(m_lookDirection, currentUpVector);
 
     m_projectionMatrix = math::Mat4::createPerspective(
         glm::radians(m_fovDegrees),
@@ -182,3 +107,4 @@ quartz::scene::Camera::update(
     // Because glm is meant for OpenGL where Y clip coordinate is inverted
     m_projectionMatrix[1][1] *= -1;
 }
+
