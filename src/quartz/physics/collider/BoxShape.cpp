@@ -1,5 +1,6 @@
-#include "quartz/physics/collider/BoxShape.hpp"
 #include "math/transform/Transform.hpp"
+
+#include "quartz/physics/collider/BoxShape.hpp"
 
 quartz::physics::BoxShape::BoxShape(
     quartz::managers::PhysicsManager& physicsManager,

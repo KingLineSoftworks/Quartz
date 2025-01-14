@@ -3,14 +3,14 @@
 #include <iostream>
 #include <limits>
 
+#include <glm/ext/vector_float3.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <reactphysics3d/mathematics/Quaternion.h>
+#include <reactphysics3d/mathematics/Vector3.h>
 
-#include "glm/ext/vector_float3.hpp"
 #include "math/transform/Vec3.hpp"
-#include "reactphysics3d/mathematics/Vector3.h"
 
 namespace math {
     union Quaternion;

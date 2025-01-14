@@ -23,9 +23,6 @@ public: // public methods
         const math::Quaternion& rotation_,
         const math::Vec3& scale_
     );
-    Transform(
-        const reactphysics3d::Transform& other
-    );
     ~Transform() = default;
 
 public: // member variables

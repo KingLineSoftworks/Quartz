@@ -7,8 +7,9 @@
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 
-#include "quartz/physics/field/Field.hpp"
 #include "util/logger/Logger.hpp"
+
+#include "quartz/physics/field/Field.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
 void
@@ -74,7 +75,7 @@ quartz::scene::Doodad::Doodad(
 }
 
 quartz::scene::Doodad::Doodad(
-    UNUSED const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
     std::optional<quartz::physics::Field>& o_field,
     const quartz::scene::Doodad::Parameters& doodadParameters

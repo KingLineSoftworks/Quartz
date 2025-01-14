@@ -3,7 +3,7 @@
 #include <optional>
 
 #include <reactphysics3d/reactphysics3d.h>
-#include "reactphysics3d/collision/Collider.h"
+#include <reactphysics3d/collision/Collider.h>
 
 #include "math/transform/Quaternion.hpp"
 

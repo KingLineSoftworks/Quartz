@@ -1,6 +1,6 @@
-#include "reactphysics3d/body/RigidBody.h"
-#include "reactphysics3d/components/RigidBodyComponents.h"
-#include "reactphysics3d/engine/PhysicsWorld.h"
+#include <reactphysics3d/body/RigidBody.h>
+#include <reactphysics3d/components/RigidBodyComponents.h>
+#include <reactphysics3d/engine/PhysicsWorld.h>
 
 #include "util/logger/Logger.hpp"
 

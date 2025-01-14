@@ -1,6 +1,6 @@
 #include <optional>
 
-#include "reactphysics3d/components/RigidBodyComponents.h"
+#include <reactphysics3d/components/RigidBodyComponents.h>
 
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Transform.hpp"

@@ -1,14 +1,14 @@
 #include <limits>
 
+#include <glm/geometric.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 
-#include "glm/geometric.hpp"
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
-
 #include "math/transform/Vec3.hpp"
+
 #include "util/macros.hpp"
 
 bool

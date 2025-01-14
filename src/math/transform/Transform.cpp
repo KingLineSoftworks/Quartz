@@ -33,10 +33,3 @@ math::Transform::Transform(
     scale(scale_)
 {}
 
-math::Transform::Transform(
-    const reactphysics3d::Transform& other
-) :
-    position(other.getPosition()),
-    rotation(other.getOrientation()),
-    scale(1.0f, 1.0f, 1.0f)
-{}
