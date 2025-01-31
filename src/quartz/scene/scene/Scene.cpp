@@ -117,16 +117,7 @@ void
 quartz::scene::Scene::setCamera(
     quartz::scene::Camera& camera
 ) {
-    LOG_FUNCTION_SCOPE_INFOthis("");
-    LOG_INFOthis("Current camera:");
-    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
-    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
-    
     mr_camera = camera;
-    
-    LOG_INFOthis("Updated camera:");
-    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
-    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
 }
 
 void
