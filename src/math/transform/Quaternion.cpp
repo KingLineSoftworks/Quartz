@@ -2,6 +2,7 @@
 
 #include <glm/geometric.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
@@ -57,7 +58,7 @@ math::Quaternion::isNormalized() const {
 
 math::Vec3
 math::Quaternion::getDirectionVector() const {
-    return {};
+    return glm::rotate(glmQuat, math::Vec3::Forward.glmVec);
 }
 
 float
