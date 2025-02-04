@@ -18,17 +18,17 @@ namespace physics {
 class quartz::physics::BoxShape {
 public: // classes
     struct Parameters {
-        Parameters(const math::Vec3& halfExtents_) :
-            halfExtents(halfExtents_)
+        Parameters(const math::Vec3& halfExtents_m_) :
+            halfExtents_m(halfExtents_m_)
         {}
 
-        math::Vec3 halfExtents;
+        math::Vec3 halfExtents_m;
     };
 
 public: // member functions
     BoxShape(
         quartz::managers::PhysicsManager& physicsManager,
-        const math::Vec3& halfExtents
+        const math::Vec3& halfExtents_m
     );
     BoxShape(const BoxShape& other) = delete;
     BoxShape(BoxShape&& other);

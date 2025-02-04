@@ -4,9 +4,9 @@
 
 quartz::physics::BoxShape::BoxShape(
     quartz::managers::PhysicsManager& physicsManager,
-    const math::Vec3& halfExtents
+    const math::Vec3& halfExtents_m
 ) :
-    mp_colliderShape(physicsManager.createBoxShapePtr(halfExtents))
+    mp_colliderShape(physicsManager.createBoxShapePtr(halfExtents_m))
 {}
 
 quartz::physics::BoxShape::BoxShape(

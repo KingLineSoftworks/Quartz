@@ -83,7 +83,7 @@ quartz::physics::RigidBody::RigidBody(
     mo_collider(quartz::physics::Collider::createBoxCollider(
         physicsManager, 
         mp_rigidBody, 
-        boxShapeParameters.halfExtents
+        boxShapeParameters.halfExtents_m
     ))
 {}
 
@@ -96,7 +96,7 @@ quartz::physics::RigidBody::RigidBody(
     mo_collider(quartz::physics::Collider::createSphereCollider(
         physicsManager, 
         mp_rigidBody, 
-        sphereShapeParameters.radius
+        sphereShapeParameters.radius_m
     ))
 {}
 
@@ -152,23 +152,23 @@ quartz::physics::RigidBody::setScale(
 }
 
 void
-quartz::physics::RigidBody::setLinearVelocity(
-    const math::Vec3& linearVelocity
+quartz::physics::RigidBody::setLinearVelocity_mps(
+    const math::Vec3& linearVelocity_mps
 ) {
-    mp_rigidBody->setLinearVelocity(linearVelocity);
+    mp_rigidBody->setLinearVelocity(linearVelocity_mps);
 }
 
 void
-quartz::physics::RigidBody::setAngularVelocity(
-    const math::Vec3& angularVelocity 
+quartz::physics::RigidBody::setAngularVelocity_mps(
+    const math::Vec3& angularVelocity_mps
 ) {
-    mp_rigidBody->setAngularVelocity(angularVelocity);
+    mp_rigidBody->setAngularVelocity(angularVelocity_mps);
 }
 
 void
-quartz::physics::RigidBody::applyLocalForceToCenterOfMass(
-    const math::Vec3& force
+quartz::physics::RigidBody::applyLocalForceToCenterOfMass_N(
+    const math::Vec3& force_N
 ) {
-    mp_rigidBody->applyLocalForceAtCenterOfMass(force);
+    mp_rigidBody->applyLocalForceAtCenterOfMass(force_N);
 }
 

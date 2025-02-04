@@ -16,7 +16,7 @@ quartz::physics::Collider::createBoxCollider(
 ) {
     quartz::physics::Collider collider;
 
-    collider.mo_boxShape = quartz::physics::BoxShape(physicsManager, parameters.halfExtents);
+    collider.mo_boxShape = quartz::physics::BoxShape(physicsManager, parameters.halfExtents_m);
 
     collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_boxShape->mp_colliderShape);
 
@@ -31,7 +31,7 @@ quartz::physics::Collider::createSphereCollider(
 ) {
     quartz::physics::Collider collider;
 
-    collider.mo_sphereShape = quartz::physics::SphereShape(physicsManager, parameters.radius);
+    collider.mo_sphereShape = quartz::physics::SphereShape(physicsManager, parameters.radius_m);
 
     collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_sphereShape->mp_colliderShape);
 

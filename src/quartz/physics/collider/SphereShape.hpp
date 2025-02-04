@@ -17,18 +17,18 @@ class quartz::physics::SphereShape {
 public: // classes
     struct Parameters {
         Parameters(
-            const double radius_
+            const double radius_m_
         ) :
-            radius(radius_)
+            radius_m(radius_m_)
         {}
 
-        double radius;
+        double radius_m;
     };
 
 public: // member functions
     SphereShape(
         quartz::managers::PhysicsManager& physicsManager,
-        const double radius
+        const double radius_m
     );
     SphereShape(const SphereShape& other) = delete;
     SphereShape(SphereShape&& other);

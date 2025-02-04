@@ -2,9 +2,9 @@
 
 quartz::physics::SphereShape::SphereShape(
     quartz::managers::PhysicsManager& physicsManager,
-    const double radius
+    const double radius_m
 ) :
-    mp_colliderShape(physicsManager.createSphereShapePtr(radius))
+    mp_colliderShape(physicsManager.createSphereShapePtr(radius_m))
 {}
 
 quartz::physics::SphereShape::SphereShape(

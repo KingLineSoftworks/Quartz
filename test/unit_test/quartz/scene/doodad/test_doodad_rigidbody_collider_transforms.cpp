@@ -25,9 +25,9 @@ void testFixedUpdateCallback(
 ) {
     std::optional<quartz::physics::RigidBody>& o_rigidBody = parameters.p_doodad->getRigidBodyOptionalReference();
 
-    o_rigidBody->setLinearVelocity({100.0f, 0.0f, 0.0f});
-    o_rigidBody->applyLocalForceToCenterOfMass({0.0f, 10.0f, 0.0f});
-    o_rigidBody->setAngularVelocity({-2788, 388, 190.101});
+    o_rigidBody->setLinearVelocity_mps({100.0f, 0.0f, 0.0f});
+    o_rigidBody->applyLocalForceToCenterOfMass_N({0.0f, 10.0f, 0.0f});
+    o_rigidBody->setAngularVelocity_mps({-2788, 388, 190.101});
 }
 
 /**
@@ -123,9 +123,9 @@ int test_transforms() {
     
     // get the rigidbody's collider's extents and make sure they match the scale
     const math::Vec3 expectedHalfExtents(
-        boxShapeParameters.halfExtents.x * scale.x,
-        boxShapeParameters.halfExtents.y * scale.y,
-        boxShapeParameters.halfExtents.z * scale.z
+        boxShapeParameters.halfExtents_m.x * scale.x,
+        boxShapeParameters.halfExtents_m.y * scale.y,
+        boxShapeParameters.halfExtents_m.z * scale.z
     );
     const math::Vec3 boxShapeHalfExtents = p_boxShape->getHalfExtents();
     UT_CHECK_EQUAL(boxShapeHalfExtents, expectedHalfExtents);
@@ -167,9 +167,9 @@ int test_transforms() {
     UT_CHECK_EQUAL(o_collider->getWorldRotation(), doodadUpdateTransform.rotation);
 
     const math::Vec3 expectedHalfExtentsUpdated(
-        boxShapeParameters.halfExtents.x * doodadUpdateTransform.scale.x,
-        boxShapeParameters.halfExtents.y * doodadUpdateTransform.scale.y,
-        boxShapeParameters.halfExtents.z * doodadUpdateTransform.scale.z
+        boxShapeParameters.halfExtents_m.x * doodadUpdateTransform.scale.x,
+        boxShapeParameters.halfExtents_m.y * doodadUpdateTransform.scale.y,
+        boxShapeParameters.halfExtents_m.z * doodadUpdateTransform.scale.z
     );
     const math::Vec3 boxShapeHalfExtentsUpdated = p_boxShape->getHalfExtents();
     UT_CHECK_EQUAL(boxShapeHalfExtentsUpdated, expectedHalfExtentsUpdated);

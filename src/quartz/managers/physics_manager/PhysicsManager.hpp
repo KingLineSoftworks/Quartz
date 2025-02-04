@@ -42,8 +42,8 @@ public: // member functions
     USE_LOGGER(PHYSICSMAN);
 
     reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
-    reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& extents);
-    reactphysics3d::SphereShape* createSphereShapePtr(const double radius);
+    reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& halfExtents_m);
+    reactphysics3d::SphereShape* createSphereShapePtr(const double radius_m);
 
 private: // member functions
     PhysicsManager();
@@ -56,3 +56,4 @@ private: // static variables
 private: // member variables
     reactphysics3d::PhysicsCommon m_physicsCommon;
 };
+

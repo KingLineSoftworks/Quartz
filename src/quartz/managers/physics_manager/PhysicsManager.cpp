@@ -24,15 +24,15 @@ quartz::managers::PhysicsManager::createPhysicsWorldPtr(
 
 reactphysics3d::BoxShape*
 quartz::managers::PhysicsManager::createBoxShapePtr(
-    const math::Vec3& extents
+    const math::Vec3& halfExtents_m
 ) {
-    return m_physicsCommon.createBoxShape(extents);
+    return m_physicsCommon.createBoxShape(halfExtents_m);
 }
 
 reactphysics3d::SphereShape*
 quartz::managers::PhysicsManager::createSphereShapePtr(
-    const double radius
+    const double radius_m
 ) {
-    return m_physicsCommon.createSphereShape(radius);
+    return m_physicsCommon.createSphereShape(radius_m);
 }
 
