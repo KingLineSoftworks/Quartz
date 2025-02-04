@@ -229,7 +229,7 @@ quartz::scene::Scene::fixedUpdate(
     // The doodad's fixedUpdate will make changes to the rigidBody and its transform, so
     // there is no need to manually snap the rigidBody to the doodad
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.fixedUpdate(inputManager, totalElapsedTime);
+        doodad.fixedUpdate(inputManager, totalElapsedTime, tickTimeDelta);
     }
 
     // This is only going to update the rigid bodies, not the doodads
