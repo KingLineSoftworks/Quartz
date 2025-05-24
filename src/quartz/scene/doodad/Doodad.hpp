@@ -39,18 +39,21 @@ public: // aliases
             Doodad* const p_doodad_,
             const quartz::managers::InputManager& inputManager_,
             const double totalElapsedTime_,
-            const double tickTimeDelta_
+            const double tickTimeDelta_,
+            const double ticksPerSecond_
         ) :
             p_doodad(p_doodad_),
             inputManager(inputManager_),
             totalElapsedTime(totalElapsedTime_),
-            tickTimeDelta(tickTimeDelta_)
+            tickTimeDelta(tickTimeDelta_),
+            ticksPerSecond(ticksPerSecond_)
         {}
 
         Doodad* const p_doodad;
         const quartz::managers::InputManager& inputManager;
         const double totalElapsedTime;
         const double tickTimeDelta;
+        const double ticksPerSecond;
     };
 
     struct UpdateCallbackParameters {
@@ -150,7 +153,8 @@ public: // member functions
     void fixedUpdate(
         const quartz::managers::InputManager& inputManager,
         const double totalElapsedTime,
-        const double tickTimeDelta
+        const double tickTimeDelta,
+        const double ticksPerSecond
     );
     void update(
         const quartz::managers::InputManager& inputManager,

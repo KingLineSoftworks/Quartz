@@ -136,7 +136,7 @@ int test_transforms() {
    
     // Call fixedUpdate on the doodad, then fixedUpdate on the field, to mimic the
     // order that it is done in quartz::scene::Scene::fixedUpdate
-    doodad.fixedUpdate(inputManager, totalElapsedTime, targetTickTimeDelta);
+    doodad.fixedUpdate(inputManager, totalElapsedTime, targetTickTimeDelta, 1.0 / targetTickTimeDelta);
     o_field->fixedUpdate(targetTickTimeDelta);
     doodad.snapToRigidBody();
     

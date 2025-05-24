@@ -176,9 +176,10 @@ void
 quartz::scene::Doodad::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
     const double totalElapsedTime,
-    const double tickTimeDelta
+    const double tickTimeDelta,
+    const double ticksPerSecond
 ) {
-    m_fixedUpdateCallback({this, inputManager, totalElapsedTime, tickTimeDelta});
+    m_fixedUpdateCallback({this, inputManager, totalElapsedTime, tickTimeDelta, ticksPerSecond});
 }
 
 void
