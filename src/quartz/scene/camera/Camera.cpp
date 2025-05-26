@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "quartz/scene/camera/Camera.hpp"
+#include "glm/trigonometric.hpp"
 #include "math/transform/Vec3.hpp"
 #include "util/logger/Logger.hpp"
 
@@ -24,6 +25,34 @@ quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
     projectionMatrix(camera.m_projectionMatrix)
 {}
 
+math::Vec3
+quartz::scene::Camera::calculateLookDirectionFromEulerAngles(
+    const quartz::scene::Camera::EulerAngles& eulerAngles
+) {
+    /**
+     * @brief We aren't considering roll for now because we don't want to support rolling the camera yet
+     */
+
+    math::Vec3 lookDirection;
+    lookDirection.x = cos(glm::radians(eulerAngles.yawDegrees)) * cos(glm::radians(eulerAngles.pitchDegrees));
+    lookDirection.y = sin(glm::radians(eulerAngles.pitchDegrees));
+    lookDirection.z = sin(glm::radians(eulerAngles.yawDegrees)) * cos(glm::radians(eulerAngles.pitchDegrees));
+
+    return lookDirection.normalize();
+}
+
+quartz::scene::Camera::EulerAngles
+quartz::scene::Camera::calculateEulerAnglesFromLookDirection(
+    const math::Vec3& lookDirection
+) {
+    const double pitchRadians = asin(lookDirection.y);
+    const double pitchDegrees = glm::degrees(pitchRadians);
+    const double yawDegrees = glm::degrees(acos(lookDirection.x / cos(pitchRadians)));
+
+    return {yawDegrees, pitchDegrees, 0};
+}
+
+
 quartz::scene::Camera::Camera() :
     m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(60.0f),
@@ -33,6 +62,7 @@ quartz::scene::Camera::Camera() :
         0.0f
     ),
     m_lookDirection(math::Vec3::Forward),
+    m_eulerAngles(quartz::scene::Camera::calculateEulerAnglesFromLookDirection(m_lookDirection)),
     m_viewMatrix(),
     m_projectionMatrix()
 {}
@@ -46,6 +76,7 @@ quartz::scene::Camera::Camera(
     m_fovDegrees(fovDegrees),
     m_worldPosition(worldPosition),
     m_lookDirection(lookDirection),
+    m_eulerAngles(quartz::scene::Camera::calculateEulerAnglesFromLookDirection(m_lookDirection)),
     m_viewMatrix(),
     m_projectionMatrix()
 {
@@ -66,6 +97,7 @@ quartz::scene::Camera::operator=(
     m_fovDegrees = other.m_fovDegrees;
     m_worldPosition = other.m_worldPosition;
     m_lookDirection = other.m_lookDirection;
+    m_eulerAngles = other.m_eulerAngles;
     m_viewMatrix = other.m_viewMatrix;
 
     return *this;
@@ -80,6 +112,26 @@ quartz::scene::Camera::lookAtPosition(
     const math::Vec3& position 
 ) {
     m_lookDirection = (position - m_worldPosition).normalize();
+
+    m_eulerAngles = quartz::scene::Camera::calculateEulerAnglesFromLookDirection(m_lookDirection);
+}
+
+void
+quartz::scene::Camera::setLookDirection(
+    const math::Vec3& lookDirection
+) {
+    m_lookDirection = lookDirection;
+
+    m_eulerAngles = quartz::scene::Camera::calculateEulerAnglesFromLookDirection(m_lookDirection);
+}
+
+void
+quartz::scene::Camera::setEulerAngles(
+    const quartz::scene::Camera::EulerAngles& eulerAngles
+) {
+    m_eulerAngles = eulerAngles;
+
+    m_lookDirection = quartz::scene::Camera::calculateLookDirectionFromEulerAngles(m_eulerAngles);
 }
 
 void
