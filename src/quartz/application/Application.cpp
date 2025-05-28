@@ -89,8 +89,9 @@ void quartz::Application::run() {
         previousFrameStartTime = currentFrameStartTime;
         frameTimeAccumulator += currentFrameTimeDelta;
 
+        processInput();
+
         while (frameTimeAccumulator >= 0) {
-            processInput();
             currentScene.fixedUpdate(m_inputManager, m_physicsManager, totalElapsedTime, targetTickTimeDelta);
             totalElapsedTime += targetTickTimeDelta;
             frameTimeAccumulator -= targetTickTimeDelta;
