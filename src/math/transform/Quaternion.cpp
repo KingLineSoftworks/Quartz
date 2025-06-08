@@ -6,6 +6,7 @@
 
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
+#include "math/transform/Mat3.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
@@ -76,6 +77,38 @@ math::Quaternion::getRotationMatrix() const {
     return glm::mat4_cast(glmQuat);
 }
 
+math::Quaternion&
+math::Quaternion::rotateToDirectionVector(const math::Vec3& desiredDirection) {
+    QUARTZ_ASSERT(desiredDirection.isNormalized(), "Desired direction vector is not normalized");
+
+    const math::Vec3 right = desiredDirection.cross(math::Vec3::Up);
+    UNUSED const math::Vec3 up = desiredDirection.cross(right);
+
+    return *this;
+}
+
+math::Quaternion
+math::Quaternion::getRotationToDirectionVector(const math::Vec3& desiredDirection) const {
+    math::Quaternion copy = *this;
+
+    copy.rotateToDirectionVector(desiredDirection);
+
+    return copy;
+}
+
+math::Quaternion
+math::Quaternion::fromEulerAngles(
+    const double yawDegrees,
+    const double pitchDegrees,
+    const double rollDegrees
+) {
+    const double x = glm::radians(pitchDegrees);
+    const double y = glm::radians(yawDegrees);
+    const double z = glm::radians(rollDegrees);
+
+    return glm::quat(glm::vec3(x, y, z));
+}
+
 math::Quaternion
 math::Quaternion::fromAxisAngleRotation(
     const math::Vec3& normalizedRotationAxis,
@@ -107,3 +140,4 @@ math::Quaternion::toString() const {
 
     return ss.str();
 }
+

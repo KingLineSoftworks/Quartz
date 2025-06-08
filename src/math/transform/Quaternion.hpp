@@ -123,6 +123,19 @@ union math::Quaternion {
 
     math::Mat4 getRotationMatrix() const;
 
+    Quaternion& rotateToDirectionVector(const math::Vec3& desiredDirection);
+    Quaternion getRotationToDirectionVector(const math::Vec3& desiredDirection) const;
+
+
+    /**
+     * @brief Create a quaternion from euler angles in degrees
+     */
+    static Quaternion fromEulerAngles(
+        const double yawDegrees,
+        const double pitchDegrees,
+        const double rollDegrees
+    );
+
     /**
      * @brief This function creates a quaternion from an axis angle representation. If quartz
      *    is in debug mode then we manually normalize the rotation axis just to be safe.
@@ -169,3 +182,4 @@ union math::Quaternion {
     glm::quat glmQuat;
     reactphysics3d::Quaternion rp3dQuat;
 };
+

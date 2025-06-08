@@ -44,11 +44,11 @@ union math::Mat4 {
 
     /**
      * -------------------------------------------------------------------------------------
-     * @brief Vector operators
+     * @brief Matrix operators
      * -------------------------------------------------------------------------------------
      */
 
-    Mat4 operator*(const Mat4& other)     const { return {glmMat * other.glmMat}; }
+    Mat4 operator*(const Mat4& other) const { return {glmMat * other.glmMat}; }
     Mat4 operator*(const glm::mat4 other) const { return {glmMat * other}; }
     friend Mat4 operator*(const glm::mat4 other, const Mat4& us) { return {other * us.glmMat}; }
 
