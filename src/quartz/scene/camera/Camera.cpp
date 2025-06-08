@@ -52,7 +52,6 @@ quartz::scene::Camera::calculateEulerAnglesFromLookDirection(
     return {yawDegrees, pitchDegrees, 0};
 }
 
-
 quartz::scene::Camera::Camera() :
     m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(60.0f),
