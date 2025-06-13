@@ -1,7 +1,6 @@
 #pragma once
 
 #include <optional>
-#include <variant>
 
 #include <reactphysics3d/body/RigidBody.h>
 
@@ -27,18 +26,18 @@ public: // classes
             const reactphysics3d::BodyType bodyType_,
             const bool enableGravity_,
             const math::Vec3& angularAxisFactor_,
-            const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_colliderParameters_
+            const quartz::physics::Collider::Parameters& colliderParameters_
         ) :
             bodyType(bodyType_),
             enableGravity(enableGravity_),
             angularLockAxisFactor(angularAxisFactor_),
-            v_colliderParameters(v_colliderParameters_)
+            colliderParameters(colliderParameters_)
         {}
 
         reactphysics3d::BodyType bodyType;
         bool enableGravity;
         math::Vec3 angularLockAxisFactor;
-        std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_colliderParameters;
+        quartz::physics::Collider::Parameters colliderParameters;
     };
 
 public: // member functions
@@ -46,11 +45,13 @@ public: // member functions
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
+        const quartz::physics::Collider::LayerProperties& layerProperties,
         const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
+        const quartz::physics::Collider::LayerProperties& layerProperties,
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     RigidBody(

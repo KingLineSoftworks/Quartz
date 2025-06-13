@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <variant>
 
 #include <reactphysics3d/reactphysics3d.h>
 #include <reactphysics3d/collision/Collider.h>
@@ -21,15 +22,49 @@ namespace physics {
 }
 
 class quartz::physics::Collider {
+public: // classes and enums
+    struct LayerProperties {
+        LayerProperties() :
+            layerBitMask(0),
+            collidableLayersBitMask(0)
+        {}
+
+        LayerProperties(
+            uint16_t layerBitMask_,
+            uint16_t collidableLayersBitMask_
+        ) :
+            layerBitMask(layerBitMask_),
+            collidableLayersBitMask(collidableLayersBitMask_)
+        {}
+
+        uint16_t layerBitMask;
+        uint16_t collidableLayersBitMask;
+    };
+
+    struct Parameters {
+        Parameters(
+            const quartz::physics::Collider::LayerProperties& layerProperties_,
+            const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_shapeParameters_
+        ) :
+            layerProperties(layerProperties_),
+            v_shapeParameters(v_shapeParameters_)
+        {}
+        
+        quartz::physics::Collider::LayerProperties layerProperties;
+        std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_shapeParameters;
+    };
+
 public: // static factory functions
     static Collider createBoxCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
+        const quartz::physics::Collider::LayerProperties& layerProperties,
         const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     static Collider createSphereCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
+        const quartz::physics::Collider::LayerProperties& layerProperties,
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     
@@ -51,7 +86,8 @@ public: // member functions
 public: // static functions
     static reactphysics3d::Collider* createColliderPtr(
         reactphysics3d::RigidBody* p_rigidBody,
-        reactphysics3d::CollisionShape* p_collisionShape
+        reactphysics3d::CollisionShape* p_collisionShape,
+        const quartz::physics::Collider::LayerProperties& layerProperties
     );
 
 private: // member functions

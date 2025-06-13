@@ -48,19 +48,19 @@ quartz::physics::RigidBody::createCollider(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(RIGIDBODY, "");
 
-    if (std::holds_alternative<std::monostate>(parameters.v_colliderParameters)) {
+    if (std::holds_alternative<std::monostate>(parameters.colliderParameters.v_shapeParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters are empty. Creating empty optional");
         return {};
     }
 
-    if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters)) {
+    if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(parameters.colliderParameters.v_shapeParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters represent box collider parameters. Creating box collider");
-        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, std::get<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters));
+        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, parameters.colliderParameters.layerProperties, std::get<quartz::physics::BoxShape::Parameters>(parameters.colliderParameters.v_shapeParameters));
     }
 
-    if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(parameters.v_colliderParameters)) {
+    if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(parameters.colliderParameters.v_shapeParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters represent sphere collider parameters. Creating sphere collider");
-        return quartz::physics::Collider::createSphereCollider(physicsManager, p_rigidBody, std::get<quartz::physics::SphereShape::Parameters>(parameters.v_colliderParameters));
+        return quartz::physics::Collider::createSphereCollider(physicsManager, p_rigidBody, parameters.colliderParameters.layerProperties, std::get<quartz::physics::SphereShape::Parameters>(parameters.colliderParameters.v_shapeParameters));
     }
 
     LOG_TRACE(RIGIDBODY, "Collider parameters are in a weird (empty) state. Not sure how we got here");
@@ -77,12 +77,14 @@ quartz::physics::RigidBody::RigidBody(
 quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
+    const quartz::physics::Collider::LayerProperties& layerProperties,
     const quartz::physics::BoxShape::Parameters& boxShapeParameters
 ) :
     mp_rigidBody(p_rigidBody),
     mo_collider(quartz::physics::Collider::createBoxCollider(
         physicsManager, 
-        mp_rigidBody, 
+        mp_rigidBody,
+        layerProperties,
         boxShapeParameters.halfExtents_m
     ))
 {}
@@ -90,12 +92,14 @@ quartz::physics::RigidBody::RigidBody(
 quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
+    const quartz::physics::Collider::LayerProperties& layerProperties,
     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
 ) :
     mp_rigidBody(p_rigidBody),
     mo_collider(quartz::physics::Collider::createSphereCollider(
         physicsManager, 
-        mp_rigidBody, 
+        mp_rigidBody,
+        layerProperties,
         sphereShapeParameters.radius_m
     ))
 {}
