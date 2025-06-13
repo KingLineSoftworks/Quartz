@@ -45,22 +45,6 @@ public: // member functions
         const bool enableGravity,
         const math::Vec3& angularLockAxisFactor
     );
-    // quartz::physics::RigidBody createRigidBody(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     const math::Transform& transform,
-    //     const reactphysics3d::BodyType bodyType,
-    //     const bool enableGravity,
-    //     const math::Vec3& angularLockAxisFactor,
-    //     const quartz::physics::BoxShape::Parameters& boxShapeParameters
-    // );
-    // quartz::physics::RigidBody createRigidBody(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     const math::Transform& transform,
-    //     const reactphysics3d::BodyType bodyType,
-    //     const bool enableGravity,
-    //     const math::Vec3& angularLockAxisFactor,
-    //     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-    // );
     quartz::physics::RigidBody createRigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         const math::Transform& transform,

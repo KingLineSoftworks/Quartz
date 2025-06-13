@@ -76,50 +76,6 @@ quartz::physics::Field::createRigidBody(
     };
 }
 
-// quartz::physics::RigidBody
-// quartz::physics::Field::createRigidBody(
-//     quartz::managers::PhysicsManager& physicsManager,
-//     const math::Transform& transform,
-//     const reactphysics3d::BodyType bodyType,
-//     const bool enableGravity,
-//     const math::Vec3& angularLockAxisFactor,
-//     const quartz::physics::BoxShape::Parameters& boxShapeParameters
-// ) {
-//     return {
-//         physicsManager,
-//         quartz::physics::RigidBody::createRigidBodyPtr(
-//             mp_physicsWorld,
-//             transform,
-//             bodyType,
-//             enableGravity,
-//             angularLockAxisFactor
-//         ),
-//         boxShapeParameters
-//     };
-// }
-// 
-// quartz::physics::RigidBody
-// quartz::physics::Field::createRigidBody(
-//     quartz::managers::PhysicsManager& physicsManager,
-//     const math::Transform& transform,
-//     const reactphysics3d::BodyType bodyType,
-//     const bool enableGravity,
-//     const math::Vec3& angularLockAxisFactor,
-//     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-// ) {
-//     return {
-//         physicsManager,
-//         quartz::physics::RigidBody::createRigidBodyPtr(
-//             mp_physicsWorld,
-//             transform,
-//             bodyType,
-//             enableGravity,
-//             angularLockAxisFactor
-//         ),
-//         sphereShapeParameters
-//     };
-// }
-
 quartz::physics::RigidBody
 quartz::physics::Field::createRigidBody(
     quartz::managers::PhysicsManager& physicsManager,
