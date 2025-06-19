@@ -23,37 +23,37 @@ namespace physics {
 
 class quartz::physics::Collider {
 public: // classes and enums
-    struct LayerProperties {
-        LayerProperties() :
-            layerBitMask(0),
-            collidableLayersBitMask(0)
+    struct CategoryProperties {
+        CategoryProperties() :
+            categoryBitMask(0),
+            collidableCategoriesBitMask(0)
         {}
 
-        LayerProperties(
-            uint16_t layerBitMask_,
-            uint16_t collidableLayersBitMask_
+        CategoryProperties(
+            uint16_t categoryBitMask_,
+            uint16_t collidableCategoriesBitMask_
         ) :
-            layerBitMask(layerBitMask_),
-            collidableLayersBitMask(collidableLayersBitMask_)
+            categoryBitMask(categoryBitMask_),
+            collidableCategoriesBitMask(collidableCategoriesBitMask_)
         {}
 
-        uint16_t layerBitMask;
-        uint16_t collidableLayersBitMask;
+        uint16_t categoryBitMask;
+        uint16_t collidableCategoriesBitMask;
     };
 
     struct Parameters {
         Parameters(
             const bool isTrigger_,
-            const quartz::physics::Collider::LayerProperties& layerProperties_,
+            const quartz::physics::Collider::CategoryProperties& categoryProperties_,
             const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_shapeParameters_
         ) :
             isTrigger(isTrigger_),
-            layerProperties(layerProperties_),
+            categoryProperties(categoryProperties_),
             v_shapeParameters(v_shapeParameters_)
         {}
 
         bool isTrigger;
-        quartz::physics::Collider::LayerProperties layerProperties;
+        quartz::physics::Collider::CategoryProperties categoryProperties;
         std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_shapeParameters;
     };
 
@@ -62,14 +62,14 @@ public: // static factory functions
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
         const bool isTrigger,
-        const quartz::physics::Collider::LayerProperties& layerProperties,
+        const quartz::physics::Collider::CategoryProperties& categoryProperties,
         const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     static Collider createSphereCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
         const bool isTrigger,
-        const quartz::physics::Collider::LayerProperties& layerProperties,
+        const quartz::physics::Collider::CategoryProperties& categoryProperties,
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     
@@ -94,7 +94,7 @@ public: // static functions
         reactphysics3d::RigidBody* p_rigidBody,
         const bool isTrigger,
         reactphysics3d::CollisionShape* p_collisionShape,
-        const quartz::physics::Collider::LayerProperties& layerProperties
+        const quartz::physics::Collider::CategoryProperties& categoryProperties
     );
 
 private: // member functions

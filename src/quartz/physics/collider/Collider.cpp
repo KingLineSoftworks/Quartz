@@ -13,14 +13,14 @@ quartz::physics::Collider::createBoxCollider(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
     const bool isTrigger,
-    const quartz::physics::Collider::LayerProperties& layerProperties,
+    const quartz::physics::Collider::CategoryProperties& categoryProperties,
     const quartz::physics::BoxShape::Parameters& parameters
 ) {
     quartz::physics::Collider collider;
 
     collider.mo_boxShape = quartz::physics::BoxShape(physicsManager, parameters.halfExtents_m);
 
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, isTrigger, collider.mo_boxShape->mp_colliderShape, layerProperties);
+    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, isTrigger, collider.mo_boxShape->mp_colliderShape, categoryProperties);
 
     return collider;
 }
@@ -30,14 +30,14 @@ quartz::physics::Collider::createSphereCollider(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
     const bool isTrigger,
-    const quartz::physics::Collider::LayerProperties& layerProperties,
+    const quartz::physics::Collider::CategoryProperties& categoryProperties,
     const quartz::physics::SphereShape::Parameters& parameters
 ) {
     quartz::physics::Collider collider;
 
     collider.mo_sphereShape = quartz::physics::SphereShape(physicsManager, parameters.radius_m);
 
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, isTrigger, collider.mo_sphereShape->mp_colliderShape, layerProperties);
+    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, isTrigger, collider.mo_sphereShape->mp_colliderShape, categoryProperties);
 
     return collider;
 }
@@ -47,7 +47,7 @@ quartz::physics::Collider::createColliderPtr(
     reactphysics3d::RigidBody* p_rigidBody,
     const bool isTrigger,
     reactphysics3d::CollisionShape* p_collisionShape,
-    const quartz::physics::Collider::LayerProperties& layerProperties
+    const quartz::physics::Collider::CategoryProperties& categoryProperties
 ) {
     /**
      *  @todo 2024/11/18 What does the rp3d identity look like for position and orientation? This should not effect scale
@@ -55,8 +55,8 @@ quartz::physics::Collider::createColliderPtr(
     reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity(); // transform relative to the body, not the world
     reactphysics3d::Collider* p_collider = p_rigidBody->addCollider(p_collisionShape, colliderTransform);
 
-    p_collider->setCollisionCategoryBits(layerProperties.layerBitMask);
-    p_collider->setCollideWithMaskBits(layerProperties.collidableLayersBitMask);
+    p_collider->setCollisionCategoryBits(categoryProperties.categoryBitMask);
+    p_collider->setCollideWithMaskBits(categoryProperties.collidableCategoriesBitMask);
 
     p_collider->setIsTrigger(isTrigger);
 

@@ -55,12 +55,12 @@ quartz::physics::RigidBody::createCollider(
 
     if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(parameters.colliderParameters.v_shapeParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters represent box collider parameters. Creating box collider");
-        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, parameters.colliderParameters.isTrigger, parameters.colliderParameters.layerProperties, std::get<quartz::physics::BoxShape::Parameters>(parameters.colliderParameters.v_shapeParameters));
+        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, parameters.colliderParameters.isTrigger, parameters.colliderParameters.categoryProperties, std::get<quartz::physics::BoxShape::Parameters>(parameters.colliderParameters.v_shapeParameters));
     }
 
     if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(parameters.colliderParameters.v_shapeParameters)) {
         LOG_TRACE(RIGIDBODY, "Collider parameters represent sphere collider parameters. Creating sphere collider");
-        return quartz::physics::Collider::createSphereCollider(physicsManager, p_rigidBody, parameters.colliderParameters.isTrigger, parameters.colliderParameters.layerProperties, std::get<quartz::physics::SphereShape::Parameters>(parameters.colliderParameters.v_shapeParameters));
+        return quartz::physics::Collider::createSphereCollider(physicsManager, p_rigidBody, parameters.colliderParameters.isTrigger, parameters.colliderParameters.categoryProperties, std::get<quartz::physics::SphereShape::Parameters>(parameters.colliderParameters.v_shapeParameters));
     }
 
     LOG_TRACE(RIGIDBODY, "Collider parameters are in a weird (empty) state. Not sure how we got here");
@@ -78,7 +78,7 @@ quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
     const bool isTrigger,
-    const quartz::physics::Collider::LayerProperties& layerProperties,
+    const quartz::physics::Collider::CategoryProperties& categoryProperties,
     const quartz::physics::BoxShape::Parameters& boxShapeParameters
 ) :
     mp_rigidBody(p_rigidBody),
@@ -86,7 +86,7 @@ quartz::physics::RigidBody::RigidBody(
         physicsManager, 
         mp_rigidBody,
         isTrigger,
-        layerProperties,
+        categoryProperties,
         boxShapeParameters.halfExtents_m
     ))
 {}
@@ -95,7 +95,7 @@ quartz::physics::RigidBody::RigidBody(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
     const bool isTrigger,
-    const quartz::physics::Collider::LayerProperties& layerProperties,
+    const quartz::physics::Collider::CategoryProperties& categoryProperties,
     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
 ) :
     mp_rigidBody(p_rigidBody),
@@ -103,7 +103,7 @@ quartz::physics::RigidBody::RigidBody(
         physicsManager, 
         mp_rigidBody,
         isTrigger,
-        layerProperties,
+        categoryProperties,
         sphereShapeParameters.radius_m
     ))
 {}

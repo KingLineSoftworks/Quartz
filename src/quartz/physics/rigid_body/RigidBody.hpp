@@ -46,14 +46,14 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
         const bool isTrigger,
-        const quartz::physics::Collider::LayerProperties& layerProperties,
+        const quartz::physics::Collider::CategoryProperties& categoryProperties,
         const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     RigidBody(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
         const bool isTrigger,
-        const quartz::physics::Collider::LayerProperties& layerProperties,
+        const quartz::physics::Collider::CategoryProperties& categoryProperties,
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
     RigidBody(
