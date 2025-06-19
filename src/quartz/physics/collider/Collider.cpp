@@ -12,6 +12,7 @@ quartz::physics::Collider
 quartz::physics::Collider::createBoxCollider(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
+    const bool isTrigger,
     const quartz::physics::Collider::LayerProperties& layerProperties,
     const quartz::physics::BoxShape::Parameters& parameters
 ) {
@@ -19,7 +20,7 @@ quartz::physics::Collider::createBoxCollider(
 
     collider.mo_boxShape = quartz::physics::BoxShape(physicsManager, parameters.halfExtents_m);
 
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_boxShape->mp_colliderShape, layerProperties);
+    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, isTrigger, collider.mo_boxShape->mp_colliderShape, layerProperties);
 
     return collider;
 }
@@ -28,6 +29,7 @@ quartz::physics::Collider
 quartz::physics::Collider::createSphereCollider(
     quartz::managers::PhysicsManager& physicsManager,
     reactphysics3d::RigidBody* p_rigidBody,
+    const bool isTrigger,
     const quartz::physics::Collider::LayerProperties& layerProperties,
     const quartz::physics::SphereShape::Parameters& parameters
 ) {
@@ -35,7 +37,7 @@ quartz::physics::Collider::createSphereCollider(
 
     collider.mo_sphereShape = quartz::physics::SphereShape(physicsManager, parameters.radius_m);
 
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_sphereShape->mp_colliderShape, layerProperties);
+    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, isTrigger, collider.mo_sphereShape->mp_colliderShape, layerProperties);
 
     return collider;
 }
@@ -43,6 +45,7 @@ quartz::physics::Collider::createSphereCollider(
 reactphysics3d::Collider*
 quartz::physics::Collider::createColliderPtr(
     reactphysics3d::RigidBody* p_rigidBody,
+    const bool isTrigger,
     reactphysics3d::CollisionShape* p_collisionShape,
     const quartz::physics::Collider::LayerProperties& layerProperties
 ) {
@@ -54,6 +57,8 @@ quartz::physics::Collider::createColliderPtr(
 
     p_collider->setCollisionCategoryBits(layerProperties.layerBitMask);
     p_collider->setCollideWithMaskBits(layerProperties.collidableLayersBitMask);
+
+    p_collider->setIsTrigger(isTrigger);
 
     return p_collider;
 }
@@ -100,6 +105,11 @@ quartz::physics::Collider::getCollisionShapePtr() const {
     }
 
     return nullptr;
+}
+
+bool
+quartz::physics::Collider::getIsTrigger() const {
+    return mp_collider->getIsTrigger();
 }
 
 math::Vec3

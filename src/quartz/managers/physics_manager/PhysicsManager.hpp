@@ -5,6 +5,7 @@
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/Loggers.hpp"
+#include "reactphysics3d/engine/EventListener.h"
 
 namespace quartz {
 
@@ -33,6 +34,35 @@ public: // classes
         friend class quartz::unit_test::UnitTestClient;
     };
 
+    class EventListener : public reactphysics3d::EventListener {
+    public: // classes
+        class Client {
+        public: // member functions
+            Client() = delete;
+
+        private: // static functions
+            static quartz::managers::PhysicsManager::EventListener& getInstance() { return quartz::managers::PhysicsManager::EventListener::getInstance(); }
+        
+        private: // friend classes
+            friend class quartz::managers::PhysicsManager;
+        };
+
+    public: // member functions
+        /**
+         * @todo 2025/06/19 Make these private and allow the reactphysics3d::ContactManager class to be a friend so it can access these.
+         *   We probably don't want just anyone who has access to this instance to have the ability to fabricate collisions.
+         */
+        void onContact(const reactphysics3d::CollisionCallback::CallbackData& callbackData) override;
+
+        void onTrigger(const reactphysics3d::OverlapCallback::CallbackData& callbackData) override;
+
+    private: // member functions
+        EventListener();
+
+    private: // static functions
+        static EventListener& getInstance();
+    };
+
 public: // member functions
     PhysicsManager(const PhysicsManager& other) = delete;
     PhysicsManager(PhysicsManager&& other) = delete;
@@ -50,6 +80,8 @@ private: // member functions
 
 private: // static functions
     static PhysicsManager& getInstance();
+
+    static quartz::managers::PhysicsManager::EventListener& getEventListenerInstance() { return quartz::managers::PhysicsManager::EventListener::Client::getInstance(); }
 
 private: // static variables
 

@@ -80,7 +80,7 @@ int test_transforms() {
     const math::Transform inputTransform(worldPosition, worldOrientation, scale);
 
     const quartz::physics::BoxShape::Parameters boxShapeParameters({1.0f, 1.0f, 1.0f});
-    const quartz::physics::RigidBody::Parameters rigidBodyParameters(reactphysics3d::BodyType::DYNAMIC, true, {0.0, 0.0, 0.0}, {{}, boxShapeParameters});
+    const quartz::physics::RigidBody::Parameters rigidBodyParameters(reactphysics3d::BodyType::DYNAMIC, true, {0.0, 0.0, 0.0}, {false, {}, boxShapeParameters});
     const quartz::scene::Doodad::Parameters doodadParameters({}, inputTransform, rigidBodyParameters, {}, testFixedUpdateCallback, testUpdateCallback);
     quartz::scene::Doodad doodad(renderingDevice, physicsManager, o_field, std::nullopt, inputTransform, rigidBodyParameters, {}, testFixedUpdateCallback, testUpdateCallback);
 

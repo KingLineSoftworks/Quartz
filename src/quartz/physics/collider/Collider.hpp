@@ -43,13 +43,16 @@ public: // classes and enums
 
     struct Parameters {
         Parameters(
+            const bool isTrigger_,
             const quartz::physics::Collider::LayerProperties& layerProperties_,
             const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_shapeParameters_
         ) :
+            isTrigger(isTrigger_),
             layerProperties(layerProperties_),
             v_shapeParameters(v_shapeParameters_)
         {}
-        
+
+        bool isTrigger;
         quartz::physics::Collider::LayerProperties layerProperties;
         std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_shapeParameters;
     };
@@ -58,12 +61,14 @@ public: // static factory functions
     static Collider createBoxCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
+        const bool isTrigger,
         const quartz::physics::Collider::LayerProperties& layerProperties,
         const quartz::physics::BoxShape::Parameters& boxShapeParameters
     );
     static Collider createSphereCollider(
         quartz::managers::PhysicsManager& physicsManager,
         reactphysics3d::RigidBody* p_rigidBody,
+        const bool isTrigger,
         const quartz::physics::Collider::LayerProperties& layerProperties,
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
@@ -78,6 +83,7 @@ public: // member functions
 
     const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
     const reactphysics3d::Collider* getColliderPtr() const { return mp_collider; }
+    bool getIsTrigger() const;
     math::Vec3 getLocalPosition() const;
     math::Quaternion getLocalRotation() const;
     math::Vec3 getWorldPosition() const;
@@ -86,6 +92,7 @@ public: // member functions
 public: // static functions
     static reactphysics3d::Collider* createColliderPtr(
         reactphysics3d::RigidBody* p_rigidBody,
+        const bool isTrigger,
         reactphysics3d::CollisionShape* p_collisionShape,
         const quartz::physics::Collider::LayerProperties& layerProperties
     );

@@ -31,5 +31,6 @@ endfunction()
 #set_quartz_major_minor_patch_versions(0 2 1) # give physics properties to the scene, so each scene has custom physics
 #set_quartz_major_minor_patch_versions(0 2 2) # invoke Doodad callback functions within update and fixedUpdate functions
 #set_quartz_major_minor_patch_versions(0 2 3) # allow client to own the camera and update it from within update functions
-set_quartz_major_minor_patch_versions(0 2 4) # implement collider layer masks
+#set_quartz_major_minor_patch_versions(0 2 4) # implement collider category masks
+set_quartz_major_minor_patch_versions(0 2 5) # allow for physics collision callbacks and trigger callbacks
 

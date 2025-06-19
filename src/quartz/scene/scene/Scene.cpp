@@ -15,17 +15,6 @@
 #include "quartz/scene/doodad/Doodad.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
-class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {
-public:
-    void onContact(UNUSED const reactphysics3d::CollisionCallback::CallbackData& callbackData) override {
-        // LOG_ERROR(PHYSICSMAN, "Contact detected");
-    }
-
-    void onTrigger(UNUSED const reactphysics3d::OverlapCallback::CallbackData& callbackData) override {
-        // LOG_ERROR(PHYSICSMAN, "Trigger detected");
-    }
-};
-
 quartz::scene::Camera quartz::scene::Scene::defaultCamera;
 
 std::vector<quartz::scene::Doodad>
@@ -142,7 +131,6 @@ quartz::scene::Scene::load(
      *    We can allow the current scene to set the event listener's functions, so each scene
      *    can handle the events in their own way.
      */
-    // static DummyTestPhysicsEventListener el;
     // mp_physicsWorld->setEventListener(&el);
     
     if (o_fieldParameters) {
