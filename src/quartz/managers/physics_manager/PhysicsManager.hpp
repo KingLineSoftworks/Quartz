@@ -1,11 +1,13 @@
 #pragma once
 
+#include <map>
+
 #include <reactphysics3d/reactphysics3d.h>
+#include <reactphysics3d/engine/EventListener.h>
 
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/Loggers.hpp"
-#include "reactphysics3d/engine/EventListener.h"
 
 namespace quartz {
 
@@ -18,7 +20,8 @@ namespace unit_test {
 namespace managers {
     class PhysicsManager;
 }
-}
+
+} // namespace quartz
 
 class quartz::managers::PhysicsManager {
 public: // classes

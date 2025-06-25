@@ -1,7 +1,10 @@
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
-#include "reactphysics3d/collision/CollisionCallback.h"
-#include "reactphysics3d/engine/PhysicsWorld.h"
+#include <reactphysics3d/collision/Collider.h>
+#include <reactphysics3d/collision/CollisionCallback.h>
+#include <reactphysics3d/engine/PhysicsWorld.h>
+
 #include "util/logger/Logger.hpp"
+
+#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 quartz::managers::PhysicsManager::EventListener::EventListener() {}
 

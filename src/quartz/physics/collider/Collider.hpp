@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <map>
 #include <variant>
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -72,7 +73,7 @@ public: // static factory functions
         const quartz::physics::Collider::CategoryProperties& categoryProperties,
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
-    
+
 public: // member functions
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
@@ -106,3 +107,4 @@ private: // member variables
 
     reactphysics3d::Collider* mp_collider;
 };
+
