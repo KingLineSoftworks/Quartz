@@ -11,7 +11,6 @@
 
 #include "util/logger/Logger.hpp"
 
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/Loggers.hpp"
 #include "quartz/physics/collider/BoxShape.hpp"
 #include "quartz/physics/collider/SphereShape.hpp"
@@ -59,22 +58,26 @@ public: // classes and enums
     };
 
 public: // static factory functions
-    static Collider createBoxCollider(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const bool isTrigger,
-        const quartz::physics::Collider::CategoryProperties& categoryProperties,
-        const quartz::physics::BoxShape::Parameters& boxShapeParameters
-    );
-    static Collider createSphereCollider(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const bool isTrigger,
-        const quartz::physics::Collider::CategoryProperties& categoryProperties,
-        const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-    );
+    // static Collider createBoxCollider(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const bool isTrigger,
+    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
+    //     const quartz::physics::BoxShape::Parameters& boxShapeParameters
+    // );
+    // static Collider createSphereCollider(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const bool isTrigger,
+    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
+    //     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
+    // );
 
 public: // member functions
+    Collider(
+        std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
+        reactphysics3d::Collider* p_collider
+    );
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
 
@@ -91,15 +94,15 @@ public: // member functions
     math::Quaternion getWorldRotation() const;
 
 public: // static functions
-    static reactphysics3d::Collider* createColliderPtr(
-        reactphysics3d::RigidBody* p_rigidBody,
-        const bool isTrigger,
-        reactphysics3d::CollisionShape* p_collisionShape,
-        const quartz::physics::Collider::CategoryProperties& categoryProperties
-    );
+    // static reactphysics3d::Collider* createColliderPtr(
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const bool isTrigger,
+    //     reactphysics3d::CollisionShape* p_collisionShape,
+    //     const quartz::physics::Collider::CategoryProperties& categoryProperties
+    // );
 
 private: // member functions
-    Collider();
+    // Collider();
 
 private: // member variables
     std::optional<quartz::physics::BoxShape> mo_boxShape;

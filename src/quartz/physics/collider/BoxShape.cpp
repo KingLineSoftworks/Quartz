@@ -2,11 +2,17 @@
 
 #include "quartz/physics/collider/BoxShape.hpp"
 
+// quartz::physics::BoxShape::BoxShape(
+//     quartz::managers::PhysicsManager& physicsManager,
+//     const math::Vec3& halfExtents_m
+// ) :
+//     mp_colliderShape(physicsManager.createBoxShapePtr(halfExtents_m))
+// {}
+
 quartz::physics::BoxShape::BoxShape(
-    quartz::managers::PhysicsManager& physicsManager,
-    const math::Vec3& halfExtents_m
+    reactphysics3d::BoxShape* p_boxShape
 ) :
-    mp_colliderShape(physicsManager.createBoxShapePtr(halfExtents_m))
+    mp_colliderShape(p_boxShape)
 {}
 
 quartz::physics::BoxShape::BoxShape(

@@ -5,16 +5,20 @@
 #include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
-
 #include "quartz/physics/Loggers.hpp"
 
 namespace quartz {
+
+namespace managers {
+    class PhysicsManager;
+}
+
 namespace physics {
     class Collider;
     class BoxShape;
 }
-}
+
+} // namespace quartz
 
 class quartz::physics::BoxShape {
 public: // classes
@@ -27,10 +31,11 @@ public: // classes
     };
 
 public: // member functions
-    BoxShape(
-        quartz::managers::PhysicsManager& physicsManager,
-        const math::Vec3& halfExtents_m
-    );
+    // BoxShape(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     const math::Vec3& halfExtents_m
+    // );
+    BoxShape(reactphysics3d::BoxShape* p_boxShape);
     BoxShape(const BoxShape& other) = delete;
     BoxShape(BoxShape&& other);
     BoxShape& operator=(BoxShape&& other);
@@ -43,6 +48,7 @@ private: // member variables
     reactphysics3d::BoxShape* mp_colliderShape;
 
 private: // friend classes
+    friend class quartz::managers::PhysicsManager;
     friend class quartz::physics::Collider;
 };
 

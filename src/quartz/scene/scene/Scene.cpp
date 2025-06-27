@@ -135,7 +135,7 @@ quartz::scene::Scene::load(
     
     if (o_fieldParameters) {
         LOG_TRACEthis("Initializing physics field");
-        mo_field.emplace(physicsManager, o_fieldParameters->gravity);
+        mo_field.emplace(physicsManager.createField(*o_fieldParameters));
     }
 
     LOG_TRACEthis("Initializing master texture list");

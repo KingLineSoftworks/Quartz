@@ -1,17 +1,22 @@
 #pragma once
 
 #include <reactphysics3d/reactphysics3d.h>
-
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
+#include <reactphysics3d/collision/shapes/SphereShape.h>
 
 #include "quartz/physics/Loggers.hpp"
 
 namespace quartz {
+
+namespace managers {
+    class PhysicsManager;
+}
+
 namespace physics {
     class Collider;
     class SphereShape;
 }
-}
+
+} // namespace quartz
 
 class quartz::physics::SphereShape {
 public: // classes
@@ -26,10 +31,11 @@ public: // classes
     };
 
 public: // member functions
-    SphereShape(
-        quartz::managers::PhysicsManager& physicsManager,
-        const double radius_m
-    );
+    // SphereShape(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     const double radius_m
+    // );
+    SphereShape(reactphysics3d::SphereShape* p_sphereShape);
     SphereShape(const SphereShape& other) = delete;
     SphereShape(SphereShape&& other);
     SphereShape& operator=(SphereShape&& other);
@@ -38,8 +44,8 @@ public: // member functions
 
 private: // member variables
     reactphysics3d::SphereShape* mp_colliderShape;
-    reactphysics3d::Collider* p_collider;
 
 private: // friend classes
+    friend class quartz::managers::PhysicsManager;
     friend class quartz::physics::Collider;
 };

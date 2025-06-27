@@ -1,10 +1,18 @@
+#include <reactphysics3d/collision/shapes/SphereShape.h>
+
 #include "quartz/physics/collider/SphereShape.hpp"
 
+// quartz::physics::SphereShape::SphereShape(
+//     quartz::managers::PhysicsManager& physicsManager,
+//     const double radius_m
+// ) :
+//     mp_colliderShape(physicsManager.createSphereShapePtr(radius_m))
+// {}
+
 quartz::physics::SphereShape::SphereShape(
-    quartz::managers::PhysicsManager& physicsManager,
-    const double radius_m
+    reactphysics3d::SphereShape* p_sphereShape
 ) :
-    mp_colliderShape(physicsManager.createSphereShapePtr(radius_m))
+    mp_colliderShape(p_sphereShape)
 {}
 
 quartz::physics::SphereShape::SphereShape(
@@ -25,3 +33,4 @@ quartz::physics::SphereShape::operator=(
 
     return *this;
 }
+

@@ -7,7 +7,6 @@
 #include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/Loggers.hpp"
 #include "quartz/physics/collider/Collider.hpp"
 
@@ -41,26 +40,29 @@ public: // classes
     };
 
 public: // member functions
-    RigidBody(reactphysics3d::RigidBody* p_rigidBody);
     RigidBody(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const bool isTrigger,
-        const quartz::physics::Collider::CategoryProperties& categoryProperties,
-        const quartz::physics::BoxShape::Parameters& boxShapeParameters
+        std::optional<quartz::physics::Collider>&& o_collider,
+        reactphysics3d::RigidBody* p_rigidBody
     );
-    RigidBody(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const bool isTrigger,
-        const quartz::physics::Collider::CategoryProperties& categoryProperties,
-        const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-    );
-    RigidBody(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::RigidBody::Parameters& parameters
-    );
+    // RigidBody(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const bool isTrigger,
+    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
+    //     const quartz::physics::BoxShape::Parameters& boxShapeParameters
+    // );
+    // RigidBody(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const bool isTrigger,
+    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
+    //     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
+    // );
+    // RigidBody(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const quartz::physics::RigidBody::Parameters& parameters
+    // );
     RigidBody(const RigidBody& other) = delete;
     RigidBody(RigidBody&& other);
     ~RigidBody();
@@ -80,23 +82,24 @@ public: // member functions
     void applyLocalForceToCenterOfMass_N(const math::Vec3& force_N);
 
 public: // static functions
-    static reactphysics3d::RigidBody* createRigidBodyPtr(
-        reactphysics3d::PhysicsWorld* p_physicsWorld,
-        const math::Transform& transform,
-        const reactphysics3d::BodyType bodyType,
-        const bool enableGravity,
-        const math::Vec3& angularLockAxisFactor
-    );
+    // static reactphysics3d::RigidBody* createRigidBodyPtr(
+    //     reactphysics3d::PhysicsWorld* p_physicsWorld,
+    //     const math::Transform& transform,
+    //     const reactphysics3d::BodyType bodyType,
+    //     const bool enableGravity,
+    //     const math::Vec3& angularLockAxisFactor
+    // );
 
 private: // static functions
-    static std::optional<quartz::physics::Collider> createCollider(
-        quartz::managers::PhysicsManager& physicsManager,
-        reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::RigidBody::Parameters& parameters
-    );
+    // static std::optional<quartz::physics::Collider> createCollider(
+    //     quartz::managers::PhysicsManager& physicsManager,
+    //     reactphysics3d::RigidBody* p_rigidBody,
+    //     const quartz::physics::RigidBody::Parameters& parameters
+    // );
 
 private: // member variables
-    reactphysics3d::RigidBody* mp_rigidBody;
     std::optional<quartz::physics::Collider> mo_collider;
+
+    reactphysics3d::RigidBody* mp_rigidBody;
 };
 

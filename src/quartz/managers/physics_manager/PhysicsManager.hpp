@@ -5,9 +5,16 @@
 #include <reactphysics3d/reactphysics3d.h>
 #include <reactphysics3d/engine/EventListener.h>
 
+#include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/Loggers.hpp"
+
+#include "quartz/physics/collider/Collider.hpp"
+#include "quartz/physics/collider/BoxShape.hpp"
+#include "quartz/physics/collider/SphereShape.hpp"
+#include "quartz/physics/field/Field.hpp"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 
 namespace quartz {
 
@@ -74,9 +81,27 @@ public: // member functions
 
     USE_LOGGER(PHYSICSMAN);
 
-    reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
-    reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& halfExtents_m);
-    reactphysics3d::SphereShape* createSphereShapePtr(const double radius_m);
+    quartz::physics::Field createField(const quartz::physics::Field::Parameters& fieldParameters);
+    quartz::physics::RigidBody createRigidBody(
+        quartz::physics::Field& field,
+        const math::Transform& transform,
+        const quartz::physics::RigidBody::Parameters& rigidBodyParameters
+    );
+    /** @todo 2025/06/24 Make this private so we can only access it here when creating a rigid body */
+    quartz::physics::Collider createCollider(
+        reactphysics3d::RigidBody* p_rigidBody,
+        const quartz::physics::Collider::Parameters& colliderParameters
+    );
+    quartz::physics::BoxShape createBoxShape(
+        const quartz::physics::BoxShape::Parameters& boxShapeParameters
+    );
+    quartz::physics::SphereShape createSphereShape(
+        const quartz::physics::SphereShape::Parameters& sphereShapeParameters
+    );
+
+    // reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
+    // reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& halfExtents_m);
+    // reactphysics3d::SphereShape* createSphereShapePtr(const double radius_m);
 
 private: // member functions
     PhysicsManager();

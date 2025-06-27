@@ -37,6 +37,5 @@ target_link_libraries(
     UTIL_Logger
 
     PUBLIC
-    QUARTZ_MANAGERS_PhysicsManager
     QUARTZ_PHYSICS_RigidBody
 )

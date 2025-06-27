@@ -60,7 +60,7 @@ quartz::scene::Doodad::Doodad(
     m_transformationMatrix(),
     mo_rigidBody(
         (o_field && o_rigidBodyParameters) ?
-            std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *o_rigidBodyParameters)) :
+            std::optional<quartz::physics::RigidBody>(physicsManager.createRigidBody(*o_field, m_transform, *o_rigidBodyParameters)) :
             std::nullopt
     ),
     m_awakenCallback(awakenCallback ? awakenCallback : quartz::scene::Doodad::noopAwakenCallback),
@@ -89,7 +89,7 @@ quartz::scene::Doodad::Doodad(
     m_transformationMatrix(),
     mo_rigidBody(
         (o_field && doodadParameters.o_rigidBodyParameters) ?
-            std::optional<quartz::physics::RigidBody>(o_field->createRigidBody(physicsManager, m_transform, *doodadParameters.o_rigidBodyParameters)) :
+            std::optional<quartz::physics::RigidBody>(physicsManager.createRigidBody(*o_field, m_transform, *doodadParameters.o_rigidBodyParameters)) :
             std::nullopt
     ),
     m_awakenCallback(doodadParameters.awakenCallback ? doodadParameters.awakenCallback : quartz::scene::Doodad::noopAwakenCallback),
