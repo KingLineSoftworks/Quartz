@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <optional>
 #include <variant>
 
@@ -66,6 +67,7 @@ public: // member functions
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
     Collider& operator=(Collider&& other);
+    ~Collider();
 
     USE_LOGGER(COLLIDER);
 
@@ -77,11 +79,20 @@ public: // member functions
     math::Vec3 getWorldPosition() const;
     math::Quaternion getWorldRotation() const;
 
+public: // static functions
+    static quartz::physics::Collider& getCollider(reactphysics3d::Collider* const p_collider) { return *quartz::physics::Collider::colliderMap.at(p_collider); }
+
 private: // member functions
     Collider(
         std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
         reactphysics3d::Collider* p_collider
     );
+
+private: // static functions
+    static void eraseCollider(reactphysics3d::Collider* const p_collider) { quartz::physics::Collider::colliderMap.erase(p_collider); }
+
+private: // member variables
+    static std::map<reactphysics3d::Collider*, quartz::physics::Collider*> colliderMap;
 
 private: // member variables
     std::optional<quartz::physics::BoxShape> mo_boxShape;

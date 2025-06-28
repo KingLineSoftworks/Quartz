@@ -88,6 +88,12 @@ public: // member functions
         const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     );
 
+    void destroyField(quartz::physics::Field& field);
+    void destroyRigidBody(
+        quartz::physics::Field& field,
+        quartz::physics::RigidBody& rigidBody
+    );
+
 private: // member functions
     PhysicsManager();
 
@@ -101,6 +107,10 @@ private: // member functions
     quartz::physics::SphereShape createSphereShape(
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
+
+    void destroyCollider(quartz::physics::Collider& collider);
+    void destroyBoxShape(quartz::physics::BoxShape& boxShape);
+    void destroySphereShape(quartz::physics::SphereShape& sphereShape);
 
 private: // static functions
     static PhysicsManager& getInstance();

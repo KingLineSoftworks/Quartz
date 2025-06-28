@@ -13,6 +13,8 @@
 
 #include "quartz/physics/collider/Collider.hpp"
 
+std::map<reactphysics3d::Collider*, quartz::physics::Collider*> quartz::physics::Collider::colliderMap;
+
 quartz::physics::Collider::Collider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
     reactphysics3d::Collider* p_collider
@@ -28,7 +30,11 @@ quartz::physics::Collider::Collider(
             std::nullopt
     ),
     mp_collider(p_collider)
-{}
+{
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Constructing collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    quartz::physics::Collider::colliderMap[mp_collider] = this;
+}
 
 quartz::physics::Collider::Collider(
     quartz::physics::Collider&& other
@@ -36,7 +42,21 @@ quartz::physics::Collider::Collider(
     mo_boxShape(std::move(other.mo_boxShape)),
     mo_sphereShape(std::move(other.mo_sphereShape)),
     mp_collider(std::move(other.mp_collider))
-{}
+{
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Move-constructing collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    quartz::physics::Collider::colliderMap[mp_collider] = this;
+}
+
+quartz::physics::Collider::~Collider() {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    /**
+     * @todo Where do we remove the rp3d from the collider map so we don't have any hanging pointer laying around? We can't
+     *   do it here due to the destructor being called after the move
+     */
+    // LOG_TRACEthis("Destructing collider. Erasing collider map rp3d pointer at {}", reinterpret_cast<void*>(mp_collider));
+    // quartz::physics::Collider::colliderMap.erase(mp_collider);
+}
 
 quartz::physics::Collider&
 quartz::physics::Collider::operator=(
@@ -52,6 +72,9 @@ quartz::physics::Collider::operator=(
     mo_sphereShape = std::move(other.mo_sphereShape);
 
     mp_collider = std::move(other.mp_collider);
+
+    LOG_TRACEthis("Moving collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    quartz::physics::Collider::colliderMap[mp_collider] = this;
 
     return *this;
 }

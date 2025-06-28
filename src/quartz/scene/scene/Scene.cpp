@@ -186,7 +186,6 @@ quartz::scene::Scene::load(
     LOG_DEBUGthis("Camera {} with position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
 }
 
-
 void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
@@ -205,6 +204,36 @@ quartz::scene::Scene::load(
         sceneParameters.doodadParameters,
         sceneParameters.o_fieldParameters
     );
+}
+
+void
+quartz::scene::Scene::unload(
+    quartz::managers::PhysicsManager& physicsManager
+) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    if (!mo_field) {
+        LOG_TRACEthis("Not unloading physics items");
+        return;
+    }
+    LOG_TRACEthis("Unloading physics items");
+
+    LOG_TRACEthis("Unloading {} doodads", m_doodads.size());
+    for (uint32_t i = 0; i < m_doodads.size(); i++) {
+        LOG_TRACEthis("Unloading doodad {}", i);
+
+        quartz::scene::Doodad& doodad = m_doodads[i];
+
+        if (!doodad.getRigidBodyOptionalReference()) {
+            LOG_TRACEthis("  doodad {} has no rigidbody", i);
+            continue;
+        }
+
+        LOG_TRACEthis("  destroying rigidbody");
+        physicsManager.destroyRigidBody(*mo_field, *doodad.getRigidBodyOptionalReference());
+    }
+
+    physicsManager.destroyField(*mo_field);
 }
 
 void

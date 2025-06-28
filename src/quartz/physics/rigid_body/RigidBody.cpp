@@ -57,7 +57,7 @@ void
 quartz::physics::RigidBody::setScale(
     UNUSED const math::Vec3& scale
 ) {
-    /** @todfo 2024/12/01 Set the scale of the collider here */
+    /** @todo 2024/12/01 Set the scale of the collider here */
 }
 
 void

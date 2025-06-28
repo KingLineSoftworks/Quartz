@@ -1,5 +1,6 @@
 #include "quartz/managers/scene_manager/SceneManager.hpp"
 #include "util/logger/Logger.hpp"
+#include <_strings.h>
 
 quartz::managers::SceneManager::SceneManager() :
     m_sceneParameters(),
@@ -81,5 +82,18 @@ quartz::managers::SceneManager::loadScene(
     );
 
     return m_scenes[index];
+}
+
+void
+quartz::managers::SceneManager::unloadCurrentScene(
+    quartz::managers::PhysicsManager& physicsManager
+) {
+    LOG_FUNCTION_CALL_TRACE(SCENEMAN, "index {}", m_currentlyLoadedSceneIndex);
+
+    if (m_scenes.empty()) {
+        return;
+    }
+
+    m_scenes[m_currentlyLoadedSceneIndex].unload(physicsManager);
 }
 

@@ -104,6 +104,9 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager,
         const quartz::scene::Scene::Parameters& sceneParameters
     );
+    void unload(
+        quartz::managers::PhysicsManager& physicsManager
+    );
 
     void fixedUpdate(
         const quartz::managers::InputManager& inputManager,

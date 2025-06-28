@@ -103,6 +103,9 @@ void quartz::Application::run() {
         m_renderingContext.draw(currentScene);
     }
 
+    LOG_INFOthis("Unloading scene");
+    m_sceneManager.unloadCurrentScene(m_physicsManager);
+
     LOG_INFOthis("Finishing");
     /**
      * @todo 2024/11/07 Create an unload function in the SceneManager that frees up all of the Vulkan resources.
