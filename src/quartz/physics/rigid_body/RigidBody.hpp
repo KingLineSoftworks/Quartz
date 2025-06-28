@@ -11,10 +11,16 @@
 #include "quartz/physics/collider/Collider.hpp"
 
 namespace quartz {
+
+namespace managers {
+    class PhysicsManager;
+}
+
 namespace physics {
     class RigidBody;
 }
-}
+
+} // namespace quartz
 
 class quartz::physics::RigidBody {
 public: // classes
@@ -40,29 +46,6 @@ public: // classes
     };
 
 public: // member functions
-    RigidBody(
-        std::optional<quartz::physics::Collider>&& o_collider,
-        reactphysics3d::RigidBody* p_rigidBody
-    );
-    // RigidBody(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const bool isTrigger,
-    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
-    //     const quartz::physics::BoxShape::Parameters& boxShapeParameters
-    // );
-    // RigidBody(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const bool isTrigger,
-    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
-    //     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-    // );
-    // RigidBody(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const quartz::physics::RigidBody::Parameters& parameters
-    // );
     RigidBody(const RigidBody& other) = delete;
     RigidBody(RigidBody&& other);
     ~RigidBody();
@@ -81,25 +64,18 @@ public: // member functions
     void setAngularVelocity_mps(const math::Vec3& angularVelocity_mps);
     void applyLocalForceToCenterOfMass_N(const math::Vec3& force_N);
 
-public: // static functions
-    // static reactphysics3d::RigidBody* createRigidBodyPtr(
-    //     reactphysics3d::PhysicsWorld* p_physicsWorld,
-    //     const math::Transform& transform,
-    //     const reactphysics3d::BodyType bodyType,
-    //     const bool enableGravity,
-    //     const math::Vec3& angularLockAxisFactor
-    // );
-
-private: // static functions
-    // static std::optional<quartz::physics::Collider> createCollider(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const quartz::physics::RigidBody::Parameters& parameters
-    // );
+private: // member functions
+    RigidBody(
+        std::optional<quartz::physics::Collider>&& o_collider,
+        reactphysics3d::RigidBody* p_rigidBody
+    );
 
 private: // member variables
     std::optional<quartz::physics::Collider> mo_collider;
 
     reactphysics3d::RigidBody* mp_rigidBody;
+
+private: // friends
+    friend class quartz::managers::PhysicsManager;
 };
 

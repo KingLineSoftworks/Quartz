@@ -31,16 +31,14 @@ public: // classes
     };
 
 public: // member functions
-    // SphereShape(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     const double radius_m
-    // );
-    SphereShape(reactphysics3d::SphereShape* p_sphereShape);
     SphereShape(const SphereShape& other) = delete;
     SphereShape(SphereShape&& other);
     SphereShape& operator=(SphereShape&& other);
 
     USE_LOGGER(SHAPE_SPHERE);
+
+private: // member functions
+    SphereShape(reactphysics3d::SphereShape* p_sphereShape);
 
 private: // member variables
     reactphysics3d::SphereShape* mp_colliderShape;

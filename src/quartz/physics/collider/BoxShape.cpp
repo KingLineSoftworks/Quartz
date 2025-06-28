@@ -1,13 +1,4 @@
-#include "math/transform/Transform.hpp"
-
 #include "quartz/physics/collider/BoxShape.hpp"
-
-// quartz::physics::BoxShape::BoxShape(
-//     quartz::managers::PhysicsManager& physicsManager,
-//     const math::Vec3& halfExtents_m
-// ) :
-//     mp_colliderShape(physicsManager.createBoxShapePtr(halfExtents_m))
-// {}
 
 quartz::physics::BoxShape::BoxShape(
     reactphysics3d::BoxShape* p_boxShape

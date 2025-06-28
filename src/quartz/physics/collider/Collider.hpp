@@ -1,7 +1,6 @@
 #pragma once
 
 #include <optional>
-#include <map>
 #include <variant>
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -16,10 +15,16 @@
 #include "quartz/physics/collider/SphereShape.hpp"
 
 namespace quartz {
+
+namespace managers {
+    class PhysicsManager;
+}
+
 namespace physics {
     class Collider;
 }
-}
+
+} // namespace quartz
 
 class quartz::physics::Collider {
 public: // classes and enums
@@ -57,30 +62,9 @@ public: // classes and enums
         std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_shapeParameters;
     };
 
-public: // static factory functions
-    // static Collider createBoxCollider(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const bool isTrigger,
-    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
-    //     const quartz::physics::BoxShape::Parameters& boxShapeParameters
-    // );
-    // static Collider createSphereCollider(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const bool isTrigger,
-    //     const quartz::physics::Collider::CategoryProperties& categoryProperties,
-    //     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-    // );
-
 public: // member functions
-    Collider(
-        std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
-        reactphysics3d::Collider* p_collider
-    );
     Collider(const Collider& other) = delete;
     Collider(Collider&& other);
-
     Collider& operator=(Collider&& other);
 
     USE_LOGGER(COLLIDER);
@@ -93,21 +77,19 @@ public: // member functions
     math::Vec3 getWorldPosition() const;
     math::Quaternion getWorldRotation() const;
 
-public: // static functions
-    // static reactphysics3d::Collider* createColliderPtr(
-    //     reactphysics3d::RigidBody* p_rigidBody,
-    //     const bool isTrigger,
-    //     reactphysics3d::CollisionShape* p_collisionShape,
-    //     const quartz::physics::Collider::CategoryProperties& categoryProperties
-    // );
-
 private: // member functions
-    // Collider();
+    Collider(
+        std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
+        reactphysics3d::Collider* p_collider
+    );
 
 private: // member variables
     std::optional<quartz::physics::BoxShape> mo_boxShape;
     std::optional<quartz::physics::SphereShape> mo_sphereShape;
 
     reactphysics3d::Collider* mp_collider;
+
+private: // friends
+    friend class quartz::managers::PhysicsManager;
 };
 

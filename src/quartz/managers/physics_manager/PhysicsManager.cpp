@@ -180,28 +180,3 @@ quartz::managers::PhysicsManager::createSphereShape(
     return quartz::physics::SphereShape(p_sphereShape);
 }
 
-// reactphysics3d::PhysicsWorld*
-// quartz::managers::PhysicsManager::createPhysicsWorldPtr(
-//     const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings
-// ) {
-//     reactphysics3d::PhysicsWorld* p_physicsWorld = m_physicsCommon.createPhysicsWorld(physicsWorldSettings);
-// 
-//     p_physicsWorld->setEventListener(&(quartz::managers::PhysicsManager::getEventListenerInstance()));
-// 
-//     return p_physicsWorld;
-// }
-
-// reactphysics3d::BoxShape*
-// quartz::managers::PhysicsManager::createBoxShapePtr(
-//     const math::Vec3& halfExtents_m
-// ) {
-//     return m_physicsCommon.createBoxShape(halfExtents_m);
-// }
-// 
-// reactphysics3d::SphereShape*
-// quartz::managers::PhysicsManager::createSphereShapePtr(
-//     const double radius_m
-// ) {
-//     return m_physicsCommon.createSphereShape(radius_m);
-// }
-

@@ -2,13 +2,6 @@
 
 #include "quartz/physics/collider/SphereShape.hpp"
 
-// quartz::physics::SphereShape::SphereShape(
-//     quartz::managers::PhysicsManager& physicsManager,
-//     const double radius_m
-// ) :
-//     mp_colliderShape(physicsManager.createSphereShapePtr(radius_m))
-// {}
-
 quartz::physics::SphereShape::SphereShape(
     reactphysics3d::SphereShape* p_sphereShape
 ) :

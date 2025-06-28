@@ -87,7 +87,10 @@ public: // member functions
         const math::Transform& transform,
         const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     );
-    /** @todo 2025/06/24 Make this private so we can only access it here when creating a rigid body */
+
+private: // member functions
+    PhysicsManager();
+
     quartz::physics::Collider createCollider(
         reactphysics3d::RigidBody* p_rigidBody,
         const quartz::physics::Collider::Parameters& colliderParameters
@@ -98,13 +101,6 @@ public: // member functions
     quartz::physics::SphereShape createSphereShape(
         const quartz::physics::SphereShape::Parameters& sphereShapeParameters
     );
-
-    // reactphysics3d::PhysicsWorld* createPhysicsWorldPtr(const reactphysics3d::PhysicsWorld::WorldSettings& physicsWorldSettings);
-    // reactphysics3d::BoxShape* createBoxShapePtr(const math::Vec3& halfExtents_m);
-    // reactphysics3d::SphereShape* createSphereShapePtr(const double radius_m);
-
-private: // member functions
-    PhysicsManager();
 
 private: // static functions
     static PhysicsManager& getInstance();

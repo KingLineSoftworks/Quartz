@@ -2,7 +2,6 @@
 
 #include <reactphysics3d/reactphysics3d.h>
 
-#include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/physics/Loggers.hpp"
@@ -31,11 +30,6 @@ public: // classes
     };
 
 public: // member functions
-    // BoxShape(
-    //     quartz::managers::PhysicsManager& physicsManager,
-    //     const math::Vec3& halfExtents_m
-    // );
-    BoxShape(reactphysics3d::BoxShape* p_boxShape);
     BoxShape(const BoxShape& other) = delete;
     BoxShape(BoxShape&& other);
     BoxShape& operator=(BoxShape&& other);
@@ -43,6 +37,9 @@ public: // member functions
     USE_LOGGER(SHAPE_BOX);
 
     math::Vec3 getExtents() const;
+
+private: // member functions
+    BoxShape(reactphysics3d::BoxShape* p_boxShape);
 
 private: // member variables
     reactphysics3d::BoxShape* mp_colliderShape;
