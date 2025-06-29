@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <optional>
 
 #include <reactphysics3d/body/RigidBody.h>
@@ -48,6 +49,7 @@ public: // classes
 public: // member functions
     RigidBody(const RigidBody& other) = delete;
     RigidBody(RigidBody&& other);
+    RigidBody& operator=(RigidBody&& other);
     ~RigidBody();
 
     USE_LOGGER(RIGIDBODY);
@@ -64,11 +66,20 @@ public: // member functions
     void setAngularVelocity_mps(const math::Vec3& angularVelocity_mps);
     void applyLocalForceToCenterOfMass_N(const math::Vec3& force_N);
 
+public: // static functions
+    static quartz::physics::RigidBody& getRigidBody(reactphysics3d::RigidBody* const p_rigidBody) { return *quartz::physics::RigidBody::rigidBodyMap.at(p_rigidBody); }
+
 private: // member functions
     RigidBody(
         std::optional<quartz::physics::Collider>&& o_collider,
         reactphysics3d::RigidBody* p_rigidBody
     );
+
+private: // static functions
+    static void eraseRigidBody(reactphysics3d::RigidBody* const p_rigidBody) { quartz::physics::RigidBody::rigidBodyMap.erase(p_rigidBody); }
+
+private: // static variables
+    static std::map<reactphysics3d::RigidBody*, quartz::physics::RigidBody*> rigidBodyMap;
 
 private: // member variables
     std::optional<quartz::physics::Collider> mo_collider;

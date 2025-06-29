@@ -32,7 +32,7 @@ quartz::physics::Collider::Collider(
     mp_collider(p_collider)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-    LOG_TRACEthis("Constructing collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    LOG_TRACEthis("Constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
     quartz::physics::Collider::colliderMap[mp_collider] = this;
 }
 
@@ -44,18 +44,12 @@ quartz::physics::Collider::Collider(
     mp_collider(std::move(other.mp_collider))
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-    LOG_TRACEthis("Move-constructing collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    LOG_TRACEthis("Move-constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
     quartz::physics::Collider::colliderMap[mp_collider] = this;
 }
 
 quartz::physics::Collider::~Collider() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-    /**
-     * @todo Where do we remove the rp3d from the collider map so we don't have any hanging pointer laying around? We can't
-     *   do it here due to the destructor being called after the move
-     */
-    // LOG_TRACEthis("Destructing collider. Erasing collider map rp3d pointer at {}", reinterpret_cast<void*>(mp_collider));
-    // quartz::physics::Collider::colliderMap.erase(mp_collider);
 }
 
 quartz::physics::Collider&
@@ -73,7 +67,7 @@ quartz::physics::Collider::operator=(
 
     mp_collider = std::move(other.mp_collider);
 
-    LOG_TRACEthis("Moving collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    LOG_TRACEthis("Moving Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
     quartz::physics::Collider::colliderMap[mp_collider] = this;
 
     return *this;

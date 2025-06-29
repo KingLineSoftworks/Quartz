@@ -7,6 +7,8 @@
 #include <reactphysics3d/mathematics/Transform.h>
 
 #include "quartz/managers/Loggers.hpp"
+#include "reactphysics3d/body/RigidBody.h"
+#include "reactphysics3d/collision/RaycastInfo.h"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
@@ -35,9 +37,6 @@ quartz::managers::PhysicsManager::EventListener::onContact(
         const reactphysics3d::CollisionCallback::ContactPair& currentContactPair = callbackData.getContactPair(contactPairIndex);
 
         /**
-         * @todo 2025/06/19 Get the rigidbody and collider from the contact pair and invoke their callbacks, use getBody1 and getBody2
-         *   to get the rigidbodies, and getCollider1 and getCollider2 to get the colliders
-         *
          * @todo 2025/06/19 Convert the rp3d callback stuff into something we can use in quartz. Make sure to consider the
          *   EventType enumeration (providing the information for contact start, stay, and exit), and pass this information to
          *   the rigidbody and collider callbacks
@@ -46,9 +45,14 @@ quartz::managers::PhysicsManager::EventListener::onContact(
          */
 
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
-
         UNUSED quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
-        // UNUSED quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(currentContactPair.getCollider2());
+        
+        reactphysics3d::RigidBody* p_rigidBody1 = dynamic_cast<reactphysics3d::RigidBody*>(currentContactPair.getBody1());
+        if (p_rigidBody1) {
+            UNUSED quartz::physics::RigidBody& rigidBody1 = quartz::physics::RigidBody::getRigidBody(p_rigidBody1);
+        } else {
+            // not a rigid body
+        }
 
         for (uint32_t contactPointIndex = 0; contactPointIndex < currentContactPair.getNbContactPoints(); contactPointIndex++) {
             UNUSED const reactphysics3d::CollisionCallback::ContactPoint& currentContactPoint = currentContactPair.getContactPoint(contactPointIndex);
@@ -118,6 +122,7 @@ quartz::managers::PhysicsManager::destroyField(
 ) {
     LOG_FUNCTION_CALL_TRACEthis("");
 
+    LOG_TRACEthis("Destroying rp3d physics world using rp3d physics common");
     m_physicsCommon.destroyPhysicsWorld(field.getRP3DPhysicsWorldPtr());
 }
 
@@ -163,6 +168,10 @@ quartz::managers::PhysicsManager::destroyRigidBody(
         this->destroyCollider(*rigidBody.mo_collider);
     }
 
+    LOG_TRACEthis("Erasing rp3d rigid body from collider map");
+    quartz::physics::RigidBody::eraseRigidBody(rigidBody.mp_rigidBody);
+
+    LOG_TRACEthis("Destroying rp3d rigid body using field's rp3d physics world");
     field.mp_physicsWorld->destroyRigidBody(rigidBody.mp_rigidBody);
 }
 

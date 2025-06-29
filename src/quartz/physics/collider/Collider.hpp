@@ -91,7 +91,7 @@ private: // member functions
 private: // static functions
     static void eraseCollider(reactphysics3d::Collider* const p_collider) { quartz::physics::Collider::colliderMap.erase(p_collider); }
 
-private: // member variables
+private: // static variables
     static std::map<reactphysics3d::Collider*, quartz::physics::Collider*> colliderMap;
 
 private: // member variables
