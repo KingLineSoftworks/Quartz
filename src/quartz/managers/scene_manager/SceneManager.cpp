@@ -11,7 +11,7 @@ quartz::managers::SceneManager::SceneManager() :
 }
 
 quartz::managers::SceneManager::~SceneManager() {
-    LOG_FUNCTION_CALL_TRACEthis("");
+    LOG_FUNCTION_SCOPE_TRACEthis("");
 }
 
 quartz::managers::SceneManager&
@@ -62,7 +62,7 @@ quartz::managers::SceneManager::loadScene(
 ) {
     LOG_FUNCTION_CALL_TRACE(SCENEMAN, "index {}", index);
 
-    /** @todo 2024/11/07 Unload the currently loaded scene before we load the next one */
+    this->unloadCurrentScene(physicsManager);
 
     m_currentlyLoadedSceneIndex = index;
 
@@ -97,3 +97,9 @@ quartz::managers::SceneManager::unloadCurrentScene(
     m_scenes[m_currentlyLoadedSceneIndex].unload(physicsManager);
 }
 
+void
+quartz::managers::SceneManager::destroyAllScenes() {
+    m_sceneParameters.clear();
+    m_scenes.clear();
+    m_currentlyLoadedSceneIndex = 0;
+}

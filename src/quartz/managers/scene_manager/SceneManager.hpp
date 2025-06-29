@@ -48,6 +48,8 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager
     );
 
+    void destroyAllScenes();
+
 private: // member functions
     SceneManager();
 

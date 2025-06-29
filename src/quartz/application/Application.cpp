@@ -46,10 +46,10 @@ quartz::Application::~Application() {
     LOG_FUNCTION_CALL_TRACEthis("");
 
     /**
-     * @todo 2024/11/07 We shouldn't be manually destroying anything, ever. Perhaps we should use
-     *    unique pointers so they automatically destruct when the Application class does
+     * @brief The scenes must be destroyed before the rendering device, otherwise we get errors. I don't
+     *   like that we have to do this ... but I see no other way
      */
-    m_sceneManager.~SceneManager();
+    m_sceneManager.destroyAllScenes();
 }
 
 void quartz::Application::run() {

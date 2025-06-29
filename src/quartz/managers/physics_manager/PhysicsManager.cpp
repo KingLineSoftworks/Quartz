@@ -116,14 +116,9 @@ void
 quartz::managers::PhysicsManager::destroyField(
     UNUSED quartz::physics::Field& field
 ) {
-    // LOG_FUNCTION_CALL_TRACEthis("");
+    LOG_FUNCTION_CALL_TRACEthis("");
 
-    /**
-     * @brief Not destroying the physics world at the moment. For some reason calling destroyPhysicsWorld is giving an
-     *   error: "Assertion failed: (index < mSize), function removeAt, file Array.h, line 353." So something must
-     *   be up with the physics common's destroyPhysicsWorld implementation
-     */
-    // m_physicsCommon.destroyPhysicsWorld(field.getRP3DPhysicsWorldPtr());
+    m_physicsCommon.destroyPhysicsWorld(field.getRP3DPhysicsWorldPtr());
 }
 
 quartz::physics::RigidBody
@@ -168,15 +163,7 @@ quartz::managers::PhysicsManager::destroyRigidBody(
         this->destroyCollider(*rigidBody.mo_collider);
     }
 
-    /**
-     * @brief Not destroying the rigid body at the moment. For some reason calling destroyRigidBody is giving an
-     *   error: "Assertion failed: (index < mSize), function removeAt, file Array.h, line 353." So something must
-     *   be up with the physics world's destroyRigidBody implementation
-     */
-    // LOG_TRACEthis("Destroying rp3d rigidbody");
-    // LOG_TRACEthis("Using rp3d physics world pointer: {}", reinterpret_cast<void*>(field.mp_physicsWorld));
-    // LOG_TRACEthis("Using rp3d rigid body pointer: {}", reinterpret_cast<void*>(rigidBody.mp_rigidBody));
-    // field.mp_physicsWorld->destroyRigidBody(rigidBody.mp_rigidBody);
+    field.mp_physicsWorld->destroyRigidBody(rigidBody.mp_rigidBody);
 }
 
 quartz::physics::Collider
@@ -229,15 +216,21 @@ quartz::managers::PhysicsManager::destroyCollider(
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 
-    if (collider.mo_boxShape) {
-        LOG_TRACEthis("Destroying box shape");
-        this->destroyBoxShape(*collider.mo_boxShape);
-    }
+    /**
+     * @brief For now, we are not destroying the physics shapes. For some reason when we do it manually instead of allowing
+     *   the rp3d physics common to do it implicitly, we end up with bad SIGABRT issues with rigid bodies trying to destroy
+     *   colliders and colliders trying to destroy shapes
+     */
 
-    if (collider.mo_sphereShape) {
-        LOG_TRACEthis("Destroying sphere shape");
-        this->destroySphereShape(*collider.mo_sphereShape);
-    }
+    // if (collider.mo_boxShape) {
+    //     LOG_TRACEthis("Destroying box shape");
+    //     this->destroyBoxShape(*collider.mo_boxShape);
+    // }
+
+    // if (collider.mo_sphereShape) {
+    //     LOG_TRACEthis("Destroying sphere shape");
+    //     this->destroySphereShape(*collider.mo_sphereShape);
+    // }
 
     LOG_TRACEthis("Erasing rp3d collider from collider map");
     quartz::physics::Collider::eraseCollider(collider.mp_collider);
@@ -254,9 +247,9 @@ quartz::managers::PhysicsManager::createBoxShape(
 
 void
 quartz::managers::PhysicsManager::destroyBoxShape(
-    quartz::physics::BoxShape& boxShape
+    UNUSED quartz::physics::BoxShape& boxShape
 ) {
-    m_physicsCommon.destroyBoxShape(boxShape.mp_colliderShape);
+    // m_physicsCommon.destroyBoxShape(boxShape.mp_colliderShape);
 }
 
 quartz::physics::SphereShape
@@ -270,8 +263,8 @@ quartz::managers::PhysicsManager::createSphereShape(
 
 void
 quartz::managers::PhysicsManager::destroySphereShape(
-    quartz::physics::SphereShape& sphereShape
+    UNUSED quartz::physics::SphereShape& sphereShape
 ) {
-    m_physicsCommon.destroySphereShape(sphereShape.mp_colliderShape);
+    // m_physicsCommon.destroySphereShape(sphereShape.mp_colliderShape);
 }
 
