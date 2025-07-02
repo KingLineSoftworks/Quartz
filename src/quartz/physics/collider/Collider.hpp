@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <map>
 #include <optional>
 #include <variant>
@@ -28,7 +29,32 @@ namespace physics {
 } // namespace quartz
 
 class quartz::physics::Collider {
-public: // classes and enums
+public: // callbacks and their info
+    enum class CollisionType : uint32_t {
+        ContactStart = 0,
+        ContactStay = 1,
+        ContactExit = 2
+    };
+
+    struct CollisionCallbackParameters {
+        CollisionCallbackParameters(
+            Collider* const p_collider_,
+            Collider* const p_otherCollider_,
+            const CollisionType collisionType_
+        ) :
+            p_collider(p_collider_),
+            p_otherCollider(p_otherCollider_),
+            collisionType(collisionType_)
+        {}
+
+        Collider* const p_collider;
+        Collider* const p_otherCollider;
+        const CollisionType collisionType;
+    };
+
+    using CollisionCallback = std::function<void(CollisionCallbackParameters parameters)>;
+
+public: // classes and structs
     struct CategoryProperties {
         CategoryProperties() :
             categoryBitMask(0),
@@ -51,17 +77,21 @@ public: // classes and enums
         Parameters(
             const bool isTrigger_,
             const quartz::physics::Collider::CategoryProperties& categoryProperties_,
-            const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_shapeParameters_
+            const std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters>& v_shapeParameters_,
+            const CollisionCallback& collisionCallback_
         ) :
             isTrigger(isTrigger_),
             categoryProperties(categoryProperties_),
-            v_shapeParameters(v_shapeParameters_)
+            v_shapeParameters(v_shapeParameters_),
+            collisionCallback(collisionCallback_)
         {}
 
         bool isTrigger;
         quartz::physics::Collider::CategoryProperties categoryProperties;
         std::variant<std::monostate, quartz::physics::BoxShape::Parameters, quartz::physics::SphereShape::Parameters> v_shapeParameters;
+        CollisionCallback collisionCallback;
     };
+    
 
 public: // member functions
     Collider(const Collider& other) = delete;
@@ -88,7 +118,13 @@ private: // member functions
         reactphysics3d::Collider* p_collider
     );
 
+    void collide(
+        Collider* const p_otherCollider,
+        const CollisionType collisionType
+    );
+
 private: // static functions
+    static void noopCollisionCallback(CollisionCallbackParameters parameters);
     static void eraseCollider(reactphysics3d::Collider* const p_collider) { quartz::physics::Collider::colliderMap.erase(p_collider); }
 
 private: // static variables
@@ -99,6 +135,8 @@ private: // member variables
     std::optional<quartz::physics::SphereShape> mo_sphereShape;
 
     reactphysics3d::Collider* mp_collider;
+
+    CollisionCallback m_collisionCallback;
 
 private: // friends
     friend class quartz::managers::PhysicsManager;

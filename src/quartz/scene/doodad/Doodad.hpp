@@ -23,7 +23,7 @@ namespace scene {
 }
 
 class quartz::scene::Doodad {
-public: // aliases
+public: // callbacks and their info
     struct AwakenCallbackParameters {
         AwakenCallbackParameters(
             quartz::scene::Scene* const p_scene_

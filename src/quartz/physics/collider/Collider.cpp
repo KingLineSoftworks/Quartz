@@ -15,6 +15,11 @@
 
 std::map<reactphysics3d::Collider*, quartz::physics::Collider*> quartz::physics::Collider::colliderMap;
 
+void
+quartz::physics::Collider::noopCollisionCallback(
+    UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters
+) {}
+
 quartz::physics::Collider::Collider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
     reactphysics3d::Collider* p_collider
@@ -29,7 +34,8 @@ quartz::physics::Collider::Collider(
             std::optional<quartz::physics::SphereShape>{std::get<quartz::physics::SphereShape>(std::move(v_shape))} :
             std::nullopt
     ),
-    mp_collider(p_collider)
+    mp_collider(p_collider),
+    m_collisionCallback(quartz::physics::Collider::noopCollisionCallback)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     LOG_TRACEthis("Constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
@@ -41,7 +47,8 @@ quartz::physics::Collider::Collider(
 ) :
     mo_boxShape(std::move(other.mo_boxShape)),
     mo_sphereShape(std::move(other.mo_sphereShape)),
-    mp_collider(std::move(other.mp_collider))
+    mp_collider(std::move(other.mp_collider)),
+    m_collisionCallback(std::move(other.m_collisionCallback))
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     LOG_TRACEthis("Move-constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
@@ -66,6 +73,8 @@ quartz::physics::Collider::operator=(
     mo_sphereShape = std::move(other.mo_sphereShape);
 
     mp_collider = std::move(other.mp_collider);
+
+    m_collisionCallback = std::move(other.m_collisionCallback);
 
     LOG_TRACEthis("Moving Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
     quartz::physics::Collider::colliderMap[mp_collider] = this;
@@ -108,5 +117,13 @@ quartz::physics::Collider::getWorldPosition() const {
 math::Quaternion
 quartz::physics::Collider::getWorldRotation() const {
     return math::Quaternion(mp_collider->getLocalToWorldTransform().getOrientation()).normalize();
+}
+
+void
+quartz::physics::Collider::collide(
+    Collider* const p_otherCollider,
+    const CollisionType collisionType
+) {
+    m_collisionCallback({this, p_otherCollider, collisionType});
 }
 

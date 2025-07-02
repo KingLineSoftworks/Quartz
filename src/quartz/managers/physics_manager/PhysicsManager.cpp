@@ -44,8 +44,22 @@ quartz::managers::PhysicsManager::EventListener::onContact(
          * @todo 2025/06/19 Make sure to provide the physics layers associated with each of the rigidbodies and colliders
          */
 
+        reactphysics3d::CollisionCallback::ContactPair::EventType eventType = currentContactPair.getEventType();
+        quartz::physics::Collider::CollisionType collisionType = static_cast<uint32_t>(eventType) == 0 ?
+            quartz::physics::Collider::CollisionType::ContactStart :
+            static_cast<uint32_t>(eventType) == 1 ?
+                quartz::physics::Collider::CollisionType::ContactStay :
+                quartz::physics::Collider::CollisionType::ContactExit;
+ 
+
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
-        UNUSED quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
+        quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
+
+        reactphysics3d::Collider* p_collider2 = currentContactPair.getCollider2();
+        quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(p_collider2);
+
+        collider1.collide(&collider2, collisionType);
+        collider2.collide(&collider1, collisionType);
         
         reactphysics3d::RigidBody* p_rigidBody1 = dynamic_cast<reactphysics3d::RigidBody*>(currentContactPair.getBody1());
         if (p_rigidBody1) {
