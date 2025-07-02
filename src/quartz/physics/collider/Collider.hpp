@@ -115,7 +115,8 @@ public: // static functions
 private: // member functions
     Collider(
         std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
-        reactphysics3d::Collider* p_collider
+        reactphysics3d::Collider* p_collider,
+        const quartz::physics::Collider::CollisionCallback& collisionCallback
     );
 
     void collide(

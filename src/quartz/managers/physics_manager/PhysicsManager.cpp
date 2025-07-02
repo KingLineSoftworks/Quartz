@@ -230,7 +230,7 @@ quartz::managers::PhysicsManager::createCollider(
     p_collider->setIsTrigger(colliderParameters.isTrigger);
 
     LOG_TRACEthis("Creating quartz collider. Moving shape");
-    return quartz::physics::Collider(std::move(v_shape), p_collider);
+    return quartz::physics::Collider(std::move(v_shape), p_collider, colliderParameters.collisionCallback);
 }
 
 void

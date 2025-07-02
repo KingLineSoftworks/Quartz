@@ -22,7 +22,8 @@ quartz::physics::Collider::noopCollisionCallback(
 
 quartz::physics::Collider::Collider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
-    reactphysics3d::Collider* p_collider
+    reactphysics3d::Collider* p_collider,
+    const quartz::physics::Collider::CollisionCallback& collisionCallback
 ) :
     mo_boxShape(
         (std::holds_alternative<quartz::physics::BoxShape>(v_shape)) ?
@@ -35,7 +36,7 @@ quartz::physics::Collider::Collider(
             std::nullopt
     ),
     mp_collider(p_collider),
-    m_collisionCallback(quartz::physics::Collider::noopCollisionCallback)
+    m_collisionCallback(collisionCallback ? collisionCallback : quartz::physics::Collider::noopCollisionCallback)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     LOG_TRACEthis("Constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
