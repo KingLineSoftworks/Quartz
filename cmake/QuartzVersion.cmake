@@ -33,4 +33,4 @@ endfunction()
 #set_quartz_major_minor_patch_versions(0 2 3) # allow client to own the camera and update it from within update functions
 #set_quartz_major_minor_patch_versions(0 2 4) # implement collider category masks
 #set_quartz_major_minor_patch_versions(0 2 5) # allow for physics collision callbacks
-set_quartz_major_minor_patch_versions(0 2 6) # allow for trigger objects (colliders with no rigidbody)
+set_quartz_major_minor_patch_versions(0 2 6) # allow for trigger objects (colliders with callbacks and no physical interaction)
