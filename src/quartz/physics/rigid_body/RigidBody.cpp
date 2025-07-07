@@ -43,7 +43,7 @@ quartz::physics::RigidBody::RigidBody(
 
 quartz::physics::RigidBody&
 quartz::physics::RigidBody::operator=(
-    UNUSED quartz::physics::RigidBody&& other
+    quartz::physics::RigidBody&& other
 ) {
     LOG_FUNCTION_SCOPE_TRACEthis("");
 

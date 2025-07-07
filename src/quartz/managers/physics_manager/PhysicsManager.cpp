@@ -1,22 +1,21 @@
+#include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/collision/Collider.h>
 #include <reactphysics3d/collision/CollisionCallback.h>
+#include <reactphysics3d/collision/RaycastInfo.h>
 #include <reactphysics3d/engine/PhysicsWorld.h>
 #include <reactphysics3d/collision/shapes/BoxShape.h>
 #include <reactphysics3d/collision/shapes/CollisionShape.h>
 #include <reactphysics3d/collision/shapes/SphereShape.h>
 #include <reactphysics3d/mathematics/Transform.h>
 
-#include "quartz/managers/Loggers.hpp"
-#include "reactphysics3d/body/RigidBody.h"
-#include "reactphysics3d/collision/RaycastInfo.h"
 #include "util/logger/Logger.hpp"
 
+#include "quartz/managers/Loggers.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 
 #include "quartz/physics/collider/BoxShape.hpp"
 #include "quartz/physics/collider/Collider.hpp"
 #include "quartz/physics/collider/SphereShape.hpp"
-#include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 
@@ -31,16 +30,12 @@ quartz::managers::PhysicsManager::EventListener::getInstance() {
 
 void
 quartz::managers::PhysicsManager::EventListener::onContact(
-    UNUSED const reactphysics3d::CollisionCallback::CallbackData& callbackData
+    const reactphysics3d::CollisionCallback::CallbackData& callbackData
 ) {
     for (uint32_t contactPairIndex = 0; contactPairIndex < callbackData.getNbContactPairs(); contactPairIndex++) {
         const reactphysics3d::CollisionCallback::ContactPair& currentContactPair = callbackData.getContactPair(contactPairIndex);
 
         /**
-         * @todo 2025/06/19 Convert the rp3d callback stuff into something we can use in quartz. Make sure to consider the
-         *   EventType enumeration (providing the information for contact start, stay, and exit), and pass this information to
-         *   the rigidbody and collider callbacks
-         *
          * @todo 2025/06/19 Make sure to provide the physics layers associated with each of the rigidbodies and colliders
          */
 
@@ -50,7 +45,6 @@ quartz::managers::PhysicsManager::EventListener::onContact(
             static_cast<uint32_t>(eventType) == 1 ?
                 quartz::physics::Collider::CollisionType::ContactStay :
                 quartz::physics::Collider::CollisionType::ContactExit;
- 
 
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
@@ -60,31 +54,39 @@ quartz::managers::PhysicsManager::EventListener::onContact(
 
         collider1.collide(&collider2, collisionType);
         collider2.collide(&collider1, collisionType);
-        
+
+        // This is just here to show how we can get the rigidbodies in case we wanted to do anything with them
         reactphysics3d::RigidBody* p_rigidBody1 = dynamic_cast<reactphysics3d::RigidBody*>(currentContactPair.getBody1());
         if (p_rigidBody1) {
             UNUSED quartz::physics::RigidBody& rigidBody1 = quartz::physics::RigidBody::getRigidBody(p_rigidBody1);
         } else {
             // not a rigid body
         }
-
-        for (uint32_t contactPointIndex = 0; contactPointIndex < currentContactPair.getNbContactPoints(); contactPointIndex++) {
-            UNUSED const reactphysics3d::CollisionCallback::ContactPoint& currentContactPoint = currentContactPair.getContactPoint(contactPointIndex);
-        } 
     }
 }
 
 void
 quartz::managers::PhysicsManager::EventListener::onTrigger(
-    UNUSED const reactphysics3d::OverlapCallback::CallbackData& callbackData
+    const reactphysics3d::OverlapCallback::CallbackData& callbackData
 ) {
     for (uint32_t overlappingPairIndex = 0; overlappingPairIndex < callbackData.getNbOverlappingPairs(); overlappingPairIndex++) {
-        UNUSED const reactphysics3d::OverlapCallback::OverlapPair& currentOverlapPair = callbackData.getOverlappingPair(overlappingPairIndex);
+        const reactphysics3d::OverlapCallback::OverlapPair& currentOverlapPair = callbackData.getOverlappingPair(overlappingPairIndex);
 
-        /**
-         * @todo 2025/06/19 Get the rigidbody and collider from the overlapping pair and invoke their callbacks, use getBody1 and getBody2
-         *   to get the rigidbodies, and getCollider1 and getCollider2 to get the colliders
-         */
+        reactphysics3d::OverlapCallback::OverlapPair::EventType eventType = currentOverlapPair.getEventType();
+        quartz::physics::Collider::CollisionType collisionType = static_cast<uint32_t>(eventType) == 0 ?
+            quartz::physics::Collider::CollisionType::ContactStart :
+            static_cast<uint32_t>(eventType) == 1 ?
+                quartz::physics::Collider::CollisionType::ContactStay :
+                quartz::physics::Collider::CollisionType::ContactExit;
+
+        reactphysics3d::Collider* p_collider1 = currentOverlapPair.getCollider1();
+        quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
+
+        reactphysics3d::Collider* p_collider2 = currentOverlapPair.getCollider2();
+        quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(p_collider2);
+
+        collider1.collide(&collider2, collisionType);
+        collider2.collide(&collider1, collisionType);
     }
 }
 

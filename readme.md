@@ -30,3 +30,8 @@ If you desire to use Quartz for your own application, the Quartz Demo App (in `d
 
 Additionally, the [Pole Position Simulator](https://github.com/KingLineSoftworks/PolePosition) provides a great example for how to include Quartz into your own project.
 
+### Physics Properties
+
+#### Triggers
+All colliders are allowed to have collision callbacks which determine which logic they invoke upon collision start, stay, and exit.
+If you set a collider to be a trigger, you will not be able to collide with it physically, though it's collision callbacks will still be invoked when a collision (overlap) occurs.
