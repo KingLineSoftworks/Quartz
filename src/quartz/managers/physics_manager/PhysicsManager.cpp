@@ -39,12 +39,6 @@ quartz::managers::PhysicsManager::EventListener::onContact(
          * @todo 2025/06/19 Make sure to provide the physics layers associated with each of the rigidbodies and colliders
          */
 
-        reactphysics3d::CollisionCallback::ContactPair::EventType eventType = currentContactPair.getEventType();
-        quartz::physics::Collider::CollisionType collisionType = static_cast<uint32_t>(eventType) == 0 ?
-            quartz::physics::Collider::CollisionType::ContactStart :
-            static_cast<uint32_t>(eventType) == 1 ?
-                quartz::physics::Collider::CollisionType::ContactStay :
-                quartz::physics::Collider::CollisionType::ContactEnd;
 
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
@@ -52,6 +46,7 @@ quartz::managers::PhysicsManager::EventListener::onContact(
         reactphysics3d::Collider* p_collider2 = currentContactPair.getCollider2();
         quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(p_collider2);
 
+        quartz::physics::Collider::CollisionType collisionType = quartz::physics::Collider::getCollisionType(currentContactPair.getEventType());
         switch (collisionType) {
             case quartz::physics::Collider::CollisionType::ContactStart:
                 collider1.collisionStart(&collider2);
@@ -84,19 +79,13 @@ quartz::managers::PhysicsManager::EventListener::onTrigger(
     for (uint32_t overlappingPairIndex = 0; overlappingPairIndex < callbackData.getNbOverlappingPairs(); overlappingPairIndex++) {
         const reactphysics3d::OverlapCallback::OverlapPair& currentOverlapPair = callbackData.getOverlappingPair(overlappingPairIndex);
 
-        reactphysics3d::OverlapCallback::OverlapPair::EventType eventType = currentOverlapPair.getEventType();
-        quartz::physics::Collider::CollisionType collisionType = static_cast<uint32_t>(eventType) == 0 ?
-            quartz::physics::Collider::CollisionType::ContactStart :
-            static_cast<uint32_t>(eventType) == 1 ?
-                quartz::physics::Collider::CollisionType::ContactStay :
-                quartz::physics::Collider::CollisionType::ContactEnd;
-
         reactphysics3d::Collider* p_collider1 = currentOverlapPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
 
         reactphysics3d::Collider* p_collider2 = currentOverlapPair.getCollider2();
         quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(p_collider2);
 
+        quartz::physics::Collider::CollisionType collisionType = quartz::physics::Collider::getCollisionType(currentOverlapPair.getEventType());
         switch (collisionType) {
             case quartz::physics::Collider::CollisionType::ContactStart:
                 collider1.collisionStart(&collider2);
@@ -179,10 +168,10 @@ quartz::managers::PhysicsManager::createRigidBody(
     reactphysics3d::RigidBody* p_rigidBody = field.getRP3DPhysicsWorldPtr()->createRigidBody(rp3dTransform);
     LOG_TRACEthis("rp3d rigidbody pointer: {}", reinterpret_cast<void*>(p_rigidBody));
 
-    const std::string bodyTypeString = quartz::physics::RigidBody::Parameters::getBodyTypeString(rigidBodyParameters.bodyType);
+    const std::string bodyTypeString = quartz::physics::RigidBody::getBodyTypeString(rigidBodyParameters.bodyType);
     LOG_TRACEthis("Using body type : {}", bodyTypeString);
     LOG_TRACEthis("Enabling gravity: {}", rigidBodyParameters.enableGravity);
-    p_rigidBody->setType(rigidBodyParameters.bodyType);
+    p_rigidBody->setType(quartz::physics::RigidBody::getBodyType(rigidBodyParameters.bodyType));
     p_rigidBody->enableGravity(rigidBodyParameters.enableGravity);
     p_rigidBody->setLinearDamping(0.0);
     p_rigidBody->setAngularDamping(0.0);

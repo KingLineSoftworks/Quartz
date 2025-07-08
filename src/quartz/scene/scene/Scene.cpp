@@ -44,7 +44,7 @@ quartz::scene::Scene::constructDoodads(
         LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
         LOG_TRACE(SCENE, "  rigid body properties:");
         if (o_rigidBodyInformation) {
-            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(o_rigidBodyInformation->bodyType));
+            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::getBodyTypeString(o_rigidBodyInformation->bodyType));
             LOG_TRACE(SCENE, "    gravity enabled = {}", o_rigidBodyInformation->enableGravity);
         } else {
             LOG_TRACE(SCENE, "    no rigid body");

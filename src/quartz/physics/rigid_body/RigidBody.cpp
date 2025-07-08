@@ -3,18 +3,56 @@
 #include <reactphysics3d/mathematics/Transform.h>
 
 #include "math/transform/Vec3.hpp"
+#include "reactphysics3d/components/RigidBodyComponents.h"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 
 std::map<reactphysics3d::RigidBody*, quartz::physics::RigidBody*> quartz::physics::RigidBody::rigidBodyMap;
 
+quartz::physics::RigidBody::BodyType
+quartz::physics::RigidBody::getBodyType(
+    reactphysics3d::BodyType bodyType
+) {
+    switch (bodyType) {
+        case reactphysics3d::BodyType::STATIC:
+            return quartz::physics::RigidBody::BodyType::Static;
+        case reactphysics3d::BodyType::KINEMATIC:
+            return quartz::physics::RigidBody::BodyType::Kinematic;
+        case reactphysics3d::BodyType::DYNAMIC:
+            return quartz::physics::RigidBody::BodyType::Dynamic;
+    }
+}
+
+reactphysics3d::BodyType
+quartz::physics::RigidBody::getBodyType(
+    quartz::physics::RigidBody::BodyType bodyType
+) {
+    switch (bodyType) {
+        case quartz::physics::RigidBody::BodyType::Static:
+            return reactphysics3d::BodyType::STATIC;
+        case quartz::physics::RigidBody::BodyType::Kinematic:
+            return reactphysics3d::BodyType::KINEMATIC;
+        case quartz::physics::RigidBody::BodyType::Dynamic:
+            return reactphysics3d::BodyType::DYNAMIC;
+    }
+}
+
 std::string
-quartz::physics::RigidBody::Parameters::getBodyTypeString(
+quartz::physics::RigidBody::getBodyTypeString(
     const reactphysics3d::BodyType bodyType
 ) {
     return bodyType == reactphysics3d::BodyType::STATIC ? "Static" :
         bodyType == reactphysics3d::BodyType::KINEMATIC ? "Kinematic" :
+        "Dynamic";
+}
+
+std::string
+quartz::physics::RigidBody::getBodyTypeString(
+    const quartz::physics::RigidBody::BodyType bodyType
+) {
+    return bodyType == quartz::physics::RigidBody::BodyType::Static ? "Static" :
+        bodyType == quartz::physics::RigidBody::BodyType::Kinematic ? "Kinematic" :
         "Dynamic";
 }
 

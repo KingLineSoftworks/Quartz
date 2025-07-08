@@ -15,6 +15,34 @@
 
 std::map<reactphysics3d::Collider*, quartz::physics::Collider*> quartz::physics::Collider::colliderMap;
 
+quartz::physics::Collider::CollisionType
+quartz::physics::Collider::getCollisionType(
+    const reactphysics3d::CollisionCallback::ContactPair::EventType eventType
+) {
+    switch (eventType) {
+        case reactphysics3d::CollisionCallback::ContactPair::EventType::ContactStart:
+            return quartz::physics::Collider::CollisionType::ContactStart;
+        case reactphysics3d::CollisionCallback::ContactPair::EventType::ContactStay:
+            return quartz::physics::Collider::CollisionType::ContactStay;
+        case reactphysics3d::CollisionCallback::ContactPair::EventType::ContactExit:
+            return quartz::physics::Collider::CollisionType::ContactEnd;
+    }
+}
+
+quartz::physics::Collider::CollisionType
+quartz::physics::Collider::getCollisionType(
+    const reactphysics3d::OverlapCallback::OverlapPair::EventType eventType
+) {
+    switch (eventType) {
+        case reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStart:
+            return quartz::physics::Collider::CollisionType::ContactStart;
+        case reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStay:
+            return quartz::physics::Collider::CollisionType::ContactStay;
+        case reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapExit:
+            return quartz::physics::Collider::CollisionType::ContactEnd;
+    }
+}
+
 void
 quartz::physics::Collider::noopCollisionCallback(
     UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters

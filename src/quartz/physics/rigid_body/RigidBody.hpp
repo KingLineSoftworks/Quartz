@@ -4,6 +4,7 @@
 #include <optional>
 
 #include <reactphysics3d/body/RigidBody.h>
+#include <reactphysics3d/components/RigidBodyComponents.h>
 
 #include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
@@ -25,11 +26,19 @@ namespace physics {
 
 class quartz::physics::RigidBody {
 public: // classes
-    struct Parameters {
-        static std::string getBodyTypeString(const reactphysics3d::BodyType);
+    enum class BodyType : uint32_t {
+        Static = 0,
+        Kinematic = 1,
+        Dynamic = 2
+    };
+    static BodyType getBodyType(reactphysics3d::BodyType bodyType);
+    static reactphysics3d::BodyType getBodyType(BodyType bodyType);
+    static std::string getBodyTypeString(const reactphysics3d::BodyType bodyType);
+    static std::string getBodyTypeString(const BodyType bodyType);
 
+    struct Parameters {
         Parameters(
-            const reactphysics3d::BodyType bodyType_,
+            const BodyType bodyType_,
             const bool enableGravity_,
             const math::Vec3& angularAxisFactor_,
             const quartz::physics::Collider::Parameters& colliderParameters_
@@ -40,7 +49,7 @@ public: // classes
             colliderParameters(colliderParameters_)
         {}
 
-        reactphysics3d::BodyType bodyType;
+        BodyType bodyType;
         bool enableGravity;
         math::Vec3 angularLockAxisFactor;
         quartz::physics::Collider::Parameters colliderParameters;

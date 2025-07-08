@@ -35,6 +35,8 @@ public: // callbacks and their info
         ContactStay = 1,
         ContactEnd = 2
     };
+    static CollisionType getCollisionType(const reactphysics3d::CollisionCallback::ContactPair::EventType eventType);
+    static CollisionType getCollisionType(const reactphysics3d::OverlapCallback::OverlapPair::EventType eventType);
 
     struct CollisionCallbackParameters {
         CollisionCallbackParameters(
