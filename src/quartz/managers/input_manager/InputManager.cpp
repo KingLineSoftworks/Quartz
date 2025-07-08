@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 
+#include "quartz/managers/Loggers.hpp"
 #include "quartz/managers/input_manager/InputManager.hpp"
 
 std::map<const GLFWwindow* const, quartz::managers::InputManager> quartz::managers::InputManager::inputManagerMap;

@@ -15,17 +15,6 @@
 #include "quartz/scene/doodad/Doodad.hpp"
 #include "quartz/scene/scene/Scene.hpp"
 
-class DummyTestPhysicsEventListener : public reactphysics3d::EventListener {
-public:
-    void onContact(UNUSED const reactphysics3d::CollisionCallback::CallbackData& callbackData) override {
-        // LOG_ERROR(PHYSICSMAN, "Contact detected");
-    }
-
-    void onTrigger(UNUSED const reactphysics3d::OverlapCallback::CallbackData& callbackData) override {
-        // LOG_ERROR(PHYSICSMAN, "Trigger detected");
-    }
-};
-
 quartz::scene::Camera quartz::scene::Scene::defaultCamera;
 
 std::vector<quartz::scene::Doodad>
@@ -55,7 +44,7 @@ quartz::scene::Scene::constructDoodads(
         LOG_TRACE(SCENE, "    scale    = {}", transform.scale.toString());
         LOG_TRACE(SCENE, "  rigid body properties:");
         if (o_rigidBodyInformation) {
-            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::Parameters::getBodyTypeString(o_rigidBodyInformation->bodyType));
+            LOG_TRACE(SCENE, "    body type       = {}", quartz::physics::RigidBody::getBodyTypeString(o_rigidBodyInformation->bodyType));
             LOG_TRACE(SCENE, "    gravity enabled = {}", o_rigidBodyInformation->enableGravity);
         } else {
             LOG_TRACE(SCENE, "    no rigid body");
@@ -117,16 +106,7 @@ void
 quartz::scene::Scene::setCamera(
     quartz::scene::Camera& camera
 ) {
-    LOG_FUNCTION_SCOPE_INFOthis("");
-    LOG_INFOthis("Current camera:");
-    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
-    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
-    
     mr_camera = camera;
-    
-    LOG_INFOthis("Updated camera:");
-    LOG_INFOthis("  id      : {}", mr_camera.get().getId());
-    LOG_INFOthis("  position: {}", mr_camera.get().getWorldPosition().toString());
 }
 
 void
@@ -151,12 +131,11 @@ quartz::scene::Scene::load(
      *    We can allow the current scene to set the event listener's functions, so each scene
      *    can handle the events in their own way.
      */
-    // static DummyTestPhysicsEventListener el;
     // mp_physicsWorld->setEventListener(&el);
     
     if (o_fieldParameters) {
         LOG_TRACEthis("Initializing physics field");
-        mo_field.emplace(physicsManager, o_fieldParameters->gravity);
+        mo_field.emplace(physicsManager.createField(*o_fieldParameters));
     }
 
     LOG_TRACEthis("Initializing master texture list");
@@ -207,7 +186,6 @@ quartz::scene::Scene::load(
     LOG_DEBUGthis("Camera {} with position {}", mr_camera.get().getId(), mr_camera.get().getWorldPosition().toString());
 }
 
-
 void
 quartz::scene::Scene::load(
     const quartz::rendering::Device& renderingDevice,
@@ -229,6 +207,36 @@ quartz::scene::Scene::load(
 }
 
 void
+quartz::scene::Scene::unload(
+    quartz::managers::PhysicsManager& physicsManager
+) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    if (!mo_field) {
+        LOG_TRACEthis("Not unloading physics items");
+        return;
+    }
+    LOG_TRACEthis("Unloading physics items");
+
+    LOG_TRACEthis("Unloading {} doodads", m_doodads.size());
+    for (uint32_t i = 0; i < m_doodads.size(); i++) {
+        LOG_TRACEthis("Unloading doodad {}", i);
+
+        quartz::scene::Doodad& doodad = m_doodads[i];
+
+        if (!doodad.getRigidBodyOptionalReference()) {
+            LOG_TRACEthis("  doodad {} has no rigidbody", i);
+            continue;
+        }
+
+        LOG_TRACEthis("  destroying rigidbody");
+        physicsManager.destroyRigidBody(*mo_field, *doodad.getRigidBodyOptionalReference());
+    }
+
+    physicsManager.destroyField(*mo_field);
+}
+
+void
 quartz::scene::Scene::fixedUpdate(
     const quartz::managers::InputManager& inputManager,
     UNUSED const quartz::managers::PhysicsManager& physicsManager,
@@ -237,8 +245,9 @@ quartz::scene::Scene::fixedUpdate(
 ) {
     // The doodad's fixedUpdate will make changes to the rigidBody and its transform, so
     // there is no need to manually snap the rigidBody to the doodad
+    const double ticksPerSecond = 1.0 / tickTimeDelta;
     for (quartz::scene::Doodad& doodad : m_doodads) {
-        doodad.fixedUpdate(inputManager, totalElapsedTime);
+        doodad.fixedUpdate(inputManager, totalElapsedTime, tickTimeDelta, ticksPerSecond);
     }
 
     // This is only going to update the rigid bodies, not the doodads

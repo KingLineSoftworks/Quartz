@@ -1,9 +1,11 @@
+#include <glm/gtx/projection.hpp>
+
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 
-const math::Vec3 math::Vec3::Forward = math::Vec3(0, 0, 1);
+const math::Vec3 math::Vec3::Forward = math::Vec3(1, 0, 0);
 const math::Vec3 math::Vec3::Up = math::Vec3(0, 1, 0);
-const math::Vec3 math::Vec3::Right = math::Vec3(-1, 0, 0);
+const math::Vec3 math::Vec3::Right = math::Vec3(0, 0, 1);
 
 const math::Vec3 math::Vec3::Backward = -1 * math::Vec3::Forward;
 const math::Vec3 math::Vec3::Down = -1 * math::Vec3::Up;
@@ -18,6 +20,17 @@ math::Vec3::operator!=(const math::Vec3& other) const {
     bool zNEquals = z - other.z > std::numeric_limits<float>::epsilon();
 
     return xNEquals || yNEquals || zNEquals;
+}
+
+math::Vec3
+math::Vec3::getProjectionOntoPlane(
+    const math::Vec3& planeNormal
+) const {
+    const math::Vec3 normalProjection = glm::proj(this->glmVec, planeNormal.glmVec);
+
+    const math::Vec3 result = (*this) - normalProjection;
+    
+    return result;
 }
 
 math::Vec3&

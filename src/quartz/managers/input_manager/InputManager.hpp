@@ -115,3 +115,4 @@ private: // member variables
     float m_scrollOffset_x;
     float m_scrollOffset_y;
 };
+

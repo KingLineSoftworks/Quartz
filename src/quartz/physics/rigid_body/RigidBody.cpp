@@ -1,126 +1,117 @@
+#include <reactphysics3d/body/RigidBody.h>
+#include <reactphysics3d/components/RigidBodyComponents.h>
 #include <reactphysics3d/engine/PhysicsWorld.h>
 #include <reactphysics3d/mathematics/Transform.h>
 
 #include "math/transform/Vec3.hpp"
 
+#include "util/logger/Logger.hpp"
+
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 
+std::map<reactphysics3d::RigidBody*, quartz::physics::RigidBody*> quartz::physics::RigidBody::rigidBodyMap;
+
+quartz::physics::RigidBody::BodyType
+quartz::physics::RigidBody::getBodyType(
+    reactphysics3d::BodyType bodyType
+) {
+    switch (bodyType) {
+        case reactphysics3d::BodyType::STATIC:
+            return quartz::physics::RigidBody::BodyType::Static;
+        case reactphysics3d::BodyType::KINEMATIC:
+            return quartz::physics::RigidBody::BodyType::Kinematic;
+        case reactphysics3d::BodyType::DYNAMIC:
+            return quartz::physics::RigidBody::BodyType::Dynamic;
+    }
+}
+
+reactphysics3d::BodyType
+quartz::physics::RigidBody::getBodyType(
+    quartz::physics::RigidBody::BodyType bodyType
+) {
+    switch (bodyType) {
+        case quartz::physics::RigidBody::BodyType::Static:
+            return reactphysics3d::BodyType::STATIC;
+        case quartz::physics::RigidBody::BodyType::Kinematic:
+            return reactphysics3d::BodyType::KINEMATIC;
+        case quartz::physics::RigidBody::BodyType::Dynamic:
+            return reactphysics3d::BodyType::DYNAMIC;
+    }
+}
+
 std::string
-quartz::physics::RigidBody::Parameters::getBodyTypeString(
+quartz::physics::RigidBody::getBodyTypeString(
     const reactphysics3d::BodyType bodyType
 ) {
-    return bodyType == reactphysics3d::BodyType::STATIC ? "Static" :
-        bodyType == reactphysics3d::BodyType::KINEMATIC ? "Kinematic" :
-        "Dynamic";
+    switch (bodyType) {
+        case reactphysics3d::BodyType::STATIC:
+            return "Static";
+        case reactphysics3d::BodyType::KINEMATIC:
+            return "Kinematic";
+        case reactphysics3d::BodyType::DYNAMIC:
+            return "Dynamic";
+    }
 }
 
-reactphysics3d::RigidBody*
-quartz::physics::RigidBody::createRigidBodyPtr(
-    reactphysics3d::PhysicsWorld* p_physicsWorld,
-    const math::Transform& transform,
-    const reactphysics3d::BodyType bodyType,
-    const bool enableGravity,
-    const math::Vec3& angularLockAxisFactor
+std::string
+quartz::physics::RigidBody::getBodyTypeString(
+    const quartz::physics::RigidBody::BodyType bodyType
 ) {
-    LOG_FUNCTION_SCOPE_TRACE(RIGIDBODY, "");
-
-    const reactphysics3d::Transform rp3dTransform(transform.position, transform.rotation);
-    reactphysics3d::RigidBody* p_rigidBody = p_physicsWorld->createRigidBody(rp3dTransform);
-
-    const std::string bodyTypeString = quartz::physics::RigidBody::Parameters::getBodyTypeString(bodyType);
-    LOG_TRACE(RIGIDBODY, "Using body type : {}", bodyTypeString);
-    LOG_TRACE(RIGIDBODY, "Enabling gravity: {}", enableGravity);
-    p_rigidBody->setType(bodyType);
-    p_rigidBody->enableGravity(enableGravity);
-    p_rigidBody->setLinearDamping(0.0);
-    p_rigidBody->setAngularDamping(0.0);
-    p_rigidBody->setAngularLockAxisFactor(angularLockAxisFactor);
-    p_rigidBody->setIsAllowedToSleep(true);
-
-    return p_rigidBody;
-}
-
-std::optional<quartz::physics::Collider>
-quartz::physics::RigidBody::createCollider(
-    quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::RigidBody::Parameters& parameters
-) {
-    LOG_FUNCTION_SCOPE_TRACE(RIGIDBODY, "");
-
-    if (std::holds_alternative<std::monostate>(parameters.v_colliderParameters)) {
-        LOG_TRACE(RIGIDBODY, "Collider parameters are empty. Creating empty optional");
-        return {};
+    switch (bodyType) {
+        case quartz::physics::RigidBody::BodyType::Static:
+            return "Static";
+        case quartz::physics::RigidBody::BodyType::Kinematic:
+            return "Kinematic";
+        case quartz::physics::RigidBody::BodyType::Dynamic:
+            return "Dynamic";
     }
-
-    if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters)) {
-        LOG_TRACE(RIGIDBODY, "Collider parameters represent box collider parameters. Creating box collider");
-        return quartz::physics::Collider::createBoxCollider(physicsManager, p_rigidBody, std::get<quartz::physics::BoxShape::Parameters>(parameters.v_colliderParameters));
-    }
-
-    if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(parameters.v_colliderParameters)) {
-        LOG_TRACE(RIGIDBODY, "Collider parameters represent sphere collider parameters. Creating sphere collider");
-        return quartz::physics::Collider::createSphereCollider(physicsManager, p_rigidBody, std::get<quartz::physics::SphereShape::Parameters>(parameters.v_colliderParameters));
-    }
-
-    LOG_TRACE(RIGIDBODY, "Collider parameters are in a weird (empty) state. Not sure how we got here");
-    return {};
 }
 
 quartz::physics::RigidBody::RigidBody(
+    std::optional<quartz::physics::Collider>&& o_collider,
     reactphysics3d::RigidBody* p_rigidBody
 ) :
-    mp_rigidBody(p_rigidBody),
-    mo_collider()
-{}
-
-quartz::physics::RigidBody::RigidBody(
-    quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::BoxShape::Parameters& boxShapeParameters
-) :
-    mp_rigidBody(p_rigidBody),
-    mo_collider(quartz::physics::Collider::createBoxCollider(
-        physicsManager, 
-        mp_rigidBody, 
-        boxShapeParameters.halfExtents
-    ))
-{}
-
-quartz::physics::RigidBody::RigidBody(
-    quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::SphereShape::Parameters& sphereShapeParameters
-) :
-    mp_rigidBody(p_rigidBody),
-    mo_collider(quartz::physics::Collider::createSphereCollider(
-        physicsManager, 
-        mp_rigidBody, 
-        sphereShapeParameters.radius
-    ))
-{}
-
-quartz::physics::RigidBody::RigidBody(
-    quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::RigidBody::Parameters& parameters
-) :
-    mp_rigidBody(p_rigidBody),
-    mo_collider(quartz::physics::RigidBody::createCollider(
-        physicsManager,
-        mp_rigidBody,
-        parameters
-    ))
-{}
+    mo_collider(std::move(o_collider)),
+    mp_rigidBody(p_rigidBody)
+{
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Constructing RigidBody. Setting rigid body map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_rigidBody), reinterpret_cast<void*>(this));
+    quartz::physics::RigidBody::rigidBodyMap[mp_rigidBody] = this;
+}
 
 quartz::physics::RigidBody::RigidBody(
     quartz::physics::RigidBody&& other
 ) :
-    mp_rigidBody(std::move(other.mp_rigidBody)),
-    mo_collider(std::move(other.mo_collider))
-{}
+    mo_collider(std::move(other.mo_collider)),
+    mp_rigidBody(std::move(other.mp_rigidBody))
+{
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Move-constructing RigidBody. Setting rigid body map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_rigidBody), reinterpret_cast<void*>(this));
+    quartz::physics::RigidBody::rigidBodyMap[mp_rigidBody] = this;
+}
 
-quartz::physics::RigidBody::~RigidBody() {}
+quartz::physics::RigidBody&
+quartz::physics::RigidBody::operator=(
+    quartz::physics::RigidBody&& other
+) {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+
+    if (this == &other) {
+        return *this;
+    }
+
+    mo_collider = std::move(other.mo_collider);
+    mp_rigidBody = std::move(other.mp_rigidBody);
+
+    LOG_TRACEthis("Moving RigidBody. Setting rigid body map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_rigidBody), reinterpret_cast<void*>(this));
+    quartz::physics::RigidBody::rigidBodyMap[mp_rigidBody] = this;
+
+    return *this;
+}
+
+quartz::physics::RigidBody::~RigidBody() {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+}
 
 void
 quartz::physics::RigidBody::setPosition(
@@ -148,27 +139,27 @@ void
 quartz::physics::RigidBody::setScale(
     UNUSED const math::Vec3& scale
 ) {
-    /** @todfo 2024/12/01 Set the scale of the collider here */
+    /** @todo 2024/12/01 Set the scale of the collider here */
 }
 
 void
-quartz::physics::RigidBody::setLinearVelocity(
-    const math::Vec3& linearVelocity
+quartz::physics::RigidBody::setLinearVelocity_mps(
+    const math::Vec3& linearVelocity_mps
 ) {
-    mp_rigidBody->setLinearVelocity(linearVelocity);
+    mp_rigidBody->setLinearVelocity(linearVelocity_mps);
 }
 
 void
-quartz::physics::RigidBody::setAngularVelocity(
-    const math::Vec3& angularVelocity 
+quartz::physics::RigidBody::setAngularVelocity_mps(
+    const math::Vec3& angularVelocity_mps
 ) {
-    mp_rigidBody->setAngularVelocity(angularVelocity);
+    mp_rigidBody->setAngularVelocity(angularVelocity_mps);
 }
 
 void
-quartz::physics::RigidBody::applyLocalForceToCenterOfMass(
-    const math::Vec3& force
+quartz::physics::RigidBody::applyLocalForceToCenterOfMass_N(
+    const math::Vec3& force_N
 ) {
-    mp_rigidBody->applyLocalForceAtCenterOfMass(force);
+    mp_rigidBody->applyLocalForceAtCenterOfMass(force_N);
 }
 

@@ -127,6 +127,10 @@ union math::Vec3 {
     Vec3 cross(const glm::vec3& other)               const { return glm::cross(glmVec, other); }
     Vec3 cross(const reactphysics3d::Vector3& other) const { return rp3dVec.cross(other); }
 
+    Vec3 getProjectionOntoPlane(const Vec3& planeNormal) const;
+    static Vec3 projectOntoPlane(const Vec3& k, const Vec3& planeNormal) { return k.getProjectionOntoPlane(planeNormal); }
+
+
     Vec3& normalize();
     Vec3 normalize() const;
 

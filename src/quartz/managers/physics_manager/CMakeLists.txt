@@ -35,4 +35,10 @@ target_link_libraries(
 
     PUBLIC
     UTIL_Logger
+
+    PUBLIC
+    QUARTZ_PHYSICS_Collider
+    QUARTZ_PHYSICS_Field
+    QUARTZ_PHYSICS_RigidBody
 )
+

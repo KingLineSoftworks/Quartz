@@ -1,70 +1,98 @@
+#include <optional>
+#include <variant>
+
 #include <reactphysics3d/body/Body.h>
 #include <reactphysics3d/mathematics/Transform.h>
+
+#include "util/logger/Logger.hpp"
 
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "util/logger/Logger.hpp"
-
+#include "quartz/physics/collider/BoxShape.hpp"
+#include "quartz/physics/collider/SphereShape.hpp"
 #include "quartz/physics/collider/Collider.hpp"
 
-quartz::physics::Collider
-quartz::physics::Collider::createBoxCollider(
-    quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::BoxShape::Parameters& parameters
+std::map<reactphysics3d::Collider*, quartz::physics::Collider*> quartz::physics::Collider::colliderMap;
+
+quartz::physics::Collider::CollisionType
+quartz::physics::Collider::getCollisionType(
+    const reactphysics3d::CollisionCallback::ContactPair::EventType eventType
 ) {
-    quartz::physics::Collider collider;
-
-    collider.mo_boxShape = quartz::physics::BoxShape(physicsManager, parameters.halfExtents);
-
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_boxShape->mp_colliderShape);
-
-    return collider;
+    switch (eventType) {
+        case reactphysics3d::CollisionCallback::ContactPair::EventType::ContactStart:
+            return quartz::physics::Collider::CollisionType::ContactStart;
+        case reactphysics3d::CollisionCallback::ContactPair::EventType::ContactStay:
+            return quartz::physics::Collider::CollisionType::ContactStay;
+        case reactphysics3d::CollisionCallback::ContactPair::EventType::ContactExit:
+            return quartz::physics::Collider::CollisionType::ContactEnd;
+    }
 }
 
-quartz::physics::Collider
-quartz::physics::Collider::createSphereCollider(
-    quartz::managers::PhysicsManager& physicsManager,
-    reactphysics3d::RigidBody* p_rigidBody,
-    const quartz::physics::SphereShape::Parameters& parameters
+quartz::physics::Collider::CollisionType
+quartz::physics::Collider::getCollisionType(
+    const reactphysics3d::OverlapCallback::OverlapPair::EventType eventType
 ) {
-    quartz::physics::Collider collider;
-
-    collider.mo_sphereShape = quartz::physics::SphereShape(physicsManager, parameters.radius);
-
-    collider.mp_collider = quartz::physics::Collider::createColliderPtr(p_rigidBody, collider.mo_sphereShape->mp_colliderShape);
-
-    return collider;
+    switch (eventType) {
+        case reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStart:
+            return quartz::physics::Collider::CollisionType::ContactStart;
+        case reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapStay:
+            return quartz::physics::Collider::CollisionType::ContactStay;
+        case reactphysics3d::OverlapCallback::OverlapPair::EventType::OverlapExit:
+            return quartz::physics::Collider::CollisionType::ContactEnd;
+    }
 }
 
-reactphysics3d::Collider*
-quartz::physics::Collider::createColliderPtr(
-    reactphysics3d::RigidBody* p_rigidBody,
-    reactphysics3d::CollisionShape* p_collisionShape
-) {
-    /**
-     *  @todo 2024/11/18 What does the rp3d identity look like for position and orientation? This should not effect scale
-     */
-    reactphysics3d::Transform colliderTransform = reactphysics3d::Transform::identity(); // transform relative to the body, not the world
-    reactphysics3d::Collider* p_collider = p_rigidBody->addCollider(p_collisionShape, colliderTransform);
+void
+quartz::physics::Collider::noopCollisionCallback(
+    UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters
+) {}
 
-    return p_collider;
+quartz::physics::Collider::Collider(
+    std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
+    reactphysics3d::Collider* p_collider,
+    const quartz::physics::Collider::CollisionCallback& collisionStartCallback,
+    const quartz::physics::Collider::CollisionCallback& collisionStayCallback,
+    const quartz::physics::Collider::CollisionCallback& collisionEndCallback
+) :
+    mo_boxShape(
+        (std::holds_alternative<quartz::physics::BoxShape>(v_shape)) ?
+            std::optional<quartz::physics::BoxShape>{std::get<quartz::physics::BoxShape>(std::move(v_shape))} :
+            std::nullopt
+    ),
+    mo_sphereShape(
+        (std::holds_alternative<quartz::physics::SphereShape>(v_shape)) ?
+            std::optional<quartz::physics::SphereShape>{std::get<quartz::physics::SphereShape>(std::move(v_shape))} :
+            std::nullopt
+    ),
+    mp_collider(p_collider),
+    m_collisionStartCallback(collisionStartCallback ? collisionStartCallback : quartz::physics::Collider::noopCollisionCallback),
+    m_collisionStayCallback(collisionStayCallback ? collisionStayCallback : quartz::physics::Collider::noopCollisionCallback),
+    m_collisionEndCallback(collisionEndCallback ? collisionEndCallback : quartz::physics::Collider::noopCollisionCallback)
+{
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    quartz::physics::Collider::colliderMap[mp_collider] = this;
 }
-
-quartz::physics::Collider::Collider() :
-    mo_boxShape(),
-    mo_sphereShape(),
-    mp_collider()
-{}
 
 quartz::physics::Collider::Collider(
     quartz::physics::Collider&& other
 ) :
     mo_boxShape(std::move(other.mo_boxShape)),
     mo_sphereShape(std::move(other.mo_sphereShape)),
-    mp_collider(std::move(other.mp_collider))
-{}
+    mp_collider(std::move(other.mp_collider)),
+    m_collisionStartCallback(std::move(other.m_collisionStartCallback)),
+    m_collisionStayCallback(std::move(other.m_collisionStayCallback)),
+    m_collisionEndCallback(std::move(other.m_collisionEndCallback))
+{
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+    LOG_TRACEthis("Move-constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    quartz::physics::Collider::colliderMap[mp_collider] = this;
+}
+
+quartz::physics::Collider::~Collider() {
+    LOG_FUNCTION_SCOPE_TRACEthis("");
+}
 
 quartz::physics::Collider&
 quartz::physics::Collider::operator=(
@@ -81,6 +109,13 @@ quartz::physics::Collider::operator=(
 
     mp_collider = std::move(other.mp_collider);
 
+    m_collisionStartCallback = std::move(other.m_collisionStartCallback);
+    m_collisionStayCallback = std::move(other.m_collisionStayCallback);
+    m_collisionEndCallback = std::move(other.m_collisionEndCallback);
+
+    LOG_TRACEthis("Moving Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
+    quartz::physics::Collider::colliderMap[mp_collider] = this;
+
     return *this;
 }
 
@@ -94,6 +129,11 @@ quartz::physics::Collider::getCollisionShapePtr() const {
     }
 
     return nullptr;
+}
+
+bool
+quartz::physics::Collider::getIsTrigger() const {
+    return mp_collider->getIsTrigger();
 }
 
 math::Vec3
@@ -114,5 +154,26 @@ quartz::physics::Collider::getWorldPosition() const {
 math::Quaternion
 quartz::physics::Collider::getWorldRotation() const {
     return math::Quaternion(mp_collider->getLocalToWorldTransform().getOrientation()).normalize();
+}
+
+void
+quartz::physics::Collider::collisionStart(
+    Collider* const p_otherCollider
+) {
+    m_collisionStartCallback({this, p_otherCollider});
+}
+
+void
+quartz::physics::Collider::collisionStay(
+    Collider* const p_otherCollider
+) {
+    m_collisionStayCallback({this, p_otherCollider});
+}
+
+void
+quartz::physics::Collider::collisionEnd(
+    Collider* const p_otherCollider
+) {
+    m_collisionEndCallback({this, p_otherCollider});
 }
 

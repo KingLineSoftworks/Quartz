@@ -2,6 +2,8 @@
 
 #include "math/transform/Mat4.hpp"
 
+#include "util/macros.hpp"
+
 math::Mat4
 math::Mat4::createPerspective(
     const float fovyRadians,
@@ -19,18 +21,14 @@ math::Mat4::createPerspective(
 
 math::Vec4&
 math::Mat4::operator[](const uint32_t i) {
-#if QUARTZ_DEBUG
-    assert(i >= 0 && i <= 3);
-#endif
+    QUARTZ_ASSERT(i >= 0 && i <= 3, "Cannot index into matrix with index " + std::to_string(i) + " in a 4x4 matrix");
 
     return cols[i];
 }
 
 const math::Vec4&
 math::Mat4::operator[](const uint32_t i) const {
-#if QUARTZ_DEBUG
-    assert(i >= 0 && i <= 3);
-#endif
+    QUARTZ_ASSERT(i >= 0 && i <= 3, "Cannot index into matrix with index " + std::to_string(i) + " in a 4x4 matrix");
 
     return cols[i];
 }
@@ -95,3 +93,4 @@ math::Mat4::toString() const {
 
     return ss.str();
 }
+

@@ -44,6 +44,11 @@ public: // member functions
         quartz::managers::PhysicsManager& physicsManager,
         const uint32_t index
     );
+    void unloadCurrentScene(
+        quartz::managers::PhysicsManager& physicsManager
+    );
+
+    void destroyAllScenes();
 
 private: // member functions
     SceneManager();
