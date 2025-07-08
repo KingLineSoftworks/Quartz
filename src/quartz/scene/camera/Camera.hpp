@@ -1,6 +1,7 @@
 #pragma once
 
-#include "glm/gtc/quaternion.hpp"
+#include <glm/gtc/quaternion.hpp>
+
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 

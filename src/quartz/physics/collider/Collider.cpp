@@ -4,13 +4,13 @@
 #include <reactphysics3d/body/Body.h>
 #include <reactphysics3d/mathematics/Transform.h>
 
+#include "util/logger/Logger.hpp"
+
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/physics/collider/BoxShape.hpp"
 #include "quartz/physics/collider/SphereShape.hpp"
-#include "util/logger/Logger.hpp"
-
 #include "quartz/physics/collider/Collider.hpp"
 
 std::map<reactphysics3d::Collider*, quartz::physics::Collider*> quartz::physics::Collider::colliderMap;

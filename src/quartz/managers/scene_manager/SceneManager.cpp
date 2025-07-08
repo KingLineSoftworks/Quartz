@@ -1,6 +1,6 @@
-#include "quartz/managers/scene_manager/SceneManager.hpp"
 #include "util/logger/Logger.hpp"
-#include <_strings.h>
+
+#include "quartz/managers/scene_manager/SceneManager.hpp"
 
 quartz::managers::SceneManager::SceneManager() :
     m_sceneParameters(),

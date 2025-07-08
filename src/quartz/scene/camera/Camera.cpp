@@ -1,9 +1,12 @@
 #include <cmath>
 
-#include "quartz/scene/camera/Camera.hpp"
-#include "glm/trigonometric.hpp"
+#include <glm/trigonometric.hpp>
+
 #include "math/transform/Vec3.hpp"
+
 #include "util/logger/Logger.hpp"
+
+#include "quartz/scene/camera/Camera.hpp"
 
 uint32_t quartz::scene::Camera::cameraCount = 0;
 
