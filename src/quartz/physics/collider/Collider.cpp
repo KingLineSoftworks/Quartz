@@ -23,7 +23,9 @@ quartz::physics::Collider::noopCollisionCallback(
 quartz::physics::Collider::Collider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
     reactphysics3d::Collider* p_collider,
-    const quartz::physics::Collider::CollisionCallback& collisionCallback
+    const quartz::physics::Collider::CollisionCallback& collisionStartCallback,
+    const quartz::physics::Collider::CollisionCallback& collisionStayCallback,
+    const quartz::physics::Collider::CollisionCallback& collisionEndCallback
 ) :
     mo_boxShape(
         (std::holds_alternative<quartz::physics::BoxShape>(v_shape)) ?
@@ -36,7 +38,9 @@ quartz::physics::Collider::Collider(
             std::nullopt
     ),
     mp_collider(p_collider),
-    m_collisionCallback(collisionCallback ? collisionCallback : quartz::physics::Collider::noopCollisionCallback)
+    m_collisionStartCallback(collisionStartCallback ? collisionStartCallback : quartz::physics::Collider::noopCollisionCallback),
+    m_collisionStayCallback(collisionStayCallback ? collisionStayCallback : quartz::physics::Collider::noopCollisionCallback),
+    m_collisionEndCallback(collisionEndCallback ? collisionEndCallback : quartz::physics::Collider::noopCollisionCallback)
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     LOG_TRACEthis("Constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
@@ -49,7 +53,9 @@ quartz::physics::Collider::Collider(
     mo_boxShape(std::move(other.mo_boxShape)),
     mo_sphereShape(std::move(other.mo_sphereShape)),
     mp_collider(std::move(other.mp_collider)),
-    m_collisionCallback(std::move(other.m_collisionCallback))
+    m_collisionStartCallback(std::move(other.m_collisionStartCallback)),
+    m_collisionStayCallback(std::move(other.m_collisionStayCallback)),
+    m_collisionEndCallback(std::move(other.m_collisionEndCallback))
 {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     LOG_TRACEthis("Move-constructing Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
@@ -75,7 +81,9 @@ quartz::physics::Collider::operator=(
 
     mp_collider = std::move(other.mp_collider);
 
-    m_collisionCallback = std::move(other.m_collisionCallback);
+    m_collisionStartCallback = std::move(other.m_collisionStartCallback);
+    m_collisionStayCallback = std::move(other.m_collisionStayCallback);
+    m_collisionEndCallback = std::move(other.m_collisionEndCallback);
 
     LOG_TRACEthis("Moving Collider. Setting collider map rp3d pointer at {} to point to quartz pointer at {}", reinterpret_cast<void*>(mp_collider), reinterpret_cast<void*>(this));
     quartz::physics::Collider::colliderMap[mp_collider] = this;
@@ -121,10 +129,23 @@ quartz::physics::Collider::getWorldRotation() const {
 }
 
 void
-quartz::physics::Collider::collide(
-    Collider* const p_otherCollider,
-    const CollisionType collisionType
+quartz::physics::Collider::collisionStart(
+    Collider* const p_otherCollider
 ) {
-    m_collisionCallback({this, p_otherCollider, collisionType});
+    m_collisionStartCallback({this, p_otherCollider});
+}
+
+void
+quartz::physics::Collider::collisionStay(
+    Collider* const p_otherCollider
+) {
+    m_collisionStayCallback({this, p_otherCollider});
+}
+
+void
+quartz::physics::Collider::collisionEnd(
+    Collider* const p_otherCollider
+) {
+    m_collisionEndCallback({this, p_otherCollider});
 }
 

@@ -44,7 +44,7 @@ quartz::managers::PhysicsManager::EventListener::onContact(
             quartz::physics::Collider::CollisionType::ContactStart :
             static_cast<uint32_t>(eventType) == 1 ?
                 quartz::physics::Collider::CollisionType::ContactStay :
-                quartz::physics::Collider::CollisionType::ContactExit;
+                quartz::physics::Collider::CollisionType::ContactEnd;
 
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
@@ -52,8 +52,20 @@ quartz::managers::PhysicsManager::EventListener::onContact(
         reactphysics3d::Collider* p_collider2 = currentContactPair.getCollider2();
         quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(p_collider2);
 
-        collider1.collide(&collider2, collisionType);
-        collider2.collide(&collider1, collisionType);
+        switch (collisionType) {
+            case quartz::physics::Collider::CollisionType::ContactStart:
+                collider1.collisionStart(&collider2);
+                collider2.collisionStart(&collider1);
+                break;
+            case quartz::physics::Collider::CollisionType::ContactStay:
+                collider1.collisionStay(&collider2);
+                collider2.collisionStay(&collider1);
+                break;
+            case quartz::physics::Collider::CollisionType::ContactEnd:
+                collider1.collisionEnd(&collider2);
+                collider2.collisionEnd(&collider1);
+                break;
+        }
 
         // This is just here to show how we can get the rigidbodies in case we wanted to do anything with them
         reactphysics3d::RigidBody* p_rigidBody1 = dynamic_cast<reactphysics3d::RigidBody*>(currentContactPair.getBody1());
@@ -77,7 +89,7 @@ quartz::managers::PhysicsManager::EventListener::onTrigger(
             quartz::physics::Collider::CollisionType::ContactStart :
             static_cast<uint32_t>(eventType) == 1 ?
                 quartz::physics::Collider::CollisionType::ContactStay :
-                quartz::physics::Collider::CollisionType::ContactExit;
+                quartz::physics::Collider::CollisionType::ContactEnd;
 
         reactphysics3d::Collider* p_collider1 = currentOverlapPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
@@ -85,8 +97,20 @@ quartz::managers::PhysicsManager::EventListener::onTrigger(
         reactphysics3d::Collider* p_collider2 = currentOverlapPair.getCollider2();
         quartz::physics::Collider& collider2 = quartz::physics::Collider::getCollider(p_collider2);
 
-        collider1.collide(&collider2, collisionType);
-        collider2.collide(&collider1, collisionType);
+        switch (collisionType) {
+            case quartz::physics::Collider::CollisionType::ContactStart:
+                collider1.collisionStart(&collider2);
+                collider2.collisionStart(&collider1);
+                break;
+            case quartz::physics::Collider::CollisionType::ContactStay:
+                collider1.collisionStay(&collider2);
+                collider2.collisionStay(&collider1);
+                break;
+            case quartz::physics::Collider::CollisionType::ContactEnd:
+                collider1.collisionEnd(&collider2);
+                collider2.collisionEnd(&collider1);
+                break;
+        }
     }
 }
 
@@ -232,7 +256,7 @@ quartz::managers::PhysicsManager::createCollider(
     p_collider->setIsTrigger(colliderParameters.isTrigger);
 
     LOG_TRACEthis("Creating quartz collider. Moving shape");
-    return quartz::physics::Collider(std::move(v_shape), p_collider, colliderParameters.collisionCallback);
+    return quartz::physics::Collider(std::move(v_shape), p_collider, colliderParameters.collisionStartCallback, colliderParameters.collisionStayCallback, colliderParameters.collisionEndCallback);
 }
 
 void
