@@ -240,6 +240,7 @@ set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
 add_subdirectory("${UTIL_SOURCE_DIR}/errors")
 add_subdirectory("${UTIL_SOURCE_DIR}/file_system")
 add_subdirectory("${UTIL_SOURCE_DIR}/logger")
+add_subdirectory("${UTIL_SOURCE_DIR}/unit_test")
 
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
@@ -273,8 +274,13 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 
 #====================================================================
 # The tests
+# @todo: 2025/07/09 Only include the testing stuff if we have the
+#    cmake option set to do so. We will need to introduce a cmake
+#    flag which defaults to true which we can override via command
+#    line, or under certain build modes
 #====================================================================
 include(CTest)
+include(CreateUnitTest)
 
 set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 

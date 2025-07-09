@@ -6,6 +6,10 @@ This project is built with CMake. It is currently supporting MacOS and Linux. No
 By default, the `CMakeLists.txt` is configured to build using clang as the compiler and ninja as the generator. This is configured in `PreLoad.cmake`.
 The `CMakeLists.txt` also tells GLFW to use Wayland instead of Xorg if the detected platform is Linux. This can be changeed by modifying the `GLFW_BUILD_WAYLAND` and `GLFW_BUILD_X11` flags.
 
+#### Running Tests
+
+@todo: 2025/07/09 Add instructions about building and running the tests
+
 ## Scening Documentation
 - [GLTF 2.0 models](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html)
 - [PBR Materials via metallic-roughness model](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#materials)
@@ -24,6 +28,10 @@ Pick up an issue, put on some [acid techno](https://soundcloud.com/intercell/kik
 ### Merging vs Rebasing
 If your branch is out of date with master (or any other branch) please do a rebase instead of a merge. We want a linear commit history, for ease of auditing. If you're not familiar with rebasing, it is not hard. Google is your friend.
 Do `git rebase master your_branch` to take all of the commits on `your_branch` and appy them on top of master.
+
+### Tests
+
+Make sure your additions are tested. There are examples of how to write unit tests and use the quartz testing framework.
 
 ## Using Quartz
 If you desire to use Quartz for your own application, the Quartz Demo App (in `demo_app/demo_app`) might provide a good starting point.
