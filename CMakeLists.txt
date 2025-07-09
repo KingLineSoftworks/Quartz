@@ -284,7 +284,7 @@ include(CreateUnitTest)
 
 set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 
-add_subdirectory("${QUARTZ_TEST_DIR}/unit_test")
+add_subdirectory("${QUARTZ_TEST_DIR}/unit")
 
 #====================================================================
 # The demo application
