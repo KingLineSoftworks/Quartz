@@ -287,13 +287,16 @@ endif()
 
 #====================================================================
 # The demo application
+# @brief This is currently commented out because we do not have a demo
+#    application within the Quartz repository. If you wish to see an
+#    up-to-date demo application, check out the PolePosition repo.
 # ====================================================================
-set(DEMO_APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
-
-set(DEMO_APPLICATION_SOURCE_DIR "${DEMO_APPLICATION_ROOT_DIR}/demo_app")
-if (QUARTZ_COMPILE_DEMO_APPLICATION)
-    message(STATUS "Adding Quartz's demo application")
-    add_subdirectory("${DEMO_APPLICATION_SOURCE_DIR}")
-else()
-    message(STATUS "Not adding Quart'z demo application")
-endif()
+# set(DEMO_APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
+#
+# set(DEMO_APPLICATION_SOURCE_DIR "${DEMO_APPLICATION_ROOT_DIR}/demo_app")
+# if (QUARTZ_COMPILE_DEMO_APPLICATION)
+#     message(STATUS "Adding Quartz's demo application")
+#     add_subdirectory("${DEMO_APPLICATION_SOURCE_DIR}")
+# else()
+#     message(STATUS "Not adding Quart'z demo application")
+# endif()
