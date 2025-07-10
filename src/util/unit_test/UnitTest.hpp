@@ -17,11 +17,13 @@
  */
 
 DECLARE_LOGGER(UNIT_TEST, trace);
+DECLARE_LOGGER(UT_RUNNER, trace);
 
 DECLARE_LOGGER_GROUP(
     TEST,
-    1,
-    UNIT_TEST
+    2,
+    UNIT_TEST,
+    UT_RUNNER
 );
 
 namespace util {
@@ -53,7 +55,7 @@ public:
 public:
     UnitTestRunner();
 
-    USE_LOGGER(UNIT_TEST);
+    USE_LOGGER(UT_RUNNER);
 
     void registerUnitTestFunction(const std::string& functionName, const UnitTestFunction& utFunction);
 
@@ -116,9 +118,70 @@ private:
     if (a != b) {                                                                                       \
         std::ostringstream message;                                                                     \
         message << #a << " is not equal to " << #b << " (" << a << " != " << b << ")";                  \
-        LOG_CRITICAL(UNIT_TEST, "{}", message.str());                                                   \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_NOT_EQUAL(a, b)                                                                        \
+    if (a == b) {                                                                                       \
+        std::ostringstream message;                                                                     \
+        message << #a << " is not un-equal to " << #b << " (" << a << " == " << b << ")";               \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_GREATER_THAN(a, b)                                                                     \
+    if (a <= b) {                                                                                       \
+        std::ostringstream message;                                                                     \
+        message << #a << " is not greater than " << #b << " (" << a << " <= " << b << ")";              \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_LESS_THAN(a, b)                                                                        \
+    if (a >= b) {                                                                                       \
+        std::ostringstream message;                                                                     \
+        message << #a << " is not less than " << #b << " (" << a << " >= " << b << ")";                 \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_GREATER_THAN_EQUAL(a, b)                                                               \
+    if (a < b) {                                                                                        \
+        std::ostringstream message;                                                                     \
+        message << #a << " is not greater than or equal to " << #b << " (" << a << " < " << b << ")";   \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_LESS_THAN_EQUAL(a, b)                                                                  \
+    if (a > b) {                                                                                        \
+        std::ostringstream message;                                                                     \
+        message << #a << " is not less than or equal to " << #b << " (" << a << " > " << b << ")";      \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_REQUIRE(a)                                                                                   \
+    if (!a) {                                                                                           \
+        std::ostringstream message;                                                                     \
+        message << #a << " is not valid";                                                               \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+        return;                                                                                         \
     }                                                                                                   \
     REQUIRE_SEMICOLON
 

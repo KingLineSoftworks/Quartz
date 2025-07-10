@@ -274,17 +274,16 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 
 #====================================================================
 # The tests
-# @todo: 2025/07/09 Only include the testing stuff if we have the
-#    cmake option set to do so. We will need to introduce a cmake
-#    flag which defaults to true which we can override via command
-#    line, or under certain build modes
 #====================================================================
-include(CTest)
-include(CreateUnitTest)
+if (QUARTZ_COMPILE_UNIT_TESTS)
+    include(CTest)
+    include(CreateUnitTest)
+    enable_testing()
 
-set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
+    set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 
-add_subdirectory("${QUARTZ_TEST_DIR}/unit")
+    add_subdirectory("${QUARTZ_TEST_DIR}/unit")
+endif()
 
 #====================================================================
 # The demo application

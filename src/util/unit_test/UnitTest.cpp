@@ -25,7 +25,8 @@ util::UnitTestRunner::run(
     util::Logger::setShouldLogPreamble(false);
     REGISTER_LOGGER_GROUP(TEST);
     util::Logger::setLevels({
-        {"UNIT_TEST", util::Logger::Level::trace}
+        {"UNIT_TEST", util::Logger::Level::critical},
+        {"UT_RUNNER", util::Logger::Level::trace}
     });
 
     uint32_t totalFailingFunctionCount = 0;
@@ -34,12 +35,12 @@ util::UnitTestRunner::run(
         const std::string& functionName = m_functions[i].first;
         const util::UnitTestRunner::UnitTestFunction& utFunction = m_functions[i].second;
         {
-            LOG_TRACEthis("{}()", functionName);
-            LOG_SCOPE_CHANGE_TRACEthis();
+            LOG_TRACE(UNIT_TEST, "{}()", functionName);
+            LOG_SCOPE_CHANGE_TRACE(UNIT_TEST);
             utFunction(*this, i, functionName);
         }
 
-        LOG_TRACEthis("");
+        LOG_TRACE(UNIT_TEST, "");
     }
 
     for (uint32_t i = 0; i < m_failureInfos.size(); ++i) {
