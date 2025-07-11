@@ -1,12 +1,12 @@
 #pragma once
 
 #include <functional>
-#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "util/macros.hpp"
+#include "util/Loggers.hpp"
 #include "util/logger/Logger.hpp"
 
 /**
@@ -15,16 +15,6 @@
  *   this, see the test/unit/example
  * ======================================================================================================
  */
-
-DECLARE_LOGGER(UNIT_TEST, trace);
-DECLARE_LOGGER(UT_RUNNER, trace);
-
-DECLARE_LOGGER_GROUP(
-    TEST,
-    2,
-    UNIT_TEST,
-    UT_RUNNER
-);
 
 namespace util {
     class UnitTestRunner;
@@ -59,6 +49,8 @@ public:
 
     void registerUnitTestFunction(const std::string& functionName, const UnitTestFunction& utFunction);
 
+    void initializeLoggers(int argc, char* argv[]);
+    void runFunctions(int argc, char* argv[]);
     int run(int argc, char* argv[], const std::string& fileName);
 
     void addCaseFailureInformation(const uint32_t functionIndex, const CaseFailureInformation& cfInfo);

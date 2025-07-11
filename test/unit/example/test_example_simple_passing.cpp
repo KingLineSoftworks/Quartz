@@ -1,3 +1,6 @@
+#include <string>
+#include <vector>
+
 #include "util/unit_test/UnitTest.hpp"
 
 UT_FUNCTION(a_test) {

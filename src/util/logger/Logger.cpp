@@ -138,7 +138,7 @@ void util::Logger::setLevel(const std::string& loggerName, const util::Logger::L
     const util::Logger::Level defaultLevel = util::Logger::loggerNameDefaultLevelMap[loggerName];
     const util::Logger::Level currentLevel = util::Logger::loggerNameLevelMap[loggerName];
 
-    if (desiredLevel <= defaultLevel) {
+    if (desiredLevel < defaultLevel) {
         if (util::Logger::shouldLogPreamble) {
             util::Logger::log(loggerName, currentLevel, "Not setting Logger {} to desired level of {} because it is not greater than its default level of {}", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(defaultLevel));
         }
