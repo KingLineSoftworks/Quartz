@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -58,7 +59,7 @@ public:
     void addCaseFailureInformation(const uint32_t functionIndex, const CaseFailureInformation& cfInfo);
 private:
     std::vector<std::pair<std::string, UnitTestFunction>> m_functions;
-    std::vector<std::vector<CaseFailureInformation>> m_failureInfos;
+    std::map<uint32_t, std::vector<CaseFailureInformation>> m_failureInfoMap;
 };
 
 /**

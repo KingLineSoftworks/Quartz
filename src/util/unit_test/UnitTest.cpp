@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdint>
 
 #include "util/Loggers.hpp"
 #include "util/macros.hpp"
@@ -17,7 +18,7 @@
 
 util::UnitTestRunner::UnitTestRunner() :
     m_functions(),
-    m_failureInfos()
+    m_failureInfoMap()
 {}
 
 void
@@ -26,7 +27,6 @@ util::UnitTestRunner::registerUnitTestFunction(
     const util::UnitTestRunner::UnitTestFunction& utFunction
 ) {
     m_functions.push_back({functionName, utFunction});
-    m_failureInfos.push_back({});
 }
 
 std::pair<std::string, util::Logger::Level>
@@ -117,10 +117,39 @@ util::UnitTestRunner::initializeLoggers(
 
 void
 util::UnitTestRunner::runFunctions(
-    UNUSED const std::vector<std::string>& commandLineArguments
+    const std::vector<std::string>& commandLineArguments
 ) {
+    std::vector<std::string> acceptedFunctionNames;
+    bool shouldGrabFunctionNames = false;
+    for (uint32_t i = 0; i < commandLineArguments.size(); ++i) {
+        const std::string currentArgument = commandLineArguments[i];
+
+        if (shouldGrabFunctionNames) {
+            if (currentArgument == "-l") {
+                break;
+            }
+
+            acceptedFunctionNames.push_back(currentArgument);
+        }
+
+        if (currentArgument == "-c") {
+            shouldGrabFunctionNames = true;
+        }
+    }
+
     for (uint32_t i = 0; i < m_functions.size(); ++i) {
         const std::string& functionName = m_functions[i].first;
+
+        if (!acceptedFunctionNames.empty()) {
+            if (std::find(commandLineArguments.begin(), commandLineArguments.end(), functionName) == commandLineArguments.end()) {
+                continue;
+            }
+        }
+
+        if (!m_failureInfoMap.contains(i)) {
+            m_failureInfoMap.insert({i, {}});
+        }
+
         const util::UnitTestRunner::UnitTestFunction& utFunction = m_functions[i].second;
         {
             LOG_TRACE(UNIT_TEST, "{}()", functionName);
@@ -144,13 +173,16 @@ util::UnitTestRunner::run(
 
     uint32_t totalFailingFunctionCount = 0;
 
-    for (uint32_t i = 0; i < m_failureInfos.size(); ++i) {
-        const std::string& functionName = m_functions[i].first;
+    for (std::pair<uint32_t, std::vector<util::UnitTestRunner::CaseFailureInformation>> indexCFInfo : m_failureInfoMap) {
+        const uint32_t functionIndex = indexCFInfo.first;
+        const std::vector<util::UnitTestRunner::CaseFailureInformation>& cfInfos = indexCFInfo.second;
+        
+        const std::string& functionName = m_functions[functionIndex].first;
 
-        const uint32_t currentFailureCount = m_failureInfos[i].size();
+        const uint32_t currentFailureCount = cfInfos.size();
         if (currentFailureCount > 0) {
             LOG_CRITICALthis("{} had {} failures", functionName, currentFailureCount);
-            for (const util::UnitTestRunner::CaseFailureInformation& cfInfo : m_failureInfos[i]) {
+            for (const util::UnitTestRunner::CaseFailureInformation& cfInfo : cfInfos) {
                 LOG_CRITICALthis("  line {} : {}", cfInfo.lineNumber, cfInfo.message);
             }
             LOG_TRACEthis("");
@@ -176,5 +208,6 @@ util::UnitTestRunner::addCaseFailureInformation(
     const uint32_t functionIndex,
     const util::UnitTestRunner::CaseFailureInformation& cfInfo
 ) {
-    m_failureInfos[functionIndex].push_back(cfInfo);
+    m_failureInfoMap[functionIndex].push_back(cfInfo);
 }
+
