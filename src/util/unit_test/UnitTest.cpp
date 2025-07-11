@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "util/Loggers.hpp"
 #include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
@@ -27,10 +29,36 @@ util::UnitTestRunner::registerUnitTestFunction(
     m_failureInfos.push_back({});
 }
 
+std::pair<std::string, util::Logger::Level>
+util::UnitTestRunner::splitLoggerLevelString(
+    const std::string& loggerLevelString
+) {
+    const uint32_t delimeterPosition = loggerLevelString.find(':');
+
+    const std::string loggerName = loggerLevelString.substr(0, delimeterPosition);
+    const std::string levelString = loggerLevelString.substr(delimeterPosition + 1);
+
+    util::Logger::Level level = util::Logger::Level::off;
+    if (levelString == "trace") {
+        level = util::Logger::Level::trace;
+    } else if (levelString == "debug") {
+        level = util::Logger::Level::debug;
+    } else if (levelString == "info") {
+        level = util::Logger::Level::info;
+    } else if (levelString == "warning") {
+        level = util::Logger::Level::warning;
+    } else if (levelString == "error") {
+        level = util::Logger::Level::error;
+    } else if (levelString == "critical") {
+        level = util::Logger::Level::critical;
+    }
+
+    return {loggerName, level};
+}
+
 void
 util::UnitTestRunner::initializeLoggers(
-    UNUSED int argc,
-    UNUSED char* argv[]
+    const std::vector<std::string>& commandLineArguments
 ) {
     util::Logger::setShouldLogPreamble(false);
 
@@ -40,29 +68,56 @@ util::UnitTestRunner::initializeLoggers(
      *    This means we need to introduce some sort of structure within the util::Logger that tracks
      *    all of the logging groups and updates whenever one is declared.
      */
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(MATH, critical);
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(UTIL, critical);
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ, critical);
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_MANAGERS, critical);
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_PHYSICS, critical);
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_RENDERING, critical);
-    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_SCENE, critical);
-
-    // For every logger in each of the logging groups, set their levels to critical
-
-    // The default level for every logger is going to be critical. We are only going to set the levels
-    // for loggers to anything else if it is specified via command line
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(MATH, off);
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(UTIL, off);
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ, off);
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_MANAGERS, off);
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_PHYSICS, off);
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_RENDERING, off);
+    REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_SCENE, off);
 
     util::Logger::setLevels({
         {"UNIT_TEST", util::Logger::Level::critical},
         {"UT_RUNNER", util::Logger::Level::trace}
     });
+
+    // Iterate through all of the arguments.
+    // We want to discard everything before the -l flag.
+    // As soon as we see a -c flag, we want to stop iterating.
+    //
+    // The level updates are going to be in the form: LOGGER_NAME:level LOGGER_NAME2:another_level
+  
+    std::vector<std::pair<std::string, util::Logger::Level>> levelOverrides;
+
+    bool shouldGrabLoggerOverrides = false;
+    for (uint32_t i = 0; i < commandLineArguments.size(); ++i) {
+        const std::string& currentArgument = commandLineArguments[i];
+
+        if (shouldGrabLoggerOverrides) {
+            if (currentArgument == "-c") {
+                break;
+            }
+
+            levelOverrides.push_back(this->splitLoggerLevelString(currentArgument));
+
+            continue;
+        }
+
+        if (currentArgument == "-l") {
+            shouldGrabLoggerOverrides = true;
+        }
+    }
+    
+    for (const std::pair<std::string, util::Logger::Level>& registrationInfo : levelOverrides) {
+        const std::string& loggerName = registrationInfo.first;
+        const util::Logger::Level& level = registrationInfo.second;
+        util::Logger::setLevel(loggerName, level);
+    }
 }
 
 void
 util::UnitTestRunner::runFunctions(
-    UNUSED int argc,
-    UNUSED char* argv[]
+    UNUSED const std::vector<std::string>& commandLineArguments
 ) {
     for (uint32_t i = 0; i < m_functions.size(); ++i) {
         const std::string& functionName = m_functions[i].first;
@@ -83,8 +138,9 @@ util::UnitTestRunner::run(
     char* argv[],
     const std::string& fileName
 ) {
-    this->initializeLoggers(argc, argv);
-    this->runFunctions(argc, argv);
+    const std::vector<std::string> commandLineArguments(argv, argv + argc);
+    this->initializeLoggers(commandLineArguments);
+    this->runFunctions(commandLineArguments);
 
     uint32_t totalFailingFunctionCount = 0;
 

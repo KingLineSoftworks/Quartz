@@ -49,8 +49,10 @@ public:
 
     void registerUnitTestFunction(const std::string& functionName, const UnitTestFunction& utFunction);
 
-    void initializeLoggers(int argc, char* argv[]);
-    void runFunctions(int argc, char* argv[]);
+    std::pair<std::string, util::Logger::Level> splitLoggerLevelString(const std::string& loggerLevelString);
+
+    void initializeLoggers(const std::vector<std::string>& commandLineArguments);
+    void runFunctions(const std::vector<std::string>& commandLineArguments);
     int run(int argc, char* argv[], const std::string& fileName);
 
     void addCaseFailureInformation(const uint32_t functionIndex, const CaseFailureInformation& cfInfo);
