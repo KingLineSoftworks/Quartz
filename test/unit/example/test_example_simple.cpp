@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
