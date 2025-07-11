@@ -199,6 +199,26 @@ private:
     }                                                                                                   \
     REQUIRE_SEMICOLON
 
+#define UT_CHECK_TRUE(val)                                                                              \
+    if (!(val)) {                                                                                       \
+        std::ostringstream message;                                                                     \
+        message << #val << " is not true (" << (val) << ")";                                            \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_FALSE(val)                                                                             \
+    if (val) {                                                                                          \
+        std::ostringstream message;                                                                     \
+        message << #val << " is not false (" << (val) << ")";                                           \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+
 #define UT_REQUIRE(a)                                                                                   \
     if (!a) {                                                                                           \
         std::ostringstream message;                                                                     \
