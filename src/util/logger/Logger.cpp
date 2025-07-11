@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "spdlog/async.h"
+#include "spdlog/fmt/bundled/core.h"
 #include "spdlog/sinks/dist_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -134,11 +135,15 @@ void util::Logger::registerLogger(const std::string& loggerName, const util::Log
  * @brief Update the logging level for the desired logger. Only update this level if it is more exclusive than its default logging level.
  */
 void util::Logger::setLevel(const std::string& loggerName, const util::Logger::Level desiredLevel) {
+    if (!util::Logger::loggerPtrMap.contains(loggerName)) {
+        throw std::runtime_error(fmt::format("{} is not a valid logger", loggerName));
+    }
+
     std::shared_ptr<util::spdlog_logger_t> p_logger = util::Logger::loggerPtrMap[loggerName];
     const util::Logger::Level defaultLevel = util::Logger::loggerNameDefaultLevelMap[loggerName];
     const util::Logger::Level currentLevel = util::Logger::loggerNameLevelMap[loggerName];
 
-    if (desiredLevel <= defaultLevel) {
+    if (desiredLevel < defaultLevel) {
         if (util::Logger::shouldLogPreamble) {
             util::Logger::log(loggerName, currentLevel, "Not setting Logger {} to desired level of {} because it is not greater than its default level of {}", loggerName, static_cast<uint32_t>(desiredLevel), static_cast<uint32_t>(defaultLevel));
         }

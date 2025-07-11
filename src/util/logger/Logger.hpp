@@ -244,6 +244,16 @@ private: // private static variables
     util::Logger::registerLoggers(quartz::loggers::groupName##_LOGGER_INFOS)
 
 /**
+ * @brief A macro to easily set all of the levels of all loggers in a group whilest registering that group
+ */
+#define REGISTER_LOGGER_GROUP_WITH_LEVEL(groupName, level)                                                      \
+    util::Logger::registerLoggers(quartz::loggers::groupName##_LOGGER_INFOS);                                   \
+    for (const util::Logger::RegistrationInfo& registrationInfo : quartz::loggers::groupName##_LOGGER_INFOS) {    \
+         util::Logger::setLevel(registrationInfo.loggerName, util::Logger::Level::level);                       \
+    }                                                                                                           \
+    REQUIRE_SEMICOLON
+
+/**
  * @brief Dictate which logger you are going to be using
  * 
  * This defines a function to get a reference to the necessary logger registration information in the quartz::logger namespace=

@@ -240,6 +240,7 @@ set(UTIL_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/util")
 add_subdirectory("${UTIL_SOURCE_DIR}/errors")
 add_subdirectory("${UTIL_SOURCE_DIR}/file_system")
 add_subdirectory("${UTIL_SOURCE_DIR}/logger")
+add_subdirectory("${UTIL_SOURCE_DIR}/unit_test")
 
 # Quartz
 set(QUARTZ_SOURCE_DIR "${QUARTZ_ROOT_SOURCE_DIR}/quartz")
@@ -274,21 +275,28 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 #====================================================================
 # The tests
 #====================================================================
-include(CTest)
+if (QUARTZ_COMPILE_UNIT_TESTS)
+    include(CTest)
+    include(CreateUnitTest)
+    enable_testing()
 
-set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
+    set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 
-add_subdirectory("${QUARTZ_TEST_DIR}/unit_test")
+    add_subdirectory("${QUARTZ_TEST_DIR}/unit")
+endif()
 
 #====================================================================
 # The demo application
+# @brief This is currently commented out because we do not have a demo
+#    application within the Quartz repository. If you wish to see an
+#    up-to-date demo application, check out the PolePosition repo.
 # ====================================================================
-set(DEMO_APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
-
-set(DEMO_APPLICATION_SOURCE_DIR "${DEMO_APPLICATION_ROOT_DIR}/demo_app")
-if (QUARTZ_COMPILE_DEMO_APPLICATION)
-    message(STATUS "Adding Quartz's demo application")
-    add_subdirectory("${DEMO_APPLICATION_SOURCE_DIR}")
-else()
-    message(STATUS "Not adding Quart'z demo application")
-endif()
+# set(DEMO_APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
+#
+# set(DEMO_APPLICATION_SOURCE_DIR "${DEMO_APPLICATION_ROOT_DIR}/demo_app")
+# if (QUARTZ_COMPILE_DEMO_APPLICATION)
+#     message(STATUS "Adding Quartz's demo application")
+#     add_subdirectory("${DEMO_APPLICATION_SOURCE_DIR}")
+# else()
+#     message(STATUS "Not adding Quart'z demo application")
+# endif()
