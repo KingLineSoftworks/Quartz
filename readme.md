@@ -32,6 +32,34 @@ Do `git rebase master your_branch` to take all of the commits on `your_branch` a
 ### Tests
 
 Make sure your additions are tested. There are examples of how to write unit tests and use the quartz testing framework.
+The quartz unit testing framework is defined in the `src/util/unit_test` directory.
+Examples on how to use this unit testing framework are in the `test/unit/example` directory.
+
+#### Unit Test Runner Usage Via Command Line
+
+This runner allows you to specify individual test cases from the command line, while still allowing the whole file to be executed via ctest.
+
+To execute a subset of tests within a file via command line, provide the -c flag like so:
+```
+./bin/ut/test_file_something -c test_case_2
+```
+You can also specify multiple test cases to run
+```
+./bin/ut/test_file_something -c test_case_3 test_case_3 test_case_99
+```
+
+By default all of the loggers are turned off besides the UNIT_TEST and UT_RUNNER loggers which are set to critical and trace respectively.
+If you wish for more verbose logs, you can specify the level of individual loggers via command line arguments with the -l flag like so:
+```
+./bin/ut/test_another_one -l RIGIDBODY:debug FIELD:trace COLLIDER:error
+```
+
+You can also specify test cases and loggers at the same time:
+```
+./bin/ut/test_hehehe -c test_case_yoyo test_case_lala -l BUFFER:trace IMAGE:critical MODEL:info
+./bin/ut/test_hehehe -l DOODAD:trace INPUTMAN:critical -c test_case_yoyo_2 test_case_lala_the_sequel
+```
+
 
 ## Using Quartz
 If you desire to use Quartz for your own application, the Quartz Demo App (in `demo_app/demo_app`) might provide a good starting point.

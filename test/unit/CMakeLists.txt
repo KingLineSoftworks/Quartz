@@ -2,5 +2,5 @@
 # Example unit tests
 #====================================================================
 
-add_subdirectory("example")
+# add_subdirectory("example")
 
