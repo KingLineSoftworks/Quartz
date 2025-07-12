@@ -1,7 +1,10 @@
 #include <glm/gtx/projection.hpp>
 
+#include "math/Loggers.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
+
+#include "util/logger/Logger.hpp"
 
 const math::Vec3 math::Vec3::Forward = math::Vec3(1, 0, 0);
 const math::Vec3 math::Vec3::Up = math::Vec3(0, 1, 0);
@@ -12,12 +15,29 @@ const math::Vec3 math::Vec3::Down = -1 * math::Vec3::Up;
 const math::Vec3 math::Vec3::Left = -1 * math::Vec3::Right;
 
 bool
+math::Vec3::operator==(const math::Vec3& other) const {
+    bool xEquals = std::abs(x - other.x) <= std::numeric_limits<float>::epsilon();
+    bool yEquals = std::abs(y - other.y) <= std::numeric_limits<float>::epsilon();
+    bool zEquals = std::abs(z - other.z) <= std::numeric_limits<float>::epsilon();
+
+    if (!xEquals) {
+        LOG_INFO(TRANSFORM, "X values do not equal. {} != {}", x, other.x);
+    }
+    if (!yEquals) {
+        LOG_INFO(TRANSFORM, "Y values do not equal. {} != {}", y, other.y);
+    }
+    if (!zEquals) {
+        LOG_INFO(TRANSFORM, "Z values do not equal. {} != {}", z, other.z);
+    }
+
+    return xEquals && yEquals && zEquals;
+}
+
+bool
 math::Vec3::operator!=(const math::Vec3& other) const {
-    bool xNEquals = x - other.x > std::numeric_limits<float>::epsilon();
-
-    bool yNEquals = y - other.y > std::numeric_limits<float>::epsilon();
-
-    bool zNEquals = z - other.z > std::numeric_limits<float>::epsilon();
+    bool xNEquals = std::abs(x - other.x) > std::numeric_limits<float>::epsilon();
+    bool yNEquals = std::abs(y - other.y) > std::numeric_limits<float>::epsilon();
+    bool zNEquals = std::abs(z - other.z) > std::numeric_limits<float>::epsilon();
 
     return xNEquals || yNEquals || zNEquals;
 }

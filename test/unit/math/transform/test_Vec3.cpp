@@ -1,3 +1,5 @@
+#include "util/Loggers.hpp"
+#include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
 #include "math/transform/Vec3.hpp"
@@ -450,6 +452,48 @@ UT_FUNCTION(test_dot) {
     }
 }
 
+UT_FUNCTION(test_cross) {
+    {
+        const math::Vec3 vec(1, 0, 0);
+        
+        const math::Vec3 vec2(0, 1, 0);
+        const glm::vec3 glmVec2 = vec2;
+        const reactphysics3d::Vector3 rp3dVec2 = vec2;
+
+        const math::Vec3 res = vec.cross(vec2);
+        const math::Vec3 resGlm = vec.cross(glmVec2);
+        const math::Vec3 resRp3d = vec.cross(rp3dVec2);
+
+        const math::Vec3 expected(0, 0, 1);
+
+        UT_CHECK_EQUAL(res, expected);
+        UT_CHECK_EQUAL(resGlm, expected);
+        UT_CHECK_EQUAL(resRp3d, expected);
+    }
+
+    {
+        const math::Vec3 vec(89, -21, 0);
+        
+        const math::Vec3 vec2(11, 0, -289);
+        const glm::vec3 glmVec2 = vec2;
+        const reactphysics3d::Vector3 rp3dVec2 = vec2;
+
+        const math::Vec3 res = vec.cross(vec2);
+        const math::Vec3 resGlm = vec.cross(glmVec2);
+        const math::Vec3 resRp3d = vec.cross(rp3dVec2);
+
+        const math::Vec3 expected(6069, 25721, 231);
+
+        UT_CHECK_EQUAL(res, expected);
+        UT_CHECK_EQUAL(resGlm, expected);
+        UT_CHECK_EQUAL(resRp3d, expected);
+    }
+}
+
+UT_FUNCTION(test_getProjectionOntoPlane) {
+
+}
+
 UT_FUNCTION(test_normalize) {
     {
         const math::Vec3 vec(0, 1, 0);
@@ -532,6 +576,10 @@ UT_FUNCTION(test_normalize) {
     }
 }
 
+UT_FUNCTION(test_look) {
+
+}
+
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
     REGISTER_UT_FUNCTION(test_copy);
@@ -539,6 +587,9 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_scalar_operators);
     REGISTER_UT_FUNCTION(test_vector_operators);
     REGISTER_UT_FUNCTION(test_dot);
+    REGISTER_UT_FUNCTION(test_cross);
+    REGISTER_UT_FUNCTION(test_getProjectionOntoPlane);
     REGISTER_UT_FUNCTION(test_normalize);
+    REGISTER_UT_FUNCTION(test_look);
     UT_RUN_TESTS();
 }

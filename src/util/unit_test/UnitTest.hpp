@@ -130,7 +130,7 @@ private:
 #define UT_FLOATING_POINT_EPSILON 0.001
 
 #define UT_CHECK_EQUAL(a, b)                                                                            \
-    if (a != b) {                                                                                       \
+    if (!(a == b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not equal to " << #b << " (" << a << " != " << b << ")";                  \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
@@ -150,7 +150,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_NOT_EQUAL(a, b)                                                                        \
-    if (a == b) {                                                                                       \
+    if (!(a != b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not un-equal to " << #b << " (" << a << " == " << b << ")";               \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
@@ -170,7 +170,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_GREATER_THAN(a, b)                                                                     \
-    if (a <= b) {                                                                                       \
+    if (!(a > b)) {                                                                                     \
         std::ostringstream message;                                                                     \
         message << #a << " is not greater than " << #b << " (" << a << " <= " << b << ")";              \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
@@ -180,7 +180,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_LESS_THAN(a, b)                                                                        \
-    if (a >= b) {                                                                                       \
+    if (!(a < b)) {                                                                                     \
         std::ostringstream message;                                                                     \
         message << #a << " is not less than " << #b << " (" << a << " >= " << b << ")";                 \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
@@ -190,7 +190,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_GREATER_THAN_EQUAL(a, b)                                                               \
-    if (a < b) {                                                                                        \
+    if (!(a >= b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not greater than or equal to " << #b << " (" << a << " < " << b << ")";   \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
@@ -200,7 +200,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_LESS_THAN_EQUAL(a, b)                                                                  \
-    if (a > b) {                                                                                        \
+    if (!(a <= b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not less than or equal to " << #b << " (" << a << " > " << b << ")";      \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \

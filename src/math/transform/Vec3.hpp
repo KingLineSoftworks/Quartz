@@ -105,9 +105,9 @@ union math::Vec3 {
     Vec3& operator/=(const glm::vec3& other)               { glmVec /= other;           return *this; }
     Vec3& operator/=(const reactphysics3d::Vector3& other) { glmVec = glmVec / Vec3(other).glmVec; return *this; }
 
-    bool operator==(const Vec3& other)                    const { return glmVec == other.glmVec; }
-    bool operator==(const glm::vec3& other)               const { return glmVec == other; }
-    bool operator==(const reactphysics3d::Vector3& other) const { return rp3dVec == other; }
+    bool operator==(const Vec3& other)                    const;
+    bool operator==(const glm::vec3& other)               const { return *this == Vec3(other); }
+    bool operator==(const reactphysics3d::Vector3& other) const { return *this == Vec3(other); }
 
     bool operator!=(const Vec3& other)                    const;
     bool operator!=(const glm::vec3& other)               const { return glmVec != other; }
