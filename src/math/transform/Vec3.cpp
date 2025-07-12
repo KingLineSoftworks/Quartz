@@ -59,7 +59,7 @@ math::Vec3::isNormalized() const {
         return true;
     }
 
-    return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
+    return std::abs(1.0f - magnitude()) <= std::numeric_limits<float>::epsilon();
 }
 
 math::Mat4

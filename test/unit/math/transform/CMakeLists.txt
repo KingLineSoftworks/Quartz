@@ -7,3 +7,9 @@ create_unit_test(
     test_Vec2.cpp
     MATH_Transform
 )
+
+create_unit_test(
+    test_Vec3
+    test_Vec3.cpp
+    MATH_Transform
+)

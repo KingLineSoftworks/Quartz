@@ -99,11 +99,11 @@ union math::Vec3 {
 
     Vec3 operator/(const Vec3& other)                    const { return {glmVec / other.glmVec}; }
     Vec3 operator/(const glm::vec3& other)               const { return {glmVec / other}; }
-    Vec3 operator/(const reactphysics3d::Vector3& other) const { return {rp3dVec / other}; }
+    Vec3 operator/(const reactphysics3d::Vector3& other) const { return {glmVec / Vec3(other).glmVec}; } // converting to glm due to weird error when we rp3d division
 
     Vec3& operator/=(const Vec3& other)                    { glmVec /= other.glmVec;    return *this; }
     Vec3& operator/=(const glm::vec3& other)               { glmVec /= other;           return *this; }
-    Vec3& operator/=(const reactphysics3d::Vector3& other) { rp3dVec = rp3dVec / other; return *this; }
+    Vec3& operator/=(const reactphysics3d::Vector3& other) { glmVec = glmVec / Vec3(other).glmVec; return *this; }
 
     bool operator==(const Vec3& other)                    const { return glmVec == other.glmVec; }
     bool operator==(const glm::vec3& other)               const { return glmVec == other; }
@@ -129,7 +129,6 @@ union math::Vec3 {
 
     Vec3 getProjectionOntoPlane(const Vec3& planeNormal) const;
     static Vec3 projectOntoPlane(const Vec3& k, const Vec3& planeNormal) { return k.getProjectionOntoPlane(planeNormal); }
-
 
     Vec3& normalize();
     Vec3 normalize() const;
