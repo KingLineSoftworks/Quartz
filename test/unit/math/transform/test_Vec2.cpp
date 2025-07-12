@@ -358,11 +358,141 @@ UT_FUNCTION(test_vector_operators) {
     }
 }
 
+UT_FUNCTION(test_dot) {
+    {
+        const math::Vec2 vec1(2, 3);
+
+        const math::Vec2 vec2(4, 5);
+        const glm::vec2 glmVec2 = vec2;
+        const reactphysics3d::Vector2 rp3dVec2 = vec2;
+
+        const float result = 2 * 4 + 3 * 5;
+
+        UT_CHECK_EQUAL_FLOATS(vec1.dot(vec2), result);
+        UT_CHECK_EQUAL_FLOATS(vec2.dot(vec1), result);
+        UT_CHECK_EQUAL_FLOATS(vec1.dot(glmVec2), result);
+        UT_CHECK_EQUAL_FLOATS(vec1.dot(rp3dVec2), result);
+    }
+
+    {
+        const math::Vec2 vec1(11, 22.22);
+
+        const math::Vec2 vec2(54.321, -33.33);
+        const glm::vec2 glmVec2 = vec2;
+        const reactphysics3d::Vector2 rp3dVec2 = vec2;
+
+        const float result = 11 * 54.321 + 22.22 * -33.33;
+
+        UT_CHECK_EQUAL_FLOATS(vec1.dot(vec2), result);
+        UT_CHECK_EQUAL_FLOATS(vec2.dot(vec1), result);
+        UT_CHECK_EQUAL_FLOATS(vec1.dot(glmVec2), result);
+        UT_CHECK_EQUAL_FLOATS(vec1.dot(rp3dVec2), result);
+    }
+}
+
+UT_FUNCTION(test_normalize) {
+    {
+        const math::Vec2 vec(0, 1);
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 1);
+        UT_CHECK_TRUE(vec.isNormalized());
+
+        const math::Vec2 vecNormalized = vec.normalize();
+
+        UT_CHECK_EQUAL(vec, vecNormalized);
+
+        UT_CHECK_TRUE(vec.isNormalized());
+        UT_CHECK_TRUE(vecNormalized.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 1);
+        UT_CHECK_EQUAL_FLOATS(vecNormalized.magnitude(), 1);
+    }
+
+    {
+        const math::Vec2 vec(0, 6);
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 6);
+        UT_CHECK_FALSE(vec.isNormalized());
+
+        const math::Vec2 vecNormalized = vec.normalize();
+        const math::Vec2 vecExpected(0, 1);
+
+        UT_CHECK_EQUAL(vecNormalized, vecExpected);
+        UT_CHECK_EQUAL(vec, math::Vec2(0, 6));
+
+        UT_CHECK_FALSE(vec.isNormalized());
+        UT_CHECK_TRUE(vecNormalized.isNormalized());
+        UT_CHECK_TRUE(vecExpected.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 6);
+        UT_CHECK_EQUAL_FLOATS(vecNormalized.magnitude(), 1);
+        UT_CHECK_EQUAL_FLOATS(vecExpected.magnitude(), 1);
+    }
+
+    {
+        math::Vec2 vec(-5, 0);
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 5);
+        UT_CHECK_FALSE(vec.isNormalized());
+
+        const math::Vec2 other = vec.normalize();
+        const math::Vec2 expected(-1, 0);
+
+        UT_CHECK_EQUAL(vec, expected);
+        UT_CHECK_EQUAL(other, expected);
+
+        UT_CHECK_TRUE(vec.isNormalized());
+        UT_CHECK_TRUE(other.isNormalized());
+        UT_CHECK_TRUE(expected.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 1);
+        UT_CHECK_EQUAL_FLOATS(other.magnitude(), 1);
+        UT_CHECK_EQUAL_FLOATS(expected.magnitude(), 1);
+    }
+
+    {
+        const math::Vec2 vec(2343.222, -5432.1);
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 5915.94453);
+        UT_CHECK_FALSE(vec.isNormalized());
+
+        const math::Vec2 other = vec.normalize();
+
+        UT_CHECK_FALSE(vec.isNormalized());
+        UT_CHECK_TRUE(other.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 5915.94453);
+        UT_CHECK_EQUAL_FLOATS(other.magnitude(), 1);
+
+        UT_CHECK_NOT_EQUAL(vec, other);
+    }
+
+    {
+        const math::Vec2 vec(999, -999);
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 1412.79934881);
+        UT_CHECK_FALSE(vec.isNormalized());
+        
+        vec.normalize();
+        
+        UT_CHECK_FALSE(vec.isNormalized());
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 1412.79934881);
+    }
+
+    {
+        math::Vec2 vec(4323.32, 3444);
+        UT_CHECK_EQUAL_FLOATS(vec.magnitude(), 5527.407332773657636);
+        UT_CHECK_FALSE(vec.isNormalized());
+
+        vec.normalize();
+
+        UT_CHECK_TRUE(vec.isNormalized());
+        UT_CHECK_EQUAL(vec.magnitude(), 1);
+    }
+}
+
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
     REGISTER_UT_FUNCTION(test_copy);
     REGISTER_UT_FUNCTION(test_assignment);
     REGISTER_UT_FUNCTION(test_scalar_operators);
     REGISTER_UT_FUNCTION(test_vector_operators);
+    REGISTER_UT_FUNCTION(test_dot);
+    REGISTER_UT_FUNCTION(test_normalize);
     UT_RUN_TESTS();
 }

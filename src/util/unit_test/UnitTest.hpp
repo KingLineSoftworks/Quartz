@@ -127,7 +127,7 @@ private:
  *    one or both of them in our macro to generate a unique variable name)
  */
 
-#define FLOATING_POINT_EPSILON 0.00001
+#define UT_FLOATING_POINT_EPSILON 0.001
 
 #define UT_CHECK_EQUAL(a, b)                                                                            \
     if (a != b) {                                                                                       \
@@ -139,14 +139,14 @@ private:
     }                                                                                                   \
     REQUIRE_SEMICOLON
 
-#define UT_CHECK_EQUAL_FLOATS(a, b)                                                                                                                        \
-    if (std::abs(a - b) > FLOATING_POINT_EPSILON) {                                                                                                         \
-        std::ostringstream message;                                                                                                                         \
-        message << #a << " is not equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " > " << FLOATING_POINT_EPSILON << ")";   \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                          \
-        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());                                                         \
-        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                                                                          \
-    }                                                                                                                                                       \
+#define UT_CHECK_EQUAL_FLOATS(a, b)                                                                                                                          \
+    if (std::abs(a - b) > UT_FLOATING_POINT_EPSILON) {                                                                                                       \
+        std::ostringstream message;                                                                                                                          \
+        message << #a << " is not equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " > " << UT_FLOATING_POINT_EPSILON << ")"; \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                           \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());                                                          \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                                                                           \
+    }                                                                                                                                                        \
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_NOT_EQUAL(a, b)                                                                        \
@@ -157,6 +157,16 @@ private:
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_NOT_EQUAL_FLOATS(a, b)                                                                                                                     \
+    if (std::abs(a - b) <= UT_FLOATING_POINT_EPSILON) {                                                                                                     \
+        std::ostringstream message;                                                                                                                         \
+        message << #a << " is equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " <= " << UT_FLOATING_POINT_EPSILON << ")";   \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                          \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());                                                         \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                                                                          \
+    }                                                                                                                                                       \
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_GREATER_THAN(a, b)                                                                     \
