@@ -620,7 +620,9 @@ UT_FUNCTION(test_normalize) {
 }
 
 UT_FUNCTION(test_look) {
-
+    // We are actually not going to write any tests for math::Vec3::look
+    // because it is just a wrapper around glm::lookAt and it seems 
+    // relatively complex to test fully and we are lazy
 }
 
 UT_MAIN() {
