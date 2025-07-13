@@ -491,7 +491,50 @@ UT_FUNCTION(test_cross) {
 }
 
 UT_FUNCTION(test_getProjectionOntoPlane) {
+    {
+        const math::Vec3 vec(9, 9, 9);
+        const math::Vec3 planeNormal(0, 1, 0);
 
+        const math::Vec3 projection = math::Vec3::projectOntoPlane(vec, planeNormal);
+
+        const math::Vec3 expected(9, 0, 9);
+
+        UT_CHECK_EQUAL(projection, expected);
+    }
+
+    {
+        const math::Vec3 vec(0, 9, 0);
+        const math::Vec3 planeNormal(0, 1, 0);
+
+        const math::Vec3 projection = math::Vec3::projectOntoPlane(vec, planeNormal);
+
+        const math::Vec3 expected(0, 0, 0);
+
+        UT_CHECK_EQUAL(projection, expected);
+    }
+
+    {
+        const math::Vec3 vec(4, -2, 6);
+        const math::Vec3 planeNormal = math::Vec3(8, 10, -5).normalize();
+
+        const math::Vec3 projection = math::Vec3::projectOntoPlane(vec, planeNormal);
+
+        const math::Vec3 expected(
+            4 + 0.7619,
+            -2 + 0.9524,
+            6 - 0.4762 
+        );
+        // The more correct values due to float precision:
+        // const math::Vec3 expected(
+        //     4 + 0.7619,
+        //     -2 + 0.95238,
+        //     6 - 0.47619 
+        // );
+
+        UT_CHECK_EQUAL_FLOATS(projection.x, expected.x);
+        UT_CHECK_EQUAL_FLOATS(projection.y, expected.y);
+        UT_CHECK_EQUAL_FLOATS(projection.z, expected.z);
+    }
 }
 
 UT_FUNCTION(test_normalize) {
