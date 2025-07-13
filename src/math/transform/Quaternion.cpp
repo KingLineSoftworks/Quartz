@@ -6,7 +6,6 @@
 
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
-#include "math/transform/Mat3.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
