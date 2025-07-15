@@ -1,4 +1,5 @@
 #include "glm/fwd.hpp"
+#include "math/transform/Vec3.hpp"
 #include "math/transform/Vec4.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
@@ -470,19 +471,86 @@ UT_FUNCTION(test_matrix_operators) {
 }
 
 UT_FUNCTION(test_translate) {
+    const math::Mat4 a(
+        {
+            1, 2, 3, 4,
+            -1, -2, -3, -4,
+            6, 7, 8, 9,
+            -6, -7, -8, -9
+        }
+    );
 
+    const math::Vec3 translation(42, 69, -7);
+
+    const math::Mat4 translationMat(
+        {
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            translation.x, translation.y, translation.z, 1
+        }
+    );
+
+    const math::Mat4 expected = a * translationMat;
+    const math::Mat4 c = math::Mat4::translate(a, translation);
+
+    UT_CHECK_EQUAL(c, expected);
+
+    math::Mat4 aNC = a;
+    
+    aNC.translate(translation);
+
+    UT_CHECK_EQUAL(aNC, expected);
 }
 
 UT_FUNCTION(test_rotate) {
-
+    // Though I may claim that I am a decent software engineer, I will not deny that
+    // I can be lazy and do not always want to write tests for complex functions
+    // implemented in ubiquitous and industry standard libraries of which I am merely
+    // wrapping
+    //
+    // GLM functions are trustworthy IMO. If I ever for some reason decide to do away
+    // with GLM in Quartz then I will write tests for this
 }
 
 UT_FUNCTION(test_scale) {
+    const math::Mat4 a(
+        {
+            1, 2, 3, 4,
+            -1, -2, -3, -4,
+            6, 7, 8, 9,
+            -6, -7, -8, -9
+        }
+    );
 
+    const math::Vec3 scale(10, 2, 0.5);
+
+    const math::Mat4 scaleMat(
+        {
+            scale.x, 0, 0, 0,
+            0, scale.y, 0, 0,
+            0, 0, scale.z, 0,
+            0, 0, 0, 1
+        }
+    );
+
+    const math::Mat4 expected = a * scaleMat;
+    const math::Mat4 c = math::Mat4::scale(a, scale);
+
+    UT_CHECK_EQUAL(c, expected);
+
+    math::Mat4 aNC = a;
+
+    aNC.scale(scale);
+
+    UT_CHECK_EQUAL(aNC, expected);
 }
 
 UT_FUNCTION(test_createPerspective) {
-
+    // Go read the comment under test_rotate for why there is no test there.
+    // Now apply that comment to this function as well. I trust that GLM is
+    // doing correct maths. If they aren't, then I guess I will find out some
+    // how in some catastrophic manner ...
 }
 
 UT_MAIN() {

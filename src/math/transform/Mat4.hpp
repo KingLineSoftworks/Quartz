@@ -65,6 +65,9 @@ union math::Mat4 {
      * -------------------------------------------------------------------------------------
      */
 
+    /**
+     * @todo 2025/07/14 Add const versions of these which return const references
+     */
     Mat4& translate(const math::Vec3& translation);
     Mat4& rotate(const math::Vec3& rotationAxis, const float rotationAmountRadians);
     Mat4& rotate(const math::Quaternion& rotation);
@@ -85,7 +88,7 @@ union math::Mat4 {
     );
     static Mat4 scale(
         const Mat4& m,
-        const math::Vec3& translation
+        const math::Vec3& scale 
     );
 
     static Mat4 createPerspective(
