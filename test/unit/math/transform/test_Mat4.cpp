@@ -1,3 +1,4 @@
+#include "glm/fwd.hpp"
 #include "math/transform/Vec4.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
@@ -57,6 +58,23 @@ UT_FUNCTION(test_construction) {
         UT_CHECK_EQUAL(mat.col1, math::Vec4(7, 7, 7, 7));
         UT_CHECK_EQUAL(mat.col2, math::Vec4(8, 8, 8, 8));
         UT_CHECK_EQUAL(mat.col3, math::Vec4(9, 9, 9, 9));
+    }
+
+    // list construction
+    {
+        const math::Mat4 mat(
+            {
+                7, 8, 9, 0,
+                0, 9, 8, 7,
+                1, 2, 3, 4,
+                4, 3, 2, 1
+            }
+        );
+
+        UT_CHECK_EQUAL(mat.col0, math::Vec4(7, 8, 9, 0));
+        UT_CHECK_EQUAL(mat.col1, math::Vec4(0, 9, 8, 7));
+        UT_CHECK_EQUAL(mat.col2, math::Vec4(1, 2, 3, 4));
+        UT_CHECK_EQUAL(mat.col3, math::Vec4(4, 3, 2, 1));
     }
 }
 
@@ -304,7 +322,151 @@ UT_FUNCTION(test_access_operators) {
 }
 
 UT_FUNCTION(test_matrix_operators) {
+    // multiply with a quartz matrix
+    {
+        const math::Mat4 a(
+            {
+                1, 2, 3, 4,
+                4, 3, 2, 1,
+                1, 1, 2, 2,
+                3, 3, 4, 4
+            }
+        );
 
+        math::Mat4 aNC = a;
+
+        const math::Mat4 b(
+            {
+                6, 7, 8, 9,
+                9, 8, 7, 6,
+                6, 6, 7, 7,
+                8, 8, 9, 9
+            }
+        );
+
+        const math::Mat4 c = a * b;
+
+        UT_CHECK_EQUAL(c[0][0], 1*6 + 4*7 + 1*8 + 3*9);
+        UT_CHECK_EQUAL(c[0][1], 2*6 + 3*7 + 1*8 + 3*9);
+        UT_CHECK_EQUAL(c[0][2], 3*6 + 2*7 + 2*8 + 4*9);
+        UT_CHECK_EQUAL(c[0][3], 4*6 + 1*7 + 2*8 + 4*9);
+
+        UT_CHECK_EQUAL(c[1][0], 1*9 + 4*8 + 1*7 + 3*6);
+        UT_CHECK_EQUAL(c[1][1], 2*9 + 3*8 + 1*7 + 3*6);
+        UT_CHECK_EQUAL(c[1][2], 3*9 + 2*8 + 2*7 + 4*6);
+        UT_CHECK_EQUAL(c[1][3], 4*9 + 1*8 + 2*7 + 4*6);
+
+        UT_CHECK_EQUAL(c[2][0], 1*6 + 4*6 + 1*7 + 3*7);
+        UT_CHECK_EQUAL(c[2][1], 2*6 + 3*6 + 1*7 + 3*7);
+        UT_CHECK_EQUAL(c[2][2], 3*6 + 2*6 + 2*7 + 4*7);
+        UT_CHECK_EQUAL(c[2][3], 4*6 + 1*6 + 2*7 + 4*7);
+
+        UT_CHECK_EQUAL(c[3][0], 1*8 + 4*8 + 1*9 + 3*9);
+        UT_CHECK_EQUAL(c[3][1], 2*8 + 3*8 + 1*9 + 3*9);
+        UT_CHECK_EQUAL(c[3][2], 3*8 + 2*8 + 2*9 + 4*9);
+        UT_CHECK_EQUAL(c[3][3], 4*8 + 1*8 + 2*9 + 4*9);
+
+        aNC *= b;
+
+        UT_CHECK_EQUAL(aNC, c);
+    }
+
+    // multiply with a glm matrix
+    {
+        const math::Mat4 a(
+            {
+                1, 2, 3, 4,
+                4, 3, 2, 1,
+                1, 1, 2, 2,
+                3, 3, 4, 4
+            }
+        );
+
+        math::Mat4 aNC = a;
+
+        const glm::mat4 b(
+            {
+                6, 7, 8, 9,
+                9, 8, 7, 6,
+                6, 6, 7, 7,
+                8, 8, 9, 9
+            }
+        );
+
+        const math::Mat4 c = a * b;
+
+        UT_CHECK_EQUAL(c[0][0], 1*6 + 4*7 + 1*8 + 3*9);
+        UT_CHECK_EQUAL(c[0][1], 2*6 + 3*7 + 1*8 + 3*9);
+        UT_CHECK_EQUAL(c[0][2], 3*6 + 2*7 + 2*8 + 4*9);
+        UT_CHECK_EQUAL(c[0][3], 4*6 + 1*7 + 2*8 + 4*9);
+
+        UT_CHECK_EQUAL(c[1][0], 1*9 + 4*8 + 1*7 + 3*6);
+        UT_CHECK_EQUAL(c[1][1], 2*9 + 3*8 + 1*7 + 3*6);
+        UT_CHECK_EQUAL(c[1][2], 3*9 + 2*8 + 2*7 + 4*6);
+        UT_CHECK_EQUAL(c[1][3], 4*9 + 1*8 + 2*7 + 4*6);
+
+        UT_CHECK_EQUAL(c[2][0], 1*6 + 4*6 + 1*7 + 3*7);
+        UT_CHECK_EQUAL(c[2][1], 2*6 + 3*6 + 1*7 + 3*7);
+        UT_CHECK_EQUAL(c[2][2], 3*6 + 2*6 + 2*7 + 4*7);
+        UT_CHECK_EQUAL(c[2][3], 4*6 + 1*6 + 2*7 + 4*7);
+
+        UT_CHECK_EQUAL(c[3][0], 1*8 + 4*8 + 1*9 + 3*9);
+        UT_CHECK_EQUAL(c[3][1], 2*8 + 3*8 + 1*9 + 3*9);
+        UT_CHECK_EQUAL(c[3][2], 3*8 + 2*8 + 2*9 + 4*9);
+        UT_CHECK_EQUAL(c[3][3], 4*8 + 1*8 + 2*9 + 4*9);
+
+        aNC *= b;
+
+        UT_CHECK_EQUAL(aNC, c);
+    }
+
+    // equals
+    {
+        const math::Mat4 a(
+            std::array<math::Vec4, 4>{
+                math::Vec4(99),
+                math::Vec4(88),
+                math::Vec4(77),
+                math::Vec4(66)
+            }
+        );
+
+        const math::Mat4 b(
+            std::array<math::Vec4, 4>{
+                math::Vec4(99),
+                math::Vec4(88),
+                math::Vec4(77),
+                math::Vec4(66)
+            }
+        );
+
+        UT_CHECK_TRUE(a == b);
+        UT_CHECK_FALSE(a != b);
+    }
+
+    // not equals
+    {
+        const math::Mat4 a(
+            std::array<math::Vec4, 4>{
+                math::Vec4(99),
+                math::Vec4(88),
+                math::Vec4(77),
+                math::Vec4(66)
+            }
+        );
+
+        const math::Mat4 b(
+            std::array<math::Vec4, 4>{
+                math::Vec4(99, 99, 99, 98),
+                math::Vec4(88),
+                math::Vec4(77),
+                math::Vec4(66)
+            }
+        );
+
+        UT_CHECK_TRUE(a != b);
+        UT_CHECK_FALSE(a == b);
+    }
 }
 
 UT_FUNCTION(test_translate) {

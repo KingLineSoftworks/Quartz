@@ -53,6 +53,9 @@ union math::Mat4 {
     Mat4 operator*(const glm::mat4 other) const { return {glmMat * other}; }
     friend Mat4 operator*(const glm::mat4 other, const Mat4& us) { return {other * us.glmMat}; }
 
+    Mat4& operator*=(const Mat4& other) { glmMat *= other.glmMat; return *this; }
+    Mat4& operator*=(const glm::mat4& other) { glmMat *= other;   return *this; }
+
     bool operator==(const Mat4& other) const;
     bool operator!=(const Mat4& other) const;
 

@@ -2,6 +2,7 @@
 
 #include "math/transform/Mat4.hpp"
 
+#include "math/transform/Vec4.hpp"
 #include "util/macros.hpp"
 
 math::Mat4
