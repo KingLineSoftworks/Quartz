@@ -20,3 +20,9 @@ create_unit_test(
     MATH_Transform
 )
 
+create_unit_test(
+    test_Mat4
+    test_Mat4.cpp
+    MATH_Transform
+)
+

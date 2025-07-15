@@ -33,6 +33,26 @@ math::Mat4::operator[](const uint32_t i) const {
     return cols[i];
 }
 
+bool
+math::Mat4::operator==(const math::Mat4& other) const {
+    return (
+        col0 == other.col0 &&
+        col1 == other.col1 &&
+        col2 == other.col2 &&
+        col3 == other.col3
+    );
+}
+
+bool
+math::Mat4::operator!=(const math::Mat4& other) const {
+    return (
+        col0 != other.col0 ||
+        col1 != other.col1 ||
+        col2 != other.col2 ||
+        col3 != other.col3
+    );
+}
+
 math::Mat4
 math::Mat4::translate(const math::Mat4& m, const math::Vec3& translation) {
     return glm::translate(m.glmMat, translation.glmVec);
