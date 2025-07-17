@@ -1,4 +1,5 @@
 #include <atomic>
+#include <cmath>
 #include <glm/ext/quaternion_float.hpp>
 
 #include <reactphysics3d/mathematics/Quaternion.h>
@@ -468,7 +469,66 @@ UT_FUNCTION(test_dot) {
 }
 
 UT_FUNCTION(test_normalize) {
+    {
+        const math::Quaternion quat(1, 2, 3, 4);
 
+        const math::Quaternion normalizedQuat = quat.normalize();
+
+        const float expectedMagnitude = std::sqrt(
+            quat.x * quat.x +
+            quat.y * quat.y +
+            quat.z * quat.z +
+            quat.w * quat.w
+        );
+
+        UT_CHECK_EQUAL_FLOATS(quat.x, 1);
+        UT_CHECK_EQUAL_FLOATS(quat.y, 2);
+        UT_CHECK_EQUAL_FLOATS(quat.z, 3);
+        UT_CHECK_EQUAL_FLOATS(quat.w, 4);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), expectedMagnitude);
+        UT_CHECK_FALSE(quat.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.x, 1 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.y, 2 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.z, 3 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.w, 4 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.magnitude(), 1);
+        UT_CHECK_TRUE(normalizedQuat.isNormalized());
+    }
+
+    {
+        math::Quaternion quat(5, 6, 7, 8);
+
+        const float expectedMagnitude = std::sqrt(
+            quat.x * quat.x +
+            quat.y * quat.y +
+            quat.z * quat.z +
+            quat.w * quat.w
+        );
+
+        UT_CHECK_EQUAL_FLOATS(quat.x, 5);
+        UT_CHECK_EQUAL_FLOATS(quat.y, 6);
+        UT_CHECK_EQUAL_FLOATS(quat.z, 7);
+        UT_CHECK_EQUAL_FLOATS(quat.w, 8);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), expectedMagnitude);
+        UT_CHECK_FALSE(quat.isNormalized());
+
+        const math::Quaternion normalizedQuat = quat.normalize();
+
+        UT_CHECK_EQUAL_FLOATS(quat.x, 5 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(quat.y, 6 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(quat.z, 7 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(quat.w, 8 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), 1);
+        UT_CHECK_TRUE(quat.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.x, 5 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.y, 6 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.z, 7 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.w, 8 / expectedMagnitude);
+        UT_CHECK_EQUAL_FLOATS(normalizedQuat.magnitude(), 1);
+        UT_CHECK_TRUE(normalizedQuat.isNormalized());
+    }
 }
 
 UT_FUNCTION(test_getDirectionVector) {
