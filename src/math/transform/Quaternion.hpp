@@ -95,11 +95,13 @@ union math::Quaternion {
     Quaternion& operator*=(const glm::quat& other)                  { glmQuat *= other;            return *this; }
     Quaternion& operator*=(const reactphysics3d::Quaternion& other) { rp3dQuat = rp3dQuat * other; return *this; }
 
-    bool operator==(const Quaternion& other) const;
-    bool operator==(const glm::quat& other)  const { return glmQuat == other; }
+    bool operator==(const Quaternion& other)                 const;
+    bool operator==(const glm::quat& other)                  const { return glmQuat == other; }
+    bool operator==(const reactphysics3d::Quaternion& other) const { return *this == Quaternion(other); }
 
-    bool operator!=(const Quaternion& other) const;
-    bool operator!=(const glm::quat& other)  const { return glmQuat != other; }
+    bool operator!=(const Quaternion& other)                 const;
+    bool operator!=(const glm::quat& other)                  const { return glmQuat != other; }
+    bool operator!=(const reactphysics3d::Quaternion& other) const { return *this != Quaternion(other); }
 
     /**
      * -------------------------------------------------------------------------------------

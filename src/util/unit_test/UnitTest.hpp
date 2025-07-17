@@ -140,7 +140,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_EQUAL_FLOATS(a, b)                                                                                                                          \
-    if (std::abs(a - b) > UT_FLOATING_POINT_EPSILON) {                                                                                                       \
+    if (std::abs((a) - (b)) > UT_FLOATING_POINT_EPSILON) {                                                                                                       \
         std::ostringstream message;                                                                                                                          \
         message << #a << " is not equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " > " << UT_FLOATING_POINT_EPSILON << ")"; \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                           \
@@ -160,7 +160,7 @@ private:
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_NOT_EQUAL_FLOATS(a, b)                                                                                                                     \
-    if (std::abs(a - b) <= UT_FLOATING_POINT_EPSILON) {                                                                                                     \
+    if (std::abs((a) - (b)) <= UT_FLOATING_POINT_EPSILON) {                                                                                                     \
         std::ostringstream message;                                                                                                                         \
         message << #a << " is equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " <= " << UT_FLOATING_POINT_EPSILON << ")";   \
         LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                          \
