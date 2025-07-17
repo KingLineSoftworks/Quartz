@@ -26,3 +26,9 @@ create_unit_test(
     MATH_Transform
 )
 
+create_unit_test(
+    test_Quaternion
+    test_Quaternion.cpp
+    MATH_Transform
+)
+

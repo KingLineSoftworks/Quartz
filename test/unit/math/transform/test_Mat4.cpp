@@ -1,8 +1,7 @@
-#include "glm/fwd.hpp"
-#include "math/transform/Vec3.hpp"
-#include "math/transform/Vec4.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
+#include "math/transform/Vec3.hpp"
+#include "math/transform/Vec4.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 
