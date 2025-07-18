@@ -1,5 +1,9 @@
 # Quartz
 
+Quartz is an interactive realtime 3D engine. Quartz uses Vulkan.
+
+![PBR Demo Gif](https://github.com/KingLineSoftworks/assets/blob/master/media/PBR%20Rendering%20Demo%20Shortened.gif)
+
 ## Building
 This project is built with CMake. It is currently supporting MacOS and Linux. No efforts have been made to build and run on Windows. There is a known issue on Linux environments using Wayland to manage windows where Quartz segfaults at the end of the program, when it is trying to free a vulkan surface. This issue is not noticed on MacOS or on Linux environments using Xorg.
 
