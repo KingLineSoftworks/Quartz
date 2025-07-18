@@ -6,6 +6,7 @@
 
 #include "util/unit_test/UnitTest.hpp"
 
+#include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
@@ -223,23 +224,50 @@ UT_FUNCTION(test_scalar_operators) {
     }
 }
 
-/**
- * @todo IMPLEMENT THESE TESTS
- */
 UT_FUNCTION(test_vec3_operators) {
     // quartz vec3
     {
+        const math::Vec3 vec = math::Vec3(1,2,3).normalize();
+        const math::Quaternion quat = math::Quaternion(4,5,6,7).normalize();
+        const math::Quaternion inverseQuat(-quat.x, -quat.y, -quat.z, quat.w);
+        const math::Quaternion vecQuat(vec.x, vec.y, vec.z, 0);
 
+        const math::Quaternion vecQuatOutput = quat * vecQuat * inverseQuat;
+        const math::Vec3 vecOutput(vecQuatOutput.x, vecQuatOutput.y, vecQuatOutput.z);
+
+        const math::Vec3 result = quat * vec;
+
+        UT_CHECK_EQUAL(result, vecOutput);
     }
 
     // glm vec3
     {
+        const glm::vec3 vec = math::Vec3(0.34,0.56,0.78).normalize();
+        const math::Quaternion quat = math::Quaternion(4,5,6,7).normalize();
+        const math::Quaternion inverseQuat(-quat.x, -quat.y, -quat.z, quat.w);
+        const math::Quaternion vecQuat(vec.x, vec.y, vec.z, 0);
 
+        const math::Quaternion vecQuatOutput = quat * vecQuat * inverseQuat;
+        const math::Vec3 vecOutput(vecQuatOutput.x, vecQuatOutput.y, vecQuatOutput.z);
+
+        const math::Vec3 result = quat * vec;
+
+        UT_CHECK_EQUAL(result, vecOutput);
     }
 
     // rp3d vec3
     {
+        const reactphysics3d::Vector3 vec = math::Vec3(0.34,0.56,0.78).normalize();
+        const math::Quaternion quat = math::Quaternion(4,5,6,7).normalize();
+        const math::Quaternion inverseQuat(-quat.x, -quat.y, -quat.z, quat.w);
+        const math::Quaternion vecQuat(vec.x, vec.y, vec.z, 0);
 
+        const math::Quaternion vecQuatOutput = quat * vecQuat * inverseQuat;
+        const math::Vec3 vecOutput(vecQuatOutput.x, vecQuatOutput.y, vecQuatOutput.z);
+
+        const math::Vec3 result = quat * vec;
+
+        UT_CHECK_EQUAL(result, vecOutput);
     }
 }
 
@@ -465,10 +493,78 @@ UT_FUNCTION(test_quaternion_operators) {
 }
 
 UT_FUNCTION(test_dot) {
+    // quartz dot
+    {
+        const math::Quaternion q1(1, 2, 3, 4);
+        const math::Quaternion q2(5, 6, 7, 8);
 
+        const float expectedDotProduct =
+            q1.x * q2.x +
+            q1.y * q2.y +
+            q1.z * q2.z +
+            q1.w * q2.w;
+
+        UT_CHECK_EQUAL_FLOATS(q1.dot(q2), expectedDotProduct);
+    }
+
+    // glm dot
+    {
+        const math::Quaternion q1(1, 2, 3, 4);
+        const glm::quat q2(5, 6, 7, 8);
+
+        const float expectedDotProduct =
+            q1.x * q2.x +
+            q1.y * q2.y +
+            q1.z * q2.z +
+            q1.w * q2.w;
+
+        UT_CHECK_EQUAL_FLOATS(q1.dot(q2), expectedDotProduct);
+    }
+
+    // rp3d dot
+    {
+        const math::Quaternion q1(1, 2, 3, 4);
+        const reactphysics3d::Quaternion q2(5, 6, 7, 8);
+
+        const float expectedDotProduct =
+            q1.x * q2.x +
+            q1.y * q2.y +
+            q1.z * q2.z +
+            q1.w * q2.w;
+
+        UT_CHECK_EQUAL_FLOATS(q1.dot(q2), expectedDotProduct);
+    }
 }
 
 UT_FUNCTION(test_normalize) {
+    {
+        math::Quaternion quat(1,1,1,1);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), 2);
+        UT_CHECK_FALSE(quat.isNormalized());
+
+        quat.normalize();
+        UT_CHECK_EQUAL_FLOATS(quat.x, 0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.y, 0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.z, 0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.w, 0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), 1);
+        UT_CHECK_TRUE(quat.isNormalized());
+    }
+
+    {
+        math::Quaternion quat(2,-2,2,-2);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), 4);
+        UT_CHECK_FALSE(quat.isNormalized());
+
+        quat.normalize();
+        UT_CHECK_EQUAL_FLOATS(quat.x, 0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.y, -0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.z, 0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.w, -0.5);
+        UT_CHECK_EQUAL_FLOATS(quat.magnitude(), 1);
+        UT_CHECK_TRUE(quat.isNormalized());
+    }
+
     {
         const math::Quaternion quat(1, 2, 3, 4);
 
@@ -538,18 +634,75 @@ UT_FUNCTION(test_getDirectionVector) {
 UT_FUNCTION(test_axisAngle) {
     // round trips betweeen fromAxisAngleRotation and
     // getAngleDegrees / getAxisVector
+   
+    // starting with rotation degrees and rotation axis
+
+    {
+        const float angle = 90;
+        const math::Vec3 axis = math::Vec3(1,2,3).normalize();
+
+        const math::Quaternion quat = math::Quaternion::fromAxisAngleRotation(axis, angle);
+
+        const float resAngle = quat.getAngleDegrees();
+        const math::Vec3 resAxis = quat.getAxisVector();
+
+        UT_CHECK_EQUAL(resAngle, angle);
+        UT_CHECK_EQUAL(resAxis, axis);
+    }
+
+    {
+        const float angle = 210.79;
+        const math::Vec3 axis = math::Vec3(32,11,43.11).normalize();
+
+        const math::Quaternion quat = math::Quaternion::fromAxisAngleRotation(axis, angle);
+
+        const float resAngle = quat.getAngleDegrees();
+        const math::Vec3 resAxis = quat.getAxisVector();
+
+        UT_CHECK_EQUAL(resAngle, angle);
+        UT_CHECK_EQUAL(resAxis, axis);
+    }
+
+    // starting with a quaternion
+
+    {
+    }
+
+    {
+    }
 }
 
 UT_FUNCTION(test_getRotationMatrix) {
+    {
+        const math::Quaternion quat = math::Quaternion(6, 7, 8, 9).normalize();
+        const float q0 = quat.w;
+        const float q1 = quat.x;
+        const float q2 = quat.y;
+        const float q3 = quat.z;
 
-}
+        math::Mat4 expected;
 
-UT_FUNCTION(test_rotateToDirectionVector) {
+        expected[0][0] = q0*q0 + q1*q1 - q2*q2 - q3*q3;
+        expected[0][1] = 2 * (q1*q2 + q0*q3);
+        expected[0][2] = 2 * (q1*q3 - q0*q2);
 
-}
+        expected[1][0] = 2 * (q1*q2 - q0*q3);
+        expected[1][1] = q0*q0 - q1*q1 + q2*q2 - q3*q3;
+        expected[1][2] = 2 * (q2*q3 + q0*q1);
 
-UT_FUNCTION(test_getRotationToDirectionVector) {
+        expected[2][0] = 2 * (q1*q3 + q0*q2);
+        expected[2][1] = 2 * (q2*q3 - q0*q1);
+        expected[2][2] = q0*q0 - q1*q1 - q2*q2 + q3*q3;
 
+        expected[3][3] = 1;
+
+        const math::Mat4 result = quat.getRotationMatrix();
+
+        UT_CHECK_EQUAL(result.col0, expected.col0);
+        UT_CHECK_EQUAL(result.col1, expected.col1);
+        UT_CHECK_EQUAL(result.col2, expected.col2);
+        UT_CHECK_EQUAL(result.col3, expected.col3);
+    }
 }
 
 UT_FUNCTION(test_fromEulerAngles) {
@@ -572,8 +725,6 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_getDirectionVector);
     REGISTER_UT_FUNCTION(test_axisAngle);
     REGISTER_UT_FUNCTION(test_getRotationMatrix);
-    REGISTER_UT_FUNCTION(test_rotateToDirectionVector);
-    REGISTER_UT_FUNCTION(test_getRotationToDirectionVector);
     REGISTER_UT_FUNCTION(test_fromEulerAngles);
     REGISTER_UT_FUNCTION(test_slerp);
     UT_RUN_TESTS();

@@ -17,6 +17,10 @@ namespace math {
     union Mat4;
 }
 
+/**
+ * @brief This link has some really useful information: https://danceswithcode.net/engineeringnotes/quaternions/quaternions.html
+ */
+
 union math::Quaternion {
     Quaternion() : glmQuat(0, 0, 0, 1) {}
     Quaternion(const float scalar) : x(scalar), y(scalar), z(scalar), w(scalar) {}
@@ -109,8 +113,9 @@ union math::Quaternion {
      * -------------------------------------------------------------------------------------
      */
 
-    float dot(const Quaternion& other) const { return glm::dot(glmQuat, other.glmQuat); }
-    float dot(const glm::quat& other)  const { return glm::dot(glmQuat, other); }
+    float dot(const Quaternion& other)                 const { return glm::dot(glmQuat, other.glmQuat); }
+    float dot(const glm::quat& other)                  const { return glm::dot(glmQuat, other); }
+    float dot(const reactphysics3d::Quaternion& other) const { return glm::dot(glmQuat, Quaternion(other).glmQuat); }
 
     Quaternion& normalize();
     Quaternion normalize() const;
@@ -124,10 +129,6 @@ union math::Quaternion {
     math::Vec3 getAxisVector() const;
 
     math::Mat4 getRotationMatrix() const;
-
-    Quaternion& rotateToDirectionVector(const math::Vec3& desiredDirection);
-    Quaternion getRotationToDirectionVector(const math::Vec3& desiredDirection) const;
-
 
     /**
      * @brief Create a quaternion from euler angles in degrees
