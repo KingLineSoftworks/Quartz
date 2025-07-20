@@ -84,8 +84,8 @@ union math::Vec4 {
     Vec4& operator/=(const Vec4& other)      { glmVec /= other.glmVec;    return *this; }
     Vec4& operator/=(const glm::vec4& other) { glmVec /= other;           return *this; }
 
-    bool operator==(const Vec4& other)      const { return glmVec == other.glmVec; }
-    bool operator==(const glm::vec4& other) const { return glmVec == other; }
+    bool operator==(const Vec4& other)      const;
+    bool operator==(const glm::vec4& other) const { return *this == Vec4(other); }
 
     bool operator!=(const Vec4& other)      const;
     bool operator!=(const glm::vec4& other) const { return glmVec != other; }

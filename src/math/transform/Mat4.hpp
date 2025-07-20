@@ -16,7 +16,8 @@ namespace math {
 union math::Mat4 {
     Mat4() : glmMat() {}
     Mat4(const float scalar) : glmMat(scalar) {}
-    Mat4(const glm::quat& quaternion) : glmMat(quaternion) {}
+    Mat4(const math::Quaternion& quaternion) : glmMat(quaternion.glmQuat) {}
+    Mat4(const std::array<math::Vec4, 4>& cols_) : cols(cols_) {}
 
     Mat4(const Mat4& other) : glmMat(other.glmMat) {}
     Mat4(const glm::mat4& other) : glmMat(other) {}
@@ -48,9 +49,15 @@ union math::Mat4 {
      * -------------------------------------------------------------------------------------
      */
 
-    Mat4 operator*(const Mat4& other) const { return {glmMat * other.glmMat}; }
+    Mat4 operator*(const Mat4& other)     const { return {glmMat * other.glmMat}; }
     Mat4 operator*(const glm::mat4 other) const { return {glmMat * other}; }
     friend Mat4 operator*(const glm::mat4 other, const Mat4& us) { return {other * us.glmMat}; }
+
+    Mat4& operator*=(const Mat4& other) { glmMat *= other.glmMat; return *this; }
+    Mat4& operator*=(const glm::mat4& other) { glmMat *= other;   return *this; }
+
+    bool operator==(const Mat4& other) const;
+    bool operator!=(const Mat4& other) const;
 
     /**
      * -------------------------------------------------------------------------------------
@@ -58,6 +65,9 @@ union math::Mat4 {
      * -------------------------------------------------------------------------------------
      */
 
+    /**
+     * @todo 2025/07/14 Add const versions of these which return const references
+     */
     Mat4& translate(const math::Vec3& translation);
     Mat4& rotate(const math::Vec3& rotationAxis, const float rotationAmountRadians);
     Mat4& rotate(const math::Quaternion& rotation);
@@ -78,7 +88,7 @@ union math::Mat4 {
     );
     static Mat4 scale(
         const Mat4& m,
-        const math::Vec3& translation
+        const math::Vec3& scale 
     );
 
     static Mat4 createPerspective(
@@ -95,6 +105,7 @@ union math::Mat4 {
      */
 
     std::string toString() const;
+    friend std::ostream& operator<<(std::ostream& os, const math::Mat4& mat) { return os << mat.toString(); }
 
     /**
      * -------------------------------------------------------------------------------------

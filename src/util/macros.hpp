@@ -112,12 +112,15 @@
  * @todo 2024/06/20 Make this work with our logging system
  */
 #if defined QUARTZ_DEBUG
-#define QUARTZ_ASSERT(condition, message)     \
-    do {                                      \
-        if (! (condition)) {                  \
-            std::cerr << "Assertion (" #condition ") failed in " << __FILE__ << " line " << __LINE__ << ": " << message << std::endl; \
-            std::terminate();                 \
-        }                                     \
+#define QUARTZ_ASSERT(condition, message)                               \
+    do {                                                                \
+        if (! (condition)) {                                            \
+            std::cerr << "Assertion (" #condition ") failed:\n"         \
+                      << "  " << __FILE__ << " :: " << __LINE__ << "\n" \
+                      << "  " << __PRETTY_FUNCTION__ << "\n"            \
+                      << "    " << message << std::endl;                \
+            std::terminate();                                           \
+        }                                                               \
     } while (false)
 #else
 #define QUARTZ_ASSERT(condition, message) static_assert(true)

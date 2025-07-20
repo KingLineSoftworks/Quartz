@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
@@ -55,3 +53,4 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_5);
     UT_RUN_TESTS();
 }
+

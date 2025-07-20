@@ -6,7 +6,6 @@
 
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
-#include "math/transform/Mat3.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
@@ -54,46 +53,56 @@ math::Quaternion::isNormalized() const {
         return true;
     }
 
-    return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
+    return std::abs(1.0f - magnitude()) <= std::numeric_limits<float>::epsilon();
 }
 
 math::Vec3
 math::Quaternion::getDirectionVector() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
     return glm::rotate(glmQuat, math::Vec3::Forward.glmVec);
 }
 
 float
 math::Quaternion::getAngleDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
     return glm::angle(glmQuat);
 }
 
 math::Vec3
 math::Quaternion::getAxisVector() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
     return glm::axis(glmQuat);
 }
 
 math::Mat4
 math::Quaternion::getRotationMatrix() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
     return glm::mat4_cast(glmQuat);
 }
 
-math::Quaternion&
-math::Quaternion::rotateToDirectionVector(const math::Vec3& desiredDirection) {
-    QUARTZ_ASSERT(desiredDirection.isNormalized(), "Desired direction vector is not normalized");
+float
+math::Quaternion::getYawDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
-    const math::Vec3 right = desiredDirection.cross(math::Vec3::Up);
-    UNUSED const math::Vec3 up = desiredDirection.cross(right);
-
-    return *this;
+    return glm::degrees(glm::yaw(this->glmQuat));
 }
 
-math::Quaternion
-math::Quaternion::getRotationToDirectionVector(const math::Vec3& desiredDirection) const {
-    math::Quaternion copy = *this;
+float
+math::Quaternion::getPitchDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
-    copy.rotateToDirectionVector(desiredDirection);
+    return glm::degrees(glm::pitch(this->glmQuat));
+}
 
-    return copy;
+float
+math::Quaternion::getRollDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
+    return glm::degrees(glm::roll(this->glmQuat));
 }
 
 math::Quaternion
@@ -106,7 +115,7 @@ math::Quaternion::fromEulerAngles(
     const double y = glm::radians(yawDegrees);
     const double z = glm::radians(rollDegrees);
 
-    return glm::quat(glm::vec3(x, y, z));
+    return glm::normalize(glm::quat(glm::vec3(x, y, z)));
 }
 
 math::Quaternion
@@ -116,7 +125,7 @@ math::Quaternion::fromAxisAngleRotation(
 ) {
     QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
 
-    return glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec);
+    return glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec));
 }
 
 math::Quaternion

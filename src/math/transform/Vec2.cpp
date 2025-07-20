@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include "math/transform/Vec2.hpp"
+#include "glm/ext/vector_float2.hpp"
 
 bool
 math::Vec2::operator!=(const math::Vec2& other) const {
@@ -28,7 +29,9 @@ math::Vec2::normalize() const {
         return {0.0, 0.0};
     }
 
-    return glm::normalize(glmVec);
+    math::Vec2 copy = *this;
+
+    return copy.normalize();
 }
 
 bool
@@ -37,7 +40,7 @@ math::Vec2::isNormalized() const {
         return true;
     }
 
-    return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
+    return std::abs(1.0f - magnitude()) <= std::numeric_limits<float>::epsilon();
 }
 
 std::string

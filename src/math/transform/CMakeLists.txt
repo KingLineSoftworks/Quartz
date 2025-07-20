@@ -11,8 +11,6 @@ add_library(
     Vec4.hpp
     Vec4.cpp
 
-    Mat3.hpp
-    Mat3.cpp
     Mat4.hpp
     Mat4.cpp
 

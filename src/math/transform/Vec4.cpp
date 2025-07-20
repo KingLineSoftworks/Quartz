@@ -41,14 +41,21 @@ math::Vec4::operator[](const uint32_t i) const {
 }
 
 bool
+math::Vec4::operator==(const math::Vec4& other) const {
+    bool xEquals = std::abs(x - other.x) <= std::numeric_limits<float>::epsilon();
+    bool yEquals = std::abs(y - other.y) <= std::numeric_limits<float>::epsilon();
+    bool zEquals = std::abs(z - other.z) <= std::numeric_limits<float>::epsilon();
+    bool wEquals = std::abs(w - other.w) <= std::numeric_limits<float>::epsilon();
+
+    return xEquals && yEquals && zEquals && wEquals;
+}
+
+bool
 math::Vec4::operator!=(const math::Vec4& other) const {
-    bool xNEquals = x - other.x > std::numeric_limits<float>::epsilon();
-
-    bool yNEquals = y - other.y > std::numeric_limits<float>::epsilon();
-
-    bool zNEquals = z - other.z > std::numeric_limits<float>::epsilon();
-
-    bool wNEquals = w - other.w > std::numeric_limits<float>::epsilon();
+    bool xNEquals = std::abs(x - other.x) > std::numeric_limits<float>::epsilon();
+    bool yNEquals = std::abs(y - other.y) > std::numeric_limits<float>::epsilon();
+    bool zNEquals = std::abs(z - other.z) > std::numeric_limits<float>::epsilon();
+    bool wNEquals = std::abs(w - other.w) > std::numeric_limits<float>::epsilon();
 
     return xNEquals || yNEquals || zNEquals || wNEquals;
 }
@@ -79,7 +86,7 @@ math::Vec4::isNormalized() const {
         return true;
     }
 
-    return 1.0f - magnitude() <= std::numeric_limits<float>::epsilon();
+    return std::abs(1.0f - magnitude()) <= std::numeric_limits<float>::epsilon();
 }
 
 std::string
