@@ -628,48 +628,158 @@ UT_FUNCTION(test_normalize) {
 }
 
 UT_FUNCTION(test_getDirectionVector) {
-
+    // This uses glm::rotate
+    // so we need to see what exactly that function is doing
 }
 
 UT_FUNCTION(test_axisAngle) {
-    // round trips betweeen fromAxisAngleRotation and
-    // getAngleDegrees / getAxisVector
-   
     // starting with rotation degrees and rotation axis
 
     {
         const float angle = 90;
         const math::Vec3 axis = math::Vec3(1,2,3).normalize();
 
-        const math::Quaternion quat = math::Quaternion::fromAxisAngleRotation(axis, angle);
+        const math::Quaternion expected(
+            axis.x * std::sin(angle/2),
+            axis.y * std::sin(angle/2),
+            axis.z * std::sin(angle/2),
+            std::cos(angle/2)
+        );
 
-        const float resAngle = quat.getAngleDegrees();
-        const math::Vec3 resAxis = quat.getAxisVector();
+        const math::Quaternion result = math::Quaternion::fromAxisAngleRotation(axis, angle);
 
-        UT_CHECK_EQUAL(resAngle, angle);
-        UT_CHECK_EQUAL(resAxis, axis);
+        UT_CHECK_EQUAL_FLOATS(result.x, expected.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, expected.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, expected.z);
+        UT_CHECK_EQUAL_FLOATS(result.w, expected.w);
+        UT_CHECK_TRUE(result.isNormalized());
     }
 
     {
-        const float angle = 210.79;
-        const math::Vec3 axis = math::Vec3(32,11,43.11).normalize();
+        const float angle = -42;
+        const math::Vec3 axis = math::Vec3(31.33,24,-32.111).normalize();
 
-        const math::Quaternion quat = math::Quaternion::fromAxisAngleRotation(axis, angle);
+        const math::Quaternion expected(
+            axis.x * std::sin(angle/2),
+            axis.y * std::sin(angle/2),
+            axis.z * std::sin(angle/2),
+            std::cos(angle/2)
+        );
 
-        const float resAngle = quat.getAngleDegrees();
-        const math::Vec3 resAxis = quat.getAxisVector();
+        const math::Quaternion result = math::Quaternion::fromAxisAngleRotation(axis, angle);
 
-        UT_CHECK_EQUAL(resAngle, angle);
-        UT_CHECK_EQUAL(resAxis, axis);
+        UT_CHECK_EQUAL_FLOATS(result.x, expected.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, expected.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, expected.z);
+        UT_CHECK_EQUAL_FLOATS(result.w, expected.w);
+        UT_CHECK_TRUE(result.isNormalized());
     }
 
     // starting with a quaternion
 
     {
+        const math::Quaternion quat = math::Quaternion(1,2,3,4).normalize();
+
+        const float angle = 2 * std::acos(quat.w);
+
+        const float resultAngle = quat.getAngleDegrees();
+        UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
+
+        const math::Vec3 axis(
+            quat.x / std::sin(angle/2),
+            quat.y / std::sin(angle/2),
+            quat.z / std::sin(angle/2)
+        );
+
+        const math::Vec3 resultAxis = quat.getAxisVector();
+
+        UT_CHECK_EQUAL(resultAxis, axis);
     }
 
     {
+        const math::Quaternion quat = math::Quaternion(-32.1244).normalize();
+
+        const float angle = 2 * std::acos(quat.w);
+
+        const float resultAngle = quat.getAngleDegrees();
+        UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
+
+        const math::Vec3 axis(
+            quat.x / std::sin(angle/2),
+            quat.y / std::sin(angle/2),
+            quat.z / std::sin(angle/2)
+        );
+
+        const math::Vec3 resultAxis = quat.getAxisVector();
+
+        UT_CHECK_EQUAL(resultAxis, axis);
+        UT_CHECK_TRUE(resultAxis.isNormalized());
     }
+
+    // round trip starting with quaternion
+
+    {
+        // Input quaternion
+        const math::Quaternion quat = math::Quaternion(999.5, -888.4, 777.3, -666.2).normalize();
+
+        // Expected angle check
+        const float angle = 2 * std::acos(quat.w);
+        const float resultAngle = quat.getAngleDegrees();
+        UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
+
+        // Expected axis check
+        const math::Vec3 axis(
+            quat.x / std::sin(angle/2),
+            quat.y / std::sin(angle/2),
+            quat.z / std::sin(angle/2)
+        );
+        const math::Vec3 resultAxis = quat.getAxisVector();
+        UT_CHECK_EQUAL(resultAxis, axis);
+        UT_CHECK_TRUE(resultAxis.isNormalized());
+
+        // Output quaternion check
+        const math::Quaternion resultQuat = math::Quaternion::fromAxisAngleRotation(resultAxis, resultAngle);
+        UT_CHECK_EQUAL(resultQuat, quat);
+
+        // Another expected angle check
+        const float resultAngle2 = resultQuat.getAngleDegrees();
+        UT_CHECK_EQUAL_FLOATS(resultAngle2, angle);
+
+        // Another expected axis check
+        const math::Vec3 resultAxis2 = resultQuat.getAxisVector();
+        UT_CHECK_EQUAL(resultAxis2, axis);
+        UT_CHECK_TRUE(resultAxis2.isNormalized());
+
+        // Another output quaternion check
+        const math::Quaternion resultQuat2 = math::Quaternion::fromAxisAngleRotation(resultAxis2, resultAngle2);
+        UT_CHECK_EQUAL(resultQuat2, quat);
+    }
+
+    // round trip test starting with axis angle
+    // not currently being used because it seems that there are some
+    // cases which do not conform to the formula outlined in the following
+    // paper: https://danceswithcode.net/engineeringnotes/quaternions/quaternions.html
+
+    // {
+    //     const float angle = 90;
+    //     const math::Vec3 axis = math::Vec3(1, 1, 1).normalize();
+
+    //     const math::Quaternion expectedQuat = math::Quaternion(
+    //         axis.x * std::sin(angle/2),
+    //         axis.y * std::sin(angle/2),
+    //         axis.z * std::sin(angle/2),
+    //         std::cos(angle/2)
+    //     ); // .normalize();
+    //     const math::Quaternion resultQuat = math::Quaternion::fromAxisAngleRotation(axis, angle);
+    //     UT_CHECK_EQUAL(resultQuat, expectedQuat);
+    //     UT_CHECK_TRUE(resultQuat.isNormalized());
+
+    //     const float resultAngle = resultQuat.getAngleDegrees();
+    //     const math::Vec3 resultAxis = resultQuat.getAxisVector();
+    //     UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
+    //     UT_CHECK_EQUAL(resultAxis, axis);
+    //     UT_CHECK_TRUE(resultAxis.isNormalized());
+    // }
 }
 
 UT_FUNCTION(test_getRotationMatrix) {
@@ -707,6 +817,106 @@ UT_FUNCTION(test_getRotationMatrix) {
 
 UT_FUNCTION(test_fromEulerAngles) {
 
+    /**
+     * @brief The GLM implementation for euler angle conversion to quaternions
+     *   is defined in gtc/quaternion.hpp
+     *
+     *   It seems as if the glm implementation is using pitch-yaw-roll order??
+     */
+
+    /*
+     * Using the Tait-Bryant variant of Euler Angles
+     * - yaw-pitch-roll rotation order
+     * - intrinsic rotation
+     * - right handed coordinate system with right handed rotations
+     */
+    // {
+    //     const float u_roll = 42;
+    //     const float v_pitch = 69;
+    //     const float w_yaw = 55;
+
+    //     const float uHalf = u_roll / 2;
+    //     const float vHalf = v_pitch / 2;
+    //     const float wHalf = w_yaw / 2;
+
+    //     const float uHC = std::cos(uHalf);
+    //     const float vHC = std::cos(vHalf);
+    //     const float wHC = std::cos(wHalf);
+    //     const float uHS = std::sin(uHalf);
+    //     const float vHS = std::sin(vHalf);
+    //     const float wHS = std::sin(wHalf);
+
+    //     const math::Quaternion expected(
+    //         uHS*vHC*wHC - uHC*vHS*wHS,
+    //         uHC*vHS*wHC + uHS*vHC*wHS,
+    //         uHC*vHS*wHS - uHS*vHS*wHC,
+    //         uHC*vHC*wHC + uHS*vHS*wHS
+    //     );
+
+    //     const math::Quaternion result = math::Quaternion::fromEulerAngles(w_yaw, v_pitch, u_roll);
+
+    //     UT_CHECK_EQUAL(result.x, expected.x);
+    //     UT_CHECK_EQUAL(result.y, expected.y);
+    //     UT_CHECK_EQUAL(result.z, expected.z);
+    //     UT_CHECK_EQUAL(result.w, expected.w);
+    // }
+
+    {
+        const float yaw = -12.221;
+        const float pitch = 105.5;
+        const float roll = -0.089;
+
+        const math::Quaternion quat = math::Quaternion::fromEulerAngles(yaw, pitch, roll);
+
+        const float yawResult = quat.getYawDegrees();
+        const float pitchResult = quat.getPitchDegrees();
+        const float rollResult = quat.getRollDegrees();
+
+        UT_CHECK_EQUAL_FLOATS(yawResult, yaw);
+        UT_CHECK_EQUAL_FLOATS(pitchResult, pitch);
+        UT_CHECK_EQUAL_FLOATS(rollResult, roll);
+
+        const math::Quaternion quat2 = math::Quaternion::fromEulerAngles(yawResult, pitchResult, rollResult);
+        UT_CHECK_EQUAL(quat2, quat);
+    }
+
+    {
+        const float yaw = 44.2;
+        const float pitch = 179.9;
+        const float roll = -179.9;
+
+        const math::Quaternion quat = math::Quaternion::fromEulerAngles(yaw, pitch, roll);
+
+        const float yawResult = quat.getYawDegrees();
+        const float pitchResult = quat.getPitchDegrees();
+        const float rollResult = quat.getRollDegrees();
+
+        UT_CHECK_EQUAL_FLOATS(yawResult, yaw);
+        UT_CHECK_EQUAL_FLOATS(pitchResult, pitch);
+        UT_CHECK_EQUAL_FLOATS(rollResult, roll);
+
+        const math::Quaternion quat2 = math::Quaternion::fromEulerAngles(yawResult, pitchResult, rollResult);
+        UT_CHECK_EQUAL(quat2, quat);
+    }
+
+    {
+        const float yaw = 20;
+        const float pitch = 30;
+        const float roll = 40;
+
+        const math::Quaternion quat = math::Quaternion::fromEulerAngles(yaw, pitch, roll);
+
+        const float yawResult = quat.getYawDegrees();
+        const float pitchResult = quat.getPitchDegrees();
+        const float rollResult = quat.getRollDegrees();
+
+        UT_CHECK_EQUAL_FLOATS(yawResult, yaw);
+        UT_CHECK_EQUAL_FLOATS(pitchResult, pitch);
+        UT_CHECK_EQUAL_FLOATS(rollResult, roll);
+
+        const math::Quaternion quat2 = math::Quaternion::fromEulerAngles(yawResult, pitchResult, rollResult);
+        UT_CHECK_EQUAL(quat2, quat);
+    }
 }
 
 UT_FUNCTION(test_slerp) {

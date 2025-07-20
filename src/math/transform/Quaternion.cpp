@@ -84,6 +84,27 @@ math::Quaternion::getRotationMatrix() const {
     return glm::mat4_cast(glmQuat);
 }
 
+float
+math::Quaternion::getYawDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
+    return glm::degrees(glm::yaw(this->glmQuat));
+}
+
+float
+math::Quaternion::getPitchDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
+    return glm::degrees(glm::pitch(this->glmQuat));
+}
+
+float
+math::Quaternion::getRollDegrees() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
+    return glm::degrees(glm::roll(this->glmQuat));
+}
+
 math::Quaternion
 math::Quaternion::fromEulerAngles(
     const double yawDegrees,

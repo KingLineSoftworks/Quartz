@@ -130,6 +130,10 @@ union math::Quaternion {
 
     math::Mat4 getRotationMatrix() const;
 
+    float getYawDegrees() const;
+    float getPitchDegrees() const;
+    float getRollDegrees() const;
+
     /**
      * @brief Create a quaternion from euler angles in degrees
      */
