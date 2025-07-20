@@ -8,4 +8,5 @@
 # Math unit tests
 #====================================================================
 
+add_subdirectory("math/algorithms")
 add_subdirectory("math/transform")

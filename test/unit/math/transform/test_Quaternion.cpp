@@ -920,7 +920,10 @@ UT_FUNCTION(test_fromEulerAngles) {
 }
 
 UT_FUNCTION(test_slerp) {
-
+    /**
+     *  @brief We are not going to test this because math::Quaternion::slerp is a simple wrapper
+     *    around the glm::slerp function which we trust
+     */
 }
 
 UT_MAIN() {
