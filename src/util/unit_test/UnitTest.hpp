@@ -149,6 +149,16 @@ private:
     }                                                                                                                                                        \
     REQUIRE_SEMICOLON
 
+#define UT_CHECK_EQUAL_CONTAINERS(a, b)                                                                         \
+    if (!(a == b)) {                                                                                            \
+        std::ostringstream message;                                                                             \
+        message << #a << " (size " << a.size() << ") is not equal to " << #b << " (size " << b.size() << ")";   \
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                              \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());             \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                              \
+    }                                                                                                           \
+    REQUIRE_SEMICOLON
+
 #define UT_CHECK_NOT_EQUAL(a, b)                                                                        \
     if (!(a != b)) {                                                                                    \
         std::ostringstream message;                                                                     \
@@ -167,6 +177,16 @@ private:
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());                                                         \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                                                                          \
     }                                                                                                                                                       \
+    REQUIRE_SEMICOLON
+
+#define UT_CHECK_NOT_EQUAL_CONTAINERS(a, b)                                                                     \
+    if (!(a != b)) {                                                                                            \
+        std::ostringstream message;                                                                             \
+        message << #a << " (size " << a.size() << ") is not un-equal to " << #b << " (size " << b.size() << ")";\
+        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                              \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());             \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                              \
+    }                                                                                                           \
     REQUIRE_SEMICOLON
 
 #define UT_CHECK_GREATER_THAN(a, b)                                                                     \

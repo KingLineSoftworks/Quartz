@@ -39,6 +39,8 @@ Make sure your additions are tested. There are examples of how to write unit tes
 The quartz unit testing framework is defined in the `src/util/unit_test` directory.
 Examples on how to use this unit testing framework are in the `test/unit/example` directory.
 
+By default Quartz is set to not compile unit tests. If you wish to compile and run unit tests, ensure to specify the `-DQUARTZ_COMPILE_UNIT_TESTS=True` option when running the cmake command.
+
 #### Unit Test Runner Usage Via Command Line
 
 This runner allows you to specify individual test cases from the command line, while still allowing the whole file to be executed via ctest.
