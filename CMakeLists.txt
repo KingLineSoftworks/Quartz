@@ -20,6 +20,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 
+set(QUARTZ_COMPILE_DEFINITIONS "")
+
 if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -33,9 +35,21 @@ if(PROJECT_IS_TOP_LEVEL)
     else ()
         message(STATUS "CMake binary directory does not contain compile_commands.json file. This is probably the first time running cmake")
     endif ()
-endif()
 
-set(QUARTZ_COMPILE_DEFINITIONS "")
+    list(
+        APPEND QUARTZ_COMPILE_DEFINITIONS
+        QUARTZ_IS_TOP_LEVEL
+        PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+else()
+    if(PROJECT_ROOT_DIR)
+        message(STATUS "Quartz is not the top level project. PROJECT_ROOT_DIR is defined to ${PROJECT_ROOT_DIR}")
+        list(APPEND QUARTZ_COMPILE_DEFINITIONS PROJECT_ROOT_DIR="${PROJECT_ROOT_DIR}")
+    else()
+        message(STATUS "Quartz is not the top level project, but PROJECT_ROOT_DIR is not defined. Setting it to be the directory above Quartz's root")
+        list(APPEND QUARTZ_COMPILE_DEFINITIONS PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}/..")
+    endif()
+endif()
 
 # ====================================================================
 # Build type information
@@ -212,7 +226,7 @@ list(
     QUARTZ_MAX_NUMBER_MATERIALS=${MAX_NUMBER_MATERIALS}
     QUARTZ_MAX_NUMBER_POINT_LIGHTS=${MAX_NUMBER_POINT_LIGHTS}
     QUARTZ_MAX_NUMBER_SPOT_LIGHTS=${MAX_NUMBER_SPOT_LIGHTS}
-    PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    QUARTZ_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     PROJECT_BINARY_DIR="${CMAKE_BINARY_DIR}"
     SHADER_BINARY_DIR="${CMAKE_SHADER_OUTPUT_DIRECTORY}"
     GLFW_INCLUDE_NONE

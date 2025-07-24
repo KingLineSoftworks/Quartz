@@ -11,11 +11,12 @@
 #include "util/file_system/FileSystem.hpp"
 
 std::string
+util::FileSystem::getAbsoluteFilepathInQuartzDirectory(const std::string& filepathInQuartzDirectory) {
+    return std::string(QUARTZ_ROOT_DIR) + std::string("/") + filepathInQuartzDirectory;
+}
+
+std::string
 util::FileSystem::getAbsoluteFilepathInProjectDirectory(const std::string& filepathInProjectDirectory) {
-    /**
-     * @todo 2025/07/23 We should make this a quartz specific pre-compiled defintion instead of "PROJECT",
-     *    or better yet, add another function for the "PROJECT" and have a different one for "QUARTZ"
-     */
     return std::string(PROJECT_ROOT_DIR) + std::string("/") + filepathInProjectDirectory;
 }
 

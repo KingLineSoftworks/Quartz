@@ -20,6 +20,7 @@ public:
      * Quartz's root directory from wherever we may be
      */
 
+    static std::string getAbsoluteFilepathInQuartzDirectory(const std::string& filepathInQuartzDirectory);
     static std::string getAbsoluteFilepathInProjectDirectory(const std::string& filepathInProjectDirectory);
     static std::string getAbsoluteFilepathInBinaryDirectory(const std::string& filepathInBinaryDirectory);
     static std::string getCompiledShaderAbsoluteFilepath(const std::string& shaderSourceFilename);

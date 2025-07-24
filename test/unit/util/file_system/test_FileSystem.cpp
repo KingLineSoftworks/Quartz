@@ -6,40 +6,38 @@
 
 #include "util/file_system/FileSystem.hpp"
 
-UT_FUNCTION(test_getAbsoluteFilePathInProjectDirectory) {
-    /**
-     * @todo 2025/07/23 This is currently configured for the case where Quartz is a
-     *    submodule. If quartz is the root level project when compiled then this test
-     *    will go into the wrong directory. We need to not go as far up if quartz is
-     *    the base level project (not a submodule)
-     *
-     * @todo 2025/07/23 We also need to consider if we are built in debug mode or not.
-     *    If we are built in debug 
-     */
+UT_FUNCTION(test_getAbsoluteFilepathInQuartzDirectory) {
     {
-        // Get file using a relative path (assuming we are starting in the .debug directory)
-        const std::string relativePath = "./../Quartz/src/quartz/application/Application.hpp";
+#ifdef QUARTZ_IS_TOP_LEVEL
+        const std::string relativePath = "./../src/math/transform/Quaternion.hpp";
+#else
+        const std::string relativePath = "./../Quartz/src/math/transform/Quaternion.hpp";
+#endif
+        const std::string absolutePath = util::FileSystem::getAbsoluteFilepathInQuartzDirectory("src/math/transform/Quaternion.hpp");
 
-        // Get file using the file system function
-        const std::string projectPath = util::FileSystem::getAbsoluteFilepathInProjectDirectory("src/quartz/application/Application.hpp");
-
-        // Ensure the file contents are the same
-        const std::vector<char> projectBytes = util::FileSystem::readBytesFromFile(projectPath);
         const std::vector<char> relativeBytes = util::FileSystem::readBytesFromFile(relativePath);
-        UT_CHECK_EQUAL_CONTAINERS(projectBytes, relativeBytes);
+        const std::vector<char> absoluteBytes = util::FileSystem::readBytesFromFile(absolutePath);
+        UT_CHECK_EQUAL_CONTAINERS(absoluteBytes, relativeBytes);
+    }
+}
+
+UT_FUNCTION(test_getAbsoluteFilePathInProjectDirectory) {
+    {
+#ifdef QUARTZ_IS_TOP_LEVEL
+        const std::string relativePath = "./../src/quartz/application/Application.hpp";
+        const std::string absolutePath = util::FileSystem::getAbsoluteFilepathInProjectDirectory("src/quartz/application/Application.hpp");
+#else
+        const std::string relativePath = "./../Quartz/src/quartz/application/Application.hpp";
+        const std::string absolutePath = util::FileSystem::getAbsoluteFilepathInProjectDirectory("Quartz/src/quartz/application/Application.hpp");
+#endif
+
+        const std::vector<char> relativeBytes = util::FileSystem::readBytesFromFile(relativePath);
+        const std::vector<char> absoluteBytes = util::FileSystem::readBytesFromFile(absolutePath);
+        UT_CHECK_EQUAL_CONTAINERS(absoluteBytes, relativeBytes);
     }
 }
 
 UT_FUNCTION(test_getAbsoluteFilePathInBinaryDirectory) {
-    /**
-     * @todo 2025/07/23 This is currently configured for the case where Quartz is a
-     *    submodule. If quartz is the root level project when compiled then this test
-     *    will go into the wrong directory. We need to not go as far up if quartz is
-     *    the base level project (not a submodule)
-     *
-     * @todo 2025/07/23 We also need to consider if we are built in debug mode or not.
-     *    If we are built in debug 
-     */
     {
         // Here we are using CMakeCache.txt because we know it will have to exist if Quartz is compiled
         const std::string relativePath = "./CMakeCache.txt";
