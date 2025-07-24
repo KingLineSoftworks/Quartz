@@ -10,3 +10,10 @@
 
 add_subdirectory("math/algorithms")
 add_subdirectory("math/transform")
+
+#====================================================================
+# Util unit tests
+#====================================================================
+
+add_subdirectory("util/file_system")
+
