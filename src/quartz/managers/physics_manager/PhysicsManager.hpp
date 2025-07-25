@@ -20,15 +20,16 @@ namespace quartz {
 
 class Application; // We must forward declare the application class here, so we can have its declaration for friending
 
-namespace unit_test {
-    class UnitTestClient;
-}
-
 namespace managers {
     class PhysicsManager;
 }
 
+namespace unit_test {
+    class PhysicsManagerUnitTestClient;
+}
+
 } // namespace quartz
+
 
 class quartz::managers::PhysicsManager {
 public: // classes
@@ -41,7 +42,7 @@ public: // classes
 
     private: // friend classes
         friend class quartz::Application;
-        friend class quartz::unit_test::UnitTestClient;
+        friend class quartz::unit_test::PhysicsManagerUnitTestClient;
     };
 
     class EventListener : public reactphysics3d::EventListener {
@@ -121,5 +122,8 @@ private: // static variables
 
 private: // member variables
     reactphysics3d::PhysicsCommon m_physicsCommon;
+
+private: // friends
+    friend class quartz::unit_test::PhysicsManagerUnitTestClient;
 };
 

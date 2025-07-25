@@ -11,14 +11,15 @@ namespace quartz {
 
 class Application;
 
-namespace unit_test {
-    class UnitTestClient;
-}
-
 namespace managers {
     class InputManager;
 }
+
+namespace unit_test {
+    class InputManagerUnitTestClient;
 }
+
+} // namespace Quartz
 
 class quartz::managers::InputManager {
 public: // classes
@@ -31,7 +32,7 @@ public: // classes
 
     private: // friend classes
         friend class quartz::Application;
-        friend class quartz::unit_test::UnitTestClient;
+        friend class quartz::unit_test::InputManagerUnitTestClient;
     };
 
 public: // member functions
