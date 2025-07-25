@@ -217,6 +217,12 @@ private: // friends
 };
 
 /**
+ * @brief Helper functions
+ */
+
+std::ostream& operator<<(std::ostream& os, const util::Logger::Level level);
+
+/**
  * @brief Create a logger
  */
 

@@ -337,3 +337,36 @@ util::Logger::Scoper::~Scoper() {
 }
 
 /* ------------------------------ private member functions ------------------------------ */
+
+/* ------------------------------ helper functions ------------------------------ */
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const util::Logger::Level level
+) {
+    switch (level) {
+        case util::Logger::Level::trace:
+            os << "trace";
+            break;
+        case util::Logger::Level::debug:
+            os << "debug";
+            break;
+        case util::Logger::Level::info:
+            os << "info";
+            break;
+        case util::Logger::Level::warning:
+            os << "warning";
+            break;
+        case util::Logger::Level::error:
+            os << "error";
+            break;
+        case util::Logger::Level::critical:
+            os << "critical";
+            break;
+        case util::Logger::Level::off:
+            os << "off";
+            break;
+    }
+    return os;
+}
