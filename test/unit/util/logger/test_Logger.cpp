@@ -101,19 +101,38 @@ UT_FUNCTION(test_registerLogger_setLevel) {
     UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().at("GOONIS"), util::Logger::Level::critical);
 }
 
-UT_FUNCTION(test_registerLoggers) {
+UT_FUNCTION(test_registerLoggers_setLevels) {
+    // Too lazy to manually check each logger
+    const uint32_t initialSize = util::LoggerUnitTestClient::loggerNameDefaultLevelMap().size();
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameDefaultLevelMap().size(), initialSize);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().size(), initialSize);
 
-}
-
-UT_FUNCTION(test_setLevel) {
-
+    // Adding loggers
+    const std::array<const util::Logger::RegistrationInfo, 2> registrationInfos1 = {
+        util::Logger::RegistrationInfo("NOONIS", util::Logger::Level::info),
+        util::Logger::RegistrationInfo("TOONIS", util::Logger::Level::off)
+    };
+    util::Logger::registerLoggers(registrationInfos1);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameDefaultLevelMap().size(), initialSize + 2);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameDefaultLevelMap().at("NOONIS"), util::Logger::Level::info);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameDefaultLevelMap().at("TOONIS"), util::Logger::Level::off);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().size(), initialSize + 2);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().at("NOONIS"), util::Logger::Level::info);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().at("TOONIS"), util::Logger::Level::off);
+    util::Logger::setLevels({
+        {"NOONIS", util::Logger::Level::error},
+        {"TOONIS", util::Logger::Level::error}
+    });
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameDefaultLevelMap().at("NOONIS"), util::Logger::Level::info);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameDefaultLevelMap().at("TOONIS"), util::Logger::Level::off);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().at("NOONIS"), util::Logger::Level::error);
+    UT_CHECK_EQUAL(util::LoggerUnitTestClient::loggerNameLevelMap().at("TOONIS"), util::Logger::Level::off);
 }
 
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_Scoper_indentationCount);
     REGISTER_UT_FUNCTION(test_setShouldLogPreamble);
     REGISTER_UT_FUNCTION(test_registerLogger_setLevel);
-    REGISTER_UT_FUNCTION(test_registerLoggers);
-    REGISTER_UT_FUNCTION(test_setLevel);
+    REGISTER_UT_FUNCTION(test_registerLoggers_setLevels);
     UT_RUN_TESTS();
 }
