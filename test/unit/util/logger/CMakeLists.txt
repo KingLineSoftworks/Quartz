@@ -1,10 +1,10 @@
 #====================================================================
-# Util File System Unit Tests
+# Util Logger Unit Tests
 #====================================================================
 
 create_unit_test(
-    test_FileSystem
-    test_FileSystem.cpp
-    UTIL_FileSystem
+    test_Logger
+    test_Logger.cpp
+    UTIL_Logger
 )
 
