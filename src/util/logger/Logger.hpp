@@ -16,6 +16,7 @@
 
 namespace util {
     class Logger;
+    class LoggerUnitTestClient;
 
 #if defined QUARTZ_DEBUG
     using spdlog_logger_t = spdlog::logger;
@@ -210,7 +211,16 @@ private: // private static variables
     static std::shared_ptr<spdlog::details::thread_pool> threadPool;
     static std::vector<spdlog::sink_ptr> sinkPtrs;
     static std::map<std::string, std::shared_ptr<util::spdlog_logger_t>> loggerPtrMap;
+
+private: // friends
+    friend LoggerUnitTestClient;
 };
+
+/**
+ * @brief Helper functions
+ */
+
+std::ostream& operator<<(std::ostream& os, const util::Logger::Level level);
 
 /**
  * @brief Create a logger
