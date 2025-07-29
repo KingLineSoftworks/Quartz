@@ -47,3 +47,4 @@ private: // friend classes
     friend class quartz::managers::PhysicsManager;
     friend class quartz::physics::Collider;
 };
+

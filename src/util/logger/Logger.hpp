@@ -16,14 +16,18 @@
 
 namespace util {
     class Logger;
-    class LoggerUnitTestClient;
 
 #if defined QUARTZ_DEBUG
     using spdlog_logger_t = spdlog::logger;
 #else
     using spdlog_logger_t = spdlog::async_logger;
 #endif
+
+namespace unit_test {
+    class LoggerUnitTestClient;
 }
+}
+
 
 /**
  * @brief A singleton-esque logger wrapping a spdlog async logger. This exposes a map
@@ -213,7 +217,7 @@ private: // private static variables
     static std::map<std::string, std::shared_ptr<util::spdlog_logger_t>> loggerPtrMap;
 
 private: // friends
-    friend LoggerUnitTestClient;
+    friend unit_test::LoggerUnitTestClient;
 };
 
 /**
