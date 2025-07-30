@@ -27,3 +27,7 @@ quartz::physics::SphereShape::operator=(
     return *this;
 }
 
+double
+quartz::physics::SphereShape::getRadius_m() const {
+    return mp_colliderShape->getRadius();
+}

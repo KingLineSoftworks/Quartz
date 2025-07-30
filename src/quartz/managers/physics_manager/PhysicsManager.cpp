@@ -18,6 +18,7 @@
 #include "quartz/physics/collider/SphereShape.hpp"
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
+#include "util/macros.hpp"
 
 quartz::managers::PhysicsManager::EventListener::EventListener() {}
 
@@ -278,6 +279,10 @@ quartz::physics::BoxShape
 quartz::managers::PhysicsManager::createBoxShape(
     const quartz::physics::BoxShape::Parameters& boxShapeParameters
 ) {
+    QUARTZ_ASSERT(boxShapeParameters.halfExtents_m.x > 0, "Box shape half extents X value must be greater than 0");
+    QUARTZ_ASSERT(boxShapeParameters.halfExtents_m.y > 0, "Box shape half extents Y value must be greater than 0");
+    QUARTZ_ASSERT(boxShapeParameters.halfExtents_m.z > 0, "Box shape half extents Z value must be greater than 0");
+
     reactphysics3d::BoxShape* p_boxShape = m_physicsCommon.createBoxShape(boxShapeParameters.halfExtents_m);
 
     return quartz::physics::BoxShape(p_boxShape);
@@ -294,6 +299,8 @@ quartz::physics::SphereShape
 quartz::managers::PhysicsManager::createSphereShape(
     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
 ) {
+    QUARTZ_ASSERT(sphereShapeParameters.radius_m > 0, "Sphere shape radius must be greater than 0");
+
     reactphysics3d::SphereShape* p_sphereShape = m_physicsCommon.createSphereShape(sphereShapeParameters.radius_m);
 
     return quartz::physics::SphereShape(p_sphereShape);

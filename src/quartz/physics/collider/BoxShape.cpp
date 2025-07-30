@@ -1,3 +1,5 @@
+#include "math/transform/Vec3.hpp"
+
 #include "quartz/physics/collider/BoxShape.hpp"
 
 quartz::physics::BoxShape::BoxShape(
@@ -26,7 +28,21 @@ quartz::physics::BoxShape::operator=(
 }
 
 math::Vec3
-quartz::physics::BoxShape::getExtents() const {
+quartz::physics::BoxShape::getHalfExtents_m() const {
     return mp_colliderShape->getHalfExtents();
+}
+
+std::array<math::Vec3, 8>
+quartz::physics::BoxShape::getLocalVertexPositions() const {
+    return {
+        mp_colliderShape->getVertexPosition(0),
+        mp_colliderShape->getVertexPosition(1),
+        mp_colliderShape->getVertexPosition(2),
+        mp_colliderShape->getVertexPosition(3),
+        mp_colliderShape->getVertexPosition(4),
+        mp_colliderShape->getVertexPosition(5),
+        mp_colliderShape->getVertexPosition(6),
+        mp_colliderShape->getVertexPosition(7),
+    };
 }
 

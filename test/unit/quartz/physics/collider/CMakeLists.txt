@@ -9,3 +9,10 @@ create_unit_test(
     QUARTZ_PHYSICS_Collider
 )
 
+create_unit_test(
+    test_BoxShape
+    test_BoxShape.cpp
+    QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_PHYSICS_Collider
+)
+
