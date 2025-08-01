@@ -64,8 +64,8 @@ public: // member functions
     USE_LOGGER(RIGIDBODY);
 
     math::Vec3 getPosition() const { return mp_rigidBody->getTransform().getPosition(); }
-    math::Vec3 getLinearVelocity_mps() const { return mp_rigidBody->getLinearVelocity(); }
     math::Quaternion getRotation() const { return math::Quaternion(mp_rigidBody->getTransform().getOrientation()).normalize(); }
+    math::Vec3 getLinearVelocity_mps() const { return mp_rigidBody->getLinearVelocity(); }
     const std::optional<quartz::physics::Collider>& getColliderOptional() const { return mo_collider; }
 
     void setPosition(const math::Vec3& position);

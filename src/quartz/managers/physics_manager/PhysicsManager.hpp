@@ -30,7 +30,6 @@ namespace unit_test {
 
 } // namespace quartz
 
-
 class quartz::managers::PhysicsManager {
 public: // classes
     class Client {
@@ -53,7 +52,7 @@ public: // classes
 
         private: // static functions
             static quartz::managers::PhysicsManager::EventListener& getInstance() { return quartz::managers::PhysicsManager::EventListener::getInstance(); }
-        
+
         private: // friend classes
             friend class quartz::managers::PhysicsManager;
         };

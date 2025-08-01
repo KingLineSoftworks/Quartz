@@ -48,6 +48,22 @@ quartz::physics::Collider::noopCollisionCallback(
     UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters
 ) {}
 
+bool
+quartz::physics::Collider::CategoryProperties::operator==(
+    const quartz::physics::Collider::CategoryProperties& other
+) const {
+    return categoryBitMask == other.categoryBitMask && collidableCategoriesBitMask == other.collidableCategoriesBitMask;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    UNUSED const quartz::physics::Collider::CategoryProperties& categoryProperties
+) {
+    os << "(" << categoryProperties.categoryBitMask << "," << categoryProperties.collidableCategoriesBitMask << ")";
+    return os;
+}
+
 quartz::physics::Collider::Collider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape>&& v_shape,
     reactphysics3d::Collider* p_collider,
@@ -129,6 +145,17 @@ quartz::physics::Collider::getCollisionShapePtr() const {
     }
 
     return nullptr;
+}
+
+quartz::physics::Collider::CategoryProperties
+quartz::physics::Collider::getCategoryProperties() const {
+
+    uint16_t categoryBitMask = mp_collider->getCollisionCategoryBits();
+    uint16_t collidableCategoriesBitMask = mp_collider->getCollideWithMaskBits();
+
+    quartz::physics::Collider::CategoryProperties categoryProperties(categoryBitMask, collidableCategoriesBitMask);
+
+    return categoryProperties;
 }
 
 bool

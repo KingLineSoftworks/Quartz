@@ -20,7 +20,8 @@ private:
 } // namespace unit_test
 } // namespace quartz
 
-UT_FUNCTION(test_construction) {
+UT_FUNCTION(test_construction_movement) {
+    // construction
     {
         const double radius_m = 4.0;        
         quartz::physics::SphereShape::Parameters params(radius_m);
@@ -29,10 +30,45 @@ UT_FUNCTION(test_construction) {
         
         UT_CHECK_EQUAL(sphereShape.getRadius_m(), radius_m);
     }
+
+    // movement 1
+    {
+        const double radius_m = 5.0;        
+        quartz::physics::SphereShape::Parameters params(radius_m);
+
+        quartz::physics::SphereShape sphereShapeA = quartz::unit_test::PhysicsManagerUnitTestClient::createSphereShape(params);
+        quartz::physics::SphereShape sphereShapeB(std::move(sphereShapeA));
+        
+        UT_CHECK_EQUAL(sphereShapeB.getRadius_m(), radius_m);
+    }
+
+    // movement 2
+    {
+        const double radius_m = 6.0;        
+        quartz::physics::SphereShape::Parameters params(radius_m);
+
+        quartz::physics::SphereShape sphereShapeA = quartz::unit_test::PhysicsManagerUnitTestClient::createSphereShape(params);
+        quartz::physics::SphereShape sphereShapeB = std::move(sphereShapeA);
+        
+        UT_CHECK_EQUAL(sphereShapeB.getRadius_m(), radius_m);
+    }
+
+    // movement 3
+    {
+        const double radius_m = 7.0;        
+        quartz::physics::SphereShape::Parameters params(radius_m);
+
+        quartz::physics::SphereShape sphereShapeA = quartz::unit_test::PhysicsManagerUnitTestClient::createSphereShape(params);
+
+        quartz::physics::SphereShape sphereShapeB = quartz::unit_test::PhysicsManagerUnitTestClient::createSphereShape({1.0});
+        sphereShapeB = std::move(sphereShapeA);
+        
+        UT_CHECK_EQUAL(sphereShapeB.getRadius_m(), radius_m);
+    }
 }
 
 UT_MAIN() {
-    REGISTER_UT_FUNCTION(test_construction);
+    REGISTER_UT_FUNCTION(test_construction_movement);
     UT_RUN_TESTS();
 }
 

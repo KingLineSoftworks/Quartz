@@ -1,5 +1,5 @@
 #====================================================================
-# Quartz Physics Unit Tests
+# Quartz Physics Collider Unit Tests
 #====================================================================
 
 create_unit_test(
@@ -12,6 +12,13 @@ create_unit_test(
 create_unit_test(
     test_BoxShape
     test_BoxShape.cpp
+    QUARTZ_MANAGERS_PhysicsManager
+    QUARTZ_PHYSICS_Collider
+)
+
+create_unit_test(
+    test_Collider
+    test_Collider.cpp
     QUARTZ_MANAGERS_PhysicsManager
     QUARTZ_PHYSICS_Collider
 )
