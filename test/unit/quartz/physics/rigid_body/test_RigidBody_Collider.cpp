@@ -26,13 +26,6 @@ public:
         return quartz::managers::PhysicsManager::Client::getInstance().createRigidBody(field, transform, rigidBodyParameters);
     }
 
-    static quartz::physics::Collider createCollider(
-        reactphysics3d::RigidBody* p_rigidBody,
-        const quartz::physics::Collider::Parameters& colliderParameters
-    ) {
-        return quartz::managers::PhysicsManager::Client::getInstance().createCollider(p_rigidBody, colliderParameters);
-    }
-
 private:
     PhysicsManagerUnitTestClient() = delete;
 };

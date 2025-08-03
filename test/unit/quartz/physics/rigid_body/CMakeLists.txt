@@ -1,18 +1,12 @@
 #====================================================================
-# Quartz Physics Collider Unit Tests
+# Quartz Physics RigidBody Unit Tests
 #====================================================================
 
 create_unit_test(
-    test_SphereShape
-    test_SphereShape.cpp
+    test_RigidBody_Collider
+    test_RigidBody_Collider.cpp
     QUARTZ_MANAGERS_PhysicsManager
     QUARTZ_PHYSICS_Collider
-)
-
-create_unit_test(
-    test_BoxShape
-    test_BoxShape.cpp
-    QUARTZ_MANAGERS_PhysicsManager
-    QUARTZ_PHYSICS_Collider
+    QUARTZ_PHYSICS_RigidBody
 )
 
