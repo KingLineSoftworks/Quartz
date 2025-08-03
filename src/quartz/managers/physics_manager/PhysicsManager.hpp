@@ -6,7 +6,6 @@
 #include <reactphysics3d/engine/EventListener.h>
 
 #include "math/transform/Transform.hpp"
-#include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/Loggers.hpp"
 

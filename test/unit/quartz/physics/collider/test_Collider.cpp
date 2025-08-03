@@ -46,7 +46,7 @@ UT_FUNCTION(test_construction) {
     {
         const math::Vec3 position(2, 3, 4);
         const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(1, 1, 0).normalize(), 45);
-        const math::Vec3 scale(4, 4, 4);
+        const math::Vec3 scale(4, 5, 6);
         const math::Transform transform(position, rotation, scale);
 
         const double sphereRadius_m = 42.69;
@@ -80,7 +80,7 @@ UT_FUNCTION(test_construction) {
 
         const std::optional<quartz::physics::SphereShape>& o_sphereShape = o_collider->getSphereShapeOptional();
         UT_REQUIRE(o_sphereShape);
-        UT_CHECK_EQUAL(o_sphereShape->getRadius_m(), sphereRadius_m * 4);
+        UT_CHECK_EQUAL_FLOATS(o_sphereShape->getRadius_m(), sphereRadius_m * 5); // scaled by transform's y element
 
         const std::optional<quartz::physics::BoxShape>& o_boxShape = o_collider->getBoxShapeOptional();
         UT_REQUIRE(!o_boxShape);
@@ -88,45 +88,54 @@ UT_FUNCTION(test_construction) {
 
     // interesting transform box rb
     {
-        // const math::Vec3 position(6, 7, 8);
-        // const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(-1, 0, 2).normalize(), 60);
-        // const math::Vec3 scale(9, -4, 3);
-        // const math::Transform transform(position, rotation, scale);
+        const math::Vec3 position(6, 7, 8);
+        const math::Quaternion rotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(-1, 0, 2).normalize(), 60);
+        const math::Vec3 scale(9, -4, 3);
+        const math::Transform transform(position, rotation, scale);
 
-        // const math::Vec3 boxHalfExtents_m(15, 20, 31);
-        // const quartz::physics::Collider::Parameters colliderParameters(
-        //     false,
-        //     quartz::physics::Collider::CategoryProperties(0b01, 0b11),
-        //     quartz::physics::BoxShape::Parameters(boxHalfExtents_m),
-        //     {},
-        //     {},
-        //     {}
-        // );
+        const math::Vec3 boxHalfExtents_m(15, 20, 31);
+        const quartz::physics::Collider::Parameters colliderParameters(
+            false,
+            quartz::physics::Collider::CategoryProperties(0b110101, 0b11000101),
+            quartz::physics::BoxShape::Parameters(boxHalfExtents_m),
+            {},
+            {},
+            {}
+        );
 
-        // const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
-        // const bool enableGravity = true;
-        // const math::Vec3 angularAxisFactor(0, 0, 0);
+        const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
+        const bool enableGravity = true;
+        const math::Vec3 angularAxisFactor(1, 2, 3);
 
-        // const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
-        // quartz::physics::RigidBody rb = quartz::unit_test::PhysicsManagerUnitTestClient::createRigidBody(field, transform, rbParameters);
+        const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
+        quartz::physics::RigidBody rb = quartz::unit_test::PhysicsManagerUnitTestClient::createRigidBody(field, transform, rbParameters);
 
-        // UT_CHECK_EQUAL(rb.getPosition(), position);
-        // UT_CHECK_EQUAL(rb.getRotation(), rotation);
+        UT_CHECK_EQUAL(rb.getPosition(), position);
+        UT_CHECK_EQUAL(rb.getRotation(), rotation);
 
-        // const std::optional<quartz::physics::Collider>& o_collider = rb.getColliderOptional();
-        // UT_REQUIRE(o_collider);
-        // UT_CHECK_EQUAL(o_collider->getIsTrigger(), colliderParameters.isTrigger);
-        // UT_CHECK_EQUAL(o_collider->getLocalPosition(), math::Vec3(0));
-        // UT_CHECK_EQUAL(o_collider->getLocalRotation(), math::Quaternion());
-        // UT_CHECK_EQUAL(o_collider->getWorldPosition(), position);
-        // UT_CHECK_EQUAL(o_collider->getWorldRotation(), rotation);
+        const std::optional<quartz::physics::Collider>& o_collider = rb.getColliderOptional();
+        UT_REQUIRE(o_collider);
+        UT_CHECK_EQUAL(o_collider->getIsTrigger(), colliderParameters.isTrigger);
+        UT_CHECK_EQUAL(o_collider->getLocalPosition(), math::Vec3(0));
+        UT_CHECK_EQUAL(o_collider->getLocalRotation(), math::Quaternion());
+        UT_CHECK_EQUAL(o_collider->getWorldPosition(), position);
+        UT_CHECK_EQUAL(o_collider->getWorldRotation(), rotation);
 
-        // const std::optional<quartz::physics::SphereShape>& o_sphereShape = o_collider->getSphereShapeOptional();
-        // UT_REQUIRE(o_sphereShape);
-        // UT_CHECK_EQUAL(o_sphereShape->getRadius_m(), sphereRadius_m * 4);
+        const std::optional<quartz::physics::SphereShape>& o_sphereShape = o_collider->getSphereShapeOptional();
+        UT_REQUIRE(!o_sphereShape);
 
-        // const std::optional<quartz::physics::BoxShape>& o_boxShape = o_collider->getBoxShapeOptional();
-        // UT_REQUIRE(!o_boxShape);
+        const std::optional<quartz::physics::BoxShape>& o_boxShape = o_collider->getBoxShapeOptional();
+        UT_REQUIRE(o_boxShape);
+        UT_CHECK_EQUAL(o_boxShape->getHalfExtents_m(), boxHalfExtents_m * scale.abs());
+        const std::array<math::Vec3, 8> boxLocalVertexPositions = o_boxShape->getLocalVertexPositions();
+        UT_CHECK_EQUAL(boxLocalVertexPositions[0], math::Vec3(-15 * std::abs(scale.x), -20 * std::abs(scale.y),  31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[1], math::Vec3( 15 * std::abs(scale.x), -20 * std::abs(scale.y),  31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[2], math::Vec3( 15 * std::abs(scale.x),  20 * std::abs(scale.y),  31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[3], math::Vec3(-15 * std::abs(scale.x),  20 * std::abs(scale.y),  31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[4], math::Vec3(-15 * std::abs(scale.x), -20 * std::abs(scale.y), -31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[5], math::Vec3( 15 * std::abs(scale.x), -20 * std::abs(scale.y), -31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[6], math::Vec3( 15 * std::abs(scale.x),  20 * std::abs(scale.y), -31 * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[7], math::Vec3(-15 * std::abs(scale.x),  20 * std::abs(scale.y), -31 * std::abs(scale.z)));
     }
 }
 

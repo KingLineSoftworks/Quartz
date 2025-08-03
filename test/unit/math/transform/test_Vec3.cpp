@@ -619,6 +619,29 @@ UT_FUNCTION(test_normalize) {
     }
 }
 
+UT_FUNCTION(test_abs) {
+    {
+        const math::Vec3 vec(-1, -2, -3);
+        const math::Vec3 vec2 = vec.abs();
+
+        UT_CHECK_EQUAL_FLOATS(vec.x, -1);
+        UT_CHECK_EQUAL_FLOATS(vec.y, -2);
+        UT_CHECK_EQUAL_FLOATS(vec.z, -3);
+        UT_CHECK_EQUAL_FLOATS(vec2.x, 1);
+        UT_CHECK_EQUAL_FLOATS(vec2.y, 2);
+        UT_CHECK_EQUAL_FLOATS(vec2.z, 3);
+    }
+
+    {
+        math::Vec3 vec(-4, -5, -6);
+        vec.abs();
+
+        UT_CHECK_EQUAL_FLOATS(vec.x, 4);
+        UT_CHECK_EQUAL_FLOATS(vec.y, 5);
+        UT_CHECK_EQUAL_FLOATS(vec.z, 6);
+    }
+}
+
 UT_FUNCTION(test_look) {
     // We are actually not going to write any tests for math::Vec3::look
     // because it is just a wrapper around glm::lookAt and it seems 
@@ -635,6 +658,7 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_cross);
     REGISTER_UT_FUNCTION(test_getProjectionOntoPlane);
     REGISTER_UT_FUNCTION(test_normalize);
+    REGISTER_UT_FUNCTION(test_abs);
     REGISTER_UT_FUNCTION(test_look);
     UT_RUN_TESTS();
 }

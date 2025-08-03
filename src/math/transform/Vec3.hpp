@@ -133,6 +133,9 @@ union math::Vec3 {
     Vec3& normalize();
     Vec3 normalize() const;
 
+    Vec3& abs();
+    Vec3 abs() const;
+
     float magnitude() const { return glm::length(glmVec); }
     bool isNormalized() const;
 

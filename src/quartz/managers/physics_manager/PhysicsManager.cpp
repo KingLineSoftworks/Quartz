@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/collision/Collider.h>
 #include <reactphysics3d/collision/CollisionCallback.h>
@@ -179,8 +180,23 @@ quartz::managers::PhysicsManager::createRigidBody(
     p_rigidBody->setAngularLockAxisFactor(rigidBodyParameters.angularLockAxisFactor);
     p_rigidBody->setIsAllowedToSleep(true);
 
+    quartz::physics::Collider::Parameters modifiedColliderParameters = rigidBodyParameters.colliderParameters;
+    if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(modifiedColliderParameters.v_shapeParameters)) {
+        LOG_TRACEthis("Updating box collider parameters to adhere to scale");
+        quartz::physics::BoxShape::Parameters boxShapeParameters = std::get<quartz::physics::BoxShape::Parameters>(modifiedColliderParameters.v_shapeParameters);
+        boxShapeParameters.halfExtents_m *= transform.scale;
+        boxShapeParameters.halfExtents_m.abs();
+        modifiedColliderParameters.v_shapeParameters = boxShapeParameters;
+    } else if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(modifiedColliderParameters.v_shapeParameters)) {
+        LOG_TRACEthis("Updating sphere collider parameters to adhere to scale");
+        quartz::physics::SphereShape::Parameters sphereShapeParameters = std::get<quartz::physics::SphereShape::Parameters>(modifiedColliderParameters.v_shapeParameters);
+        sphereShapeParameters.radius_m *= transform.scale.y; // using y value to prefer colliding with the ground properly instead of the other directions
+        sphereShapeParameters.radius_m = std::abs(sphereShapeParameters.radius_m);
+        modifiedColliderParameters.v_shapeParameters = sphereShapeParameters;
+    }
+
     LOG_TRACEthis("Creating quartz collider");
-    quartz::physics::Collider collider = this->createCollider(p_rigidBody, rigidBodyParameters.colliderParameters);
+    quartz::physics::Collider collider = this->createCollider(p_rigidBody, modifiedColliderParameters);
 
     LOG_TRACEthis("Creating quartz rigidbody. Moving quartz collider");
     return quartz::physics::RigidBody(std::move(collider), p_rigidBody);

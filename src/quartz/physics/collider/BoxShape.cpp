@@ -35,14 +35,14 @@ quartz::physics::BoxShape::getHalfExtents_m() const {
 std::array<math::Vec3, 8>
 quartz::physics::BoxShape::getLocalVertexPositions() const {
     return {
-        mp_colliderShape->getVertexPosition(0),
-        mp_colliderShape->getVertexPosition(1),
-        mp_colliderShape->getVertexPosition(2),
-        mp_colliderShape->getVertexPosition(3),
-        mp_colliderShape->getVertexPosition(4),
-        mp_colliderShape->getVertexPosition(5),
-        mp_colliderShape->getVertexPosition(6),
-        mp_colliderShape->getVertexPosition(7),
+        mp_colliderShape->getVertexPosition(0), // -x -y  z
+        mp_colliderShape->getVertexPosition(1), //  x -y  z
+        mp_colliderShape->getVertexPosition(2), //  x  y  z
+        mp_colliderShape->getVertexPosition(3), // -x  y  z
+        mp_colliderShape->getVertexPosition(4), // -x -y -z
+        mp_colliderShape->getVertexPosition(5), //  x -y -z
+        mp_colliderShape->getVertexPosition(6), //  x  y -z
+        mp_colliderShape->getVertexPosition(7), // -x  y -z
     };
 }
 
