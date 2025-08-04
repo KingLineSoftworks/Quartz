@@ -2,6 +2,7 @@
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/physics/collider/SphereShape.hpp"
+#include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
@@ -18,12 +19,23 @@ public:
         return quartz::managers::PhysicsManager::Client::getInstance().createField({math::Vec3(0, -9.81, 0)});
     }
 
+    static void destroyField(quartz::physics::Field& field) {
+        quartz::managers::PhysicsManager::Client::getInstance().destroyField(field);
+    }
+
     static quartz::physics::RigidBody createRigidBody(
         quartz::physics::Field& field,
         const math::Transform& transform,
         const quartz::physics::RigidBody::Parameters& rigidBodyParameters
     ) {
         return quartz::managers::PhysicsManager::Client::getInstance().createRigidBody(field, transform, rigidBodyParameters);
+    }
+
+    static void destroyRigidBody(
+        quartz::physics::Field& field,
+        quartz::physics::RigidBody& rigidBody
+    ) {
+        quartz::managers::PhysicsManager::Client::getInstance().destroyRigidBody(field, rigidBody);
     }
 
 private:
@@ -130,10 +142,170 @@ UT_FUNCTION(test_construction) {
         UT_CHECK_EQUAL(boxLocalVertexPositions[6], math::Vec3( 15 * std::abs(scale.x),  20 * std::abs(scale.y), -31 * std::abs(scale.z)));
         UT_CHECK_EQUAL(boxLocalVertexPositions[7], math::Vec3(-15 * std::abs(scale.x),  20 * std::abs(scale.y), -31 * std::abs(scale.z)));
     }
+
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);
+}
+
+UT_FUNCTION(test_collider_callback) {
+    quartz::physics::Field field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
+    const double tickTimeDelta = 0.05;
+
+    uint32_t sphereStartValue = 0;
+    uint32_t sphereStayValue = 0;
+    uint32_t sphereEndValue = 0;
+
+    uint32_t groundStartValue = 0;
+    uint32_t groundStayValue = 0;
+    uint32_t groundEndValue = 0;
+
+    // Create a sphere with radius 1 at position 0,0.9,0 so it is already in contact with the ground
+
+    const math::Vec3 spherePosition(0, 0.99, 0);
+    const math::Quaternion sphereRotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(0, 1, 0).normalize(), 0);
+    const math::Vec3 sphereScale(1, 1, 1);
+    const math::Transform sphereTransform(spherePosition, sphereRotation, sphereScale);
+
+    const double sphereRadius_m = 1;
+    const quartz::physics::Collider::Parameters sphereColliderParameters(
+        false,
+        quartz::physics::Collider::CategoryProperties(0b01, 0b11),
+        quartz::physics::SphereShape::Parameters(sphereRadius_m),
+        [&sphereStartValue] (UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters) { sphereStartValue++; },
+        [&sphereStayValue] (UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters) { sphereStayValue++; },
+        [&sphereEndValue] (UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters) { sphereEndValue++; }
+    );
+
+    const quartz::physics::RigidBody::BodyType sphereBodyType = quartz::physics::RigidBody::BodyType::Dynamic;
+    const bool sphereEnableGravity = true;
+    const math::Vec3 sphereAngularAxisFactor(0, 0, 0);
+
+    const quartz::physics::RigidBody::Parameters sphereRbParameters(sphereBodyType, sphereEnableGravity, sphereAngularAxisFactor, sphereColliderParameters);
+    quartz::physics::RigidBody sphereRb = quartz::unit_test::PhysicsManagerUnitTestClient::createRigidBody(field, sphereTransform, sphereRbParameters);
+
+    // Create a box that has its upper bound at y level 0, so it is in contact with the sphere
+
+    const math::Vec3 groundPosition(0, -1, 0);
+    const math::Quaternion groundRotation = math::Quaternion::fromAxisAngleRotation(math::Vec3(0, 1, 0).normalize(), 0);
+    const math::Vec3 groundScale(1, 1, 1);
+    const math::Transform groundTransform(groundPosition, groundRotation, groundScale);
+
+    const math::Vec3 boxHalfExtents_m(10, 1, 10);
+    const quartz::physics::Collider::Parameters groundColliderParameters(
+        false,
+        quartz::physics::Collider::CategoryProperties(0b10, 0b11),
+        quartz::physics::BoxShape::Parameters(boxHalfExtents_m),
+        [&groundStartValue] (UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters) { groundStartValue++; },
+        [&groundStayValue] (UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters) { groundStayValue++; },
+        [&groundEndValue] (UNUSED quartz::physics::Collider::CollisionCallbackParameters parameters) { groundEndValue++; }
+    );
+
+    const quartz::physics::RigidBody::BodyType groundBodyType = quartz::physics::RigidBody::BodyType::Static;
+    const bool groundEnableGravity = false;
+    const math::Vec3 groundAngularAxisFactor(0, 1, 0);
+
+    const quartz::physics::RigidBody::Parameters groundRbParameters(groundBodyType, groundEnableGravity, groundAngularAxisFactor, groundColliderParameters);
+    quartz::physics::RigidBody groundRb = quartz::unit_test::PhysicsManagerUnitTestClient::createRigidBody(field, groundTransform, groundRbParameters);
+
+    // Ensure all values are 0 at the beginning
+    UT_CHECK_EQUAL(sphereStartValue, 0);
+    UT_CHECK_EQUAL(sphereStayValue, 0);
+    UT_CHECK_EQUAL(sphereEndValue, 0);
+    UT_CHECK_EQUAL(groundStartValue, 0);
+    UT_CHECK_EQUAL(groundStayValue, 0);
+    UT_CHECK_EQUAL(groundEndValue, 0);
+
+    // Move the sphere to be in contact with the ground, update the field, ensure that the start values increment to 1
+    {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "First fixed update, should start contact");
+        field.fixedUpdate(tickTimeDelta);
+        UT_CHECK_EQUAL(sphereStartValue, 1);
+        UT_CHECK_EQUAL(sphereStayValue, 0);
+        UT_CHECK_EQUAL(sphereEndValue, 0);
+        UT_CHECK_EQUAL(groundStartValue, 1);
+        UT_CHECK_EQUAL(groundStayValue, 0);
+        UT_CHECK_EQUAL(groundEndValue, 0);
+    }
+
+    // Update the field twice, ensuring that the stay values increment to 2 and the start value remains at 1
+    {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "Second fixed update, should stay contact");
+        field.fixedUpdate(tickTimeDelta);
+        UT_CHECK_EQUAL(sphereStartValue, 1);
+        UT_CHECK_EQUAL(sphereStayValue, 1);
+        UT_CHECK_EQUAL(sphereEndValue, 0);
+        UT_CHECK_EQUAL(groundStartValue, 1);
+        UT_CHECK_EQUAL(groundStayValue, 1);
+        UT_CHECK_EQUAL(groundEndValue, 0);
+    }
+    {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "Third fixed update, should stay contact");
+        field.fixedUpdate(tickTimeDelta);
+        UT_CHECK_EQUAL(sphereStartValue, 1);
+        UT_CHECK_EQUAL(sphereStayValue, 2);
+        UT_CHECK_EQUAL(sphereEndValue, 0);
+        UT_CHECK_EQUAL(groundStartValue, 1);
+        UT_CHECK_EQUAL(groundStayValue, 2);
+        UT_CHECK_EQUAL(groundEndValue, 0);
+    }
+ 
+    //  Move the sphere and ensure that the end values increment
+    {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "Fourth fixed update (moving sphere RB away from ground), should end contact");
+        sphereRb.setPosition({1000, 1000, 1000});
+        field.fixedUpdate(tickTimeDelta);
+        UT_CHECK_EQUAL(sphereStartValue, 1);
+        UT_CHECK_EQUAL(sphereStayValue, 2);
+        UT_CHECK_EQUAL(sphereEndValue, 1);
+        UT_CHECK_EQUAL(groundStartValue, 1);
+        UT_CHECK_EQUAL(groundStayValue, 2);
+        UT_CHECK_EQUAL(groundEndValue, 1);
+    }
+
+    //  Move the sphere back to the the ground and ensure that the start values increment
+    {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "Fifth fixed update (moving sphere RB back to the ground), should start contact again");
+        sphereRb.setPosition({0, 0, 0});
+        field.fixedUpdate(tickTimeDelta);
+        UT_CHECK_EQUAL(sphereStartValue, 2);
+        UT_CHECK_EQUAL(sphereStayValue, 2);
+        UT_CHECK_EQUAL(sphereEndValue, 1);
+        UT_CHECK_EQUAL(groundStartValue, 2);
+        UT_CHECK_EQUAL(groundStayValue, 2);
+        UT_CHECK_EQUAL(groundEndValue, 1);
+    }
+
+    // Destroy the ground and ensure that we don't get the end contact values to increment
+    {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "Sixth fixed update (deleting ground RB), should not increment end contact values");
+        quartz::unit_test::PhysicsManagerUnitTestClient::destroyRigidBody(field, groundRb);
+        field.fixedUpdate(tickTimeDelta);
+        UT_CHECK_EQUAL(sphereStartValue, 2);
+        UT_CHECK_EQUAL(sphereStayValue, 2);
+        UT_CHECK_EQUAL(sphereEndValue, 1);
+        UT_CHECK_EQUAL(groundStartValue, 2);
+        UT_CHECK_EQUAL(groundStayValue, 2);
+        UT_CHECK_EQUAL(groundEndValue, 1);
+    }
+
+    // Clean up and destroy the field
+
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);
+}
+
+UT_FUNCTION(test_trigger_callback) {
+
 }
 
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
+    REGISTER_UT_FUNCTION(test_collider_callback);
+    REGISTER_UT_FUNCTION(test_trigger_callback);
     UT_RUN_TESTS();
 }
 

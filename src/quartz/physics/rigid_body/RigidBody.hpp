@@ -26,6 +26,14 @@ namespace physics {
 
 class quartz::physics::RigidBody {
 public: // classes
+    /**
+     * @brief A static body has infinite mass, zero velocity but its position can be changed manually.
+     *    A static body does not collide with other static or kinematic bodies, only dynamic bodies
+     * @brief A kinematic body has infinite mass, its velocity can be changed manually and its position is computed by the physics engine.
+     *    A kinematic body does not collide with other static or kinematic bodies.
+     * @brief A dynamic body has non-zero mass, non-zero velocity determined by forces and its position is determined by the physics engine.
+     *  A dynamic body can collide with other dynamic, static or kinematic bodies.
+     */
     enum class BodyType : uint32_t {
         Static = 0,
         Kinematic = 1,

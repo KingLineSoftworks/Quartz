@@ -1,4 +1,5 @@
 #include <cstdlib>
+
 #include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/collision/Collider.h>
 #include <reactphysics3d/collision/CollisionCallback.h>
@@ -9,6 +10,7 @@
 #include <reactphysics3d/collision/shapes/SphereShape.h>
 #include <reactphysics3d/mathematics/Transform.h>
 
+#include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/managers/Loggers.hpp"
@@ -19,7 +21,6 @@
 #include "quartz/physics/collider/SphereShape.hpp"
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
-#include "util/macros.hpp"
 
 quartz::managers::PhysicsManager::EventListener::EventListener() {}
 
@@ -40,7 +41,6 @@ quartz::managers::PhysicsManager::EventListener::onContact(
         /**
          * @todo 2025/06/19 Make sure to provide the physics layers associated with each of the rigidbodies and colliders
          */
-
 
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
