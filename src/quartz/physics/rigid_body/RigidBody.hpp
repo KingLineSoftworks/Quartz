@@ -6,7 +6,6 @@
 #include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/components/RigidBodyComponents.h>
 
-#include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/physics/Loggers.hpp"
