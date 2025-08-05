@@ -70,6 +70,8 @@ public: // classes and structs
 
         uint16_t categoryBitMask;
         uint16_t collidableCategoriesBitMask;
+
+        bool operator==(const CategoryProperties& other) const;
     };
 
     struct Parameters {
@@ -106,13 +108,16 @@ public: // member functions
 
     USE_LOGGER(COLLIDER);
 
-    const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
-    const reactphysics3d::Collider* getColliderPtr() const { return mp_collider; }
+    quartz::physics::Collider::CategoryProperties getCategoryProperties() const;
+
     bool getIsTrigger() const;
     math::Vec3 getLocalPosition() const;
     math::Quaternion getLocalRotation() const;
     math::Vec3 getWorldPosition() const;
     math::Quaternion getWorldRotation() const;
+
+    const std::optional<quartz::physics::BoxShape>& getBoxShapeOptional() const { return mo_boxShape; }
+    const std::optional<quartz::physics::SphereShape>& getSphereShapeOptional() const { return mo_sphereShape; }
 
 public: // static functions
     static quartz::physics::Collider& getCollider(reactphysics3d::Collider* const p_collider) { return *quartz::physics::Collider::colliderMap.at(p_collider); }
@@ -129,6 +134,9 @@ private: // member functions
     void collisionStart(Collider* const p_otherCollider);
     void collisionStay(Collider* const p_otherCollider);
     void collisionEnd(Collider* const p_otherCollider);
+
+    const reactphysics3d::CollisionShape* getCollisionShapePtr() const;
+    const reactphysics3d::Collider* getColliderPtr() const { return mp_collider; }
 
 private: // static functions
     static void noopCollisionCallback(CollisionCallbackParameters parameters);
@@ -150,4 +158,6 @@ private: // member variables
 private: // friends
     friend class quartz::managers::PhysicsManager;
 };
+
+std::ostream& operator<<(std::ostream& os, const quartz::physics::Collider::CategoryProperties& categoryProperties);
 

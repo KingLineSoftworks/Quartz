@@ -1,3 +1,6 @@
+#include <cstdlib>
+
+#include <optional>
 #include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/collision/Collider.h>
 #include <reactphysics3d/collision/CollisionCallback.h>
@@ -8,6 +11,7 @@
 #include <reactphysics3d/collision/shapes/SphereShape.h>
 #include <reactphysics3d/mathematics/Transform.h>
 
+#include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/managers/Loggers.hpp"
@@ -38,7 +42,6 @@ quartz::managers::PhysicsManager::EventListener::onContact(
         /**
          * @todo 2025/06/19 Make sure to provide the physics layers associated with each of the rigidbodies and colliders
          */
-
 
         reactphysics3d::Collider* p_collider1 = currentContactPair.getCollider1();
         quartz::physics::Collider& collider1 = quartz::physics::Collider::getCollider(p_collider1);
@@ -178,11 +181,26 @@ quartz::managers::PhysicsManager::createRigidBody(
     p_rigidBody->setAngularLockAxisFactor(rigidBodyParameters.angularLockAxisFactor);
     p_rigidBody->setIsAllowedToSleep(true);
 
+    quartz::physics::Collider::Parameters modifiedColliderParameters = rigidBodyParameters.colliderParameters;
+    if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(modifiedColliderParameters.v_shapeParameters)) {
+        LOG_TRACEthis("Updating box collider parameters to adhere to scale");
+        quartz::physics::BoxShape::Parameters boxShapeParameters = std::get<quartz::physics::BoxShape::Parameters>(modifiedColliderParameters.v_shapeParameters);
+        boxShapeParameters.halfExtents_m *= transform.scale;
+        boxShapeParameters.halfExtents_m.abs();
+        modifiedColliderParameters.v_shapeParameters = boxShapeParameters;
+    } else if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(modifiedColliderParameters.v_shapeParameters)) {
+        LOG_TRACEthis("Updating sphere collider parameters to adhere to scale");
+        quartz::physics::SphereShape::Parameters sphereShapeParameters = std::get<quartz::physics::SphereShape::Parameters>(modifiedColliderParameters.v_shapeParameters);
+        sphereShapeParameters.radius_m *= transform.scale.y; // using y value to prefer colliding with the ground properly instead of the other directions
+        sphereShapeParameters.radius_m = std::abs(sphereShapeParameters.radius_m);
+        modifiedColliderParameters.v_shapeParameters = sphereShapeParameters;
+    }
+
     LOG_TRACEthis("Creating quartz collider");
-    quartz::physics::Collider collider = this->createCollider(p_rigidBody, rigidBodyParameters.colliderParameters);
+    std::optional<quartz::physics::Collider> o_collider = this->createCollider(p_rigidBody, modifiedColliderParameters);
 
     LOG_TRACEthis("Creating quartz rigidbody. Moving quartz collider");
-    return quartz::physics::RigidBody(std::move(collider), p_rigidBody);
+    return quartz::physics::RigidBody(std::move(o_collider), p_rigidBody);
 }
 
 void
@@ -204,7 +222,7 @@ quartz::managers::PhysicsManager::destroyRigidBody(
     field.mp_physicsWorld->destroyRigidBody(rigidBody.mp_rigidBody);
 }
 
-quartz::physics::Collider
+std::optional<quartz::physics::Collider>
 quartz::managers::PhysicsManager::createCollider(
     reactphysics3d::RigidBody* p_rigidBody,
     const quartz::physics::Collider::Parameters& colliderParameters
@@ -215,17 +233,18 @@ quartz::managers::PhysicsManager::createCollider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape> v_shape;
 
     if (std::holds_alternative<std::monostate>(colliderParameters.v_shapeParameters)) {
-        LOG_TRACEthis("Collider parameters are empty. Not creating collision shape");
+        LOG_TRACEthis("Collider shape parameters are empty. Not creating collider");
+        return std::nullopt;
     }
 
     if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(colliderParameters.v_shapeParameters)) {
-        LOG_TRACEthis("Collider parameters represent box collider parameters. Creating box collider");
+        LOG_TRACEthis("Collider shape parameters represent box collider parameters. Creating box collider");
         v_shape = this->createBoxShape(std::get<quartz::physics::BoxShape::Parameters>(colliderParameters.v_shapeParameters));
         p_collisionShape = std::get<quartz::physics::BoxShape>(v_shape).mp_colliderShape;
     }
 
     if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(colliderParameters.v_shapeParameters)) {
-        LOG_TRACEthis("Collider parameters represent sphere collider parameters. Creating sphere collider");
+        LOG_TRACEthis("Collider shape parameters represent sphere collider parameters. Creating sphere collider");
         v_shape = this->createSphereShape(std::get<quartz::physics::SphereShape::Parameters>(colliderParameters.v_shapeParameters));
         p_collisionShape = std::get<quartz::physics::SphereShape>(v_shape).mp_colliderShape;
     }
@@ -278,6 +297,10 @@ quartz::physics::BoxShape
 quartz::managers::PhysicsManager::createBoxShape(
     const quartz::physics::BoxShape::Parameters& boxShapeParameters
 ) {
+    QUARTZ_ASSERT(boxShapeParameters.halfExtents_m.x > 0, "Box shape half extents X value must be greater than 0");
+    QUARTZ_ASSERT(boxShapeParameters.halfExtents_m.y > 0, "Box shape half extents Y value must be greater than 0");
+    QUARTZ_ASSERT(boxShapeParameters.halfExtents_m.z > 0, "Box shape half extents Z value must be greater than 0");
+
     reactphysics3d::BoxShape* p_boxShape = m_physicsCommon.createBoxShape(boxShapeParameters.halfExtents_m);
 
     return quartz::physics::BoxShape(p_boxShape);
@@ -294,6 +317,8 @@ quartz::physics::SphereShape
 quartz::managers::PhysicsManager::createSphereShape(
     const quartz::physics::SphereShape::Parameters& sphereShapeParameters
 ) {
+    QUARTZ_ASSERT(sphereShapeParameters.radius_m > 0, "Sphere shape radius must be greater than 0");
+
     reactphysics3d::SphereShape* p_sphereShape = m_physicsCommon.createSphereShape(sphereShapeParameters.radius_m);
 
     return quartz::physics::SphereShape(p_sphereShape);

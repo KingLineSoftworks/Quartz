@@ -37,6 +37,8 @@ public: // member functions
 
     USE_LOGGER(SHAPE_SPHERE);
 
+    double getRadius_m() const;
+
 private: // member functions
     SphereShape(reactphysics3d::SphereShape* p_sphereShape);
 
@@ -47,3 +49,4 @@ private: // friend classes
     friend class quartz::managers::PhysicsManager;
     friend class quartz::physics::Collider;
 };
+

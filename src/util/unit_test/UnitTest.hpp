@@ -24,7 +24,7 @@
  *    You can also specify multiple test cases to run
  *      ./bin/ut/test_file_something -c test_case_2 test_case_3 test_case_99
  *
- *    By default all of the loggers are turned off besides the UNIT_TEST and UT_RUNNER loggers which are
+ *    By default all of the loggers are turned off besides the UT and UT_RUNNER loggers which are
  *    set to critical and trace respectively. If you wish for more verbose logs, you can specify the
  *    level of individual loggers via command line arguments with the -l flag like so:
  *      ./bin/ut/test_another_one -l RIGIDBODY:debug FIELD:trace COLLIDER:error
@@ -133,7 +133,7 @@ private:
     if (!(a == b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not equal to " << #b << " (" << a << " != " << b << ")";                  \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -143,7 +143,7 @@ private:
     if (std::abs((a) - (b)) > UT_FLOATING_POINT_EPSILON) {                                                                                                       \
         std::ostringstream message;                                                                                                                          \
         message << #a << " is not equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " > " << UT_FLOATING_POINT_EPSILON << ")"; \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                           \
+        LOG_ERROR(UT, "{}", message.str());                                                                                                           \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());                                                          \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                                                                           \
     }                                                                                                                                                        \
@@ -153,7 +153,7 @@ private:
     if (!(a == b)) {                                                                                            \
         std::ostringstream message;                                                                             \
         message << #a << " (size " << a.size() << ") is not equal to " << #b << " (size " << b.size() << ")";   \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                              \
+        LOG_ERROR(UT, "{}", message.str());                                                              \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());             \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                              \
     }                                                                                                           \
@@ -163,7 +163,7 @@ private:
     if (!(a != b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not un-equal to " << #b << " (" << a << " == " << b << ")";               \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -173,7 +173,7 @@ private:
     if (std::abs((a) - (b)) <= UT_FLOATING_POINT_EPSILON) {                                                                                                     \
         std::ostringstream message;                                                                                                                         \
         message << #a << " is equal to " << #b << " (abs(" << a << " - " << b << ") = " << std::abs(a - b) << " <= " << UT_FLOATING_POINT_EPSILON << ")";   \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                                                                          \
+        LOG_ERROR(UT, "{}", message.str());                                                                                                          \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());                                                         \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                                                                          \
     }                                                                                                                                                       \
@@ -183,7 +183,7 @@ private:
     if (!(a != b)) {                                                                                            \
         std::ostringstream message;                                                                             \
         message << #a << " (size " << a.size() << ") is not un-equal to " << #b << " (size " << b.size() << ")";\
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                              \
+        LOG_ERROR(UT, "{}", message.str());                                                              \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());             \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                              \
     }                                                                                                           \
@@ -193,7 +193,7 @@ private:
     if (!(a > b)) {                                                                                     \
         std::ostringstream message;                                                                     \
         message << #a << " is not greater than " << #b << " (" << a << " <= " << b << ")";              \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -203,7 +203,7 @@ private:
     if (!(a < b)) {                                                                                     \
         std::ostringstream message;                                                                     \
         message << #a << " is not less than " << #b << " (" << a << " >= " << b << ")";                 \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -213,7 +213,7 @@ private:
     if (!(a >= b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not greater than or equal to " << #b << " (" << a << " < " << b << ")";   \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -223,7 +223,7 @@ private:
     if (!(a <= b)) {                                                                                    \
         std::ostringstream message;                                                                     \
         message << #a << " is not less than or equal to " << #b << " (" << a << " > " << b << ")";      \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -233,7 +233,7 @@ private:
     if (!(val)) {                                                                                       \
         std::ostringstream message;                                                                     \
         message << #val << " is not true (" << (val) << ")";                                            \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -243,7 +243,7 @@ private:
     if (val) {                                                                                          \
         std::ostringstream message;                                                                     \
         message << #val << " is not false (" << (val) << ")";                                           \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
     }                                                                                                   \
@@ -253,7 +253,7 @@ private:
     if (!a) {                                                                                           \
         std::ostringstream message;                                                                     \
         message << #a << " is not valid";                                                               \
-        LOG_ERROR(UNIT_TEST, "{}", message.str());                                                      \
+        LOG_ERROR(UT, "{}", message.str());                                                      \
         util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
         utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
         return;                                                                                         \

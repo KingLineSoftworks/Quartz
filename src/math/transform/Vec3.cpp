@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <glm/gtx/projection.hpp>
 
 #include "math/Loggers.hpp"
@@ -49,7 +50,7 @@ math::Vec3::getProjectionOntoPlane(
     const math::Vec3 normalProjection = glm::proj(this->glmVec, planeNormal.glmVec);
 
     const math::Vec3 result = (*this) - normalProjection;
-    
+
     return result;
 }
 
@@ -71,6 +72,26 @@ math::Vec3::normalize() const {
     }
 
     return glm::normalize(glmVec);
+}
+
+math::Vec3&
+math::Vec3::abs() {
+    x = std::abs(x);
+    y = std::abs(y);
+    z = std::abs(z);
+
+    return *this;
+}
+
+math::Vec3
+math::Vec3::abs() const {
+    math::Vec3 copy;
+
+    copy.x = std::abs(x);
+    copy.y = std::abs(y);
+    copy.z = std::abs(z);
+
+    return copy;
 }
 
 bool

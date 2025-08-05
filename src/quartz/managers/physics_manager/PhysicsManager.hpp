@@ -6,7 +6,6 @@
 #include <reactphysics3d/engine/EventListener.h>
 
 #include "math/transform/Transform.hpp"
-#include "math/transform/Vec3.hpp"
 
 #include "quartz/managers/Loggers.hpp"
 
@@ -20,12 +19,12 @@ namespace quartz {
 
 class Application; // We must forward declare the application class here, so we can have its declaration for friending
 
-namespace unit_test {
-    class UnitTestClient;
-}
-
 namespace managers {
     class PhysicsManager;
+}
+
+namespace unit_test {
+    class PhysicsManagerUnitTestClient;
 }
 
 } // namespace quartz
@@ -41,7 +40,7 @@ public: // classes
 
     private: // friend classes
         friend class quartz::Application;
-        friend class quartz::unit_test::UnitTestClient;
+        friend class quartz::unit_test::PhysicsManagerUnitTestClient;
     };
 
     class EventListener : public reactphysics3d::EventListener {
@@ -52,7 +51,7 @@ public: // classes
 
         private: // static functions
             static quartz::managers::PhysicsManager::EventListener& getInstance() { return quartz::managers::PhysicsManager::EventListener::getInstance(); }
-        
+
         private: // friend classes
             friend class quartz::managers::PhysicsManager;
         };
@@ -97,7 +96,7 @@ public: // member functions
 private: // member functions
     PhysicsManager();
 
-    quartz::physics::Collider createCollider(
+    std::optional<quartz::physics::Collider> createCollider(
         reactphysics3d::RigidBody* p_rigidBody,
         const quartz::physics::Collider::Parameters& colliderParameters
     );
@@ -121,5 +120,8 @@ private: // static variables
 
 private: // member variables
     reactphysics3d::PhysicsCommon m_physicsCommon;
+
+private: // friends
+    friend class quartz::unit_test::PhysicsManagerUnitTestClient;
 };
 

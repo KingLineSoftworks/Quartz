@@ -145,7 +145,7 @@ public: // member functions
     
     /**
      * @todo 2024/11/25 Make these update functions private and allow the quartz::scene::Scene class
-     *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::UnitTestClient)
+     *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::DoodadUnitTestClient)
      */
     void awaken(
         quartz::scene::Scene* const p_scene

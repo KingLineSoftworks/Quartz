@@ -77,7 +77,7 @@ util::UnitTestRunner::initializeLoggers(
     REGISTER_LOGGER_GROUP_WITH_LEVEL(QUARTZ_SCENE, off);
 
     util::Logger::setLevels({
-        {"UNIT_TEST", util::Logger::Level::critical},
+        {"UT", util::Logger::Level::critical},
         {"UT_RUNNER", util::Logger::Level::trace}
     });
 
@@ -152,12 +152,12 @@ util::UnitTestRunner::runFunctions(
 
         const util::UnitTestRunner::UnitTestFunction& utFunction = m_functions[i].second;
         {
-            LOG_TRACE(UNIT_TEST, "{}()", functionName);
-            LOG_SCOPE_CHANGE_TRACE(UNIT_TEST);
+            LOG_TRACE(UT, "{}()", functionName);
+            LOG_SCOPE_CHANGE_TRACE(UT);
             utFunction(*this, i, functionName);
         }
 
-        LOG_TRACE(UNIT_TEST, "");
+        LOG_TRACE(UT, "");
     }
 }
 

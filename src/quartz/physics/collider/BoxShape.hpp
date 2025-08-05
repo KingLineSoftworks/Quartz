@@ -36,7 +36,9 @@ public: // member functions
 
     USE_LOGGER(SHAPE_BOX);
 
-    math::Vec3 getExtents() const;
+    math::Vec3 getHalfExtents_m() const;
+
+    std::array<math::Vec3, 8> getLocalVertexPositions() const;
 
 private: // member functions
     BoxShape(reactphysics3d::BoxShape* p_boxShape);
