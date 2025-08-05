@@ -96,7 +96,7 @@ public: // member functions
 private: // member functions
     PhysicsManager();
 
-    quartz::physics::Collider createCollider(
+    std::optional<quartz::physics::Collider> createCollider(
         reactphysics3d::RigidBody* p_rigidBody,
         const quartz::physics::Collider::Parameters& colliderParameters
     );

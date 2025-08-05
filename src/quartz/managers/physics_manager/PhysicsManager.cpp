@@ -1,5 +1,6 @@
 #include <cstdlib>
 
+#include <optional>
 #include <reactphysics3d/body/RigidBody.h>
 #include <reactphysics3d/collision/Collider.h>
 #include <reactphysics3d/collision/CollisionCallback.h>
@@ -196,10 +197,10 @@ quartz::managers::PhysicsManager::createRigidBody(
     }
 
     LOG_TRACEthis("Creating quartz collider");
-    quartz::physics::Collider collider = this->createCollider(p_rigidBody, modifiedColliderParameters);
+    std::optional<quartz::physics::Collider> o_collider = this->createCollider(p_rigidBody, modifiedColliderParameters);
 
     LOG_TRACEthis("Creating quartz rigidbody. Moving quartz collider");
-    return quartz::physics::RigidBody(std::move(collider), p_rigidBody);
+    return quartz::physics::RigidBody(std::move(o_collider), p_rigidBody);
 }
 
 void
@@ -221,7 +222,7 @@ quartz::managers::PhysicsManager::destroyRigidBody(
     field.mp_physicsWorld->destroyRigidBody(rigidBody.mp_rigidBody);
 }
 
-quartz::physics::Collider
+std::optional<quartz::physics::Collider>
 quartz::managers::PhysicsManager::createCollider(
     reactphysics3d::RigidBody* p_rigidBody,
     const quartz::physics::Collider::Parameters& colliderParameters
@@ -232,17 +233,18 @@ quartz::managers::PhysicsManager::createCollider(
     std::variant<std::monostate, quartz::physics::BoxShape, quartz::physics::SphereShape> v_shape;
 
     if (std::holds_alternative<std::monostate>(colliderParameters.v_shapeParameters)) {
-        LOG_TRACEthis("Collider parameters are empty. Not creating collision shape");
+        LOG_TRACEthis("Collider shape parameters are empty. Not creating collider");
+        return std::nullopt;
     }
 
     if (std::holds_alternative<quartz::physics::BoxShape::Parameters>(colliderParameters.v_shapeParameters)) {
-        LOG_TRACEthis("Collider parameters represent box collider parameters. Creating box collider");
+        LOG_TRACEthis("Collider shape parameters represent box collider parameters. Creating box collider");
         v_shape = this->createBoxShape(std::get<quartz::physics::BoxShape::Parameters>(colliderParameters.v_shapeParameters));
         p_collisionShape = std::get<quartz::physics::BoxShape>(v_shape).mp_colliderShape;
     }
 
     if (std::holds_alternative<quartz::physics::SphereShape::Parameters>(colliderParameters.v_shapeParameters)) {
-        LOG_TRACEthis("Collider parameters represent sphere collider parameters. Creating sphere collider");
+        LOG_TRACEthis("Collider shape parameters represent sphere collider parameters. Creating sphere collider");
         v_shape = this->createSphereShape(std::get<quartz::physics::SphereShape::Parameters>(colliderParameters.v_shapeParameters));
         p_collisionShape = std::get<quartz::physics::SphereShape>(v_shape).mp_colliderShape;
     }
