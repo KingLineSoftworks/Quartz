@@ -37,7 +37,7 @@ private:
 
 UT_FUNCTION(test_Scoper_indentationCount) {
     uint32_t traceOffset = 0;
-    if (util::unit_test::LoggerUnitTestClient::loggerNameLevelMap().at("UNIT_TEST") == util::Logger::Level::trace) {
+    if (util::unit_test::LoggerUnitTestClient::loggerNameLevelMap().at("UT") == util::Logger::Level::trace) {
         traceOffset = 1;
     }
     UT_CHECK_EQUAL(util::Logger::Scoper::getIndentationCount(), traceOffset);
