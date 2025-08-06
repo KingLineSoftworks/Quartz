@@ -26,8 +26,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_SCENE_SkyBox
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_SCENE_SkyBox
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
@@ -43,3 +43,4 @@ target_link_libraries(
     QUARTZ_RENDERING_CubeMap
     QUARTZ_RENDERING_Device
 )
+

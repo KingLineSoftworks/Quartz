@@ -4,6 +4,7 @@
 
 #include "quartz/rendering/cube_map/CubeMap.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
+#include "util/logger/Logger.hpp"
 
 vk::VertexInputBindingDescription
 quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription() {
@@ -80,6 +81,10 @@ quartz::rendering::CubeMap::createStagedImageBufferFromFilepaths(
         );
         if (!p_currPixels) {
             LOG_THROW(CUBEMAP, util::AssetLoadFailedError, "Failed to load texture from {}", imageFilepath);
+        }
+        LOG_CRITICAL(CUBEMAP, "Pixels loaded:");
+        for (uint32_t i = 0; i < 16; ++i) {
+            LOG_CRITICAL(CUBEMAP, "{}", p_currPixels[i]);
         }
 
         // x4 for rgba (32 bits = 4 bytes)

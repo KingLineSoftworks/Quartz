@@ -25,8 +25,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_RENDERING_CubeMap
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_RENDERING_CubeMap
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
