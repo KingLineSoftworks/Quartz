@@ -5,7 +5,6 @@
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/scene/Loggers.hpp"
 
 namespace quartz {
@@ -65,7 +64,6 @@ public: // static functions
     static math::Vec3 calculateLookDirectionFromEulerAngles(const quartz::scene::Camera::EulerAngles& eulerAngles);
     static quartz::scene::Camera::EulerAngles calculateEulerAnglesFromLookDirection(const math::Vec3& lookDirection);
 
-
 public: // member functions
     Camera();
     Camera(
@@ -79,6 +77,7 @@ public: // member functions
     USE_LOGGER(CAMERA);
 
     uint32_t getId() const { return m_id; }
+    float getFovDegrees() const { return m_fovDegrees; }
     const math::Vec3& getWorldPosition() const { return m_worldPosition; }
     const math::Vec3& getLookDirection() const { return m_lookDirection; }
     const quartz::scene::Camera::EulerAngles& getEulerAngles() const { return m_eulerAngles; }

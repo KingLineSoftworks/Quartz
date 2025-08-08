@@ -5,6 +5,7 @@
 #include "math/transform/Vec3.hpp"
 
 #include "util/logger/Logger.hpp"
+#include "util/macros.hpp"
 
 #include "quartz/scene/camera/Camera.hpp"
 
@@ -77,7 +78,7 @@ quartz::scene::Camera::Camera(
     m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(fovDegrees),
     m_worldPosition(worldPosition),
-    m_lookDirection(lookDirection),
+    m_lookDirection(lookDirection.normalize()),
     m_eulerAngles(quartz::scene::Camera::calculateEulerAnglesFromLookDirection(m_lookDirection)),
     m_viewMatrix(),
     m_projectionMatrix()
@@ -122,6 +123,8 @@ void
 quartz::scene::Camera::setLookDirection(
     const math::Vec3& lookDirection
 ) {
+    QUARTZ_ASSERT(lookDirection.isNormalized(), "Camera look direction must be normalized");
+
     m_lookDirection = lookDirection;
 
     m_eulerAngles = quartz::scene::Camera::calculateEulerAnglesFromLookDirection(m_lookDirection);
