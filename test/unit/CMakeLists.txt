@@ -26,5 +26,6 @@ add_subdirectory("quartz/physics/collider")
 add_subdirectory("quartz/physics/field")
 add_subdirectory("quartz/physics/rigid_body")
 
+add_subdirectory("quartz/scene/light")
 add_subdirectory("quartz/scene/sky_box")
 

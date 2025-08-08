@@ -1,7 +1,6 @@
 #include "math/transform/Transform.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/physics/collider/SphereShape.hpp"
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
@@ -10,6 +9,7 @@
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/physics/collider/Collider.hpp"
+#include "quartz/physics/collider/SphereShape.hpp"
 
 namespace quartz {
 namespace unit_test {
