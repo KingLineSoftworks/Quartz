@@ -646,64 +646,192 @@ UT_FUNCTION(test_normalize) {
     }
 }
 
-UT_FUNCTION(test_rotate) {
-    // This uses glm::rotate
-    // so we need to see what exactly that function is doing
-}
-
 UT_FUNCTION(test_rotationFromTo) {
-    {
-        const math::Vec3 a = math::Vec3(0).normalize();
-        const math::Vec3 b = math::Vec3(0).normalize();
-        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
-        const math::Vec3 result = quat.rotate(a);
-        UT_CHECK_EQUAL(result, b);
-    }
+    /**
+     * @brief We are not testing with vectors of {0,0,0} because that is UB.
+     *    It does not make sense to rotate from a unit vector to a vector that
+     *    has a magnitude of 0. The 0 vector does not actually specify a direction,
+     *    so any rotation applied to A will be valid to achieve a rotation to the
+     *    0 vector.
+     */
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 0");
         const math::Vec3 a = math::Vec3(4).normalize();
         const math::Vec3 b = math::Vec3(4).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
         const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
         const math::Vec3 result = quat.rotate(a);
-        UT_CHECK_EQUAL(result, b);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
     }
 
     {
-        const math::Vec3 a = math::Vec3(5).normalize();
-        const math::Vec3 b = math::Vec3(0).normalize();
-        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
-        const math::Vec3 result = quat.rotate(a);
-        UT_CHECK_EQUAL(result, b);
-    }
-
-    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 1");
         const math::Vec3 a = math::Vec3(1, 2, 3).normalize();
         const math::Vec3 b = math::Vec3(3, 2, 1).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
         const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
         const math::Vec3 result = quat.rotate(a);
-        UT_CHECK_EQUAL(result, b);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
     }
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 2");
         const math::Vec3 a = math::Vec3(1, 2, 3).normalize();
         const math::Vec3 b = math::Vec3(-3, -2, -1).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
         const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
         const math::Vec3 result = quat.rotate(a);
-        UT_CHECK_EQUAL(result, b);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
     }
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 3");
         const math::Vec3 a = math::Vec3(3, 2, 1).normalize();
         const math::Vec3 b = math::Vec3(-3, -2, -1).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
         const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
         const math::Vec3 result = quat.rotate(a);
-        UT_CHECK_EQUAL(result, b);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 4");
+        const math::Vec3 a = math::Vec3(3, 2, 1).normalize();
+        const math::Vec3 b = -1 * a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 5");
+        const math::Vec3 a = math::Vec3(-9, -11, -44).normalize();
+        const math::Vec3 b = -1 * a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 6");
+        const math::Vec3 a = math::Vec3(-99, 11, -50).normalize();
+        const math::Vec3 b = -1 * a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 7");
+        const math::Vec3 a = math::Vec3(99, -78, -50).normalize();
+        const math::Vec3 b = a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 8");
+        const math::Vec3 a = math::Vec3(99, -78, -50).normalize();
+        const math::Vec3 b = math::Vec3(33, 42, -69).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 9");
+        const math::Vec3 a = math::Vec3(-6, -8, 5).normalize();
+        const math::Vec3 b = math::Vec3(-4, 5, -3).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
     }
 }
 
 UT_FUNCTION(test_directionVector) {
+    uint32_t caseIndex = 0;
+
     {
         LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
         const math::Vec3 inputVec = math::Vec3(1, 0, 0).normalize();
         LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
         LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
@@ -716,6 +844,7 @@ UT_FUNCTION(test_directionVector) {
 
     {
         LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
         const math::Vec3 inputVec = math::Vec3(0, 1, 0).normalize();
         LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
         LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
@@ -728,6 +857,7 @@ UT_FUNCTION(test_directionVector) {
 
     {
         LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
         const math::Vec3 inputVec = math::Vec3(0, 0, 1).normalize();
         LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
         LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
@@ -740,6 +870,7 @@ UT_FUNCTION(test_directionVector) {
     
     {
         LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
         const math::Vec3 inputVec = math::Vec3(1, 2, 3).normalize();
         LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
         LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
@@ -752,6 +883,7 @@ UT_FUNCTION(test_directionVector) {
     
     {
         LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
         const math::Vec3 inputVec = math::Vec3(-99, 678.9, 0.5).normalize();
         LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
         LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
@@ -767,14 +899,20 @@ UT_FUNCTION(test_axisAngle) {
     // starting with rotation degrees and rotation axis
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 0");
         const float angle = 90;
+        const float radians = glm::radians(angle);
         const math::Vec3 axis = math::Vec3(1,2,3).normalize();
+        LOG_INFO(UT, "Input angle degrees: {}", angle);
+        LOG_INFO(UT, "Input angle radians: {}", radians);
+        LOG_INFO(UT, "Input axis: {}", axis.toString());
 
         const math::Quaternion expected(
-            axis.x * std::sin(angle/2),
-            axis.y * std::sin(angle/2),
-            axis.z * std::sin(angle/2),
-            std::cos(angle/2)
+            axis.x * std::sin(radians/2),
+            axis.y * std::sin(radians/2),
+            axis.z * std::sin(radians/2),
+            std::cos(radians/2)
         );
 
         const math::Quaternion result = math::Quaternion::fromAxisAngleRotation(axis, angle);
@@ -784,17 +922,32 @@ UT_FUNCTION(test_axisAngle) {
         UT_CHECK_EQUAL_FLOATS(result.z, expected.z);
         UT_CHECK_EQUAL_FLOATS(result.w, expected.w);
         UT_CHECK_TRUE(result.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(result.getAngleDegrees(), angle);
+        UT_CHECK_EQUAL(result.getAxisVector(), axis);
+
+        const math::Quaternion glmExpected = glm::normalize(glm::angleAxis(radians, axis.glmVec));
+        UT_CHECK_EQUAL_FLOATS(result.x, glmExpected.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, glmExpected.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, glmExpected.z);
+        UT_CHECK_EQUAL_FLOATS(result.w, glmExpected.w);
     }
 
     {
-        const float angle = -42;
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 1");
+        const float angle = 42;
+        const float radians = glm::radians(angle);
         const math::Vec3 axis = math::Vec3(31.33,24,-32.111).normalize();
+        LOG_INFO(UT, "Input angle degrees: {}", angle);
+        LOG_INFO(UT, "Input angle radians: {}", radians);
+        LOG_INFO(UT, "Input axis: {}", axis.toString());
 
         const math::Quaternion expected(
-            axis.x * std::sin(angle/2),
-            axis.y * std::sin(angle/2),
-            axis.z * std::sin(angle/2),
-            std::cos(angle/2)
+            axis.x * std::sin(radians/2),
+            axis.y * std::sin(radians/2),
+            axis.z * std::sin(radians/2),
+            std::cos(radians/2)
         );
 
         const math::Quaternion result = math::Quaternion::fromAxisAngleRotation(axis, angle);
@@ -804,22 +957,35 @@ UT_FUNCTION(test_axisAngle) {
         UT_CHECK_EQUAL_FLOATS(result.z, expected.z);
         UT_CHECK_EQUAL_FLOATS(result.w, expected.w);
         UT_CHECK_TRUE(result.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(result.getAngleDegrees(), angle);
+        UT_CHECK_EQUAL(result.getAxisVector(), axis);
+
+        const math::Quaternion glmExpected = glm::normalize(glm::angleAxis(radians, axis.glmVec));
+        UT_CHECK_EQUAL_FLOATS(result.x, glmExpected.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, glmExpected.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, glmExpected.z);
+        UT_CHECK_EQUAL_FLOATS(result.w, glmExpected.w);
     }
 
     // starting with a quaternion
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 2");
         const math::Quaternion quat = math::Quaternion(1,2,3,4).normalize();
+        LOG_INFO(UT, "Input quaternion: {}", quat.toString());
 
-        const float angle = 2 * std::acos(quat.w);
+        const float radians = 2 * std::acos(quat.w);
+        const float angle = glm::degrees(radians);
 
         const float resultAngle = quat.getAngleDegrees();
         UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
 
         const math::Vec3 axis(
-            quat.x / std::sin(angle/2),
-            quat.y / std::sin(angle/2),
-            quat.z / std::sin(angle/2)
+            quat.x / std::sin(radians/2),
+            quat.y / std::sin(radians/2),
+            quat.z / std::sin(radians/2)
         );
 
         const math::Vec3 resultAxis = quat.getAxisVector();
@@ -828,17 +994,20 @@ UT_FUNCTION(test_axisAngle) {
     }
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 3");
         const math::Quaternion quat = math::Quaternion(-32.1244).normalize();
+        LOG_INFO(UT, "Input quaternion: {}", quat.toString());
 
-        const float angle = 2 * std::acos(quat.w);
+        const float radians = 2 * std::acos(quat.w);
 
         const float resultAngle = quat.getAngleDegrees();
-        UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
+        UT_CHECK_EQUAL_FLOATS(resultAngle, glm::degrees(radians));
 
         const math::Vec3 axis(
-            quat.x / std::sin(angle/2),
-            quat.y / std::sin(angle/2),
-            quat.z / std::sin(angle/2)
+            quat.x / std::sin(radians/2),
+            quat.y / std::sin(radians/2),
+            quat.z / std::sin(radians/2)
         );
 
         const math::Vec3 resultAxis = quat.getAxisVector();
@@ -850,19 +1019,22 @@ UT_FUNCTION(test_axisAngle) {
     // round trip starting with quaternion
 
     {
-        // Input quaternion
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 4");
         const math::Quaternion quat = math::Quaternion(999.5, -888.4, 777.3, -666.2).normalize();
+        LOG_INFO(UT, "Input quaternion: {}", quat.toString());
 
         // Expected angle check
-        const float angle = 2 * std::acos(quat.w);
+        const float radians = 2 * std::acos(quat.w);
+        const float angle = glm::degrees(radians);
         const float resultAngle = quat.getAngleDegrees();
         UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
 
         // Expected axis check
         const math::Vec3 axis(
-            quat.x / std::sin(angle/2),
-            quat.y / std::sin(angle/2),
-            quat.z / std::sin(angle/2)
+            quat.x / std::sin(radians/2),
+            quat.y / std::sin(radians/2),
+            quat.z / std::sin(radians/2)
         );
         const math::Vec3 resultAxis = quat.getAxisVector();
         UT_CHECK_EQUAL(resultAxis, axis);
@@ -1066,7 +1238,6 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_quaternion_operators);
     REGISTER_UT_FUNCTION(test_dot);
     REGISTER_UT_FUNCTION(test_normalize);
-    REGISTER_UT_FUNCTION(test_rotate);
     REGISTER_UT_FUNCTION(test_rotationFromTo);
     REGISTER_UT_FUNCTION(test_directionVector);
     REGISTER_UT_FUNCTION(test_axisAngle);

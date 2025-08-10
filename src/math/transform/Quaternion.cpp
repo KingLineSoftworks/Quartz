@@ -9,6 +9,7 @@
 
 #include "glm/gtc/quaternion.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/scalar_constants.hpp"
 #include "glm/fwd.hpp"
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
@@ -17,6 +18,7 @@
 #include "math/transform/Vec3.hpp"
 
 #include "reactphysics3d/mathematics/Quaternion.h"
+#include "util/logger/Logger.hpp"
 #include "util/macros.hpp"
 
 bool
@@ -97,15 +99,13 @@ math::Quaternion::getDirectionVector() const {
     directionVector *= -1;
     directionVector.normalize();
     return directionVector;
-
-    // return glm::rotate(glmQuat, math::Vec3::Forward.glmVec);
 }
 
 float
 math::Quaternion::getAngleDegrees() const {
     QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
-    return glm::angle(glmQuat);
+    return glm::degrees(glm::angle(glmQuat));
 }
 
 math::Vec3
@@ -148,7 +148,37 @@ math::Quaternion::rotationFromTo(
     UNUSED const math::Vec3& a,
     UNUSED const math::Vec3& b
 ) {
-    return {};
+    QUARTZ_ASSERT(a.isNormalized(), "Input vector a is not normalized");
+    QUARTZ_ASSERT(b.isNormalized(), "Input vector b is not normalized");
+
+    const float dot = a.dot(b);
+    LOG_INFO(TRANSFORM, "A.dot(B) = {}", dot);
+    LOG_INFO(TRANSFORM, "Dot UB:    {}", 1.0f - std::numeric_limits<float>::epsilon());
+    LOG_INFO(TRANSFORM, "Dot LB:    {}", -1.0f + std::numeric_limits<float>::epsilon());
+    if (dot >= (1.0f - std::numeric_limits<float>::epsilon())) {
+        // Inputs are parallel so just use the identity to save some work
+        return {0, 0, 0, 1};
+    }
+    if (dot <= (-1.0f + std::numeric_limits<float>::epsilon())) {
+        // Inputs are opposite, so we need to choose an axis angle representation.
+        // Try using a generic rotation axis. If that ends up being parallel to our
+        // input, then try with a different rotation axis
+        math::Vec3 axis = math::Vec3::Up.cross(a);
+        if (axis.magnitude() < std::numeric_limits<float>::epsilon()) {
+            axis = math::Vec3::Forward.cross(a);
+        }
+        axis.normalize();
+
+        // Rotate 180 degrees (pi radians) around the chosen axis
+        // return math::Quaternion::fromAxisAngleRotation(axis, glm::degrees(glm::pi<float>()));
+        return math::Quaternion::fromAxisAngleRotation(axis, 180);
+    }
+
+    math::Vec3 c = a.cross(b);
+    math::Quaternion q(c);
+    q.w = std::sqrt((a.magnitude() * a.magnitude()) * (b.magnitude() * b.magnitude())) + a.dot(b);
+    q.normalize();
+    return q;
 }
 
 math::Quaternion
@@ -156,30 +186,8 @@ math::Quaternion::fromDirectionVector(
     const math::Vec3& direction
 ) {
     QUARTZ_ASSERT(direction.isNormalized(), "Direction vector is not normalized");
-#define CASE_1
 
-#if defined CASE_1
     return glm::normalize(glm::quatLookAt(direction.glmVec, math::Vec3::Up.glmVec));
-#undef CASE_1
-#elif defined CASE_2
-    // Use look at to align the forwared vector with direction??? Then go to quat???
-    // const math::Mat4 mat = math::Vec3::Forward.look(direction, math::Vec3::Up);
-
-    const math::Mat4 mat = glm::lookAt(glm::vec3(0), direction.glmVec, math::Vec3::Up.glmVec);
-    const math::Quaternion quat = glm::normalize(glm::quat_cast(mat.glmMat));
-    return quat;
-#undef CASE_2
-#elif defined CASE_3
-    // To do this requires a 3x3 matrix class implementation
-    // - construction from 3 vectors
-    // - conversion to quaternion
-
-    const math::Vec3 side = direction.cross(math::Vec3::Up);
-    const math::Vec3 newUp = direction.cross(side);
-    const math::Mat4()
-    return {};
-#undef CASE_3
-#endif
 }
 
 math::Quaternion
@@ -202,11 +210,13 @@ math::Quaternion::fromAxisAngleRotation(
     const float rotationAmountDegrees
 ) {
     QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
+    QUARTZ_ASSERT(rotationAmountDegrees >= 0, "Rotation amount degrees is less than 0");
 
     // This is the same as doing the following with glm:
     // glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec))
 
-    const float theta = rotationAmountDegrees / 2.0;
+    const float radians = glm::radians(rotationAmountDegrees);
+    const float theta = radians / 2.0;
     const math::Vec3& a = normalizedRotationAxis;
 
     const float s = std::sin(theta);
