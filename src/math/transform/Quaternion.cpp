@@ -7,6 +7,9 @@
 #include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/ext/quaternion_float.hpp>
 
+#include "glm/gtc/quaternion.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/fwd.hpp"
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
@@ -61,10 +64,41 @@ math::Quaternion::isNormalized() const {
 }
 
 math::Vec3
+math::Quaternion::rotate(
+    const math::Vec3& vec
+) const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+
+    // rotation = q * v * qInverse
+    // but because q must be unit length, qInverse == qConjugate
+    // We are using glm here for simplicity's sake
+    
+    return glm::rotate(glmQuat, vec.glmVec);
+}
+
+math::Vec3
 math::Quaternion::getDirectionVector() const {
     QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
-    return glm::rotate(glmQuat, math::Vec3::Forward.glmVec);
+    /**
+     * @brief This solution is taken from a post on gamedev.net. The answer provides forward, up,
+     *    and side vectors derived from quaternion->matrix conversion. For some reason, we must
+     *    negate our resulting direction vector - which I think is quite suspicious ...
+     *
+     * @link http://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
+     */
+
+    math::Vec3 directionVector;
+
+    directionVector.x = 2 * (x * z + w * y);
+    directionVector.y = 2 * (y * z - w * x);
+    directionVector.z = 1 - 2 * (x * x + y * y);
+
+    directionVector *= -1;
+    directionVector.normalize();
+    return directionVector;
+
+    // return glm::rotate(glmQuat, math::Vec3::Forward.glmVec);
 }
 
 float
@@ -107,6 +141,45 @@ math::Quaternion::getRollDegrees() const {
     QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
     return glm::degrees(glm::roll(this->glmQuat));
+}
+
+math::Quaternion
+math::Quaternion::rotationFromTo(
+    UNUSED const math::Vec3& a,
+    UNUSED const math::Vec3& b
+) {
+    return {};
+}
+
+math::Quaternion
+math::Quaternion::fromDirectionVector(
+    const math::Vec3& direction
+) {
+    QUARTZ_ASSERT(direction.isNormalized(), "Direction vector is not normalized");
+#define CASE_1
+
+#if defined CASE_1
+    return glm::normalize(glm::quatLookAt(direction.glmVec, math::Vec3::Up.glmVec));
+#undef CASE_1
+#elif defined CASE_2
+    // Use look at to align the forwared vector with direction??? Then go to quat???
+    // const math::Mat4 mat = math::Vec3::Forward.look(direction, math::Vec3::Up);
+
+    const math::Mat4 mat = glm::lookAt(glm::vec3(0), direction.glmVec, math::Vec3::Up.glmVec);
+    const math::Quaternion quat = glm::normalize(glm::quat_cast(mat.glmMat));
+    return quat;
+#undef CASE_2
+#elif defined CASE_3
+    // To do this requires a 3x3 matrix class implementation
+    // - construction from 3 vectors
+    // - conversion to quaternion
+
+    const math::Vec3 side = direction.cross(math::Vec3::Up);
+    const math::Vec3 newUp = direction.cross(side);
+    const math::Mat4()
+    return {};
+#undef CASE_3
+#endif
 }
 
 math::Quaternion

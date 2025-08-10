@@ -1,9 +1,11 @@
 #include <atomic>
 #include <cmath>
+
 #include <glm/ext/quaternion_float.hpp>
 
 #include <reactphysics3d/mathematics/Quaternion.h>
 
+#include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
 #include "math/transform/Mat4.hpp"
@@ -49,6 +51,23 @@ UT_FUNCTION(test_construction) {
         UT_CHECK_EQUAL_FLOATS(quat.rp3dQuat.y, 42.69);
         UT_CHECK_EQUAL_FLOATS(quat.rp3dQuat.z, 42.69);
         UT_CHECK_EQUAL_FLOATS(quat.rp3dQuat.w, 42.69);
+    }
+
+    // vector3 construction (i, j, k from the vector, with w == 0)
+    {
+        const math::Vec3 vec1(1, 2, 3);
+        const math::Quaternion quat1(vec1);
+        UT_CHECK_EQUAL_FLOATS(quat1.x, 1);
+        UT_CHECK_EQUAL_FLOATS(quat1.y, 2);
+        UT_CHECK_EQUAL_FLOATS(quat1.z, 3);
+        UT_CHECK_EQUAL_FLOATS(quat1.w, 0);
+
+        const math::Vec3 vec2(-111, 0.2, -33.33);
+        const math::Quaternion quat2(vec2);
+        UT_CHECK_EQUAL_FLOATS(quat2.x, -111);
+        UT_CHECK_EQUAL_FLOATS(quat2.y, 0.2);
+        UT_CHECK_EQUAL_FLOATS(quat2.z, -33.33);
+        UT_CHECK_EQUAL_FLOATS(quat2.w, 0);
     }
 
     // element construction
@@ -627,9 +646,121 @@ UT_FUNCTION(test_normalize) {
     }
 }
 
-UT_FUNCTION(test_getDirectionVector) {
+UT_FUNCTION(test_rotate) {
     // This uses glm::rotate
     // so we need to see what exactly that function is doing
+}
+
+UT_FUNCTION(test_rotationFromTo) {
+    {
+        const math::Vec3 a = math::Vec3(0).normalize();
+        const math::Vec3 b = math::Vec3(0).normalize();
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        const math::Vec3 result = quat.rotate(a);
+        UT_CHECK_EQUAL(result, b);
+    }
+
+    {
+        const math::Vec3 a = math::Vec3(4).normalize();
+        const math::Vec3 b = math::Vec3(4).normalize();
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        const math::Vec3 result = quat.rotate(a);
+        UT_CHECK_EQUAL(result, b);
+    }
+
+    {
+        const math::Vec3 a = math::Vec3(5).normalize();
+        const math::Vec3 b = math::Vec3(0).normalize();
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        const math::Vec3 result = quat.rotate(a);
+        UT_CHECK_EQUAL(result, b);
+    }
+
+    {
+        const math::Vec3 a = math::Vec3(1, 2, 3).normalize();
+        const math::Vec3 b = math::Vec3(3, 2, 1).normalize();
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        const math::Vec3 result = quat.rotate(a);
+        UT_CHECK_EQUAL(result, b);
+    }
+
+    {
+        const math::Vec3 a = math::Vec3(1, 2, 3).normalize();
+        const math::Vec3 b = math::Vec3(-3, -2, -1).normalize();
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        const math::Vec3 result = quat.rotate(a);
+        UT_CHECK_EQUAL(result, b);
+    }
+
+    {
+        const math::Vec3 a = math::Vec3(3, 2, 1).normalize();
+        const math::Vec3 b = math::Vec3(-3, -2, -1).normalize();
+        const math::Quaternion quat = math::Quaternion::rotationFromTo(a, b);
+        const math::Vec3 result = quat.rotate(a);
+        UT_CHECK_EQUAL(result, b);
+    }
+}
+
+UT_FUNCTION(test_directionVector) {
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        const math::Vec3 inputVec = math::Vec3(1, 0, 0).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        const math::Vec3 inputVec = math::Vec3(0, 1, 0).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        const math::Vec3 inputVec = math::Vec3(0, 0, 1).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+    }
+    
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        const math::Vec3 inputVec = math::Vec3(1, 2, 3).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+    }
+    
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        const math::Vec3 inputVec = math::Vec3(-99, 678.9, 0.5).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+    }
 }
 
 UT_FUNCTION(test_axisAngle) {
@@ -935,7 +1066,9 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_quaternion_operators);
     REGISTER_UT_FUNCTION(test_dot);
     REGISTER_UT_FUNCTION(test_normalize);
-    REGISTER_UT_FUNCTION(test_getDirectionVector);
+    REGISTER_UT_FUNCTION(test_rotate);
+    REGISTER_UT_FUNCTION(test_rotationFromTo);
+    REGISTER_UT_FUNCTION(test_directionVector);
     REGISTER_UT_FUNCTION(test_axisAngle);
     REGISTER_UT_FUNCTION(test_getRotationMatrix);
     REGISTER_UT_FUNCTION(test_fromEulerAngles);

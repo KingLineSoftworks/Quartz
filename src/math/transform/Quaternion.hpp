@@ -24,6 +24,7 @@ namespace math {
 union math::Quaternion {
     Quaternion() : glmQuat(0, 0, 0, 1) {}
     Quaternion(const float scalar) : x(scalar), y(scalar), z(scalar), w(scalar) {}
+    Quaternion(const math::Vec3& vec) : x(vec.x), y(vec.y), z(vec.z), w() {}
     Quaternion(const float x, const float y, const float z, const float w) : glmQuat(x, y, z, w) {}
 
     Quaternion(const Quaternion& other) : glmQuat(other.glmQuat) {}
@@ -123,6 +124,8 @@ union math::Quaternion {
     float magnitude() const { return glm::length(glmQuat); }
     bool isNormalized() const;
 
+    math::Vec3 rotate(const math::Vec3& vec) const;
+
     math::Vec3 getDirectionVector() const;
 
     float getAngleDegrees() const;
@@ -133,6 +136,22 @@ union math::Quaternion {
     float getYawDegrees() const;
     float getPitchDegrees() const;
     float getRollDegrees() const;
+
+    /**
+     * @brief Calculate the rotation quaternion between two vectors
+     */
+    static Quaternion rotationFromTo(
+        const math::Vec3& a,
+        const math::Vec3& b
+    );
+
+    /**
+     * @brief Create a quaternion looking along the specified direction,
+     *    using the world's up vector
+     */
+    static Quaternion fromDirectionVector(
+        const math::Vec3& direction
+    );
 
     /**
      * @brief Create a quaternion from euler angles in degrees
