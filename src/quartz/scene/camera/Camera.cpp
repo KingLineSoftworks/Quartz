@@ -1,12 +1,16 @@
 #include <cmath>
+#include <limits>
+#include <ostream>
 
 #include <glm/trigonometric.hpp>
 
+#include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
 #include "util/logger/Logger.hpp"
 #include "util/macros.hpp"
 
+#include "quartz/scene/Loggers.hpp"
 #include "quartz/scene/camera/Camera.hpp"
 
 uint32_t quartz::scene::Camera::cameraCount = 0;
@@ -29,19 +33,43 @@ quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
     projectionMatrix(camera.m_projectionMatrix)
 {}
 
+bool
+quartz::scene::Camera::EulerAngles::operator==(
+    const quartz::scene::Camera::EulerAngles& other
+) const {
+    bool yawEquals = std::abs(yawDegrees - other.yawDegrees) <= std::numeric_limits<float>::epsilon();
+    bool pitchEquals = std::abs(pitchDegrees - other.pitchDegrees) <= std::numeric_limits<float>::epsilon();
+    bool rollEquals = std::abs(rollDegrees - other.rollDegrees) <= std::numeric_limits<float>::epsilon();
+
+    return yawEquals && pitchEquals && rollEquals;
+}
+
+std::ostream&
+quartz::scene::operator<<(
+    std::ostream& os,
+    const quartz::scene::Camera::EulerAngles& eulerAngles
+) {
+    return os << "[yaw deg " << eulerAngles.yawDegrees
+        << ", pitch deg " << eulerAngles.pitchDegrees
+        << ", roll deg " << eulerAngles.rollDegrees << "]";
+}
+
 math::Vec3
 quartz::scene::Camera::calculateLookDirectionFromEulerAngles(
     const quartz::scene::Camera::EulerAngles& eulerAngles
 ) {
     /**
      * @brief We aren't considering roll for now because we don't want to support rolling the camera yet
+     *
+     * @todo 2025/08/08 Clearly this doesn't match the implementation we have for going euler angles ->
+     *    quaternion -> look vector , but we don't really care for the time being because this works for
+     *    cameras
      */
 
     math::Vec3 lookDirection;
-    lookDirection.x = cos(glm::radians(eulerAngles.yawDegrees)) * cos(glm::radians(eulerAngles.pitchDegrees));
-    lookDirection.y = sin(glm::radians(eulerAngles.pitchDegrees));
-    lookDirection.z = sin(glm::radians(eulerAngles.yawDegrees)) * cos(glm::radians(eulerAngles.pitchDegrees));
-
+    lookDirection.x = std::cos(glm::radians(eulerAngles.yawDegrees)) * std::cos(glm::radians(eulerAngles.pitchDegrees));
+    lookDirection.y = std::sin(glm::radians(eulerAngles.pitchDegrees));
+    lookDirection.z = std::sin(glm::radians(eulerAngles.yawDegrees)) * std::cos(glm::radians(eulerAngles.pitchDegrees));
     return lookDirection.normalize();
 }
 
@@ -49,9 +77,10 @@ quartz::scene::Camera::EulerAngles
 quartz::scene::Camera::calculateEulerAnglesFromLookDirection(
     const math::Vec3& lookDirection
 ) {
-    const double pitchRadians = asin(lookDirection.y);
+    const double pitchRadians = std::asin(lookDirection.y);
     const double pitchDegrees = glm::degrees(pitchRadians);
-    const double yawDegrees = glm::degrees(acos(lookDirection.x / cos(pitchRadians)));
+    const double yawRadians = std::acos(lookDirection.x / std::cos(pitchRadians));
+    const double yawDegrees = glm::degrees(yawRadians);
 
     return {yawDegrees, pitchDegrees, 0};
 }

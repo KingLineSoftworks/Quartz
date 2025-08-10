@@ -21,16 +21,6 @@ math::Vec3::operator==(const math::Vec3& other) const {
     bool yEquals = std::abs(y - other.y) <= std::numeric_limits<float>::epsilon();
     bool zEquals = std::abs(z - other.z) <= std::numeric_limits<float>::epsilon();
 
-    if (!xEquals) {
-        LOG_INFO(TRANSFORM, "X values do not equal. {} != {}", x, other.x);
-    }
-    if (!yEquals) {
-        LOG_INFO(TRANSFORM, "Y values do not equal. {} != {}", y, other.y);
-    }
-    if (!zEquals) {
-        LOG_INFO(TRANSFORM, "Z values do not equal. {} != {}", z, other.z);
-    }
-
     return xEquals && yEquals && zEquals;
 }
 

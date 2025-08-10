@@ -1,8 +1,11 @@
+#include <cmath>
 #include <limits>
 
 #include <glm/geometric.hpp>
-#include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/trigonometric.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/ext/quaternion_float.hpp>
 
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
@@ -10,6 +13,7 @@
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
+#include "reactphysics3d/mathematics/Quaternion.h"
 #include "util/macros.hpp"
 
 bool
@@ -43,7 +47,7 @@ math::Quaternion::normalize() const {
     if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
         return {0.0, 0.0, 0.0, 0.0};
     }
-    
+
     return glm::normalize(glmQuat);
 }
 
@@ -115,7 +119,8 @@ math::Quaternion::fromEulerAngles(
     const double y = glm::radians(yawDegrees);
     const double z = glm::radians(rollDegrees);
 
-    return glm::normalize(glm::quat(glm::vec3(x, y, z)));
+    //return glm::normalize(glm::quat(glm::vec3(x, y, z)));
+    return reactphysics3d::Quaternion::fromEulerAngles(x, y, z);
 }
 
 math::Quaternion
@@ -125,7 +130,20 @@ math::Quaternion::fromAxisAngleRotation(
 ) {
     QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
 
-    return glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec));
+    // This is the same as doing the following with glm:
+    // glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec))
+
+    const float theta = rotationAmountDegrees / 2.0;
+    const math::Vec3& a = normalizedRotationAxis;
+
+    const float s = std::sin(theta);
+    math::Quaternion quat(
+        a.x * s,
+        a.y * s,
+        a.z * s,
+        std::cos(theta)
+    );
+    return quat.normalize();
 }
 
 math::Quaternion

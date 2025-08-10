@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 #include <glm/gtc/quaternion.hpp>
 
 #include "math/transform/Mat4.hpp"
@@ -54,6 +56,9 @@ public: // classes
             rollDegrees(rollDegrees)
         {}
 
+        bool operator==(const EulerAngles& other) const;
+        friend std::ostream& operator<<(std::ostream& os, const EulerAngles& eulerAngles);
+
     public: // member variables
         double yawDegrees;
         double pitchDegrees;
@@ -61,6 +66,9 @@ public: // classes
     };
 
 public: // static functions
+    /**
+     * @todo 2025/08/08 These break down beyond 90 degrees. Fix this
+     */
     static math::Vec3 calculateLookDirectionFromEulerAngles(const quartz::scene::Camera::EulerAngles& eulerAngles);
     static quartz::scene::Camera::EulerAngles calculateEulerAnglesFromLookDirection(const math::Vec3& lookDirection);
 
