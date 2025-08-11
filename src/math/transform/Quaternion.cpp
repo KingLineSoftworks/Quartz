@@ -81,24 +81,8 @@ math::Quaternion::rotate(
 math::Vec3
 math::Quaternion::getDirectionVector() const {
     QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
-
-    /**
-     * @brief This solution is taken from a post on gamedev.net. The answer provides forward, up,
-     *    and side vectors derived from quaternion->matrix conversion. For some reason, we must
-     *    negate our resulting direction vector - which I think is quite suspicious ...
-     *
-     * @link http://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
-     */
-
-    math::Vec3 directionVector;
-
-    directionVector.x = 2 * (x * z + w * y);
-    directionVector.y = 2 * (y * z - w * x);
-    directionVector.z = 1 - 2 * (x * x + y * y);
-
-    directionVector *= -1;
-    directionVector.normalize();
-    return directionVector;
+    
+    return glm::normalize(glm::rotate(glmQuat, math::Vec3::Forward.glmVec));
 }
 
 float
@@ -152,9 +136,6 @@ math::Quaternion::rotationFromTo(
     QUARTZ_ASSERT(b.isNormalized(), "Input vector b is not normalized");
 
     const float dot = a.dot(b);
-    LOG_INFO(TRANSFORM, "A.dot(B) = {}", dot);
-    LOG_INFO(TRANSFORM, "Dot UB:    {}", 1.0f - std::numeric_limits<float>::epsilon());
-    LOG_INFO(TRANSFORM, "Dot LB:    {}", -1.0f + std::numeric_limits<float>::epsilon());
     if (dot >= (1.0f - std::numeric_limits<float>::epsilon())) {
         // Inputs are parallel so just use the identity to save some work
         return {0, 0, 0, 1};
@@ -187,7 +168,7 @@ math::Quaternion::fromDirectionVector(
 ) {
     QUARTZ_ASSERT(direction.isNormalized(), "Direction vector is not normalized");
 
-    return glm::normalize(glm::quatLookAt(direction.glmVec, math::Vec3::Up.glmVec));
+    return math::Quaternion::rotationFromTo(math::Vec3::Forward, direction);
 }
 
 math::Quaternion

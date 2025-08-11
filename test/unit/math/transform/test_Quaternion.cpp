@@ -840,6 +840,8 @@ UT_FUNCTION(test_directionVector) {
         LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
         const math::Vec3 outputVec = inputQuat.getDirectionVector();
         UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
     }
 
     {
@@ -853,6 +855,8 @@ UT_FUNCTION(test_directionVector) {
         LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
         const math::Vec3 outputVec = inputQuat.getDirectionVector();
         UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
     }
 
     {
@@ -866,6 +870,8 @@ UT_FUNCTION(test_directionVector) {
         LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
         const math::Vec3 outputVec = inputQuat.getDirectionVector();
         UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
     }
     
     {
@@ -879,6 +885,8 @@ UT_FUNCTION(test_directionVector) {
         LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
         const math::Vec3 outputVec = inputQuat.getDirectionVector();
         UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
     }
     
     {
@@ -892,6 +900,8 @@ UT_FUNCTION(test_directionVector) {
         LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
         const math::Vec3 outputVec = inputQuat.getDirectionVector();
         UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
     }
 }
 
@@ -1229,6 +1239,73 @@ UT_FUNCTION(test_slerp) {
      */
 }
 
+UT_FUNCTION(test_comparisons) {
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 0 - euler angles and axis angle equality");
+
+        const math::Quaternion quatEuler = math::Quaternion::fromEulerAngles(90, 0, 0);
+        const math::Quaternion quatAxis = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 90);
+
+        const math::Vec3 dirEuler = quatEuler.getDirectionVector();
+        const math::Vec3 dirAxis = quatAxis.getDirectionVector();
+
+        LOG_INFO(UT, "result fromEulerAngles      : {}", quatEuler.toString());
+        LOG_INFO(UT, "result fromAxisAngleRotation: {}", quatAxis.toString());
+
+        LOG_INFO(UT, "axis fromEulerAngles      : {}", dirEuler.toString());
+        LOG_INFO(UT, "axis fromAxisAngleRotation: {}", dirAxis.toString());
+
+        // All we really care about is whether or not we can use the resulting quaternions to
+        // rotate correctly, so we are only testing whether or not rotating a vector is the same
+        UT_CHECK_EQUAL(quatEuler.rotate(math::Vec3::Forward), quatAxis.rotate(math::Vec3::Forward));
+
+        // More complex rotation of a vector between these types of initializations
+        const math::Vec3 baseDirection = math::Vec3(3, 4, 5).normalize();
+        const math::Vec3 rotatedEuler = quatEuler.rotate(baseDirection);
+        const math::Vec3 rotatedAxis = quatAxis.rotate(baseDirection);
+        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
+        LOG_INFO(UT, "rotated fromEulerAngles      : {}", rotatedEuler.toString());
+        LOG_INFO(UT, "rotated fromAxisAngleRotation: {}", rotatedAxis.toString());
+
+        UT_CHECK_EQUAL(rotatedEuler, rotatedAxis);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 2 - direction vector and axis angle equality");
+
+        const math::Quaternion quatDir = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+        const math::Quaternion quatAxis = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 270);
+        LOG_INFO(UT, "Quat dir  angle and axis: {} degrees around {}", quatDir.getAngleDegrees(), quatDir.getAxisVector().toString());
+        LOG_INFO(UT, "Quat axis angle and axis: {} degrees around {}", quatAxis.getAngleDegrees(), quatAxis.getAxisVector().toString());
+
+        const math::Vec3 dirDir = quatDir.getDirectionVector();
+        const math::Vec3 dirAxis = quatAxis.getDirectionVector();
+
+        LOG_INFO(UT, "result fromDirectionVector  : {}", quatDir.toString());
+        LOG_INFO(UT, "result fromAxisAngleRotation: {}", quatAxis.toString());
+
+        LOG_INFO(UT, "axis fromDirectionVector  : {}", dirDir.toString());
+        LOG_INFO(UT, "axis fromAxisAngleRotation: {}", dirAxis.toString());
+
+        const math::Vec3 simpleRotationDir = quatDir.rotate(math::Vec3::Forward);
+        const math::Vec3 simpleRotationAxis = quatAxis.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.x, simpleRotationAxis.x);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.y, simpleRotationAxis.y);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.z, simpleRotationAxis.z);
+
+        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
+        const math::Vec3 rotatedDir = quatDir.rotate(baseDirection);
+        const math::Vec3 rotatedAxis = quatAxis.rotate(baseDirection);
+        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
+        LOG_INFO(UT, "rotated fromDirectionVector  : {}", rotatedDir.toString());
+        LOG_INFO(UT, "rotated fromAxisAngleRotation: {}", rotatedAxis.toString());
+
+        UT_CHECK_EQUAL(rotatedDir, rotatedAxis);
+    }
+}
+
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
     REGISTER_UT_FUNCTION(test_copy);
@@ -1244,5 +1321,6 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_getRotationMatrix);
     REGISTER_UT_FUNCTION(test_fromEulerAngles);
     REGISTER_UT_FUNCTION(test_slerp);
+    REGISTER_UT_FUNCTION(test_comparisons);
     UT_RUN_TESTS();
 }
