@@ -128,7 +128,7 @@ math::Quaternion::getRollDegrees() const {
 }
 
 math::Quaternion
-math::Quaternion::rotationFromTo(
+math::Quaternion::fromVectorDifference(
     UNUSED const math::Vec3& a,
     UNUSED const math::Vec3& b
 ) {
@@ -168,7 +168,7 @@ math::Quaternion::fromDirectionVector(
 ) {
     QUARTZ_ASSERT(direction.isNormalized(), "Direction vector is not normalized");
 
-    return math::Quaternion::rotationFromTo(math::Vec3::Forward, direction);
+    return math::Quaternion::fromVectorDifference(math::Vec3::Forward, direction);
 }
 
 math::Quaternion
@@ -181,7 +181,6 @@ math::Quaternion::fromEulerAngles(
     const double y = glm::radians(yawDegrees);
     const double z = glm::radians(rollDegrees);
 
-    //return glm::normalize(glm::quat(glm::vec3(x, y, z)));
     return reactphysics3d::Quaternion::fromEulerAngles(x, y, z);
 }
 

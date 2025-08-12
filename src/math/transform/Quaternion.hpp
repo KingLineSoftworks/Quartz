@@ -140,7 +140,7 @@ union math::Quaternion {
     /**
      * @brief Calculate the rotation quaternion between two vectors
      */
-    static Quaternion rotationFromTo(
+    static Quaternion fromVectorDifference(
         const math::Vec3& a,
         const math::Vec3& b
     );
