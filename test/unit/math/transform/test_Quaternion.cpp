@@ -1240,294 +1240,149 @@ UT_FUNCTION(test_slerp) {
 }
 
 UT_FUNCTION(test_comparisons) {
-    {
+    struct QuaternionComparisonTestInfo {
+        // A
+        const math::Quaternion a;
+        const std::string aMessage;
+
+        // B
+        const math::Quaternion b;
+        const std::string bMessage;
+
+        // Misc.
+        const math::Vec3 baseDirection;
+        const std::string description;
+    };
+
+    const std::vector<QuaternionComparisonTestInfo> testInfos = {
+
+        // Euler angles to axis angle
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromEulerAngles(90, 0, 0),
+            "fromEulerAngles      ",
+            math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 90),
+            "fromAxisAngleRotation",
+            math::Vec3(100, 90, 20),
+            "euler angle and axis angle rotation"
+        ),
+
+        // Direction vector to axis angle
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3::Right),
+            "fromDirectionVector  ",
+            math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 270),
+            "fromAxisAngleRotation",
+            math::Vec3(-100, 900, 200),
+            "direction vector and axis angle rotation"
+        ),
+
+        // Vector difference to axis angle
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromVectorDifference(math::Vec3::Down, math::Vec3::Backward),
+            "fromVectorDifference ",
+            math::Quaternion::fromAxisAngleRotation(math::Vec3::Left, 90),
+            "fromAxisAngleRotation",
+            math::Vec3(-1, 9, 2),
+            "vector difference and axis angle rotation"
+        ),
+
+        // Direction vector to euler angles
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3::Up),
+            "fromDirectionVector",
+            math::Quaternion::fromEulerAngles(0, 0, 90),
+            "fromEulerAngles     ",
+            math::Vec3(-7, 0, 5),
+            "direction vector and euler angle 1"
+        ),
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3(1, 0, 1).normalize()),
+            "fromDirectionVector",
+            math::Quaternion::fromEulerAngles(-45, 0, 0),
+            "fromEulerAngles     ",
+            math::Vec3(17, 9, 5),
+            "direction vector and euler angle 2"
+        ),
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3(1, 1, 0).normalize()),
+            "fromDirectionVector",
+            math::Quaternion::fromEulerAngles(0, 0, 45),
+            "fromEulerAngles     ",
+            math::Vec3(-17, 90, 25),
+            "direction vector and euler angle 3"
+        ),
+
+        // Vector difference to euler angles
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromVectorDifference(math::Vec3::Forward, math::Vec3::Right),
+            "fromVectorDifference",
+            math::Quaternion::fromEulerAngles(-90, 0, 0),
+            "fromEulerAngles     ",
+            math::Vec3(17, 1.8, -22),
+            "vector difference and euler angle"
+        ),
+
+        // Vector difference to direction vector
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromVectorDifference(math::Vec3::Left, math::Vec3::Backward),
+            "fromVectorDifference",
+            math::Quaternion::fromDirectionVector(math::Vec3::Left),
+            "fromDirectionVector ",
+            math::Vec3(7, 89, 22),
+            "vector difference and direction vector"
+        )
+    };
+
+    for (uint32_t i = 0; i < testInfos.size(); ++i) {
         LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 0 - euler angles and axis angle equality");
-
-        const math::Quaternion quatEuler = math::Quaternion::fromEulerAngles(90, 0, 0);
-        const math::Quaternion quatAxis = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 90);
-
-        const math::Vec3 dirEuler = quatEuler.getAxisVector();
-        const math::Vec3 dirAxis = quatAxis.getAxisVector();
-
-        LOG_INFO(UT, "result fromEulerAngles      : {}", quatEuler.toString());
-        LOG_INFO(UT, "result fromAxisAngleRotation: {}", quatAxis.toString());
-
-        LOG_INFO(UT, "axis fromEulerAngles      : {}", dirEuler.toString());
-        LOG_INFO(UT, "axis fromAxisAngleRotation: {}", dirAxis.toString());
-
-        // All we really care about is whether or not we can use the resulting quaternions to
-        // rotate correctly, so we are only testing whether or not rotating a vector is the same
-        UT_CHECK_EQUAL(quatEuler.rotate(math::Vec3::Forward), quatAxis.rotate(math::Vec3::Forward));
-
-        // More complex rotation of a vector between these types of initializations
-        const math::Vec3 baseDirection = math::Vec3(3, 4, 5).normalize();
-        const math::Vec3 rotatedEuler = quatEuler.rotate(baseDirection);
-        const math::Vec3 rotatedAxis = quatAxis.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromEulerAngles      : {}", rotatedEuler.toString());
-        LOG_INFO(UT, "rotated fromAxisAngleRotation: {}", rotatedAxis.toString());
-
-        UT_CHECK_EQUAL(rotatedEuler, rotatedAxis);
-    }
-
-    {
-        LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 1 - direction vector and axis angle equality");
-
-        const math::Quaternion quatDir = math::Quaternion::fromDirectionVector(math::Vec3::Right);
-        const math::Quaternion quatAxis = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 270);
-        LOG_INFO(UT, "Quat dir  angle and axis: {} degrees around {}", quatDir.getAngleDegrees(), quatDir.getAxisVector().toString());
-        LOG_INFO(UT, "Quat axis angle and axis: {} degrees around {}", quatAxis.getAngleDegrees(), quatAxis.getAxisVector().toString());
-
-        const math::Vec3 dirDir = quatDir.getDirectionVector();
-        const math::Vec3 dirAxis = quatAxis.getDirectionVector();
-
-        LOG_INFO(UT, "result fromDirectionVector  : {}", quatDir.toString());
-        LOG_INFO(UT, "result fromAxisAngleRotation: {}", quatAxis.toString());
-
-        LOG_INFO(UT, "dir fromDirectionVector  : {}", dirDir.toString());
-        LOG_INFO(UT, "dir fromAxisAngleRotation: {}", dirAxis.toString());
-
-        const math::Vec3 simpleRotationDir = quatDir.rotate(math::Vec3::Forward);
-        const math::Vec3 simpleRotationAxis = quatAxis.rotate(math::Vec3::Forward);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.x, simpleRotationAxis.x);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.y, simpleRotationAxis.y);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.z, simpleRotationAxis.z);
-
-        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
-        const math::Vec3 rotatedDir = quatDir.rotate(baseDirection);
-        const math::Vec3 rotatedAxis = quatAxis.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromDirectionVector  : {}", rotatedDir.toString());
-        LOG_INFO(UT, "rotated fromAxisAngleRotation: {}", rotatedAxis.toString());
-
-        UT_CHECK_EQUAL(rotatedDir, rotatedAxis);
-    }
-
-    {
-        LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 2 - vector difference and axis angle equality");
-
-        const math::Quaternion quatDiff = math::Quaternion::fromVectorDifference(math::Vec3::Down, math::Vec3::Backward);
-        const math::Quaternion quatAxis = math::Quaternion::fromAxisAngleRotation(math::Vec3::Left, 90);
-
-        const math::Vec3 dirDiff = quatDiff.getAxisVector();
-        const math::Vec3 dirAxis = quatAxis.getAxisVector();
-
-        LOG_INFO(UT, "result fromVectorDifference : {}", quatDiff.toString());
-        LOG_INFO(UT, "result fromAxisAngleRotation: {}", quatAxis.toString());
-
-        LOG_INFO(UT, "axis fromVectorDifference : {}", dirDiff.toString());
-        LOG_INFO(UT, "axis fromAxisAngleRotation: {}", dirAxis.toString());
-
-        const math::Vec3 simpleRotationDiff = quatDiff.rotate(math::Vec3::Forward);
-        const math::Vec3 simpleRotationAxis = quatAxis.rotate(math::Vec3::Forward);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDiff.x, simpleRotationAxis.x);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDiff.y, simpleRotationAxis.y);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDiff.z, simpleRotationAxis.z);
-
-        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
-        const math::Vec3 rotatedDiff = quatDiff.rotate(baseDirection);
-        const math::Vec3 rotatedAxis = quatAxis.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromVectorDifference : {}", rotatedDiff.toString());
-        LOG_INFO(UT, "rotated fromAxisAngleRotation: {}", rotatedAxis.toString());
-
-        UT_CHECK_EQUAL(rotatedDiff, rotatedAxis);
-    }
-
-    {
-        LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 3 - direction vector and euler angle equality");
-
-        // Why is 90 degrees roll equivelant to straight up?
-        const math::Quaternion quatDir = math::Quaternion::fromDirectionVector(math::Vec3::Up);
-        const math::Quaternion quatEuler = math::Quaternion::fromEulerAngles(0, 0, 90);
-
-        const math::Vec3 dirDir = quatDir.getDirectionVector();
-        const math::Vec3 dirEuler = quatEuler.getDirectionVector();
-
-        const math::Vec3 axisDir = quatDir.getAxisVector();
-        const math::Vec3 axisEuler = quatEuler.getAxisVector();
-
-        const float yawDir = quatDir.getYawDegrees();
-        const float pitchDir = quatDir.getPitchDegrees();
-        const float rollDir = quatDir.getRollDegrees();
-        const float yawEuler = quatEuler.getYawDegrees();
-        const float pitchEuler = quatEuler.getPitchDegrees();
-        const float rollEuler = quatEuler.getRollDegrees();
-
-        LOG_INFO(UT, "result fromDirectionVector: {}", quatDir.toString());
-        LOG_INFO(UT, "result fromEulerAngles    : {}", quatEuler.toString());
-
-        LOG_INFO(UT, "direction fromDirectionVector: {}", dirDir.toString());
-        LOG_INFO(UT, "direction fromEulerAngles    : {}", dirEuler.toString());
-
-        LOG_INFO(UT, "axis fromDirectionVector: {}", axisDir.toString());
-        LOG_INFO(UT, "axis fromEulerAngles    : {}", axisEuler.toString());
-
-        LOG_INFO(UT, "angles fromDirectionVector: {}, {}, {}", yawDir, pitchDir, rollDir);
-        LOG_INFO(UT, "angles fromEulerAngles    : {}, {}, {}", yawEuler, pitchEuler, rollEuler);
-
-        const math::Vec3 simpleRotationDir = quatDir.rotate(math::Vec3::Forward);
-        const math::Vec3 simpleRotationEuler = quatEuler.rotate(math::Vec3::Forward);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.x, simpleRotationEuler.x);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.y, simpleRotationEuler.y);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.z, simpleRotationEuler.z);
-
-        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
-        const math::Vec3 rotatedDir = quatDir.rotate(baseDirection);
-        const math::Vec3 rotatedEuler = quatEuler.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromDirectionVector: {}", rotatedDir.toString());
-        LOG_INFO(UT, "rotated fromEulerAngles    : {}", rotatedEuler.toString());
-
-        UT_CHECK_EQUAL(rotatedDir, rotatedEuler);
-    }
-
-    {
-        LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 4 - direction vector and euler angle equality 2");
-
-        const math::Quaternion quatDir = math::Quaternion::fromDirectionVector(math::Vec3(1, 0, 1).normalize());
-        const math::Quaternion quatEuler = math::Quaternion::fromEulerAngles(-45, 0, 0);
-
-        const math::Vec3 dirDir = quatDir.getDirectionVector();
-        const math::Vec3 dirEuler = quatEuler.getDirectionVector();
-
-        const math::Vec3 axisDir = quatDir.getAxisVector();
-        const math::Vec3 axisEuler = quatEuler.getAxisVector();
-
-        const float yawDir = quatDir.getYawDegrees();
-        const float pitchDir = quatDir.getPitchDegrees();
-        const float rollDir = quatDir.getRollDegrees();
-        const float yawEuler = quatEuler.getYawDegrees();
-        const float pitchEuler = quatEuler.getPitchDegrees();
-        const float rollEuler = quatEuler.getRollDegrees();
-
-        LOG_INFO(UT, "result fromDirectionVector: {}", quatDir.toString());
-        LOG_INFO(UT, "result fromEulerAngles    : {}", quatEuler.toString());
-
-        LOG_INFO(UT, "direction fromDirectionVector: {}", dirDir.toString());
-        LOG_INFO(UT, "direction fromEulerAngles    : {}", dirEuler.toString());
-
-        LOG_INFO(UT, "axis fromDirectionVector: {}", axisDir.toString());
-        LOG_INFO(UT, "axis fromEulerAngles    : {}", axisEuler.toString());
-
-        LOG_INFO(UT, "angles fromDirectionVector: {}, {}, {}", yawDir, pitchDir, rollDir);
-        LOG_INFO(UT, "angles fromEulerAngles    : {}, {}, {}", yawEuler, pitchEuler, rollEuler);
-
-        const math::Vec3 simpleRotationDir = quatDir.rotate(math::Vec3::Forward);
-        const math::Vec3 simpleRotationEuler = quatEuler.rotate(math::Vec3::Forward);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.x, simpleRotationEuler.x);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.y, simpleRotationEuler.y);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.z, simpleRotationEuler.z);
-
-        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
-        const math::Vec3 rotatedDir = quatDir.rotate(baseDirection);
-        const math::Vec3 rotatedEuler = quatEuler.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromDirectionVector: {}", rotatedDir.toString());
-        LOG_INFO(UT, "rotated fromEulerAngles    : {}", rotatedEuler.toString());
-
-        UT_CHECK_EQUAL(rotatedDir, rotatedEuler);
-    }
-
-    {
-        LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 5 - direction vector and euler angle equality 3");
-
-        const math::Quaternion quatDir = math::Quaternion::fromDirectionVector(math::Vec3(1, 1, 0).normalize());
-        const math::Quaternion quatEuler = math::Quaternion::fromEulerAngles(0, 0, 45);
-
-        const math::Vec3 dirDir = quatDir.getDirectionVector();
-        const math::Vec3 dirEuler = quatEuler.getDirectionVector();
-
-        const math::Vec3 axisDir = quatDir.getAxisVector();
-        const math::Vec3 axisEuler = quatEuler.getAxisVector();
-
-        const float yawDir = quatDir.getYawDegrees();
-        const float pitchDir = quatDir.getPitchDegrees();
-        const float rollDir = quatDir.getRollDegrees();
-        const float yawEuler = quatEuler.getYawDegrees();
-        const float pitchEuler = quatEuler.getPitchDegrees();
-        const float rollEuler = quatEuler.getRollDegrees();
-
-        LOG_INFO(UT, "result fromDirectionVector: {}", quatDir.toString());
-        LOG_INFO(UT, "result fromEulerAngles    : {}", quatEuler.toString());
-
-        LOG_INFO(UT, "direction fromDirectionVector: {}", dirDir.toString());
-        LOG_INFO(UT, "direction fromEulerAngles    : {}", dirEuler.toString());
-
-        LOG_INFO(UT, "axis fromDirectionVector: {}", axisDir.toString());
-        LOG_INFO(UT, "axis fromEulerAngles    : {}", axisEuler.toString());
-
-        LOG_INFO(UT, "angles fromDirectionVector: {}, {}, {}", yawDir, pitchDir, rollDir);
-        LOG_INFO(UT, "angles fromEulerAngles    : {}, {}, {}", yawEuler, pitchEuler, rollEuler);
-
-        const math::Vec3 simpleRotationDir = quatDir.rotate(math::Vec3::Forward);
-        const math::Vec3 simpleRotationEuler = quatEuler.rotate(math::Vec3::Forward);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.x, simpleRotationEuler.x);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.y, simpleRotationEuler.y);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.z, simpleRotationEuler.z);
-
-        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
-        const math::Vec3 rotatedDir = quatDir.rotate(baseDirection);
-        const math::Vec3 rotatedEuler = quatEuler.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromDirectionVector: {}", rotatedDir.toString());
-        LOG_INFO(UT, "rotated fromEulerAngles    : {}", rotatedEuler.toString());
-
-        UT_CHECK_EQUAL(rotatedDir, rotatedEuler);
-    }
-
-    {
-        LOG_SCOPE_CHANGE_INFO(UT);
-        LOG_INFO(UT, "TEST CASE 6 - vector difference and euler angle equality");
-
-        const math::Quaternion quatDir = math::Quaternion::fromDirectionVector(math::Vec3(1, 1, 0).normalize());
-        const math::Quaternion quatEuler = math::Quaternion::fromEulerAngles(0, 0, 45);
-
-        const math::Vec3 dirDir = quatDir.getDirectionVector();
-        const math::Vec3 dirEuler = quatEuler.getDirectionVector();
-
-        const math::Vec3 axisDir = quatDir.getAxisVector();
-        const math::Vec3 axisEuler = quatEuler.getAxisVector();
-
-        const float yawDir = quatDir.getYawDegrees();
-        const float pitchDir = quatDir.getPitchDegrees();
-        const float rollDir = quatDir.getRollDegrees();
-        const float yawEuler = quatEuler.getYawDegrees();
-        const float pitchEuler = quatEuler.getPitchDegrees();
-        const float rollEuler = quatEuler.getRollDegrees();
-
-        LOG_INFO(UT, "result fromDirectionVector: {}", quatDir.toString());
-        LOG_INFO(UT, "result fromEulerAngles    : {}", quatEuler.toString());
-
-        LOG_INFO(UT, "direction fromDirectionVector: {}", dirDir.toString());
-        LOG_INFO(UT, "direction fromEulerAngles    : {}", dirEuler.toString());
-
-        LOG_INFO(UT, "axis fromDirectionVector: {}", axisDir.toString());
-        LOG_INFO(UT, "axis fromEulerAngles    : {}", axisEuler.toString());
-
-        LOG_INFO(UT, "angles fromDirectionVector: {}, {}, {}", yawDir, pitchDir, rollDir);
-        LOG_INFO(UT, "angles fromEulerAngles    : {}, {}, {}", yawEuler, pitchEuler, rollEuler);
-
-        const math::Vec3 simpleRotationDir = quatDir.rotate(math::Vec3::Forward);
-        const math::Vec3 simpleRotationEuler = quatEuler.rotate(math::Vec3::Forward);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.x, simpleRotationEuler.x);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.y, simpleRotationEuler.y);
-        UT_CHECK_EQUAL_FLOATS(simpleRotationDir.z, simpleRotationEuler.z);
-
-        const math::Vec3 baseDirection = math::Vec3(-8, 17, 9).normalize();
-        const math::Vec3 rotatedDir = quatDir.rotate(baseDirection);
-        const math::Vec3 rotatedEuler = quatEuler.rotate(baseDirection);
-        LOG_INFO(UT, "Base vector: {}", baseDirection.toString());
-        LOG_INFO(UT, "rotated fromDirectionVector: {}", rotatedDir.toString());
-        LOG_INFO(UT, "rotated fromEulerAngles    : {}", rotatedEuler.toString());
-
-        UT_CHECK_EQUAL(rotatedDir, rotatedEuler);
+        LOG_INFO(UT, "TEST CASE {} - {}", i, testInfos[i].description);
+
+        const math::Vec3 dirA = testInfos[i].a.getDirectionVector();
+        const math::Vec3 dirB = testInfos[i].b.getDirectionVector();
+
+        const math::Vec3 axisA = testInfos[i].a.getAxisVector();
+        const math::Vec3 axisB = testInfos[i].b.getAxisVector();
+
+        const float yawA = testInfos[i].a.getYawDegrees();
+        const float pitchA = testInfos[i].a.getPitchDegrees();
+        const float rollA = testInfos[i].a.getRollDegrees();
+        const float yawB = testInfos[i].b.getYawDegrees();
+        const float pitchB = testInfos[i].b.getPitchDegrees();
+        const float rollB = testInfos[i].b.getRollDegrees();
+
+        LOG_INFO(UT, "result {}: {}", testInfos[i].aMessage, testInfos[i].a.toString());
+        LOG_INFO(UT, "result {}: {}", testInfos[i].bMessage, testInfos[i].b.toString());
+
+        LOG_INFO(UT, "direction {}: {}", testInfos[i].aMessage, dirA.toString());
+        LOG_INFO(UT, "direction {}: {}", testInfos[i].bMessage, dirB.toString());
+
+        LOG_INFO(UT, "axis {}: {}", testInfos[i].aMessage, axisA.toString());
+        LOG_INFO(UT, "axis {}: {}", testInfos[i].bMessage, axisB.toString());
+
+        LOG_INFO(UT, "angles {}: {}, {}, {}", testInfos[i].aMessage, yawA, pitchA, rollA);
+        LOG_INFO(UT, "angles {}: {}, {}, {}", testInfos[i].bMessage, yawB, pitchB, rollB);
+
+        const math::Vec3 simpleRotationA = testInfos[i].a.rotate(math::Vec3::Forward);
+        const math::Vec3 simpleRotationB = testInfos[i].b.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationA.x, simpleRotationB.x);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationA.y, simpleRotationB.y);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationA.z, simpleRotationB.z);
+
+        const math::Vec3 rotatedA = testInfos[i].a.rotate(testInfos[i].baseDirection);
+        const math::Vec3 rotatedB = testInfos[i].b.rotate(testInfos[i].baseDirection);
+        LOG_INFO(UT, "Base vector: {}", testInfos[i].baseDirection.toString());
+        LOG_INFO(UT, "rotated {}: {}", testInfos[i].aMessage, rotatedA.toString());
+        LOG_INFO(UT, "rotated {}: {}", testInfos[i].aMessage, rotatedB.toString());
+
+        UT_CHECK_EQUAL_FLOATS(rotatedA.x, rotatedB.x);
+        UT_CHECK_EQUAL_FLOATS(rotatedA.y, rotatedB.y);
+        UT_CHECK_EQUAL_FLOATS(rotatedA.z, rotatedB.z);
     }
 }
 
