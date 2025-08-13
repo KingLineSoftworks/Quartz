@@ -1,25 +1,28 @@
 #include <cmath>
 #include <limits>
 
+#include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/ext/quaternion_float.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/scalar_constants.hpp>
 
-#include "glm/gtc/quaternion.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/ext/scalar_constants.hpp"
-#include "glm/fwd.hpp"
+#include <reactphysics3d/mathematics/Quaternion.h>
+
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "reactphysics3d/mathematics/Quaternion.h"
 #include "util/logger/Logger.hpp"
 #include "util/macros.hpp"
+
+const math::Quaternion math::Quaternion::Left45(1, 0, 0, 1);
 
 bool
 math::Quaternion::operator==(const math::Quaternion& other) const {
@@ -181,7 +184,7 @@ math::Quaternion::fromEulerAngles(
     const double y = glm::radians(yawDegrees);
     const double z = glm::radians(rollDegrees);
 
-    return reactphysics3d::Quaternion::fromEulerAngles(x, y, z);
+    return math::Quaternion(reactphysics3d::Quaternion::fromEulerAngles(x, y, z)).normalize();
 }
 
 math::Quaternion

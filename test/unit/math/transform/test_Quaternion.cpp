@@ -1386,6 +1386,154 @@ UT_FUNCTION(test_comparisons) {
     }
 }
 
+UT_FUNCTION(test_composition) {
+    const math::Quaternion knownL90_direction = math::Quaternion::fromDirectionVector(math::Vec3::Left);
+    const math::Quaternion knownL90_euler = math::Quaternion::fromEulerAngles(90, 0, 0);
+    UT_REQUIRE(knownL90_direction == knownL90_euler);
+    const math::Quaternion knownL90 = knownL90_direction;
+    LOG_DEBUG(UT, "knownL90 = {}", knownL90.toString());
+
+    const math::Quaternion knownL60_direction = math::Quaternion::fromDirectionVector(math::Vec3(2, 0, -3.4641).normalize());
+    const math::Quaternion knownL60_euler = math::Quaternion::fromEulerAngles(60, 0, 0);
+    UT_REQUIRE(knownL60_direction == knownL60_euler);
+    const math::Quaternion knownL60 = knownL60_direction;
+    LOG_DEBUG(UT, "knownL60 = {}", knownL60.toString());
+
+    const math::Quaternion knownL45_direction = math::Quaternion::fromDirectionVector(math::Vec3(1, 0, -1).normalize());
+    const math::Quaternion knownL45_euler = math::Quaternion::fromEulerAngles(45, 0, 0);
+    UT_REQUIRE(knownL45_direction == knownL45_euler);
+    const math::Quaternion knownL45 = knownL45_direction;
+    LOG_DEBUG(UT, "knownL45 = {}", knownL45.toString());
+
+    const math::Quaternion knownL30_direction = math::Quaternion::fromDirectionVector(math::Vec3(3.4641, 0, -2).normalize());
+    const math::Quaternion knownL30_euler = math::Quaternion::fromEulerAngles(30, 0, 0);
+    UT_REQUIRE(knownL30_direction == knownL30_euler);
+    const math::Quaternion knownL30 = knownL30_direction;
+    LOG_DEBUG(UT, "knownL30 = {}", knownL30.toString());
+
+    const math::Quaternion knownL01_direction = math::Quaternion::fromDirectionVector(math::Vec3(5.76912, 0, -0.1007).normalize());
+    const math::Quaternion knownL01_euler = math::Quaternion::fromEulerAngles(1, 0, 0);
+    UT_REQUIRE(knownL01_direction == knownL01_euler);
+    const math::Quaternion knownL01 = knownL01_direction;
+    LOG_DEBUG(UT, "knownL01 = {}", knownL01.toString());
+
+    // Test to see how we can make 90 degrees with 45 degrees
+    {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Testing composition of 45 degree quaternions to make 90 degree quaternion");
+        LOG_DEBUG(UT, "We are expecting to see:");
+        LOG_DEBUG(UT, "  knownL45 * knownL45 == knownL90");
+
+        const math::Quaternion multiply = knownL45 * 2;
+        const math::Quaternion add = knownL45 + knownL45;
+        const math::Quaternion square = knownL45 * knownL45;
+
+        LOG_TRACE(UT, "Non-normalized:");
+        LOG_TRACE(UT, "knownL45 * 2        = {}", multiply.toString());
+        LOG_TRACE(UT, "knownL45 + knownL45 = {}", add.toString());
+        LOG_TRACE(UT, "knownL45 * knownL45 = {}", square.toString());
+
+        UT_CHECK_NOT_EQUAL(multiply, knownL90);
+        UT_CHECK_NOT_EQUAL(add, knownL90);
+        UT_CHECK_EQUAL(square, knownL90);
+
+        const math::Quaternion multiplyNormalized = multiply.normalize();
+        const math::Quaternion addNormalized = add.normalize();
+        const math::Quaternion squareNormalized = square.normalize();
+
+        LOG_TRACE(UT, "Normalized:");
+        LOG_TRACE(UT, "knownL45 * 2        = {}", multiplyNormalized.toString());
+        LOG_TRACE(UT, "knownL45 + knownL45 = {}", addNormalized.toString());
+        LOG_TRACE(UT, "knownL45 * knownL45 = {}", squareNormalized.toString());
+
+        UT_CHECK_NOT_EQUAL(multiply.normalize(), knownL90);
+        UT_CHECK_NOT_EQUAL(add.normalize(), knownL90);
+        UT_CHECK_EQUAL(square.normalize(), knownL90);
+    }
+
+    // Test to see how we can make 90 degrees with 30 and 60 degrees
+    {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Testing composition of 30 and 60 degree quaternions to make 90 degree quaternion");
+        LOG_DEBUG(UT, "We are expecting to see:");
+        LOG_DEBUG(UT, "  knownL30 * knownL60 == knownL90");
+        LOG_DEBUG(UT, "And:");
+        LOG_DEBUG(UT, "  knownL60 * knownL30 == knownL90");
+
+        const std::vector<std::tuple<math::Quaternion, std::string, math::Quaternion, std::string>> quats = {
+            {knownL30, "knownL30", knownL60, "knownL60"},
+            {knownL60, "knownL60", knownL30, "knownL30"}
+        };
+
+        for (const std::tuple<math::Quaternion, std::string, math::Quaternion, std::string>& quatInfo : quats){
+            LOG_SCOPE_CHANGE_TRACE(UT);
+
+            const math::Quaternion& a = std::get<0>(quatInfo);
+            const std::string& aName = std::get<1>(quatInfo);
+            const math::Quaternion& b = std::get<2>(quatInfo);
+            const std::string& bName = std::get<3>(quatInfo);
+
+            const math::Quaternion multiply = a * b;
+            const math::Quaternion add = a + b;
+
+            LOG_TRACE(UT, "Non-normalized:");
+            LOG_TRACE(UT, "{} * {} = {}", aName, bName, multiply.toString());
+            LOG_TRACE(UT, "{} + {} = {}", aName, bName, add.toString());
+
+            UT_CHECK_EQUAL(multiply, knownL90);
+            UT_CHECK_NOT_EQUAL(add, knownL90);
+
+            const math::Quaternion multiplyNormalized = multiply.normalize();
+            const math::Quaternion addNormalized = add.normalize();
+
+            LOG_TRACE(UT, "Normalized:");
+            LOG_TRACE(UT, "{} * {} = {}", aName, bName, multiplyNormalized.toString());
+            LOG_TRACE(UT, "{} + {} = {}", aName, bName, addNormalized.toString());
+
+            UT_CHECK_EQUAL(multiplyNormalized, knownL90);
+            UT_CHECK_NOT_EQUAL(addNormalized, knownL90);
+        }
+    }
+
+    // Test to see how we can make 45 degrees with many 1 degrees quaternions
+    {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Testing composition of many 1 degree quaternions to make 45 degree quaternion");
+        LOG_DEBUG(UT, "We are expecting to see:");
+        LOG_DEBUG(UT, "  knownL01 * knownL01 * knownL01 * knownL01 ... * knownL01 == knownL45");
+
+        math::Quaternion multiply = knownL01;
+        math::Quaternion add = knownL01;
+        for (uint32_t i = 0; i < 44; ++i) {
+            multiply *= knownL01;
+            add += knownL01;
+        }
+
+        LOG_TRACE(UT, "Non-normalized:");
+        LOG_TRACE(UT, "multiplied = {}", multiply.toString());
+        LOG_TRACE(UT, "added = {}", add.toString());
+
+        UT_CHECK_EQUAL_FLOATS(multiply.x, knownL45.x);
+        UT_CHECK_EQUAL_FLOATS(multiply.y, knownL45.y);
+        UT_CHECK_EQUAL_FLOATS(multiply.z, knownL45.z);
+        UT_CHECK_EQUAL_FLOATS(multiply.w, knownL45.w);
+        UT_CHECK_NOT_EQUAL(add, knownL45);
+
+        const math::Quaternion multiplyNormalized = multiply.normalize();
+        const math::Quaternion addNormalized = add.normalize();
+
+        LOG_TRACE(UT, "Normalized:");
+        LOG_TRACE(UT, "multiplied = {}", multiplyNormalized.toString());
+        LOG_TRACE(UT, "added = {}", addNormalized.toString());
+
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.x, knownL45.x);
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.y, knownL45.y);
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.z, knownL45.z);
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.w, knownL45.w);
+        UT_CHECK_NOT_EQUAL(addNormalized, knownL45);
+    }
+}
+
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
     REGISTER_UT_FUNCTION(test_copy);
@@ -1402,5 +1550,6 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_fromEulerAngles);
     REGISTER_UT_FUNCTION(test_slerp);
     REGISTER_UT_FUNCTION(test_comparisons);
+    REGISTER_UT_FUNCTION(test_composition);
     UT_RUN_TESTS();
 }

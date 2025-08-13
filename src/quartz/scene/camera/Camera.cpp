@@ -66,11 +66,13 @@ quartz::scene::Camera::calculateLookDirectionFromEulerAngles(
      *    cameras
      */
 
-    math::Vec3 lookDirection;
-    lookDirection.x = std::cos(glm::radians(eulerAngles.yawDegrees)) * std::cos(glm::radians(eulerAngles.pitchDegrees));
-    lookDirection.y = std::sin(glm::radians(eulerAngles.pitchDegrees));
-    lookDirection.z = std::sin(glm::radians(eulerAngles.yawDegrees)) * std::cos(glm::radians(eulerAngles.pitchDegrees));
-    return lookDirection.normalize();
+    // math::Vec3 lookDirection;
+    // lookDirection.x = std::cos(glm::radians(eulerAngles.yawDegrees)) * std::cos(glm::radians(eulerAngles.pitchDegrees));
+    // lookDirection.y = std::sin(glm::radians(eulerAngles.pitchDegrees));
+    // lookDirection.z = std::sin(glm::radians(eulerAngles.yawDegrees)) * std::cos(glm::radians(eulerAngles.pitchDegrees));
+    // return lookDirection.normalize();
+    const math::Quaternion quat = math::Quaternion::fromEulerAngles(eulerAngles.yawDegrees, eulerAngles.pitchDegrees, eulerAngles.pitchDegrees);
+    return quat.getDirectionVector();
 }
 
 quartz::scene::Camera::EulerAngles
