@@ -195,7 +195,11 @@ union math::Quaternion {
      * -------------------------------------------------------------------------------------
      */
 
-    static const Quaternion Left45;
+    static const Quaternion Up01;
+    static const Quaternion Right01;
+
+    static const Quaternion Down01;
+    static const Quaternion Left01;
 
     /**
      * -------------------------------------------------------------------------------------

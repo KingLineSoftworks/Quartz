@@ -4,6 +4,7 @@
 
 #include <glm/trigonometric.hpp>
 
+#include "glm/gtc/quaternion.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
@@ -79,10 +80,17 @@ quartz::scene::Camera::EulerAngles
 quartz::scene::Camera::calculateEulerAnglesFromLookDirection(
     const math::Vec3& lookDirection
 ) {
-    const double pitchRadians = std::asin(lookDirection.y);
-    const double pitchDegrees = glm::degrees(pitchRadians);
-    const double yawRadians = std::acos(lookDirection.x / std::cos(pitchRadians));
-    const double yawDegrees = glm::degrees(yawRadians);
+    // const double pitchRadians = std::asin(lookDirection.y);
+    // const double pitchDegrees = glm::degrees(pitchRadians);
+    // const double yawRadians = std::acos(lookDirection.x / std::cos(pitchRadians));
+    // const double yawDegrees = glm::degrees(yawRadians);
+
+    // return {yawDegrees, pitchDegrees, 0};
+
+    const math::Quaternion quat = math::Quaternion::fromDirectionVector(lookDirection);
+    const float yawDegrees = quat.getYawDegrees();
+    const float pitchDegrees = quat.getPitchDegrees();
+    UNUSED const float rollDegrees = quat.getRollDegrees();
 
     return {yawDegrees, pitchDegrees, 0};
 }
