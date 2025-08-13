@@ -1,6 +1,5 @@
 #====================================================================
-# Quartz Scene SkyBox Unit Tests
+# Scratch executables
 #====================================================================
 
-create_unit_test(test_SkyBox.cpp QUARTZ_SCENE_SkyBox UTIL_FileSystem)
-
+create_scratch_executable(QuaternionEulerAngleExploration.cpp MATH_Transform)
