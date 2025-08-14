@@ -22,10 +22,10 @@
 #include "util/logger/Logger.hpp"
 #include "util/macros.hpp"
 
-const math::Quaternion math::Quaternion::Up01 = math::Quaternion::fromEulerAngles(0, 1, 0);
+const math::Quaternion math::Quaternion::Up01 = math::Quaternion::fromEulerAngles(0, 0, 1);
 const math::Quaternion math::Quaternion::Right01 = math::Quaternion::fromEulerAngles(-1, 0, 0);
 
-const math::Quaternion math::Quaternion::Down01 = math::Quaternion::fromEulerAngles(0, -1, 0);
+const math::Quaternion math::Quaternion::Down01 = math::Quaternion::fromEulerAngles(0, 0, -1);
 const math::Quaternion math::Quaternion::Left01 = math::Quaternion::fromEulerAngles(1, 0, 0);
 
 bool

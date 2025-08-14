@@ -65,13 +65,6 @@ public: // classes
         double rollDegrees;
     };
 
-public: // static functions
-    /**
-     * @todo 2025/08/08 These break down beyond 90 degrees. Fix this
-     */
-    static math::Vec3 calculateLookDirectionFromEulerAngles(const quartz::scene::Camera::EulerAngles& eulerAngles);
-    static quartz::scene::Camera::EulerAngles calculateEulerAnglesFromLookDirection(const math::Vec3& lookDirection);
-
 public: // member functions
     Camera();
     Camera(
@@ -87,15 +80,18 @@ public: // member functions
     uint32_t getId() const { return m_id; }
     float getFovDegrees() const { return m_fovDegrees; }
     const math::Vec3& getWorldPosition() const { return m_worldPosition; }
-    const math::Vec3& getLookDirection() const { return m_lookDirection; }
-    const quartz::scene::Camera::EulerAngles& getEulerAngles() const { return m_eulerAngles; }
+    const math::Quaternion& getRotation() const { return m_rotation; }
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
     const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
+    const math::Vec3 getLookDirection() const { return m_rotation.getDirectionVector(); ; }
 
     void setPosition(const math::Vec3& position) { m_worldPosition = position; }
+    void setRotation(const math::Quaternion& rotation) { m_rotation = rotation; }
     void setLookDirection(const math::Vec3& lookDirection);
     void lookAtPosition(const math::Vec3& position);
-    void setEulerAngles(const quartz::scene::Camera::EulerAngles& eulerAngles);
+
+    double rotateDegreesVertical(const double degrees);
+    double rotateDegreesHorizontal(const double degrees);
 
     void update(
         const float windowWidth,
@@ -112,8 +108,20 @@ private: // member variables
 
     float m_fovDegrees;
     math::Vec3 m_worldPosition;
-    math::Vec3 m_lookDirection;
-    quartz::scene::Camera::EulerAngles m_eulerAngles;
+    math::Quaternion m_rotation;
+
+    /**
+     * @todo 2025/08/18 Rename these to m_degreesHorizontal, m_degreesVertical, and m_degreesClockwise,
+     *    so we don't need to expose any sort of euler angle ambiguity, and so it's obvious which ones
+     *    are getting modified by the rotateDegrees* functions. We want to handle the euler angles
+     *    under the hood and not expose the user to them.
+     *
+     * @todo 2025/08/18 Make these floats instead of doubles so they directly match with the quaternion
+     *    we are maintaining, and so there is no precision loss.
+     */
+    double m_yawDegrees;
+    double m_pitchDegrees;
+    double m_rollDegrees;
 
     math::Mat4 m_viewMatrix;
     math::Mat4 m_projectionMatrix;
