@@ -44,7 +44,7 @@ public: // member functions
     Camera(
         const double fovDegrees,
         const math::Vec3& worldPosition,
-        const math::Vec3& lookDirection
+        const math::Quaternion& rotation 
     );
     Camera& operator=(const Camera& other);
     ~Camera();
@@ -60,7 +60,15 @@ public: // member functions
     const math::Quaternion& getRotation() const { return m_rotation; }
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
     const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
-    const math::Vec3 getLookDirection() const { return m_rotation.getDirectionVector(); ; }
+    const math::Vec3 getLookDirection() const { return m_rotation.getDirectionVector(); }
+
+    /**
+     * @todo 2025/08/16 Implement setLookDirection and setLookAtPosition (which uses setLookDirection under the hood).
+     *    There are going to be some snags while doing this, in regards to the roll amound when using the quaternion's
+     *    fromDirectionVector function.
+     *    We will need to figure out the amount of roll introduced in these functions and undo them to re-align with
+     *    the horizon.
+     */
 
     void setPosition(const math::Vec3& position) { m_worldPosition = position; }
     void setRotation(const math::Quaternion& rotation) { m_rotation = rotation; }

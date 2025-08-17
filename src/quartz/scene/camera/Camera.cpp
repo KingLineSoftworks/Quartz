@@ -53,12 +53,12 @@ quartz::scene::Camera::Camera() :
 quartz::scene::Camera::Camera(
     const double fovDegrees,
     const math::Vec3& worldPosition,
-    const math::Vec3& lookDirection
+    const math::Quaternion& rotation
 ) :
     m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(fovDegrees),
     m_worldPosition(worldPosition),
-    m_rotation(math::Quaternion::fromDirectionVector(lookDirection.normalize())),
+    m_rotation(rotation),
     m_horizontalRotationDegrees(m_rotation.getYawDegrees()),
     m_verticalRotationDegrees(m_rotation.getPitchDegrees()),
     m_clockwiseRotationDegrees(m_rotation.getRollDegrees()),

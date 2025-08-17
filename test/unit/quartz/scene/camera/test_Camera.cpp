@@ -11,29 +11,36 @@ UT_FUNCTION(test_construction) {
     const quartz::scene::Camera camera1(
         90,
         {0, 0, 0},
-        {1, 2, 3}
+        math::Quaternion::fromDirectionVector(math::Vec3(1, 2, 3).normalize())
     );
     UT_CHECK_EQUAL(camera1.getId(), 0);
     UT_CHECK_EQUAL_FLOATS(camera1.getFovDegrees(), 90);
     UT_CHECK_EQUAL(camera1.getWorldPosition(), math::Vec3(0, 0, 0));
     UT_CHECK_EQUAL(camera1.getLookDirection(), math::Vec3(1, 2, 3).normalize());
+    /**
+     * @todo 2025/08/16 Ensure horizontal, vertical, and clockwise rotations are correct
+     */
 
     {
         const quartz::scene::Camera camera2(
             40.444,
             {44, 55, 66},
-            {-1, -2, -3}
+            math::Quaternion::fromDirectionVector(math::Vec3(-1, -2, -3).normalize())
         );
         UT_CHECK_EQUAL(camera2.getId(), 1);
         UT_CHECK_EQUAL_FLOATS(camera2.getFovDegrees(), 40.444);
         UT_CHECK_EQUAL(camera2.getWorldPosition(), math::Vec3(44, 55, 66));
         UT_CHECK_EQUAL(camera2.getLookDirection(), math::Vec3(-1, -2, -3).normalize());
+
+        /**
+         * @todo 2025/08/16 Ensure horizontal, vertical, and clockwise rotations are correct
+         */
     }
 
     const quartz::scene::Camera camera3(
         -40.444,
         {-44, 55, -66},
-        {-1, -2222, -3}
+        math::Quaternion::fromDirectionVector(math::Vec3(-1, -2222, -3).normalize())
     );
     UT_CHECK_EQUAL(camera3.getId(), 2);
     UT_CHECK_EQUAL_FLOATS(camera3.getFovDegrees(), -40.444);
@@ -41,6 +48,9 @@ UT_FUNCTION(test_construction) {
     UT_CHECK_EQUAL_FLOATS(camera3.getLookDirection().x, math::Vec3(-1, -2222, -3).normalize().x);
     UT_CHECK_EQUAL_FLOATS(camera3.getLookDirection().y, math::Vec3(-1, -2222, -3).normalize().y);
     UT_CHECK_EQUAL_FLOATS(camera3.getLookDirection().z, math::Vec3(-1, -2222, -3).normalize().z);
+    /**
+     * @todo 2025/08/16 Ensure horizontal, vertical, and clockwise rotations are correct
+     */
 }
 
 UT_FUNCTION(test_setPosition) {
@@ -50,22 +60,135 @@ UT_FUNCTION(test_setPosition) {
     camera.setPosition({3, 3, 3});
 
     UT_CHECK_EQUAL(camera.getWorldPosition(), math::Vec3(3, 3, 3));
-
-    /**
-     * @todo 2025/08/07 Check view matrix were updated correctly
-     */
 }
 
 UT_FUNCTION(test_setRotation) {
+    // Create a rotation quaternion
+    // Set the camera's rotation
+    // Ensure that the horizontal, vertical, and clockwise degrees are correct
+ 
+    // Rotate 30 degrees horizontally
+    {
+        const math::Quaternion rotation = math::Quaternion::fromEulerAngles(30, 0, 0);
 
+        const quartz::scene::Camera camera(70, math::Vec3(0,0,0), rotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 30);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+
+        UT_CHECK_EQUAL(camera.getRotation().getDirectionVector(), rotation.getDirectionVector());
+    }
+
+    // Rotate 60 degrees up
+    {
+        const math::Quaternion rotation = math::Quaternion::fromEulerAngles(0, 60, 0);
+
+        const quartz::scene::Camera camera(70, math::Vec3(0,0,0), rotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 60);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+
+        UT_CHECK_EQUAL(camera.getRotation().getDirectionVector(), rotation.getDirectionVector());
+    }
+
+    // Rotate horizontally and up
+    {
+        const math::Quaternion rotation = math::Quaternion::fromEulerAngles(25, 50, 0);
+
+        const quartz::scene::Camera camera(70, math::Vec3(0,0,0), rotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 25);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 50);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+
+        UT_CHECK_EQUAL(camera.getRotation().getDirectionVector(), rotation.getDirectionVector());
+    }
 }
 
 UT_FUNCTION(test_setRotationDegrees) {
+    // Set the rotation
+    // Ensure the horizontal, vertical, and clockwise rotations are correct
+    // Ensure the look direction is correct
 
+    // Rotate to the left 
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.setRotationDegrees(45, 0, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Left),
+            0.5f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+    }
+
+    // Rotate down
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.setRotationDegrees(0, 45, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Down),
+            0.5f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+    }
+
+    // Rotate to the right
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.setRotationDegrees(-45, 0, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Right),
+            0.5f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+    }
+
+    // Rotate up 
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.setRotationDegrees(0, -45, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Up),
+            0.5f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+    }
+
+    /**
+     * @todo 2025/08/16 Create test for corner case when we try to set the rotation straight up or straight down
+     */
 }
 
 UT_FUNCTION(test_rotateDegrees) {
+    // Set the rotation
+    // Ensure the horizontal, vertical, and clockwise rotations are correct
+    // Ensure the look direction is correct
 
+    /**
+     * @todo 2025/08/16 Create test for corner case when we try to set the rotation straight up or straight down
+     */
 }
 
 UT_FUNCTION(test_update) {
@@ -98,7 +221,7 @@ UT_FUNCTION(test_UBO) {
     UT_CHECK_EQUAL(ubo2.projectionMatrix, projectionMatrix);
 
     // Create UBO from camera
-    const quartz::scene::Camera camera(42.42, {7, 8, 9}, {-4, -3, -2});
+    const quartz::scene::Camera camera(42.42, {7, 8, 9}, math::Quaternion::fromDirectionVector(math::Vec3(-4, -3, -2).normalize()));
     const quartz::scene::Camera::UniformBufferObject ubo3(camera);
     UT_CHECK_EQUAL(ubo3.position, camera.getWorldPosition());
     UT_CHECK_EQUAL(ubo3.viewMatrix, camera.getViewMatrix());
