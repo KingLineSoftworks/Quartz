@@ -43,9 +43,9 @@ quartz::scene::Camera::Camera() :
         0.0f
     ),
     m_rotation(math::Quaternion::fromDirectionVector(math::Vec3::Forward)),
-    m_horizontalRotationDegrees(m_rotation.getYawDegrees()),
+    m_horizontalRotationDegrees(std::fmod(m_rotation.getYawDegrees(), 360.0f)),
     m_verticalRotationDegrees(m_rotation.getPitchDegrees()),
-    m_clockwiseRotationDegrees(m_rotation.getRollDegrees()),
+    m_clockwiseRotationDegrees(std::fmod(m_rotation.getRollDegrees(), 360.0f)),
     m_viewMatrix(),
     m_projectionMatrix()
 {}
@@ -59,9 +59,9 @@ quartz::scene::Camera::Camera(
     m_fovDegrees(fovDegrees),
     m_worldPosition(worldPosition),
     m_rotation(rotation),
-    m_horizontalRotationDegrees(m_rotation.getYawDegrees()),
+    m_horizontalRotationDegrees(std::fmod(m_rotation.getYawDegrees(), 360.0f)),
     m_verticalRotationDegrees(m_rotation.getPitchDegrees()),
-    m_clockwiseRotationDegrees(m_rotation.getRollDegrees()),
+    m_clockwiseRotationDegrees(std::fmod(m_rotation.getRollDegrees(), 360.0f)),
     m_viewMatrix(),
     m_projectionMatrix()
 {
@@ -121,6 +121,12 @@ quartz::scene::Camera::rotateDegrees(
     m_verticalRotationDegrees = actualVerticalTotalDegrees;
 
     m_clockwiseRotationDegrees = std::fmod(m_clockwiseRotationDegrees + clockwiseDeltaDegrees, 360.0f);
+
+    /**
+     * @todo 2025/08/16 Make a function to calculate the final rotation using the total horizontal, vertical, and
+     *    clockwise rotations.
+     *    This function will allow us to take rotation amounts via constructor and calculate a rotation
+     */
 
     const math::Quaternion horizontalRotation = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, m_horizontalRotationDegrees);
     const math::Vec3 horizontalLookDirection = horizontalRotation.getDirectionVector();

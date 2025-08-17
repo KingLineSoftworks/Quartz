@@ -126,6 +126,10 @@ UT_FUNCTION(test_setRotationDegrees) {
         );
 
         UT_CHECK_EQUAL(actualRotation, expectedRotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 45);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
     }
 
     // Rotate down
@@ -142,6 +146,10 @@ UT_FUNCTION(test_setRotationDegrees) {
         );
 
         UT_CHECK_EQUAL(actualRotation, expectedRotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 45);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
     }
 
     // Rotate to the right
@@ -158,6 +166,10 @@ UT_FUNCTION(test_setRotationDegrees) {
         );
 
         UT_CHECK_EQUAL(actualRotation, expectedRotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), -45);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
     }
 
     // Rotate up 
@@ -174,6 +186,10 @@ UT_FUNCTION(test_setRotationDegrees) {
         );
 
         UT_CHECK_EQUAL(actualRotation, expectedRotation);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), -45);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
     }
 
     /**
@@ -187,6 +203,99 @@ UT_FUNCTION(test_rotateDegrees) {
     // Ensure the look direction is correct
 
     /**
+     * @todo 2025/08/16 Should a positive horizontal rotation really amount to a leftwards rotation????
+     */
+
+    // Rotate to the left, starting facing forward 
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.rotateDegrees(35, 0, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Left),
+            35.0f / 90.0f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().x, expectedRotation.getDirectionVector().x);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().y, expectedRotation.getDirectionVector().y);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().z, expectedRotation.getDirectionVector().z);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 35);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+    }
+
+    // Rotate to the right, starting facing forward and right
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3(1, 0, 1).normalize()));
+
+        camera.rotateDegrees(-45, 0, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().x, expectedRotation.getDirectionVector().x);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().y, expectedRotation.getDirectionVector().y);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().z, expectedRotation.getDirectionVector().z);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), -90);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+    }
+
+    // Rotate down, starting facing forward
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.rotateDegrees(0, 30, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Down),
+            30.0f / 90.0f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().x, expectedRotation.getDirectionVector().x);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().y, expectedRotation.getDirectionVector().y);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().z, expectedRotation.getDirectionVector().z);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), 30);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+    }
+
+    // Rotate up
+    {
+        quartz::scene::Camera camera(65, {0, 8, 0}, math::Quaternion::fromDirectionVector(math::Vec3::Forward));
+
+        camera.rotateDegrees(0, -40, 0);
+
+        const math::Quaternion actualRotation = camera.getRotation();
+        const math::Quaternion expectedRotation = math::Quaternion::slerp(
+            math::Quaternion::fromDirectionVector(math::Vec3::Forward),
+            math::Quaternion::fromDirectionVector(math::Vec3::Up),
+            40.0f / 90.0f
+        );
+
+        UT_CHECK_EQUAL(actualRotation, expectedRotation);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().x, expectedRotation.getDirectionVector().x);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().y, expectedRotation.getDirectionVector().y);
+        UT_CHECK_EQUAL_FLOATS(actualRotation.getDirectionVector().z, expectedRotation.getDirectionVector().z);
+
+        UT_CHECK_EQUAL_FLOATS(camera.getHorizontalRotationDegrees(), 0);
+        UT_CHECK_EQUAL_FLOATS(camera.getVerticalRotationDegrees(), -40);
+        UT_CHECK_EQUAL_FLOATS(camera.getClockwiseRotationDegrees(), 0);
+    }
+
+    /**
+     * @todo 2025/08/16 Create test for complex cases (facing non-forwards before rotation, rotating on two axes at once)
      * @todo 2025/08/16 Create test for corner case when we try to set the rotation straight up or straight down
      */
 }
