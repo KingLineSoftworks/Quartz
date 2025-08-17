@@ -22,12 +22,6 @@
 #include "util/logger/Logger.hpp"
 #include "util/macros.hpp"
 
-const math::Quaternion math::Quaternion::Up01 = math::Quaternion::fromEulerAngles(0, 0, 1);
-const math::Quaternion math::Quaternion::Right01 = math::Quaternion::fromEulerAngles(-1, 0, 0);
-
-const math::Quaternion math::Quaternion::Down01 = math::Quaternion::fromEulerAngles(0, 0, -1);
-const math::Quaternion math::Quaternion::Left01 = math::Quaternion::fromEulerAngles(1, 0, 0);
-
 bool
 math::Quaternion::operator==(const math::Quaternion& other) const {
     bool xEquals = std::abs(x - other.x) <= std::numeric_limits<float>::epsilon();
@@ -197,7 +191,7 @@ math::Quaternion::fromAxisAngleRotation(
     const float rotationAmountDegrees
 ) {
     QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
-    QUARTZ_ASSERT(rotationAmountDegrees >= 0, "Rotation amount degrees is less than 0");
+    // QUARTZ_ASSERT(rotationAmountDegrees >= 0, "Rotation amount degrees is less than 0");
 
     // This is the same as doing the following with glm:
     // glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec))

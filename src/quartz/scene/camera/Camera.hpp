@@ -79,6 +79,9 @@ public: // member functions
 
     uint32_t getId() const { return m_id; }
     float getFovDegrees() const { return m_fovDegrees; }
+    float getHorizontalRotationDegrees() const { return m_horizontalRotationDegrees; }
+    float getVerticalRotationDegrees() const { return m_verticalRotationDegrees; }
+    float getClockwiseRotationDegrees() const { return m_clockwiseRotationDegrees; }
     const math::Vec3& getWorldPosition() const { return m_worldPosition; }
     const math::Quaternion& getRotation() const { return m_rotation; }
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
@@ -89,9 +92,8 @@ public: // member functions
     void setRotation(const math::Quaternion& rotation) { m_rotation = rotation; }
     void setLookDirection(const math::Vec3& lookDirection);
     void lookAtPosition(const math::Vec3& position);
-
-    double rotateDegreesVertical(const double degrees);
-    double rotateDegreesHorizontal(const double degrees);
+    void setRotationDegrees(const float horizontalDegrees, const float verticalDegrees, const float clockwiseDegrees);
+    void rotateDegrees(const float horizontalDeltaDegrees, const float verticalDeltaDegrees, const float clockwiseDeltaDegrees);
 
     void update(
         const float windowWidth,
@@ -110,18 +112,9 @@ private: // member variables
     math::Vec3 m_worldPosition;
     math::Quaternion m_rotation;
 
-    /**
-     * @todo 2025/08/18 Rename these to m_degreesHorizontal, m_degreesVertical, and m_degreesClockwise,
-     *    so we don't need to expose any sort of euler angle ambiguity, and so it's obvious which ones
-     *    are getting modified by the rotateDegrees* functions. We want to handle the euler angles
-     *    under the hood and not expose the user to them.
-     *
-     * @todo 2025/08/18 Make these floats instead of doubles so they directly match with the quaternion
-     *    we are maintaining, and so there is no precision loss.
-     */
-    double m_yawDegrees;
-    double m_pitchDegrees;
-    double m_rollDegrees;
+    float m_horizontalRotationDegrees;
+    float m_verticalRotationDegrees;
+    float m_clockwiseRotationDegrees;
 
     math::Mat4 m_viewMatrix;
     math::Mat4 m_projectionMatrix;

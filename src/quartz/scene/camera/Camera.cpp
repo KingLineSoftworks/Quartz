@@ -64,9 +64,9 @@ quartz::scene::Camera::Camera() :
         0.0f
     ),
     m_rotation(math::Quaternion::fromDirectionVector(math::Vec3::Forward)),
-    m_yawDegrees(m_rotation.getYawDegrees()),
-    m_pitchDegrees(m_rotation.getPitchDegrees()),
-    m_rollDegrees(m_rotation.getRollDegrees()),
+    m_horizontalRotationDegrees(m_rotation.getYawDegrees()),
+    m_verticalRotationDegrees(m_rotation.getPitchDegrees()),
+    m_clockwiseRotationDegrees(m_rotation.getRollDegrees()),
     m_viewMatrix(),
     m_projectionMatrix()
 {}
@@ -80,9 +80,9 @@ quartz::scene::Camera::Camera(
     m_fovDegrees(fovDegrees),
     m_worldPosition(worldPosition),
     m_rotation(math::Quaternion::fromDirectionVector(lookDirection.normalize())),
-    m_yawDegrees(m_rotation.getYawDegrees()),
-    m_pitchDegrees(m_rotation.getPitchDegrees()),
-    m_rollDegrees(m_rotation.getRollDegrees()),
+    m_horizontalRotationDegrees(m_rotation.getYawDegrees()),
+    m_verticalRotationDegrees(m_rotation.getPitchDegrees()),
+    m_clockwiseRotationDegrees(m_rotation.getRollDegrees()),
     m_viewMatrix(),
     m_projectionMatrix()
 {
@@ -102,9 +102,9 @@ quartz::scene::Camera::operator=(
     m_id = other.m_id;
     m_fovDegrees = other.m_fovDegrees;
     m_worldPosition = other.m_worldPosition;
-    m_yawDegrees = other.m_yawDegrees;
-    m_pitchDegrees = other.m_pitchDegrees;
-    m_rollDegrees = other.m_rollDegrees;
+    m_horizontalRotationDegrees = other.m_horizontalRotationDegrees;
+    m_verticalRotationDegrees = other.m_verticalRotationDegrees;
+    m_clockwiseRotationDegrees = other.m_clockwiseRotationDegrees;
     m_rotation = other.m_rotation;
     m_viewMatrix = other.m_viewMatrix;
 
@@ -133,46 +133,37 @@ quartz::scene::Camera::lookAtPosition(
     m_rotation = math::Quaternion::fromDirectionVector(lookDirection);
 }
 
-double
-quartz::scene::Camera::rotateDegreesVertical(
-    const double degrees
+void
+quartz::scene::Camera::setRotationDegrees(
+    const float horizontalDegrees,
+    const float verticalDegrees,
+    UNUSED const float clockwiseDegrees
 ) {
-    /**
-     * @todo 2025/08/14 Try to use euler angles so we can exactly match the desired degree input
-     */
-    const math::Quaternion verticalBaseRotation = degrees > 0 ? math::Quaternion::Up01 : math::Quaternion::Down01;
-    
-    math::Quaternion verticalRotation;
-    for (uint32_t i = 0; i < std::abs(degrees); ++i) {
-        verticalRotation *= verticalBaseRotation;
-    }
-    verticalRotation.normalize();
+    m_horizontalRotationDegrees = horizontalDegrees;
+    m_verticalRotationDegrees = verticalDegrees;
+    m_clockwiseRotationDegrees = clockwiseDegrees;
 
-    m_rotation = m_rotation * verticalRotation;
-    m_rotation.normalize();
-
-    return degrees;
+    // Actually set the rotation (and clamp the values)
+    this->rotateDegrees(0, 0, 0);
 }
 
-double
-quartz::scene::Camera::rotateDegreesHorizontal(
-    const double degrees
+void
+quartz::scene::Camera::rotateDegrees(
+    const float horizontalDeltaDegrees,
+    const float verticalDeltaDegrees,
+    UNUSED const float clockwiseDeltaDegrees
 ) {
-    /**
-     * @todo 2025/08/14 Try to use euler angles so we can exactly match the desired degree input
-     */
-    const math::Quaternion horizontalBaseRotation = degrees > 0 ? math::Quaternion::Right01 : math::Quaternion::Left01;
-    
-    math::Quaternion horizontalRotation;
-    for (uint32_t i = 0; i < std::abs(degrees); ++i) {
-        horizontalRotation *= horizontalBaseRotation;
-    }
-    horizontalRotation.normalize();
+    m_horizontalRotationDegrees = std::fmod(m_horizontalRotationDegrees + horizontalDeltaDegrees, 360.0f);
 
-    m_rotation = m_rotation * horizontalRotation;
-    m_rotation.normalize();
+    const float desiredVerticalTotalDegrees = m_verticalRotationDegrees + verticalDeltaDegrees;
+    const float actualVerticalTotalDegrees = std::clamp(desiredVerticalTotalDegrees, -89.5f, 89.5f);
+    m_verticalRotationDegrees = actualVerticalTotalDegrees;
 
-    return degrees;
+    const math::Quaternion horizontalRotation = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, m_horizontalRotationDegrees);
+    const math::Vec3 horizontalLookDirection = horizontalRotation.getDirectionVector();
+    const math::Vec3 horizontalRightDirection = horizontalLookDirection.cross(math::Vec3::Up).normalize();
+    const math::Quaternion verticalRotation = math::Quaternion::fromAxisAngleRotation(horizontalRightDirection, m_verticalRotationDegrees);
+    m_rotation = (verticalRotation * horizontalRotation).normalize();
 }
 
 void
@@ -184,7 +175,6 @@ quartz::scene::Camera::update(
 ) {
     const math::Vec3 lookDirection = m_rotation.getDirectionVector();
     math::Vec3 currentRightVector = lookDirection.cross(math::Vec3::Up).normalize();
-
     math::Vec3 currentUpVector = currentRightVector.cross(lookDirection).normalize();
 
     // ----- update view and projection matrices ----- //
