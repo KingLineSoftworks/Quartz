@@ -39,32 +39,6 @@ public: // classes
         alignas(16) math::Mat4 projectionMatrix;
     };
 
-    /**
-     * @brief So we can represent rotation easily in addition to our look vector. This is useful for updating
-     *   the camera's orientation based on mouse movement
-     */
-    struct EulerAngles {
-    public: // member functions
-        EulerAngles() = default;
-        EulerAngles(
-            const double yawDegrees,
-            const double pitchDegrees,
-            const double rollDegrees
-        ) :
-            yawDegrees(yawDegrees),
-            pitchDegrees(pitchDegrees),
-            rollDegrees(rollDegrees)
-        {}
-
-        bool operator==(const EulerAngles& other) const;
-        friend std::ostream& operator<<(std::ostream& os, const EulerAngles& eulerAngles);
-
-    public: // member variables
-        double yawDegrees;
-        double pitchDegrees;
-        double rollDegrees;
-    };
-
 public: // member functions
     Camera();
     Camera(
@@ -90,8 +64,6 @@ public: // member functions
 
     void setPosition(const math::Vec3& position) { m_worldPosition = position; }
     void setRotation(const math::Quaternion& rotation) { m_rotation = rotation; }
-    void setLookDirection(const math::Vec3& lookDirection);
-    void lookAtPosition(const math::Vec3& position);
     void setRotationDegrees(const float horizontalDegrees, const float verticalDegrees, const float clockwiseDegrees);
     void rotateDegrees(const float horizontalDeltaDegrees, const float verticalDeltaDegrees, const float clockwiseDeltaDegrees);
 

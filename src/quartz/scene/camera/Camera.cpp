@@ -34,27 +34,6 @@ quartz::scene::Camera::UniformBufferObject::UniformBufferObject(
     projectionMatrix(camera.m_projectionMatrix)
 {}
 
-bool
-quartz::scene::Camera::EulerAngles::operator==(
-    const quartz::scene::Camera::EulerAngles& other
-) const {
-    bool yawEquals = std::abs(yawDegrees - other.yawDegrees) <= std::numeric_limits<float>::epsilon();
-    bool pitchEquals = std::abs(pitchDegrees - other.pitchDegrees) <= std::numeric_limits<float>::epsilon();
-    bool rollEquals = std::abs(rollDegrees - other.rollDegrees) <= std::numeric_limits<float>::epsilon();
-
-    return yawEquals && pitchEquals && rollEquals;
-}
-
-std::ostream&
-quartz::scene::operator<<(
-    std::ostream& os,
-    const quartz::scene::Camera::EulerAngles& eulerAngles
-) {
-    return os << "[yaw deg " << eulerAngles.yawDegrees
-        << ", pitch deg " << eulerAngles.pitchDegrees
-        << ", roll deg " << eulerAngles.rollDegrees << "]";
-}
-
 quartz::scene::Camera::Camera() :
     m_id(quartz::scene::Camera::cameraCount++),
     m_fovDegrees(60.0f),
@@ -116,28 +95,10 @@ quartz::scene::Camera::~Camera() {
 }
 
 void
-quartz::scene::Camera::setLookDirection(
-    const math::Vec3& lookDirection
-) {
-    QUARTZ_ASSERT(lookDirection.isNormalized(), "Camera look direction must be normalized");
-
-    m_rotation = math::Quaternion::fromDirectionVector(lookDirection);
-}
-
-void
-quartz::scene::Camera::lookAtPosition(
-    const math::Vec3& position 
-) {
-    const math::Vec3 lookDirection = (position - m_worldPosition).normalize();
-
-    m_rotation = math::Quaternion::fromDirectionVector(lookDirection);
-}
-
-void
 quartz::scene::Camera::setRotationDegrees(
     const float horizontalDegrees,
     const float verticalDegrees,
-    UNUSED const float clockwiseDegrees
+    const float clockwiseDegrees
 ) {
     m_horizontalRotationDegrees = horizontalDegrees;
     m_verticalRotationDegrees = verticalDegrees;
@@ -159,10 +120,13 @@ quartz::scene::Camera::rotateDegrees(
     const float actualVerticalTotalDegrees = std::clamp(desiredVerticalTotalDegrees, -89.5f, 89.5f);
     m_verticalRotationDegrees = actualVerticalTotalDegrees;
 
+    m_clockwiseRotationDegrees = std::fmod(m_clockwiseRotationDegrees + clockwiseDeltaDegrees, 360.0f);
+
     const math::Quaternion horizontalRotation = math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, m_horizontalRotationDegrees);
     const math::Vec3 horizontalLookDirection = horizontalRotation.getDirectionVector();
     const math::Vec3 horizontalRightDirection = horizontalLookDirection.cross(math::Vec3::Up).normalize();
-    const math::Quaternion verticalRotation = math::Quaternion::fromAxisAngleRotation(horizontalRightDirection, m_verticalRotationDegrees);
+    const math::Quaternion verticalRotation = math::Quaternion::fromAxisAngleRotation(horizontalRightDirection, -m_verticalRotationDegrees);
+
     m_rotation = (verticalRotation * horizontalRotation).normalize();
 }
 
