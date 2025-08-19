@@ -260,3 +260,14 @@ private:
     }                                                                                                   \
     REQUIRE_SEMICOLON
 
+#define UT_REQUIRE_NOT(a)                                                                               \
+    if (a) {                                                                                            \
+        std::ostringstream message;                                                                     \
+        message << #a << " is valid";                                                                   \
+        LOG_ERROR(UT, "{}", message.str());                                                             \
+        util::UnitTestRunner::CaseFailureInformation cfInfo(functionName, __LINE__, message.str());     \
+        utRunner.addCaseFailureInformation(functionIndex, cfInfo);                                      \
+        return;                                                                                         \
+    }                                                                                                   \
+    REQUIRE_SEMICOLON
+

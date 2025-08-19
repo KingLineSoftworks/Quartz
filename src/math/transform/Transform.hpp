@@ -25,6 +25,9 @@ public: // public methods
     );
     ~Transform() = default;
 
+    bool operator==(const Transform& other) const;
+    bool operator!=(const Transform& other) const;
+
 public: // member variables
     math::Vec3 position;
 

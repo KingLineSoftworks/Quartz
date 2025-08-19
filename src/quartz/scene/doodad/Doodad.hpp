@@ -142,7 +142,7 @@ public: // member functions
     void setRotation(const math::Quaternion& rotation);
     void setScale(const math::Vec3& scale);
     void snapToRigidBody();
-    
+ 
     /**
      * @todo 2024/11/25 Make these update functions private and allow the quartz::scene::Scene class
      *    to be a friend so we can still allow it to invoke these (as well as quartz::unit_test::DoodadUnitTestClient)
@@ -163,11 +163,13 @@ public: // member functions
         const double frameInterpolationFactor
     );
 
+public: // static functions
+    static math::Transform fixTransform(const math::Transform& transform);
+
 private: // static functions
     static void noopAwakenCallback(AwakenCallbackParameters parameters);
     static void noopFixedUpdateCallback(FixedUpdateCallbackParameters parameters);
     static void noopUpdateCallback(UpdateCallbackParameters parameters);
-    static math::Transform fixTransform(const math::Transform& transform);
 
 private: // member variables
     std::optional<quartz::rendering::Model> mo_model;

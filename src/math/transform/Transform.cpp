@@ -33,3 +33,16 @@ math::Transform::Transform(
     scale(scale_)
 {}
 
+bool
+math::Transform::operator==(
+    const math::Transform& other
+) const {
+    return position == other.position && rotation == other.rotation && scale == other.scale;
+}
+
+bool
+math::Transform::operator!=(
+    const math::Transform& other
+) const {
+    return position != other.position || rotation != other.rotation || scale != other.scale;
+}
