@@ -195,13 +195,20 @@ quartz::rendering::Model::loadMaterialMasterIndices(
 ) {
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
-    std::vector<uint32_t> masterTextureIndices = quartz::rendering::Model::loadTextures(
-        renderingDevice,
-        gltfModel
-    );
+    quartz::rendering::Material::initializeMasterMaterialList(renderingDevice);
+
+    std::vector<uint32_t> masterTextureIndices = quartz::rendering::Model::loadTextures(renderingDevice, gltfModel);
+    LOG_TRACE(MODEL, "Loaded {} texture indices", masterTextureIndices.size());
 
     LOG_TRACE(MODEL, "Creating list of materials");
     std::vector<uint32_t> masterMaterialIndices;
+
+    if (gltfModel.materials.size() == 0) {
+        LOG_TRACE(MODEL, "No materials are present, using default material master index as the only material");
+        masterMaterialIndices.push_back(quartz::rendering::Material::getDefaultMaterialMasterIndex());
+        return masterMaterialIndices;
+    }
+
     LOG_TRACE(MODEL, "Reserving space for {} elements in materials list", gltfModel.materials.size());
     masterMaterialIndices.reserve(gltfModel.materials.size());
 

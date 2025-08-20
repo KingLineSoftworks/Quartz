@@ -1,3 +1,4 @@
+#include "quartz/rendering/texture/Texture.hpp"
 #include "util/Loggers.hpp"
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
@@ -136,6 +137,7 @@ UT_FUNCTION(test_construction) {
     }
 
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
+    quartz::rendering::Texture::cleanUpAllTextures();
 }
 
 UT_FUNCTION(test_awaken) {

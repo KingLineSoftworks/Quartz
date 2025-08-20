@@ -126,12 +126,12 @@ quartz::rendering::Material::createMaterial(
 
 void
 quartz::rendering::Material::initializeMasterMaterialList(const quartz::rendering::Device& renderingDevice) {
-    LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
-
     if (!quartz::rendering::Material::masterMaterialList.empty()) {
         LOG_TRACE(MATERIAL, "Master material list is already initialized. Not doing anything");
         return;
     }
+
+    LOG_FUNCTION_SCOPE_TRACE(MATERIAL, "");
 
     LOG_TRACE(MATERIAL, "Initializing master texture list");
     quartz::rendering::Texture::initializeMasterTextureList(renderingDevice);
