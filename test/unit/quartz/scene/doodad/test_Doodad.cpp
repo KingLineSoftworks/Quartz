@@ -1,3 +1,5 @@
+#include "quartz/physics/rigid_body/RigidBody.hpp"
+#include "quartz/rendering/model/Scene.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 #include "util/Loggers.hpp"
 #include "util/file_system/FileSystem.hpp"
@@ -42,26 +44,19 @@ private:
  */
 
 UT_FUNCTION(test_construction) {
-    LOG_TRACE(UT, "Creating renderince instance");
     quartz::rendering::Instance renderingInstance("DOODAD_UT", 9, 9, 9, true);
-    LOG_TRACE(UT, "Creating renderince device");
     quartz::rendering::Device renderingDevice(renderingInstance);
 
-    LOG_TRACE(UT, "Creating physics manager");
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();
-    LOG_TRACE(UT, "Creating field");
     std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
 
-    // no model, no rigidbody, no op callbacks
+    // no model, no rigidbody, no callbacks
     {
-        LOG_SCOPE_CHANGE_TRACE(UT);
-        LOG_TRACE(UT, "Creating transform");
         const math::Vec3 position(1, 2, 3);
         const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
         const math::Vec3 scale(4, 5, 6);
         const math::Transform transform(position, rotation, scale);
 
-        LOG_TRACE(UT, "Creating doodad parameters");
         const quartz::scene::Doodad::Parameters parameters(
             std::nullopt,
             transform,
@@ -71,7 +66,6 @@ UT_FUNCTION(test_construction) {
             {}
         );
 
-        LOG_TRACE(UT, "Creating doodad");
         const quartz::scene::Doodad doodad(renderingDevice, physicsManager, field, parameters);
 
         UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
@@ -83,17 +77,13 @@ UT_FUNCTION(test_construction) {
 
     // model, rigidbody, no op callbacks
     {
-        LOG_SCOPE_CHANGE_TRACE(UT);
-        LOG_TRACE(UT, "Creating object filepath");
         const std::string objectFilepath = util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/models/unit_models/unit_cube/glb/unit_cube.glb");
 
-        LOG_TRACE(UT, "Creating transform");
         const math::Vec3 position(1, 2, 3);
         const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
         const math::Vec3 scale(4, 5, 6);
         const math::Transform transform(position, rotation, scale);
 
-        LOG_TRACE(UT, "Creating collider parameters");
         const double sphereRadius_m = 43;
         const quartz::physics::Collider::Parameters colliderParameters(
             false,
@@ -104,13 +94,11 @@ UT_FUNCTION(test_construction) {
             {}
         );
 
-        LOG_TRACE(UT, "Creating rigidbody parameters");
         const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
         const bool enableGravity = true;
         const math::Vec3 angularAxisFactor(0, 0, 0);
         const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
 
-        LOG_TRACE(UT, "Creating doodad");
         const quartz::scene::Doodad doodad(
             renderingDevice,
             physicsManager,
@@ -123,17 +111,110 @@ UT_FUNCTION(test_construction) {
             {}
         );
 
-        LOG_TRACE(UT, "comparing position");
         UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
-        LOG_TRACE(UT, "comparing rotation");
         UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
-        LOG_TRACE(UT, "comparing scale");
         UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
-        LOG_TRACE(UT, "requiring model optional");
-        UT_REQUIRE(doodad.getModelOptional());
-        LOG_TRACE(UT, "requiring rigidbody optional");
-        UT_REQUIRE(doodad.getRigidBodyOptional());
-        LOG_TRACE(UT, "done");
+
+        const std::optional<quartz::rendering::Model>& o_model = doodad.getModelOptional();
+        UT_REQUIRE(o_model);
+        const quartz::rendering::Model& model = *o_model;
+        UT_CHECK_EQUAL(model.getMaterialMasterIndices().size(), 0);
+        const quartz::rendering::Scene& defaultScene = model.getDefaultScene();
+        UT_CHECK_EQUAL(defaultScene.getRootNodePtrs().size(), 1);
+
+        const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
+        UT_REQUIRE(o_rigidBody);
+        const quartz::physics::RigidBody& rigidBody = *o_rigidBody;
+        UT_CHECK_EQUAL(rigidBody.getPosition(), position);
+        UT_CHECK_EQUAL(rigidBody.getRotation(), rotation);
+        const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
+        UT_REQUIRE(o_collider);
+        UT_CHECK_EQUAL(o_collider->getCategoryProperties(), colliderParameters.categoryProperties);
+        UT_CHECK_EQUAL(o_collider->getIsTrigger(), colliderParameters.isTrigger);
+        UT_CHECK_EQUAL(o_collider->getLocalPosition(), math::Vec3(0));
+        UT_CHECK_EQUAL(o_collider->getLocalRotation(), math::Quaternion());
+        UT_CHECK_EQUAL(o_collider->getWorldPosition(), position);
+        UT_CHECK_EQUAL(o_collider->getWorldRotation(), rotation);
+        const std::optional<quartz::physics::SphereShape>& o_sphereShape = o_collider->getSphereShapeOptional();
+        UT_REQUIRE(o_sphereShape);
+        UT_CHECK_EQUAL_FLOATS(o_sphereShape->getRadius_m(), sphereRadius_m * scale.y); // scaled by transform's y element
+        const std::optional<quartz::physics::BoxShape>& o_boxShape = o_collider->getBoxShapeOptional();
+        UT_REQUIRE(!o_boxShape);
+    }
+
+    // More complex model, rigidbody, no callbacks
+    {
+        const std::string objectFilepath = util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/models/glTF-Sample-Models/2.0/AntiqueCamera/glTF/AntiqueCamera.gltf");
+
+        const math::Vec3 position(1, 2, 3);
+        const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+        const math::Vec3 scale(4, 5, 6);
+        const math::Transform transform(position, rotation, scale);
+
+        const math::Vec3 boxHalfExtents_m(5, 2, 13);
+        const quartz::physics::Collider::Parameters colliderParameters(
+            false,
+            quartz::physics::Collider::CategoryProperties(0b110101, 0b11000101),
+            quartz::physics::BoxShape::Parameters(boxHalfExtents_m),
+            {},
+            {},
+            {}
+        );
+
+        const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
+        const bool enableGravity = true;
+        const math::Vec3 angularAxisFactor(1, 2, 3);
+        const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
+
+        const quartz::scene::Doodad doodad(
+            renderingDevice,
+            physicsManager,
+            field,
+            objectFilepath,
+            transform,
+            rbParameters,
+            {},
+            {},
+            {}
+        );
+
+        UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
+        UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
+        UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+
+        const std::optional<quartz::rendering::Model>& o_model = doodad.getModelOptional();
+        UT_REQUIRE(o_model);
+        const quartz::rendering::Model& model = *o_model;
+        UT_CHECK_EQUAL(model.getMaterialMasterIndices().size(), 2);
+        const quartz::rendering::Scene& defaultScene = model.getDefaultScene();
+        UT_CHECK_EQUAL(defaultScene.getRootNodePtrs().size(), 2);
+
+        const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
+        UT_REQUIRE(o_rigidBody);
+        const quartz::physics::RigidBody& rigidBody = *o_rigidBody;
+        UT_CHECK_EQUAL(rigidBody.getPosition(), position);
+        UT_CHECK_EQUAL(rigidBody.getRotation(), rotation);
+        const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
+        UT_REQUIRE(o_collider);
+        UT_CHECK_EQUAL(o_collider->getIsTrigger(), colliderParameters.isTrigger);
+        UT_CHECK_EQUAL(o_collider->getLocalPosition(), math::Vec3(0));
+        UT_CHECK_EQUAL(o_collider->getLocalRotation(), math::Quaternion());
+        UT_CHECK_EQUAL(o_collider->getWorldPosition(), position);
+        UT_CHECK_EQUAL(o_collider->getWorldRotation(), rotation);
+        const std::optional<quartz::physics::SphereShape>& o_sphereShape = o_collider->getSphereShapeOptional();
+        UT_REQUIRE(!o_sphereShape);
+        const std::optional<quartz::physics::BoxShape>& o_boxShape = o_collider->getBoxShapeOptional();
+        UT_REQUIRE(o_boxShape);
+        UT_CHECK_EQUAL(o_boxShape->getHalfExtents_m(), boxHalfExtents_m * scale.abs());
+        const std::array<math::Vec3, 8> boxLocalVertexPositions = o_boxShape->getLocalVertexPositions();
+        UT_CHECK_EQUAL(boxLocalVertexPositions[0], math::Vec3(-1 * boxHalfExtents_m.x * std::abs(scale.x), -1 * boxHalfExtents_m.y * std::abs(scale.y),  1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[1], math::Vec3( 1 * boxHalfExtents_m.x * std::abs(scale.x), -1 * boxHalfExtents_m.y * std::abs(scale.y),  1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[2], math::Vec3( 1 * boxHalfExtents_m.x * std::abs(scale.x),  1 * boxHalfExtents_m.y * std::abs(scale.y),  1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[3], math::Vec3(-1 * boxHalfExtents_m.x * std::abs(scale.x),  1 * boxHalfExtents_m.y * std::abs(scale.y),  1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[4], math::Vec3(-1 * boxHalfExtents_m.x * std::abs(scale.x), -1 * boxHalfExtents_m.y * std::abs(scale.y), -1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[5], math::Vec3( 1 * boxHalfExtents_m.x * std::abs(scale.x), -1 * boxHalfExtents_m.y * std::abs(scale.y), -1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[6], math::Vec3( 1 * boxHalfExtents_m.x * std::abs(scale.x),  1 * boxHalfExtents_m.y * std::abs(scale.y), -1 * boxHalfExtents_m.z * std::abs(scale.z)));
+        UT_CHECK_EQUAL(boxLocalVertexPositions[7], math::Vec3(-1 * boxHalfExtents_m.x * std::abs(scale.x),  1 * boxHalfExtents_m.y * std::abs(scale.y), -1 * boxHalfExtents_m.z * std::abs(scale.z)));
     }
 
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
