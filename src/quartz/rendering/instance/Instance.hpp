@@ -21,6 +21,8 @@ public: // member functions
         const uint32_t applicationPatchVersion,
         const bool validationLayersEnabled
     );
+    Instance(const Instance& other) = delete;
+    Instance(Instance&& other) = delete;
     ~Instance();
 
     USE_LOGGER(INSTANCE);
@@ -37,6 +39,7 @@ public: // static functions
     );
 
 private: // static functions
+    static bool initializeGLFW();
     static std::vector<const char*> getEnabledValidationLayerNames(
         const bool validationLayersEnabled
     );
@@ -58,6 +61,7 @@ private: // static functions
     );
 
 private: // member variables
+    const bool m_glfwInitialized;
     const std::vector<const char*> m_validationLayerNames;
     const std::vector<const char*> m_instanceExtensionNames;
     vk::UniqueInstance mp_vulkanInstance;

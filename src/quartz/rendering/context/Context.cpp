@@ -453,3 +453,4 @@ quartz::rendering::Context::finish() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
     m_renderingDevice.waitIdle();
 }
+

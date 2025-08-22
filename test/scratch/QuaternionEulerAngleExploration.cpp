@@ -1,7 +1,7 @@
+#include "util/logger/Logger.hpp"
+
 #include "math/Loggers.hpp"
 #include "math/transform/Quaternion.hpp"
-
-#include "util/logger/Logger.hpp"
 
 int main() {
     REGISTER_LOGGER_GROUP(MATH);
