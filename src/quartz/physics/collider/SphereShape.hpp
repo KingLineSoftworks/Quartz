@@ -39,6 +39,8 @@ public: // member functions
 
     double getRadius_m() const;
 
+    void setRadius_m(const double radius_m);
+
 private: // member functions
     SphereShape(reactphysics3d::SphereShape* p_sphereShape);
 

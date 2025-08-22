@@ -58,11 +58,11 @@ quartz::rendering::Instance::initializeGLFW() {
     LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "");
 
     if (!glfwInit()) {
-        LOG_CRITICAL(WINDOW, "Failed to initialize GLFW");
-        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to initialize GLFW");
+        LOG_CRITICAL(INSTANCE, "Failed to initialize GLFW");
+        LOG_THROW(INSTANCE, util::VulkanCreationFailedError, "Failed to initialize GLFW");
     }
 
-    LOG_INFO(WINDOW, "GLFW initialized");
+    LOG_INFO(INSTANCE, "GLFW initialized");
     return true;
 }
 

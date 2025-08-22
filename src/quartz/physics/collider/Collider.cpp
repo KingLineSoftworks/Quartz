@@ -184,6 +184,21 @@ quartz::physics::Collider::getWorldRotation() const {
 }
 
 void
+quartz::physics::Collider::setScale(
+    UNUSED const math::Vec3& scale
+) {
+    if (mo_boxShape) {
+        mo_boxShape->setHalfExtents_m(scale);
+        return;
+    }
+
+    if (mo_sphereShape) {
+        mo_sphereShape->setRadius_m(scale.y);
+        return;
+    }
+}
+
+void
 quartz::physics::Collider::collisionStart(
     Collider* const p_otherCollider
 ) {

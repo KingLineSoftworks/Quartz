@@ -31,3 +31,10 @@ double
 quartz::physics::SphereShape::getRadius_m() const {
     return mp_colliderShape->getRadius();
 }
+
+void
+quartz::physics::SphereShape::setRadius_m(
+    const double radius_m
+) {
+    mp_colliderShape->setRadius(radius_m);
+}

@@ -89,6 +89,12 @@ UT_FUNCTION(test_construction) {
 
         const std::optional<quartz::physics::BoxShape>& o_boxShape = o_collider->getBoxShapeOptional();
         UT_REQUIRE(!o_boxShape);
+
+        // Update the scale and ensure it gets updated correctly
+        
+        rb.setScale({99, 100, 101});
+
+        UT_CHECK_EQUAL(o_sphereShape->getRadius_m(), 100);
     }
 
     // interesting transform box rb
@@ -141,6 +147,12 @@ UT_FUNCTION(test_construction) {
         UT_CHECK_EQUAL(boxLocalVertexPositions[5], math::Vec3( 15 * std::abs(scale.x), -20 * std::abs(scale.y), -31 * std::abs(scale.z)));
         UT_CHECK_EQUAL(boxLocalVertexPositions[6], math::Vec3( 15 * std::abs(scale.x),  20 * std::abs(scale.y), -31 * std::abs(scale.z)));
         UT_CHECK_EQUAL(boxLocalVertexPositions[7], math::Vec3(-15 * std::abs(scale.x),  20 * std::abs(scale.y), -31 * std::abs(scale.z)));
+
+        // Update the scale and ensure it gets updated correctly
+        
+        rb.setScale({99, 100, 101});
+
+        UT_CHECK_EQUAL(o_boxShape->getHalfExtents_m(), math::Vec3(99, 100, 101));
     }
 
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);

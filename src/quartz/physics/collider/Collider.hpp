@@ -119,6 +119,8 @@ public: // member functions
     const std::optional<quartz::physics::BoxShape>& getBoxShapeOptional() const { return mo_boxShape; }
     const std::optional<quartz::physics::SphereShape>& getSphereShapeOptional() const { return mo_sphereShape; }
 
+    void setScale(const math::Vec3& scale);
+
 public: // static functions
     static quartz::physics::Collider& getCollider(reactphysics3d::Collider* const p_collider) { return *quartz::physics::Collider::colliderMap.at(p_collider); }
 
