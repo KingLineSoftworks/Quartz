@@ -92,7 +92,7 @@ UT_FUNCTION(test_construction) {
 
         // Update the scale and ensure it gets updated correctly
         
-        rb.setScale({99, 100, 101});
+        rb.setScale({99, -100, 101});
 
         UT_CHECK_EQUAL(o_sphereShape->getRadius_m(), 100);
     }
@@ -150,7 +150,7 @@ UT_FUNCTION(test_construction) {
 
         // Update the scale and ensure it gets updated correctly
         
-        rb.setScale({99, 100, 101});
+        rb.setScale({-99, 100, -101});
 
         UT_CHECK_EQUAL(o_boxShape->getHalfExtents_m(), math::Vec3(99, 100, 101));
     }

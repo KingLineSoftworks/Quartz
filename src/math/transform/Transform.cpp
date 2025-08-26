@@ -1,4 +1,6 @@
+#include "math/Loggers.hpp"
 #include "math/transform/Transform.hpp"
+#include "math/transform/Mat4.hpp"
 
 math::Transform::Transform() :
     position(0.0f, 0.0f, 0.0f),
@@ -45,4 +47,17 @@ math::Transform::operator!=(
     const math::Transform& other
 ) const {
     return position != other.position || rotation != other.rotation || scale != other.scale;
+}
+
+math::Mat4
+math::Transform::calculateTransformationMatrix() const {
+    const math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), position);
+
+    const math::Mat4 rotationMatrix = rotation.getRotationMatrix();
+
+    const math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), scale);
+
+    const math::Mat4 transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
+    return transformationMatrix;
 }

@@ -36,5 +36,5 @@ void
 quartz::physics::SphereShape::setRadius_m(
     const double radius_m
 ) {
-    mp_colliderShape->setRadius(radius_m);
+    mp_colliderShape->setRadius(std::abs(radius_m));
 }

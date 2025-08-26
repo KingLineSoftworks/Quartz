@@ -50,6 +50,6 @@ void
 quartz::physics::BoxShape::setHalfExtents_m(
     const math::Vec3& halfExtents_m
 ) {
-    mp_colliderShape->setHalfExtents(halfExtents_m);
+    mp_colliderShape->setHalfExtents(halfExtents_m.abs());
 }
 

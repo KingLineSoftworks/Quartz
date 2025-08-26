@@ -165,6 +165,11 @@ public: // member functions
 
 public: // static functions
     static math::Transform fixTransform(const math::Transform& transform);
+    static math::Mat4 calculateTransformationmatrix(
+        const math::Transform& currentTransform,
+        const math::Transform& nextTransform,
+        const double interpolationFactor
+    );
 
 private: // static functions
     static void noopAwakenCallback(AwakenCallbackParameters parameters);

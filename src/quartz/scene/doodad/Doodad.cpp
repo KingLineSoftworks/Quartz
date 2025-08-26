@@ -40,6 +40,49 @@ quartz::scene::Doodad::fixTransform(
     return fixedTransform;
 }
 
+math::Mat4
+quartz::scene::Doodad::calculateTransformationmatrix(
+    const math::Transform &currentTransform,
+    const math::Transform &nextTransform,
+    const double interpolationFactor
+) {
+    const math::Vec3 interpolatedPosition = math::lerp(
+        currentTransform.position,
+        nextTransform.position,
+        interpolationFactor
+    );
+
+    const math::Quaternion interpolatedRotation = math::Quaternion::slerp(
+        currentTransform.rotation.normalize(),
+        nextTransform.rotation.normalize(),
+        interpolationFactor
+    );
+
+    const math::Vec3 interpolatedScale = math::lerp(
+        currentTransform.scale,
+        nextTransform.scale,
+        interpolationFactor
+    );
+
+#if false
+    const math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
+    const math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
+    const math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
+
+    const math::Mat4 transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
+    return transformationMatrix;
+#else
+    const math::Transform interpolatedTransform(
+        interpolatedPosition,
+        interpolatedRotation,
+        interpolatedScale
+    );
+
+    return interpolatedTransform.calculateTransformationMatrix();
+#endif
+}
+
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
@@ -210,6 +253,7 @@ quartz::scene::Doodad::update(
         currentTransform = m_transform;
     }
 
+#if false
     const math::Vec3 interpolatedPosition = math::lerp(
         m_transform.position,
         currentTransform.position,
@@ -228,11 +272,18 @@ quartz::scene::Doodad::update(
         frameInterpolationFactor
     );
 
-    math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
-    math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
-    math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
+    const math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
+    const math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
+    const math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
 
     m_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+#else
+    m_transformationMatrix = quartz::scene::Doodad::calculateTransformationmatrix(
+        m_transform,
+        currentTransform,
+        frameInterpolationFactor
+    );
+#endif
 
     m_transform = currentTransform;
 }
