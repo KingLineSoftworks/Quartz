@@ -84,6 +84,21 @@ math::Vec3::abs() const {
     return copy;
 }
 
+math::Vec3
+math::Vec3::lerp(
+    const math::Vec3& a,
+    const math::Vec3& b,
+    const float t
+) {
+    const math::Vec3 result(
+        std::lerp(a.x, b.x, t),
+        std::lerp(a.y, b.y, t),
+        std::lerp(a.z, b.z, t)
+    );
+
+    return result;
+}
+
 bool
 math::Vec3::isNormalized() const {
     if (x == 0.0 && y == 0.0 && z == 0.0) {

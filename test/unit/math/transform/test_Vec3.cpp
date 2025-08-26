@@ -642,6 +642,86 @@ UT_FUNCTION(test_abs) {
     }
 }
 
+UT_FUNCTION(test_lerp) {
+
+    struct TestInfo {
+        math::Vec3 a;
+        math::Vec3 b;
+        float t;
+        math::Vec3 expected;
+    };
+
+    const std::vector<TestInfo> testInfos = {
+        TestInfo(
+            {0, 0, 0},
+            {100, 100, 100},
+            0,
+            {0, 0, 0}
+        ),
+        TestInfo(
+            {0, 0, 0},
+            {100, 100, 100},
+            1,
+            {100, 100, 100}
+        ),
+        TestInfo(
+            {0, 0, 0},
+            {100, 100, 100},
+            0.5f,
+            {50, 50, 50}
+        ),
+        TestInfo(
+            {-100, 0, 200},
+            {100, 100, 100},
+            0.25f,
+            {-50, 25, 175}
+        ),
+        TestInfo(
+            {500, -500, -100},
+            {-100, 100, 500},
+            0.75f,
+            {50, -50, 350}
+        ),
+    };
+
+    for (uint32_t iInfo = 0; iInfo < testInfos.size(); ++iInfo) {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Test index {}", iInfo);
+
+        const TestInfo& testInfo = testInfos[iInfo];
+        const math::Vec3& a = testInfo.a;
+        const math::Vec3& b = testInfo.b;
+        const float t = testInfo.t;
+        const math::Vec3& expected = testInfo.expected;
+        LOG_DEBUG(UT, "a: {}", a.toString());
+        LOG_DEBUG(UT, "b: {}", b.toString());
+        LOG_DEBUG(UT, "t: {}", t);
+        LOG_DEBUG(UT, "expected: {}", expected.toString());
+
+        for (uint32_t iVal = 0; iVal < 3; iVal++) {
+            LOG_SCOPE_CHANGE_DEBUG(UT);
+            LOG_DEBUG(UT, "{}", (iVal == 0 ? "x" : iVal == 1 ? "y" : "z"));
+
+            const float aVal = a.glmVec[iVal];
+            const float bVal = b.glmVec[iVal];
+            const float diff = bVal - aVal;
+            const float slide = diff * t;
+            const float result = aVal + slide;
+
+            LOG_DEBUG(UT, "{} - {} = {}", bVal, aVal, diff);
+            LOG_DEBUG(UT, "{} * {} = {}", diff, t, slide);
+            LOG_DEBUG(UT, "{} + {} = {}", aVal, slide, result);
+        }
+        LOG_DEBUG(UT, "x lerp: {}", std::lerp(a.x, b.x, t));
+        LOG_DEBUG(UT, "y lerp: {}", std::lerp(a.y, b.y, t));
+        LOG_DEBUG(UT, "z lerp: {}", std::lerp(a.z, b.z, t));
+
+        const math::Vec3 result = math::Vec3::lerp(a, b, t);
+
+        UT_CHECK_EQUAL(result, expected);
+    }
+}
+
 UT_FUNCTION(test_look) {
     // We are actually not going to write any tests for math::Vec3::look
     // because it is just a wrapper around glm::lookAt and it seems 
@@ -659,6 +739,7 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_getProjectionOntoPlane);
     REGISTER_UT_FUNCTION(test_normalize);
     REGISTER_UT_FUNCTION(test_abs);
+    REGISTER_UT_FUNCTION(test_lerp);
     REGISTER_UT_FUNCTION(test_look);
     UT_RUN_TESTS();
 }
