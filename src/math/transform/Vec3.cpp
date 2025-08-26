@@ -2,6 +2,7 @@
 #include <glm/gtx/projection.hpp>
 
 #include "math/Loggers.hpp"
+#include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 
@@ -90,13 +91,7 @@ math::Vec3::lerp(
     const math::Vec3& b,
     const float t
 ) {
-    const math::Vec3 result(
-        std::lerp(a.x, b.x, t),
-        std::lerp(a.y, b.y, t),
-        std::lerp(a.z, b.z, t)
-    );
-
-    return result;
+    return math::lerp(a, b, t);
 }
 
 bool

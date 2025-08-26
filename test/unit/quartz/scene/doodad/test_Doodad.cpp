@@ -1,13 +1,14 @@
+#include <cstdint>
 #include <memory>
 #include <optional>
 
-#include "math/transform/Mat4.hpp"
 #include "quartz/physics/collider/SphereShape.hpp"
 #include "util/Loggers.hpp"
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
+#include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Transform.hpp"
@@ -961,54 +962,205 @@ UT_FUNCTION(test_snapToRigidBody) {
 
 UT_FUNCTION(test_physics) {
     // When the rigid body moves and rotates, so do we - but we don't scale
+    // Set the position
+    // Set an update callback which modifies the position, rotation, and scale
+    // Invoke doodad.update
+    // Ensure the transformation matrix matches what we expect it to be
+
+    const std::string testName = "DOODAD_UT-test_physics";
+    quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
+    quartz::rendering::Device renderingDevice(renderingInstance);
+    quartz::rendering::Window renderingWindow(testName, 4, 4, renderingInstance, renderingDevice);
+
+    quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();
+    std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
+    
+    quartz::managers::InputManager& inputManager = quartz::unit_test::InputManagerUnitTestClient::getInstance(renderingWindow.getGLFWwindowPtr());
+
+    const math::Vec3 position(1, 2, 3);
+    const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+    const math::Vec3 scale(4, 5, 6);
+    const math::Transform transform(position, rotation, scale);
+
+    const double sphereRadius_m = 43;
+    const quartz::physics::Collider::Parameters colliderParameters(
+        false,
+        quartz::physics::Collider::CategoryProperties(0b01, 0b11),
+        quartz::physics::SphereShape::Parameters(sphereRadius_m),
+        {},
+        {},
+        {}
+    );
+
+    const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
+    const bool enableGravity = true;
+    const math::Vec3 angularAxisFactor(0, 0, 0);
+    const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
+
+    const math::Vec3 updatedPosition(101, 102, -97);
+    const math::Quaternion updatedRotation = math::Quaternion::fromDirectionVector(math::Vec3::Down);
+    const math::Vec3 updatedScale(40, 50, 60);
+    const quartz::scene::Doodad::UpdateCallback updateCallback = [&] (UNUSED quartz::scene::Doodad::UpdateCallbackParameters callbackParameters) {
+        // We don't actually have to do anything in the update step, because we will be updating the rigid body's position
+    };
+
+    const std::vector<double> interpolationFactors = {
+        0.0,
+        1.0,
+        0.5,
+        0.42,
+        0.71
+    };
+
+    // No interpolation, use original position
+    for (uint32_t iInterp = 0; iInterp < interpolationFactors.size(); ++iInterp) {
+        const double interpolationFactor = interpolationFactors[iInterp];
+
+        quartz::scene::Doodad doodad(
+            renderingDevice,
+            physicsManager,
+            field,
+            std::nullopt,
+            transform,
+            rbParameters,
+            {},
+            {},
+            updateCallback
+        );
+
+        // Initial transform should match
+        UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
+        UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
+        UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+
+        // Initial transformation matrix should match as well
+        UT_CHECK_EQUAL(doodad.getTransformationMatrix(), transform.calculateTransformationMatrix());
+
+        // Update the position of the rigid body
+        quartz::physics::RigidBody& rigidBody = *doodad.getRigidBodyOptionalReference();
+        rigidBody.setPosition(updatedPosition);
+        rigidBody.setRotation(updatedRotation);
+        rigidBody.setScale(updatedScale);
+
+        // Update the doodad to interpolate between the two positions
+        doodad.update(
+            inputManager,
+            100.0,
+            5.0,
+            interpolationFactor
+        );
+
+        // Transform should actually be fully updated, besides the scale
+        UT_CHECK_EQUAL(doodad.getTransform().position, updatedPosition);
+        UT_CHECK_EQUAL(doodad.getTransform().rotation, updatedRotation);
+        UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+
+        // Transformation matrix should match all of our updated values
+        const math::Transform expectedTransform(
+            math::Vec3::lerp(position, updatedPosition, interpolationFactor),
+            math::Quaternion::slerp(rotation, updatedRotation, interpolationFactor),
+            scale 
+        );
+        const math::Mat4 expectedMatrix = expectedTransform.calculateTransformationMatrix();
+        const math::Mat4 actualMatrix = doodad.getTransformationMatrix();
+        for (uint32_t iCol = 0; iCol < 4; ++iCol) {
+            const math::Vec4& colExpected = expectedMatrix.cols[iCol];
+            const math::Vec4& colActual = actualMatrix.cols[iCol];
+            for (uint32_t iRow = 0; iRow < 4; ++iRow) {
+                UT_CHECK_EQUAL_FLOATS(colActual[iRow], colExpected[iRow]);
+            }
+        }
+    }
+
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
+    quartz::rendering::Texture::cleanUpAllTextures();
 }
 
 UT_FUNCTION(test_transformationMatrix) {
-    // // Set the position
-    // // Set an update callback which modifies the position, rotation, and scale
-    // // Invoke doodad.update
-    // // Ensure the transformation matrix matches what we expect it to be
+    // Set the position
+    // Set an update callback which modifies the position, rotation, and scale
+    // Invoke doodad.update
+    // Ensure the transformation matrix matches what we expect it to be
 
-    // quartz::rendering::Instance renderingInstance("DOODAD_UT", 9, 9, 9, true);
-    // quartz::rendering::Device renderingDevice(renderingInstance);
+    const std::string testName = "DOODAD_UT_test_transformationMatrix";
+    quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
+    quartz::rendering::Device renderingDevice(renderingInstance);
+    quartz::rendering::Window renderingWindow(testName, 4, 4, renderingInstance, renderingDevice);
 
-    // quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();
-    // std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
+    quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();
+    std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
+    
+    quartz::managers::InputManager& inputManager = quartz::unit_test::InputManagerUnitTestClient::getInstance(renderingWindow.getGLFWwindowPtr());
 
-    // const math::Vec3 position(1, 2, 3);
-    // const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
-    // const math::Vec3 scale(4, 5, 6);
-    // const math::Transform transform(position, rotation, scale);
+    const math::Vec3 position(1, 2, 3);
+    const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+    const math::Vec3 scale(4, 5, 6);
+    const math::Transform transform(position, rotation, scale);
 
-    // const math::Vec3 updatedPosition(101, 102, -97);
-    // const math::Quaternion updatedRotation = math::Quaternion::fromDirectionVector(math::Vec3::Down);
-    // const math::Vec3 updatedScale(40, 50, 60);
-    // const quartz::scene::Doodad::UpdateCallback updateCallback = [&] (quartz::scene::Doodad::UpdateCallbackParameters callbackParameters) {
-    //     callbackParameters.p_doodad->setPosition(updatedPosition);
-    //     callbackParameters.p_doodad->setRotation(updatedRotation);
-    //     callbackParameters.p_doodad->setScale(updatedScale);
-    // };
+    const math::Vec3 updatedPosition(101, 102, -97);
+    const math::Quaternion updatedRotation = math::Quaternion::fromDirectionVector(math::Vec3::Down);
+    const math::Vec3 updatedScale(40, 50, 60);
+    const quartz::scene::Doodad::UpdateCallback updateCallback = [&] (quartz::scene::Doodad::UpdateCallbackParameters callbackParameters) {
+        callbackParameters.p_doodad->setPosition(updatedPosition);
+        callbackParameters.p_doodad->setRotation(updatedRotation);
+        callbackParameters.p_doodad->setScale(updatedScale);
+    };
 
-    // quartz::scene::Doodad doodad(
-    //     renderingDevice,
-    //     physicsManager,
-    //     field,
-    //     std::nullopt,
-    //     transform,
-    //     std::nullopt,
-    //     {},
-    //     {},
-    //     updateCallback
-    // );
+    // Interpolation factor does not matter because we don't have a rigid body
+    {
+        const double interpolationFactor = 0.42;
 
-    // UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
-    // UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
-    // UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+        quartz::scene::Doodad doodad(
+            renderingDevice,
+            physicsManager,
+            field,
+            std::nullopt,
+            transform,
+            std::nullopt,
+            {},
+            {},
+            updateCallback
+        );
 
-    // // Transformation matrix should not be set upon construction, so we need to update it in order to get it to contain a value
+        // Initial transform should match
+        UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
+        UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
+        UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
 
-    // quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
-    // quartz::rendering::Texture::cleanUpAllTextures();
+        // Initial transformation matrix should match as well
+        UT_CHECK_EQUAL(doodad.getTransformationMatrix(), transform.calculateTransformationMatrix());
+
+        doodad.update(
+            inputManager,
+            100.0,
+            5.0,
+            interpolationFactor
+        );
+
+        // Transform should actually be fully updated
+        UT_CHECK_EQUAL(doodad.getTransform().position, updatedPosition);
+        UT_CHECK_EQUAL(doodad.getTransform().rotation, updatedRotation);
+        UT_CHECK_EQUAL(doodad.getTransform().scale, updatedScale);
+
+        // Transformation matrix should match all of our updated values
+        const math::Transform expectedTransform(
+            updatedPosition,
+            updatedRotation,
+            updatedScale
+        );
+        const math::Mat4 expectedMatrix = expectedTransform.calculateTransformationMatrix();
+        const math::Mat4 actualMatrix = doodad.getTransformationMatrix();
+        for (uint32_t iCol = 0; iCol < 4; ++iCol) {
+            const math::Vec4& colExpected = expectedMatrix.cols[iCol];
+            const math::Vec4& colActual = actualMatrix.cols[iCol];
+            for (uint32_t iRow = 0; iRow < 4; ++iRow) {
+                UT_CHECK_EQUAL_FLOATS(colActual[iRow], colExpected[iRow]);
+            }
+        }
+    }
+
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
+    quartz::rendering::Texture::cleanUpAllTextures();
 }
 
 UT_FUNCTION(test_fixTransform) {

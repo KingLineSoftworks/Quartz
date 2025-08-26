@@ -2,6 +2,7 @@
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
+#include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Vec3.hpp"
 
 UT_FUNCTION(test_construction) {
@@ -716,7 +717,7 @@ UT_FUNCTION(test_lerp) {
         LOG_DEBUG(UT, "y lerp: {}", std::lerp(a.y, b.y, t));
         LOG_DEBUG(UT, "z lerp: {}", std::lerp(a.z, b.z, t));
 
-        const math::Vec3 result = math::Vec3::lerp(a, b, t);
+        const math::Vec3 result = math::lerp(a, b, t);
 
         UT_CHECK_EQUAL(result, expected);
     }
@@ -743,3 +744,4 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_look);
     UT_RUN_TESTS();
 }
+

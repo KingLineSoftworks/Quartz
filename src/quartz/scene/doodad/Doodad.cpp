@@ -64,15 +64,6 @@ quartz::scene::Doodad::calculateTransformationmatrix(
         interpolationFactor
     );
 
-#if false
-    const math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
-    const math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
-    const math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
-
-    const math::Mat4 transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-
-    return transformationMatrix;
-#else
     const math::Transform interpolatedTransform(
         interpolatedPosition,
         interpolatedRotation,
@@ -80,7 +71,6 @@ quartz::scene::Doodad::calculateTransformationmatrix(
     );
 
     return interpolatedTransform.calculateTransformationMatrix();
-#endif
 }
 
 quartz::scene::Doodad::Doodad(
@@ -100,7 +90,7 @@ quartz::scene::Doodad::Doodad(
             std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
-    m_transformationMatrix(),
+    m_transformationMatrix(m_transform.calculateTransformationMatrix()),
     mo_rigidBody(
         (o_field && o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(physicsManager.createRigidBody(*o_field, m_transform, *o_rigidBodyParameters)) :
@@ -129,7 +119,7 @@ quartz::scene::Doodad::Doodad(
             std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
-    m_transformationMatrix(),
+    m_transformationMatrix(m_transform.calculateTransformationMatrix()),
     mo_rigidBody(
         (o_field && doodadParameters.o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(physicsManager.createRigidBody(*o_field, m_transform, *doodadParameters.o_rigidBodyParameters)) :
@@ -253,37 +243,11 @@ quartz::scene::Doodad::update(
         currentTransform = m_transform;
     }
 
-#if false
-    const math::Vec3 interpolatedPosition = math::lerp(
-        m_transform.position,
-        currentTransform.position,
-        frameInterpolationFactor
-    );
-
-    const math::Quaternion interpolatedRotation = math::Quaternion::slerp(
-        m_transform.rotation.normalize(),
-        currentTransform.rotation.normalize(),
-        frameInterpolationFactor
-    );
-
-    const math::Vec3 interpolatedScale = math::lerp(
-        m_transform.scale,
-        currentTransform.scale,
-        frameInterpolationFactor
-    );
-
-    const math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
-    const math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
-    const math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
-
-    m_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
-#else
     m_transformationMatrix = quartz::scene::Doodad::calculateTransformationmatrix(
         m_transform,
         currentTransform,
         frameInterpolationFactor
     );
-#endif
 
     m_transform = currentTransform;
 }
