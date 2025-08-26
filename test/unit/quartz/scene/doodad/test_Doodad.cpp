@@ -1042,6 +1042,14 @@ UT_FUNCTION(test_physics) {
         rigidBody.setRotation(updatedRotation);
         rigidBody.setScale(updatedScale);
 
+        // Should still be the initial transform
+        UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
+        UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
+        UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+
+        // Should still be the original transformation matrix
+        UT_CHECK_EQUAL(doodad.getTransformationMatrix(), transform.calculateTransformationMatrix());
+
         // Update the doodad to interpolate between the two positions
         doodad.update(
             inputManager,

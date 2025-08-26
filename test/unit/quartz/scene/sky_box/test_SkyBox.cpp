@@ -56,7 +56,7 @@ UT_FUNCTION(test_construction_same_size) {
     memcpy(actualImageBytes.data(), p_mappedStagingMemory, totalSize);
     for (uint32_t imageIndex = 0; imageIndex < 6; ++imageIndex) {
         LOG_INFO(UT, "Displaying pixel data for image {}", imageIndex);
-        const uint32_t startIndex = totalImageDataSize * imageIndex;
+        UNUSED const uint32_t startIndex = totalImageDataSize * imageIndex;
         for (uint32_t byteIndex = 0; byteIndex < totalImageDataSize; byteIndex += 4) {
             LOG_INFO(
                 UT,

@@ -703,11 +703,11 @@ UT_FUNCTION(test_lerp) {
             LOG_SCOPE_CHANGE_DEBUG(UT);
             LOG_DEBUG(UT, "{}", (iVal == 0 ? "x" : iVal == 1 ? "y" : "z"));
 
-            const float aVal = a.glmVec[iVal];
-            const float bVal = b.glmVec[iVal];
-            const float diff = bVal - aVal;
-            const float slide = diff * t;
-            const float result = aVal + slide;
+            UNUSED const float aVal = a.glmVec[iVal];
+            UNUSED const float bVal = b.glmVec[iVal];
+            UNUSED const float diff = bVal - aVal;
+            UNUSED const float slide = diff * t;
+            UNUSED const float result = aVal + slide;
 
             LOG_DEBUG(UT, "{} - {} = {}", bVal, aVal, diff);
             LOG_DEBUG(UT, "{} * {} = {}", diff, t, slide);

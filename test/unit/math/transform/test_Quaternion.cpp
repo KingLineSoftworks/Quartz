@@ -827,7 +827,7 @@ UT_FUNCTION(test_fromVectorDifference) {
 }
 
 UT_FUNCTION(test_directionVector) {
-    uint32_t caseIndex = 0;
+    UNUSED uint32_t caseIndex = 0;
 
     {
         LOG_SCOPE_CHANGE_INFO(UT);
@@ -1343,18 +1343,18 @@ UT_FUNCTION(test_comparisons) {
         LOG_SCOPE_CHANGE_INFO(UT);
         LOG_INFO(UT, "TEST CASE {} - {}", i, testInfos[i].description);
 
-        const math::Vec3 dirA = testInfos[i].a.getDirectionVector();
-        const math::Vec3 dirB = testInfos[i].b.getDirectionVector();
+        UNUSED const math::Vec3 dirA = testInfos[i].a.getDirectionVector();
+        UNUSED const math::Vec3 dirB = testInfos[i].b.getDirectionVector();
 
-        const math::Vec3 axisA = testInfos[i].a.getAxisVector();
-        const math::Vec3 axisB = testInfos[i].b.getAxisVector();
+        UNUSED const math::Vec3 axisA = testInfos[i].a.getAxisVector();
+        UNUSED const math::Vec3 axisB = testInfos[i].b.getAxisVector();
 
-        const float yawA = testInfos[i].a.getYawDegrees();
-        const float pitchA = testInfos[i].a.getPitchDegrees();
-        const float rollA = testInfos[i].a.getRollDegrees();
-        const float yawB = testInfos[i].b.getYawDegrees();
-        const float pitchB = testInfos[i].b.getPitchDegrees();
-        const float rollB = testInfos[i].b.getRollDegrees();
+        UNUSED const float yawA = testInfos[i].a.getYawDegrees();
+        UNUSED const float pitchA = testInfos[i].a.getPitchDegrees();
+        UNUSED const float rollA = testInfos[i].a.getRollDegrees();
+        UNUSED const float yawB = testInfos[i].b.getYawDegrees();
+        UNUSED const float pitchB = testInfos[i].b.getPitchDegrees();
+        UNUSED const float rollB = testInfos[i].b.getRollDegrees();
 
         LOG_INFO(UT, "result {}: {}", testInfos[i].aMessage, testInfos[i].a.toString());
         LOG_INFO(UT, "result {}: {}", testInfos[i].bMessage, testInfos[i].b.toString());
@@ -1437,9 +1437,9 @@ UT_FUNCTION(test_composition) {
         UT_CHECK_NOT_EQUAL(add, knownL90);
         UT_CHECK_EQUAL(square, knownL90);
 
-        const math::Quaternion multiplyNormalized = multiply.normalize();
-        const math::Quaternion addNormalized = add.normalize();
-        const math::Quaternion squareNormalized = square.normalize();
+        UNUSED const math::Quaternion multiplyNormalized = multiply.normalize();
+        UNUSED const math::Quaternion addNormalized = add.normalize();
+        UNUSED const math::Quaternion squareNormalized = square.normalize();
 
         LOG_TRACE(UT, "Normalized:");
         LOG_TRACE(UT, "knownL45 * 2        = {}", multiplyNormalized.toString());
@@ -1469,9 +1469,9 @@ UT_FUNCTION(test_composition) {
             LOG_SCOPE_CHANGE_TRACE(UT);
 
             const math::Quaternion& a = std::get<0>(quatInfo);
-            const std::string& aName = std::get<1>(quatInfo);
+            UNUSED const std::string& aName = std::get<1>(quatInfo);
             const math::Quaternion& b = std::get<2>(quatInfo);
-            const std::string& bName = std::get<3>(quatInfo);
+            UNUSED const std::string& bName = std::get<3>(quatInfo);
 
             const math::Quaternion multiply = a * b;
             const math::Quaternion add = a + b;
