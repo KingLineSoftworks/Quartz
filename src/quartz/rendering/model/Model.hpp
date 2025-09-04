@@ -90,6 +90,7 @@ public: // member functions
     USE_LOGGER(MODEL);
 
     const std::vector<uint32_t>& getMaterialMasterIndices() const { return m_materialMasterIndices; }
+    const std::vector<quartz::rendering::Scene>& getScenes() const { return m_scenes; }
     const quartz::rendering::Scene& getDefaultScene() const { return m_scenes[m_defaultSceneIndex]; }
 
 private: // static functions

@@ -286,7 +286,7 @@ UT_FUNCTION(test_awaken) {
     quartz::rendering::Texture::cleanUpAllTextures();
 }
 
-UT_FUNCTION(test_updateCallback) {
+UT_FUNCTION(test_updateCallback_rb) {
     const std::string testName = "DOODAD_UT-test_updateCallback";
     quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
     quartz::rendering::Device renderingDevice(renderingInstance);
@@ -347,6 +347,7 @@ UT_FUNCTION(test_updateCallback) {
 
     quartz::managers::InputManager& inputManager = quartz::unit_test::InputManagerUnitTestClient::getInstance(renderingWindow.getGLFWwindowPtr());
 
+    // Ensure that the doodad and rb have the original transform
     UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
     UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
     UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
@@ -399,7 +400,115 @@ UT_FUNCTION(test_updateCallback) {
     quartz::rendering::Texture::cleanUpAllTextures();
 }
 
-UT_FUNCTION(test_fixedUpdateCallback) {
+UT_FUNCTION(test_updateCallback_doodad) {
+    const std::string testName = "DOODAD_UT-test_updateCallback";
+    quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
+    quartz::rendering::Device renderingDevice(renderingInstance);
+    quartz::rendering::Window renderingWindow(testName, 4, 4, renderingInstance, renderingDevice);
+
+    quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();
+    std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
+
+    const math::Vec3 position(1, 2, 3);
+    const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+    const math::Vec3 scale(4, 5, 6);
+    const math::Transform transform(position, rotation, scale);
+
+    const math::Vec3 boxHalfExtents_m(5, 2, 13);
+    const quartz::physics::Collider::Parameters colliderParameters(
+        false,
+        quartz::physics::Collider::CategoryProperties(0b110101, 0b11000101),
+        quartz::physics::BoxShape::Parameters(boxHalfExtents_m),
+        {},
+        {},
+        {}
+    );
+
+    const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
+    const bool enableGravity = true;
+    const math::Vec3 angularAxisFactor(1, 2, 3);
+    const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
+
+    const math::Vec3 newPosition(99, 100, 101);
+    const math::Vec3 newScale(88, 77, 66);
+    const math::Quaternion newRotation = math::Quaternion::fromDirectionVector(math::Vec3::Left);
+    bool updated = false;
+    quartz::scene::Doodad::UpdateCallback updateCallback = [&] (quartz::scene::Doodad::UpdateCallbackParameters callbackParameters) {
+        updated = true;
+
+        UT_REQUIRE(callbackParameters.p_doodad);
+
+        callbackParameters.p_doodad->setPosition(newPosition);
+        callbackParameters.p_doodad->setScale(newScale);
+        callbackParameters.p_doodad->setRotation(newRotation);
+    };
+
+    const quartz::scene::Doodad::Parameters parameters(
+        std::nullopt,
+        transform,
+        rbParameters,
+        {},
+        {},
+        updateCallback
+    );
+
+    quartz::scene::Doodad doodad(renderingDevice, physicsManager, field, parameters);
+
+    quartz::managers::InputManager& inputManager = quartz::unit_test::InputManagerUnitTestClient::getInstance(renderingWindow.getGLFWwindowPtr());
+
+    // Ensure that the doodad and rb have the original transform
+    UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
+    UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
+    UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+    UT_REQUIRE_NOT(doodad.getModelOptional());
+    const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
+    UT_REQUIRE(o_rigidBody);
+    const quartz::physics::RigidBody& rigidBody = *o_rigidBody;
+    UT_CHECK_EQUAL(rigidBody.getPosition(), position);
+    UT_CHECK_EQUAL(rigidBody.getRotation(), rotation);
+    const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
+    UT_REQUIRE(o_collider);
+    const quartz::physics::Collider& collider = *o_collider;
+    UT_CHECK_EQUAL(collider.getWorldPosition(), position);
+    UT_CHECK_EQUAL(collider.getWorldRotation(), rotation);
+    const std::optional<quartz::physics::BoxShape>& o_boxShape = collider.getBoxShapeOptional();
+    UT_REQUIRE(o_boxShape);
+    const quartz::physics::BoxShape& boxShape = *o_boxShape;
+    UT_CHECK_EQUAL(boxShape.getHalfExtents_m(), boxHalfExtents_m * scale);
+    const std::optional<quartz::physics::SphereShape>& o_sphereShape = collider.getSphereShapeOptional();
+    UT_REQUIRE_NOT(o_sphereShape);
+
+    UT_CHECK_FALSE(updated);
+
+    doodad.update(
+        inputManager,
+        100.0,
+        0.5,
+        0.25
+    );
+
+    // The doodad should have an updated transform, and the rigidbody should be updated accordingly as well
+    UT_CHECK_EQUAL(doodad.getTransform().position, newPosition);
+    UT_CHECK_EQUAL(doodad.getTransform().rotation, newRotation);
+    UT_CHECK_EQUAL(doodad.getTransform().scale, newScale);
+    UT_REQUIRE_NOT(doodad.getModelOptional());
+    UT_REQUIRE(o_rigidBody);
+    UT_CHECK_EQUAL(rigidBody.getPosition(), newPosition);
+    UT_CHECK_EQUAL(rigidBody.getRotation(), newRotation);
+    UT_REQUIRE(o_collider);
+    UT_CHECK_EQUAL(collider.getWorldPosition(), newPosition);
+    UT_CHECK_EQUAL(collider.getWorldRotation(), newRotation);
+    UT_REQUIRE(o_boxShape);
+    UT_CHECK_EQUAL(boxShape.getHalfExtents_m(), newScale);
+    UT_REQUIRE_NOT(o_sphereShape);
+
+    UT_CHECK_TRUE(updated);
+
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
+    quartz::rendering::Texture::cleanUpAllTextures();
+}
+
+UT_FUNCTION(test_fixedUpdateCallback_rb) {
     const std::string testName = "DOODAD_UT-test_fixedUpdateCallback";
     quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
     quartz::rendering::Device renderingDevice(renderingInstance);
@@ -496,6 +605,115 @@ UT_FUNCTION(test_fixedUpdateCallback) {
     UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
     UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
     UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+    UT_REQUIRE_NOT(doodad.getModelOptional());
+    UT_REQUIRE(o_rigidBody);
+    UT_CHECK_EQUAL(rigidBody.getPosition(), newPosition);
+    UT_CHECK_EQUAL(rigidBody.getRotation(), newRotation);
+    UT_REQUIRE(o_collider);
+    UT_CHECK_EQUAL(collider.getWorldPosition(), newPosition);
+    UT_CHECK_EQUAL(collider.getWorldRotation(), newRotation);
+    UT_REQUIRE_NOT(o_boxShape);
+    UT_REQUIRE(o_sphereShape);
+    UT_CHECK_EQUAL(sphereShape.getRadius_m(), newScale.y);
+
+    UT_CHECK_TRUE(updated);
+
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(*field);
+    quartz::rendering::Texture::cleanUpAllTextures();
+}
+
+UT_FUNCTION(test_fixedUpdateCallback_doodad) {
+    const std::string testName = "DOODAD_UT-test_fixedUpdateCallback";
+    quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
+    quartz::rendering::Device renderingDevice(renderingInstance);
+    quartz::rendering::Window renderingWindow(testName, 4, 4, renderingInstance, renderingDevice);
+
+    quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();
+    std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
+
+    const math::Vec3 position(1, 2, 3);
+    const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
+    const math::Vec3 scale(4, 5, 6);
+    const math::Transform transform(position, rotation, scale);
+
+    const double sphereRadius_m = 43;
+    const quartz::physics::Collider::Parameters colliderParameters(
+        false,
+        quartz::physics::Collider::CategoryProperties(0b01, 0b11),
+        quartz::physics::SphereShape::Parameters(sphereRadius_m),
+        {},
+        {},
+        {}
+    );
+
+    const quartz::physics::RigidBody::BodyType bodyType = quartz::physics::RigidBody::BodyType::Static;
+    const bool enableGravity = true;
+    const math::Vec3 angularAxisFactor(0, 0, 0);
+    const quartz::physics::RigidBody::Parameters rbParameters(bodyType, enableGravity, angularAxisFactor, colliderParameters);
+
+    const math::Vec3 newPosition(99, 100, 101);
+    const math::Vec3 newScale(88, 777, 66);
+    const math::Quaternion newRotation = math::Quaternion::fromDirectionVector(math::Vec3::Left);
+    bool updated = false;
+    quartz::scene::Doodad::FixedUpdateCallback fixedUpdateCallback = [&] (quartz::scene::Doodad::FixedUpdateCallbackParameters callbackParameters) {
+        updated = true;
+
+        UT_REQUIRE(callbackParameters.p_doodad);
+
+        callbackParameters.p_doodad->setPosition(newPosition);
+        callbackParameters.p_doodad->setScale(newScale);
+        callbackParameters.p_doodad->setRotation(newRotation);
+    };
+
+    const quartz::scene::Doodad::Parameters parameters(
+        std::nullopt,
+        transform,
+        rbParameters,
+        {},
+        fixedUpdateCallback,
+        {}
+    );
+
+    quartz::scene::Doodad doodad(renderingDevice, physicsManager, field, parameters);
+
+    quartz::managers::InputManager& inputManager = quartz::unit_test::InputManagerUnitTestClient::getInstance(renderingWindow.getGLFWwindowPtr());
+
+    // Ensure doodad and rigidbody have original transforms
+    UT_CHECK_EQUAL(doodad.getTransform().position, transform.position);
+    UT_CHECK_EQUAL(doodad.getTransform().rotation, transform.rotation);
+    UT_CHECK_EQUAL(doodad.getTransform().scale, transform.scale);
+    UT_REQUIRE_NOT(doodad.getModelOptional());
+    const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
+    UT_REQUIRE(o_rigidBody);
+    const quartz::physics::RigidBody& rigidBody = *o_rigidBody;
+    UT_CHECK_EQUAL(rigidBody.getPosition(), position);
+    UT_CHECK_EQUAL(rigidBody.getRotation(), rotation);
+    const std::optional<quartz::physics::Collider>& o_collider = rigidBody.getColliderOptional();
+    UT_REQUIRE(o_collider);
+    const quartz::physics::Collider& collider = *o_collider;
+    UT_CHECK_EQUAL(collider.getWorldPosition(), position);
+    UT_CHECK_EQUAL(collider.getWorldRotation(), rotation);
+    const std::optional<quartz::physics::BoxShape>& o_boxShape = collider.getBoxShapeOptional();
+    UT_REQUIRE_NOT(o_boxShape);
+    const std::optional<quartz::physics::SphereShape>& o_sphereShape = collider.getSphereShapeOptional();
+    UT_REQUIRE(o_sphereShape);
+    const quartz::physics::SphereShape& sphereShape = *o_sphereShape;
+    UT_CHECK_EQUAL(sphereShape.getRadius_m(), sphereRadius_m * 5);
+
+    UT_CHECK_FALSE(updated);
+
+    doodad.fixedUpdate(
+        inputManager,
+        100.0,
+        0.5,
+        0.25
+    );
+
+    // If we are updating the doodad directly within the fixed update callback, the updates to the doodad
+    // should propagate to the rigidbody
+    UT_CHECK_EQUAL(doodad.getTransform().position, newPosition);
+    UT_CHECK_EQUAL(doodad.getTransform().rotation, newRotation);
+    UT_CHECK_EQUAL(doodad.getTransform().scale, newScale);
     UT_REQUIRE_NOT(doodad.getModelOptional());
     UT_REQUIRE(o_rigidBody);
     UT_CHECK_EQUAL(rigidBody.getPosition(), newPosition);
@@ -966,6 +1184,7 @@ UT_FUNCTION(test_physics) {
     // Set an update callback which modifies the position, rotation, and scale
     // Invoke doodad.update
     // Ensure the transformation matrix matches what we expect it to be
+    // Ensure the model is updated correctly
 
     const std::string testName = "DOODAD_UT-test_physics";
     quartz::rendering::Instance renderingInstance(testName, 9, 9, 9, true);
@@ -976,6 +1195,8 @@ UT_FUNCTION(test_physics) {
     std::optional<quartz::physics::Field> field = quartz::unit_test::PhysicsManagerUnitTestClient::createField();
     
     quartz::managers::InputManager& inputManager = quartz::unit_test::InputManagerUnitTestClient::getInstance(renderingWindow.getGLFWwindowPtr());
+
+    const std::string objectFilepath = util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/models/unit_models/unit_cube/glb/unit_cube.glb");
 
     const math::Vec3 position(1, 2, 3);
     const math::Quaternion rotation = math::Quaternion::fromDirectionVector(math::Vec3::Right);
@@ -1001,7 +1222,7 @@ UT_FUNCTION(test_physics) {
     const math::Quaternion updatedRotation = math::Quaternion::fromDirectionVector(math::Vec3::Down);
     const math::Vec3 updatedScale(40, 50, 60);
     const quartz::scene::Doodad::UpdateCallback updateCallback = [&] (UNUSED quartz::scene::Doodad::UpdateCallbackParameters callbackParameters) {
-        // We don't actually have to do anything in the update step, because we will be updating the rigid body's position
+        // We don't actually have to do anything in the update step, because we will be updating the rigid body's position and rotation
     };
 
     const std::vector<double> interpolationFactors = {
@@ -1012,7 +1233,6 @@ UT_FUNCTION(test_physics) {
         0.71
     };
 
-    // No interpolation, use original position
     for (uint32_t iInterp = 0; iInterp < interpolationFactors.size(); ++iInterp) {
         const double interpolationFactor = interpolationFactors[iInterp];
 
@@ -1020,7 +1240,7 @@ UT_FUNCTION(test_physics) {
             renderingDevice,
             physicsManager,
             field,
-            std::nullopt,
+            objectFilepath,
             transform,
             rbParameters,
             {},
@@ -1215,8 +1435,10 @@ UT_FUNCTION(test_calculateTransformationMatrix) {
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
     REGISTER_UT_FUNCTION(test_awaken);
-    REGISTER_UT_FUNCTION(test_updateCallback);
-    REGISTER_UT_FUNCTION(test_fixedUpdateCallback);
+    REGISTER_UT_FUNCTION(test_updateCallback_rb);
+    REGISTER_UT_FUNCTION(test_updateCallback_doodad);
+    REGISTER_UT_FUNCTION(test_fixedUpdateCallback_rb);
+    REGISTER_UT_FUNCTION(test_fixedUpdateCallback_doodad);
     REGISTER_UT_FUNCTION(test_setPosition);
     REGISTER_UT_FUNCTION(test_setRotation);
     REGISTER_UT_FUNCTION(test_setScale_sphere);
