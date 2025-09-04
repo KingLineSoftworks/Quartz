@@ -70,6 +70,7 @@ public: // member functions
      *    the horizon.
      */
 
+    void setFovDegrees(const float fovDegrees) { m_fovDegrees = fovDegrees; }
     void setPosition(const math::Vec3& position) { m_worldPosition = position; }
     void setRotation(const math::Quaternion& rotation) { m_rotation = rotation; }
     void setRotationDegrees(const float horizontalDegrees, const float verticalDegrees, const float clockwiseDegrees);
