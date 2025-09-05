@@ -28,3 +28,23 @@ quartz::scene::DirectionalLight::operator=(
 
     return *this;
 }
+
+bool
+quartz::scene::DirectionalLight::operator==(
+    const quartz::scene::DirectionalLight& other 
+) const {
+    return color == other.color && direction == other.direction;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const quartz::scene::DirectionalLight& directionalLight
+) {
+    os << "["
+       << directionalLight.color.toString() << ", "
+       << directionalLight.direction.toString()
+       << "]";
+    return os;
+}
+

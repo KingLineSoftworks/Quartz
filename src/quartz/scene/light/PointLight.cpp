@@ -12,3 +12,27 @@ quartz::scene::PointLight::PointLight(
     attenuationQuadraticFactor(attenuationQuadraticFactor_)
 {}
 
+bool
+quartz::scene::PointLight::operator==(
+    const quartz::scene::PointLight& other 
+) const {
+    return color == other.color &&
+        position == other.position &&
+        attenuationLinearFactor == other.attenuationLinearFactor &&
+        attenuationQuadraticFactor == other.attenuationQuadraticFactor;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const quartz::scene::PointLight& pointLight
+) {
+    os << "["
+       << pointLight.color.toString() << ", "
+       << pointLight.position.toString() << ", "
+       << pointLight.attenuationLinearFactor << ", "
+       << pointLight.attenuationQuadraticFactor
+       << "]";
+    return os;
+}
+

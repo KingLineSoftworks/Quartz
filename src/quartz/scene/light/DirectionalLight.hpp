@@ -18,7 +18,11 @@ public: // member functions
     DirectionalLight(const DirectionalLight& other);
     DirectionalLight& operator=(const DirectionalLight& other);
 
+    bool operator==(const DirectionalLight& other) const;
+
 public: // member variables
     alignas(16) math::Vec3 color;
     alignas(16) math::Vec3 direction;
 };
+
+std::ostream& operator<<(std::ostream& os, const quartz::scene::DirectionalLight& directionalLight);
