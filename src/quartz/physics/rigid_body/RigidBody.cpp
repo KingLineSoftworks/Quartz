@@ -137,9 +137,13 @@ quartz::physics::RigidBody::setRotation(
 
 void
 quartz::physics::RigidBody::setScale(
-    UNUSED const math::Vec3& scale
+    const math::Vec3& scale
 ) {
-    /** @todo 2024/12/01 Set the scale of the collider here */
+    if (!mo_collider) {
+        return;
+    }
+
+    mo_collider->setScale(scale);
 }
 
 void

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <ostream>
+
 #include <glm/gtc/quaternion.hpp>
 
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 
-#include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/scene/Loggers.hpp"
 
 namespace quartz {
@@ -38,40 +39,12 @@ public: // classes
         alignas(16) math::Mat4 projectionMatrix;
     };
 
-    /**
-     * @brief So we can represent rotation easily in addition to our look vector. This is useful for updating
-     *   the camera's orientation based on mouse movement
-     */
-    struct EulerAngles {
-    public: // member functions
-        EulerAngles() = default;
-        EulerAngles(
-            const double yawDegrees,
-            const double pitchDegrees,
-            const double rollDegrees
-        ) :
-            yawDegrees(yawDegrees),
-            pitchDegrees(pitchDegrees),
-            rollDegrees(rollDegrees)
-        {}
-
-    public: // member variables
-        double yawDegrees;
-        double pitchDegrees;
-        double rollDegrees;
-    };
-
-public: // static functions
-    static math::Vec3 calculateLookDirectionFromEulerAngles(const quartz::scene::Camera::EulerAngles& eulerAngles);
-    static quartz::scene::Camera::EulerAngles calculateEulerAnglesFromLookDirection(const math::Vec3& lookDirection);
-
-
 public: // member functions
     Camera();
     Camera(
         const double fovDegrees,
         const math::Vec3& worldPosition,
-        const math::Vec3& lookDirection
+        const math::Quaternion& rotation 
     );
     Camera& operator=(const Camera& other);
     ~Camera();
@@ -79,16 +52,29 @@ public: // member functions
     USE_LOGGER(CAMERA);
 
     uint32_t getId() const { return m_id; }
+    float getFovDegrees() const { return m_fovDegrees; }
+    float getHorizontalRotationDegrees() const { return m_horizontalRotationDegrees; }
+    float getVerticalRotationDegrees() const { return m_verticalRotationDegrees; }
+    float getClockwiseRotationDegrees() const { return m_clockwiseRotationDegrees; }
     const math::Vec3& getWorldPosition() const { return m_worldPosition; }
-    const math::Vec3& getLookDirection() const { return m_lookDirection; }
-    const quartz::scene::Camera::EulerAngles& getEulerAngles() const { return m_eulerAngles; }
+    const math::Quaternion& getRotation() const { return m_rotation; }
     const math::Mat4& getViewMatrix() const { return m_viewMatrix; }
     const math::Mat4& getProjectionMatrix() const { return m_projectionMatrix; }
+    const math::Vec3 getLookDirection() const { return m_rotation.getDirectionVector(); }
 
+    /**
+     * @todo 2025/08/16 Implement setLookDirection and setLookAtPosition (which uses setLookDirection under the hood).
+     *    There are going to be some snags while doing this, in regards to the roll amound when using the quaternion's
+     *    fromDirectionVector function.
+     *    We will need to figure out the amount of roll introduced in these functions and undo them to re-align with
+     *    the horizon.
+     */
+
+    void setFovDegrees(const float fovDegrees) { m_fovDegrees = fovDegrees; }
     void setPosition(const math::Vec3& position) { m_worldPosition = position; }
-    void setLookDirection(const math::Vec3& lookDirection);
-    void lookAtPosition(const math::Vec3& position);
-    void setEulerAngles(const quartz::scene::Camera::EulerAngles& eulerAngles);
+    void setRotation(const math::Quaternion& rotation) { m_rotation = rotation; }
+    void setRotationDegrees(const float horizontalDegrees, const float verticalDegrees, const float clockwiseDegrees);
+    void rotateDegrees(const float horizontalDeltaDegrees, const float verticalDeltaDegrees, const float clockwiseDeltaDegrees);
 
     void update(
         const float windowWidth,
@@ -105,8 +91,11 @@ private: // member variables
 
     float m_fovDegrees;
     math::Vec3 m_worldPosition;
-    math::Vec3 m_lookDirection;
-    quartz::scene::Camera::EulerAngles m_eulerAngles;
+    math::Quaternion m_rotation;
+
+    float m_horizontalRotationDegrees;
+    float m_verticalRotationDegrees;
+    float m_clockwiseRotationDegrees;
 
     math::Mat4 m_viewMatrix;
     math::Mat4 m_projectionMatrix;

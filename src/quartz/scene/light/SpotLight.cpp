@@ -18,3 +18,33 @@ quartz::scene::SpotLight::SpotLight(
     attenuationQuadraticFactor(attenuationQuadraticFactor_)
 {}
 
+bool
+quartz::scene::SpotLight::operator==(
+    const quartz::scene::SpotLight& other 
+) const {
+    return color == other.color &&
+        position == other.position &&
+        direction == other.direction &&
+        innerRadiusDegrees == other.innerRadiusDegrees &&
+        outerRadiusDegrees == other.outerRadiusDegrees &&
+        attenuationLinearFactor == other.attenuationLinearFactor &&
+        attenuationQuadraticFactor == other.attenuationQuadraticFactor;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const quartz::scene::SpotLight& spotLight
+) {
+    os << "["
+       << spotLight.color.toString() << ", "
+       << spotLight.position.toString() << ", "
+       << spotLight.direction.toString() << ", "
+       << spotLight.innerRadiusDegrees << ", "
+       << spotLight.outerRadiusDegrees << ", "
+       << spotLight.attenuationLinearFactor << ", "
+       << spotLight.attenuationQuadraticFactor
+       << "]";
+    return os;
+}
+

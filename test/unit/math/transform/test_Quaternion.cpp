@@ -1,9 +1,11 @@
 #include <atomic>
 #include <cmath>
+
 #include <glm/ext/quaternion_float.hpp>
 
 #include <reactphysics3d/mathematics/Quaternion.h>
 
+#include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
 #include "math/transform/Mat4.hpp"
@@ -49,6 +51,23 @@ UT_FUNCTION(test_construction) {
         UT_CHECK_EQUAL_FLOATS(quat.rp3dQuat.y, 42.69);
         UT_CHECK_EQUAL_FLOATS(quat.rp3dQuat.z, 42.69);
         UT_CHECK_EQUAL_FLOATS(quat.rp3dQuat.w, 42.69);
+    }
+
+    // vector3 construction (i, j, k from the vector, with w == 0)
+    {
+        const math::Vec3 vec1(1, 2, 3);
+        const math::Quaternion quat1(vec1);
+        UT_CHECK_EQUAL_FLOATS(quat1.x, 1);
+        UT_CHECK_EQUAL_FLOATS(quat1.y, 2);
+        UT_CHECK_EQUAL_FLOATS(quat1.z, 3);
+        UT_CHECK_EQUAL_FLOATS(quat1.w, 0);
+
+        const math::Vec3 vec2(-111, 0.2, -33.33);
+        const math::Quaternion quat2(vec2);
+        UT_CHECK_EQUAL_FLOATS(quat2.x, -111);
+        UT_CHECK_EQUAL_FLOATS(quat2.y, 0.2);
+        UT_CHECK_EQUAL_FLOATS(quat2.z, -33.33);
+        UT_CHECK_EQUAL_FLOATS(quat2.w, 0);
     }
 
     // element construction
@@ -627,23 +646,283 @@ UT_FUNCTION(test_normalize) {
     }
 }
 
-UT_FUNCTION(test_getDirectionVector) {
-    // This uses glm::rotate
-    // so we need to see what exactly that function is doing
+UT_FUNCTION(test_fromVectorDifference) {
+    /**
+     * @brief We are not testing with vectors of {0,0,0} because that is UB.
+     *    It does not make sense to rotate from a unit vector to a vector that
+     *    has a magnitude of 0. The 0 vector does not actually specify a direction,
+     *    so any rotation applied to A will be valid to achieve a rotation to the
+     *    0 vector.
+     */
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 0");
+        const math::Vec3 a = math::Vec3(4).normalize();
+        const math::Vec3 b = math::Vec3(4).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 1");
+        const math::Vec3 a = math::Vec3(1, 2, 3).normalize();
+        const math::Vec3 b = math::Vec3(3, 2, 1).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 2");
+        const math::Vec3 a = math::Vec3(1, 2, 3).normalize();
+        const math::Vec3 b = math::Vec3(-3, -2, -1).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 3");
+        const math::Vec3 a = math::Vec3(3, 2, 1).normalize();
+        const math::Vec3 b = math::Vec3(-3, -2, -1).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 4");
+        const math::Vec3 a = math::Vec3(3, 2, 1).normalize();
+        const math::Vec3 b = -1 * a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 5");
+        const math::Vec3 a = math::Vec3(-9, -11, -44).normalize();
+        const math::Vec3 b = -1 * a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 6");
+        const math::Vec3 a = math::Vec3(-99, 11, -50).normalize();
+        const math::Vec3 b = -1 * a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 7");
+        const math::Vec3 a = math::Vec3(99, -78, -50).normalize();
+        const math::Vec3 b = a;
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 8");
+        const math::Vec3 a = math::Vec3(99, -78, -50).normalize();
+        const math::Vec3 b = math::Vec3(33, 42, -69).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 9");
+        const math::Vec3 a = math::Vec3(-6, -8, 5).normalize();
+        const math::Vec3 b = math::Vec3(-4, 5, -3).normalize();
+        LOG_INFO(UT, "A: {}", a.toString());
+        LOG_INFO(UT, "B: {}", b.toString());
+        const math::Quaternion quat = math::Quaternion::fromVectorDifference(a, b);
+        LOG_INFO(UT, "Q: {}", quat.toString());
+        const math::Vec3 result = quat.rotate(a);
+        LOG_INFO(UT, "R: {} - (should equal B)", result.toString());
+        // UT_CHECK_EQUAL(result, b);
+        UT_CHECK_EQUAL_FLOATS(result.x, b.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, b.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, b.z);
+    }
+}
+
+UT_FUNCTION(test_directionVector) {
+    UNUSED uint32_t caseIndex = 0;
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
+        const math::Vec3 inputVec = math::Vec3(1, 0, 0).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
+        const math::Vec3 inputVec = math::Vec3(0, 1, 0).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
+    }
+
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
+        const math::Vec3 inputVec = math::Vec3(0, 0, 1).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
+    }
+    
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
+        const math::Vec3 inputVec = math::Vec3(1, 2, 3).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
+    }
+    
+    {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {}", caseIndex++);
+        const math::Vec3 inputVec = math::Vec3(-99, 678.9, 0.5).normalize();
+        LOG_INFO(UT, "Testing input direction of {}", inputVec.toString());
+        LOG_INFO(UT, "  Dir is normalized = {}", inputVec.isNormalized());
+        const math::Quaternion inputQuat = math::Quaternion::fromDirectionVector(inputVec);
+        LOG_INFO(UT, "Calculated input quaternion of {}", inputQuat.toString());
+        LOG_INFO(UT, "  Quat is normalized = {}", inputQuat.isNormalized());
+        const math::Vec3 outputVec = inputQuat.getDirectionVector();
+        UT_CHECK_EQUAL(outputVec, inputVec);
+        const math::Vec3 forwardRotated = inputQuat.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL(forwardRotated, inputVec);
+    }
 }
 
 UT_FUNCTION(test_axisAngle) {
     // starting with rotation degrees and rotation axis
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 0");
         const float angle = 90;
+        const float radians = glm::radians(angle);
         const math::Vec3 axis = math::Vec3(1,2,3).normalize();
+        LOG_INFO(UT, "Input angle degrees: {}", angle);
+        LOG_INFO(UT, "Input angle radians: {}", radians);
+        LOG_INFO(UT, "Input axis: {}", axis.toString());
 
         const math::Quaternion expected(
-            axis.x * std::sin(angle/2),
-            axis.y * std::sin(angle/2),
-            axis.z * std::sin(angle/2),
-            std::cos(angle/2)
+            axis.x * std::sin(radians/2),
+            axis.y * std::sin(radians/2),
+            axis.z * std::sin(radians/2),
+            std::cos(radians/2)
         );
 
         const math::Quaternion result = math::Quaternion::fromAxisAngleRotation(axis, angle);
@@ -653,17 +932,32 @@ UT_FUNCTION(test_axisAngle) {
         UT_CHECK_EQUAL_FLOATS(result.z, expected.z);
         UT_CHECK_EQUAL_FLOATS(result.w, expected.w);
         UT_CHECK_TRUE(result.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(result.getAngleDegrees(), angle);
+        UT_CHECK_EQUAL(result.getAxisVector(), axis);
+
+        const math::Quaternion glmExpected = glm::normalize(glm::angleAxis(radians, axis.glmVec));
+        UT_CHECK_EQUAL_FLOATS(result.x, glmExpected.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, glmExpected.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, glmExpected.z);
+        UT_CHECK_EQUAL_FLOATS(result.w, glmExpected.w);
     }
 
     {
-        const float angle = -42;
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 1");
+        const float angle = 42;
+        const float radians = glm::radians(angle);
         const math::Vec3 axis = math::Vec3(31.33,24,-32.111).normalize();
+        LOG_INFO(UT, "Input angle degrees: {}", angle);
+        LOG_INFO(UT, "Input angle radians: {}", radians);
+        LOG_INFO(UT, "Input axis: {}", axis.toString());
 
         const math::Quaternion expected(
-            axis.x * std::sin(angle/2),
-            axis.y * std::sin(angle/2),
-            axis.z * std::sin(angle/2),
-            std::cos(angle/2)
+            axis.x * std::sin(radians/2),
+            axis.y * std::sin(radians/2),
+            axis.z * std::sin(radians/2),
+            std::cos(radians/2)
         );
 
         const math::Quaternion result = math::Quaternion::fromAxisAngleRotation(axis, angle);
@@ -673,22 +967,35 @@ UT_FUNCTION(test_axisAngle) {
         UT_CHECK_EQUAL_FLOATS(result.z, expected.z);
         UT_CHECK_EQUAL_FLOATS(result.w, expected.w);
         UT_CHECK_TRUE(result.isNormalized());
+
+        UT_CHECK_EQUAL_FLOATS(result.getAngleDegrees(), angle);
+        UT_CHECK_EQUAL(result.getAxisVector(), axis);
+
+        const math::Quaternion glmExpected = glm::normalize(glm::angleAxis(radians, axis.glmVec));
+        UT_CHECK_EQUAL_FLOATS(result.x, glmExpected.x);
+        UT_CHECK_EQUAL_FLOATS(result.y, glmExpected.y);
+        UT_CHECK_EQUAL_FLOATS(result.z, glmExpected.z);
+        UT_CHECK_EQUAL_FLOATS(result.w, glmExpected.w);
     }
 
     // starting with a quaternion
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 2");
         const math::Quaternion quat = math::Quaternion(1,2,3,4).normalize();
+        LOG_INFO(UT, "Input quaternion: {}", quat.toString());
 
-        const float angle = 2 * std::acos(quat.w);
+        const float radians = 2 * std::acos(quat.w);
+        const float angle = glm::degrees(radians);
 
         const float resultAngle = quat.getAngleDegrees();
         UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
 
         const math::Vec3 axis(
-            quat.x / std::sin(angle/2),
-            quat.y / std::sin(angle/2),
-            quat.z / std::sin(angle/2)
+            quat.x / std::sin(radians/2),
+            quat.y / std::sin(radians/2),
+            quat.z / std::sin(radians/2)
         );
 
         const math::Vec3 resultAxis = quat.getAxisVector();
@@ -697,17 +1004,20 @@ UT_FUNCTION(test_axisAngle) {
     }
 
     {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 3");
         const math::Quaternion quat = math::Quaternion(-32.1244).normalize();
+        LOG_INFO(UT, "Input quaternion: {}", quat.toString());
 
-        const float angle = 2 * std::acos(quat.w);
+        const float radians = 2 * std::acos(quat.w);
 
         const float resultAngle = quat.getAngleDegrees();
-        UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
+        UT_CHECK_EQUAL_FLOATS(resultAngle, glm::degrees(radians));
 
         const math::Vec3 axis(
-            quat.x / std::sin(angle/2),
-            quat.y / std::sin(angle/2),
-            quat.z / std::sin(angle/2)
+            quat.x / std::sin(radians/2),
+            quat.y / std::sin(radians/2),
+            quat.z / std::sin(radians/2)
         );
 
         const math::Vec3 resultAxis = quat.getAxisVector();
@@ -719,19 +1029,22 @@ UT_FUNCTION(test_axisAngle) {
     // round trip starting with quaternion
 
     {
-        // Input quaternion
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE 4");
         const math::Quaternion quat = math::Quaternion(999.5, -888.4, 777.3, -666.2).normalize();
+        LOG_INFO(UT, "Input quaternion: {}", quat.toString());
 
         // Expected angle check
-        const float angle = 2 * std::acos(quat.w);
+        const float radians = 2 * std::acos(quat.w);
+        const float angle = glm::degrees(radians);
         const float resultAngle = quat.getAngleDegrees();
         UT_CHECK_EQUAL_FLOATS(resultAngle, angle);
 
         // Expected axis check
         const math::Vec3 axis(
-            quat.x / std::sin(angle/2),
-            quat.y / std::sin(angle/2),
-            quat.z / std::sin(angle/2)
+            quat.x / std::sin(radians/2),
+            quat.y / std::sin(radians/2),
+            quat.z / std::sin(radians/2)
         );
         const math::Vec3 resultAxis = quat.getAxisVector();
         UT_CHECK_EQUAL(resultAxis, axis);
@@ -926,6 +1239,301 @@ UT_FUNCTION(test_slerp) {
      */
 }
 
+UT_FUNCTION(test_comparisons) {
+    struct QuaternionComparisonTestInfo {
+        // A
+        const math::Quaternion a;
+        const std::string aMessage;
+
+        // B
+        const math::Quaternion b;
+        const std::string bMessage;
+
+        // Misc.
+        const math::Vec3 baseDirection;
+        const std::string description;
+    };
+
+    const std::vector<QuaternionComparisonTestInfo> testInfos = {
+
+        // Euler angles to axis angle
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromEulerAngles(90, 0, 0),
+            "fromEulerAngles      ",
+            math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 90),
+            "fromAxisAngleRotation",
+            math::Vec3(100, 90, 20),
+            "euler angle and axis angle rotation"
+        ),
+
+        // Direction vector to axis angle
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3::Right),
+            "fromDirectionVector  ",
+            math::Quaternion::fromAxisAngleRotation(math::Vec3::Up, 270),
+            "fromAxisAngleRotation",
+            math::Vec3(-100, 900, 200),
+            "direction vector and axis angle rotation"
+        ),
+
+        // Vector difference to axis angle
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromVectorDifference(math::Vec3::Down, math::Vec3::Backward),
+            "fromVectorDifference ",
+            math::Quaternion::fromAxisAngleRotation(math::Vec3::Left, 90),
+            "fromAxisAngleRotation",
+            math::Vec3(-1, 9, 2),
+            "vector difference and axis angle rotation"
+        ),
+
+        // Direction vector to euler angles
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3::Up),
+            "fromDirectionVector",
+            math::Quaternion::fromEulerAngles(0, 0, 90),
+            "fromEulerAngles     ",
+            math::Vec3(-7, 0, 5),
+            "direction vector and euler angle 1"
+        ),
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3(1, 0, 1).normalize()),
+            "fromDirectionVector",
+            math::Quaternion::fromEulerAngles(-45, 0, 0),
+            "fromEulerAngles     ",
+            math::Vec3(17, 9, 5),
+            "direction vector and euler angle 2"
+        ),
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromDirectionVector(math::Vec3(1, 1, 0).normalize()),
+            "fromDirectionVector",
+            math::Quaternion::fromEulerAngles(0, 0, 45),
+            "fromEulerAngles     ",
+            math::Vec3(-17, 90, 25),
+            "direction vector and euler angle 3"
+        ),
+
+        // Vector difference to euler angles
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromVectorDifference(math::Vec3::Forward, math::Vec3::Right),
+            "fromVectorDifference",
+            math::Quaternion::fromEulerAngles(-90, 0, 0),
+            "fromEulerAngles     ",
+            math::Vec3(17, 1.8, -22),
+            "vector difference and euler angle"
+        ),
+
+        // Vector difference to direction vector
+
+        QuaternionComparisonTestInfo(
+            math::Quaternion::fromVectorDifference(math::Vec3::Left, math::Vec3::Backward),
+            "fromVectorDifference",
+            math::Quaternion::fromDirectionVector(math::Vec3::Left),
+            "fromDirectionVector ",
+            math::Vec3(7, 89, 22),
+            "vector difference and direction vector"
+        )
+    };
+
+    for (uint32_t i = 0; i < testInfos.size(); ++i) {
+        LOG_SCOPE_CHANGE_INFO(UT);
+        LOG_INFO(UT, "TEST CASE {} - {}", i, testInfos[i].description);
+
+        UNUSED const math::Vec3 dirA = testInfos[i].a.getDirectionVector();
+        UNUSED const math::Vec3 dirB = testInfos[i].b.getDirectionVector();
+
+        UNUSED const math::Vec3 axisA = testInfos[i].a.getAxisVector();
+        UNUSED const math::Vec3 axisB = testInfos[i].b.getAxisVector();
+
+        UNUSED const float yawA = testInfos[i].a.getYawDegrees();
+        UNUSED const float pitchA = testInfos[i].a.getPitchDegrees();
+        UNUSED const float rollA = testInfos[i].a.getRollDegrees();
+        UNUSED const float yawB = testInfos[i].b.getYawDegrees();
+        UNUSED const float pitchB = testInfos[i].b.getPitchDegrees();
+        UNUSED const float rollB = testInfos[i].b.getRollDegrees();
+
+        LOG_INFO(UT, "result {}: {}", testInfos[i].aMessage, testInfos[i].a.toString());
+        LOG_INFO(UT, "result {}: {}", testInfos[i].bMessage, testInfos[i].b.toString());
+
+        LOG_INFO(UT, "direction {}: {}", testInfos[i].aMessage, dirA.toString());
+        LOG_INFO(UT, "direction {}: {}", testInfos[i].bMessage, dirB.toString());
+
+        LOG_INFO(UT, "axis {}: {}", testInfos[i].aMessage, axisA.toString());
+        LOG_INFO(UT, "axis {}: {}", testInfos[i].bMessage, axisB.toString());
+
+        LOG_INFO(UT, "angles {}: {}, {}, {}", testInfos[i].aMessage, yawA, pitchA, rollA);
+        LOG_INFO(UT, "angles {}: {}, {}, {}", testInfos[i].bMessage, yawB, pitchB, rollB);
+
+        const math::Vec3 simpleRotationA = testInfos[i].a.rotate(math::Vec3::Forward);
+        const math::Vec3 simpleRotationB = testInfos[i].b.rotate(math::Vec3::Forward);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationA.x, simpleRotationB.x);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationA.y, simpleRotationB.y);
+        UT_CHECK_EQUAL_FLOATS(simpleRotationA.z, simpleRotationB.z);
+
+        const math::Vec3 rotatedA = testInfos[i].a.rotate(testInfos[i].baseDirection);
+        const math::Vec3 rotatedB = testInfos[i].b.rotate(testInfos[i].baseDirection);
+        LOG_INFO(UT, "Base vector: {}", testInfos[i].baseDirection.toString());
+        LOG_INFO(UT, "rotated {}: {}", testInfos[i].aMessage, rotatedA.toString());
+        LOG_INFO(UT, "rotated {}: {}", testInfos[i].aMessage, rotatedB.toString());
+
+        UT_CHECK_EQUAL_FLOATS(rotatedA.x, rotatedB.x);
+        UT_CHECK_EQUAL_FLOATS(rotatedA.y, rotatedB.y);
+        UT_CHECK_EQUAL_FLOATS(rotatedA.z, rotatedB.z);
+    }
+}
+
+UT_FUNCTION(test_composition) {
+    const math::Quaternion knownL90_direction = math::Quaternion::fromDirectionVector(math::Vec3::Left);
+    const math::Quaternion knownL90_euler = math::Quaternion::fromEulerAngles(90, 0, 0);
+    UT_REQUIRE(knownL90_direction == knownL90_euler);
+    const math::Quaternion knownL90 = knownL90_direction;
+    LOG_DEBUG(UT, "knownL90 = {}", knownL90.toString());
+
+    const math::Quaternion knownL60_direction = math::Quaternion::fromDirectionVector(math::Vec3(2, 0, -3.4641).normalize());
+    const math::Quaternion knownL60_euler = math::Quaternion::fromEulerAngles(60, 0, 0);
+    UT_REQUIRE(knownL60_direction == knownL60_euler);
+    const math::Quaternion knownL60 = knownL60_direction;
+    LOG_DEBUG(UT, "knownL60 = {}", knownL60.toString());
+
+    const math::Quaternion knownL45_direction = math::Quaternion::fromDirectionVector(math::Vec3(1, 0, -1).normalize());
+    const math::Quaternion knownL45_euler = math::Quaternion::fromEulerAngles(45, 0, 0);
+    UT_REQUIRE(knownL45_direction == knownL45_euler);
+    const math::Quaternion knownL45 = knownL45_direction;
+    LOG_DEBUG(UT, "knownL45 = {}", knownL45.toString());
+
+    const math::Quaternion knownL30_direction = math::Quaternion::fromDirectionVector(math::Vec3(3.4641, 0, -2).normalize());
+    const math::Quaternion knownL30_euler = math::Quaternion::fromEulerAngles(30, 0, 0);
+    UT_REQUIRE(knownL30_direction == knownL30_euler);
+    const math::Quaternion knownL30 = knownL30_direction;
+    LOG_DEBUG(UT, "knownL30 = {}", knownL30.toString());
+
+    const math::Quaternion knownL01_direction = math::Quaternion::fromDirectionVector(math::Vec3(5.76912, 0, -0.1007).normalize());
+    const math::Quaternion knownL01_euler = math::Quaternion::fromEulerAngles(1, 0, 0);
+    UT_REQUIRE(knownL01_direction == knownL01_euler);
+    const math::Quaternion knownL01 = knownL01_direction;
+    LOG_DEBUG(UT, "knownL01 = {}", knownL01.toString());
+
+    // Test to see how we can make 90 degrees with 45 degrees
+    {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Testing composition of 45 degree quaternions to make 90 degree quaternion");
+        LOG_DEBUG(UT, "We are expecting to see:");
+        LOG_DEBUG(UT, "  knownL45 * knownL45 == knownL90");
+
+        const math::Quaternion multiply = knownL45 * 2;
+        const math::Quaternion add = knownL45 + knownL45;
+        const math::Quaternion square = knownL45 * knownL45;
+
+        LOG_TRACE(UT, "Non-normalized:");
+        LOG_TRACE(UT, "knownL45 * 2        = {}", multiply.toString());
+        LOG_TRACE(UT, "knownL45 + knownL45 = {}", add.toString());
+        LOG_TRACE(UT, "knownL45 * knownL45 = {}", square.toString());
+
+        UT_CHECK_NOT_EQUAL(multiply, knownL90);
+        UT_CHECK_NOT_EQUAL(add, knownL90);
+        UT_CHECK_EQUAL(square, knownL90);
+
+        UNUSED const math::Quaternion multiplyNormalized = multiply.normalize();
+        UNUSED const math::Quaternion addNormalized = add.normalize();
+        UNUSED const math::Quaternion squareNormalized = square.normalize();
+
+        LOG_TRACE(UT, "Normalized:");
+        LOG_TRACE(UT, "knownL45 * 2        = {}", multiplyNormalized.toString());
+        LOG_TRACE(UT, "knownL45 + knownL45 = {}", addNormalized.toString());
+        LOG_TRACE(UT, "knownL45 * knownL45 = {}", squareNormalized.toString());
+
+        UT_CHECK_NOT_EQUAL(multiply.normalize(), knownL90);
+        UT_CHECK_NOT_EQUAL(add.normalize(), knownL90);
+        UT_CHECK_EQUAL(square.normalize(), knownL90);
+    }
+
+    // Test to see how we can make 90 degrees with 30 and 60 degrees
+    {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Testing composition of 30 and 60 degree quaternions to make 90 degree quaternion");
+        LOG_DEBUG(UT, "We are expecting to see:");
+        LOG_DEBUG(UT, "  knownL30 * knownL60 == knownL90");
+        LOG_DEBUG(UT, "And:");
+        LOG_DEBUG(UT, "  knownL60 * knownL30 == knownL90");
+
+        const std::vector<std::tuple<math::Quaternion, std::string, math::Quaternion, std::string>> quats = {
+            {knownL30, "knownL30", knownL60, "knownL60"},
+            {knownL60, "knownL60", knownL30, "knownL30"}
+        };
+
+        for (const std::tuple<math::Quaternion, std::string, math::Quaternion, std::string>& quatInfo : quats){
+            LOG_SCOPE_CHANGE_TRACE(UT);
+
+            const math::Quaternion& a = std::get<0>(quatInfo);
+            UNUSED const std::string& aName = std::get<1>(quatInfo);
+            const math::Quaternion& b = std::get<2>(quatInfo);
+            UNUSED const std::string& bName = std::get<3>(quatInfo);
+
+            const math::Quaternion multiply = a * b;
+            const math::Quaternion add = a + b;
+
+            LOG_TRACE(UT, "Non-normalized:");
+            LOG_TRACE(UT, "{} * {} = {}", aName, bName, multiply.toString());
+            LOG_TRACE(UT, "{} + {} = {}", aName, bName, add.toString());
+
+            UT_CHECK_EQUAL(multiply, knownL90);
+            UT_CHECK_NOT_EQUAL(add, knownL90);
+
+            const math::Quaternion multiplyNormalized = multiply.normalize();
+            const math::Quaternion addNormalized = add.normalize();
+
+            LOG_TRACE(UT, "Normalized:");
+            LOG_TRACE(UT, "{} * {} = {}", aName, bName, multiplyNormalized.toString());
+            LOG_TRACE(UT, "{} + {} = {}", aName, bName, addNormalized.toString());
+
+            UT_CHECK_EQUAL(multiplyNormalized, knownL90);
+            UT_CHECK_NOT_EQUAL(addNormalized, knownL90);
+        }
+    }
+
+    // Test to see how we can make 45 degrees with many 1 degrees quaternions
+    {
+        LOG_SCOPE_CHANGE_DEBUG(UT);
+        LOG_DEBUG(UT, "Testing composition of many 1 degree quaternions to make 45 degree quaternion");
+        LOG_DEBUG(UT, "We are expecting to see:");
+        LOG_DEBUG(UT, "  knownL01 * knownL01 * knownL01 * knownL01 ... * knownL01 == knownL45");
+
+        math::Quaternion multiply = knownL01;
+        math::Quaternion add = knownL01;
+        for (uint32_t i = 0; i < 44; ++i) {
+            multiply *= knownL01;
+            add += knownL01;
+        }
+
+        LOG_TRACE(UT, "Non-normalized:");
+        LOG_TRACE(UT, "multiplied = {}", multiply.toString());
+        LOG_TRACE(UT, "added = {}", add.toString());
+
+        UT_CHECK_EQUAL_FLOATS(multiply.x, knownL45.x);
+        UT_CHECK_EQUAL_FLOATS(multiply.y, knownL45.y);
+        UT_CHECK_EQUAL_FLOATS(multiply.z, knownL45.z);
+        UT_CHECK_EQUAL_FLOATS(multiply.w, knownL45.w);
+        UT_CHECK_NOT_EQUAL(add, knownL45);
+
+        const math::Quaternion multiplyNormalized = multiply.normalize();
+        const math::Quaternion addNormalized = add.normalize();
+
+        LOG_TRACE(UT, "Normalized:");
+        LOG_TRACE(UT, "multiplied = {}", multiplyNormalized.toString());
+        LOG_TRACE(UT, "added = {}", addNormalized.toString());
+
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.x, knownL45.x);
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.y, knownL45.y);
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.z, knownL45.z);
+        UT_CHECK_EQUAL_FLOATS(multiplyNormalized.w, knownL45.w);
+        UT_CHECK_NOT_EQUAL(addNormalized, knownL45);
+    }
+}
+
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction);
     REGISTER_UT_FUNCTION(test_copy);
@@ -935,10 +1543,13 @@ UT_MAIN() {
     REGISTER_UT_FUNCTION(test_quaternion_operators);
     REGISTER_UT_FUNCTION(test_dot);
     REGISTER_UT_FUNCTION(test_normalize);
-    REGISTER_UT_FUNCTION(test_getDirectionVector);
+    REGISTER_UT_FUNCTION(test_fromVectorDifference);
+    REGISTER_UT_FUNCTION(test_directionVector);
     REGISTER_UT_FUNCTION(test_axisAngle);
     REGISTER_UT_FUNCTION(test_getRotationMatrix);
     REGISTER_UT_FUNCTION(test_fromEulerAngles);
     REGISTER_UT_FUNCTION(test_slerp);
+    REGISTER_UT_FUNCTION(test_comparisons);
+    REGISTER_UT_FUNCTION(test_composition);
     UT_RUN_TESTS();
 }

@@ -24,3 +24,20 @@ quartz::scene::AmbientLight::operator=(
 
     return *this;
 }
+
+bool
+quartz::scene::AmbientLight::operator==(
+    const quartz::scene::AmbientLight& other
+) const {
+    return color == other.color;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const quartz::scene::AmbientLight& ambientLight
+) {
+    os << ambientLight.color.toString();
+    return os;
+}
+

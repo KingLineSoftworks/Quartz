@@ -40,6 +40,39 @@ quartz::scene::Doodad::fixTransform(
     return fixedTransform;
 }
 
+math::Mat4
+quartz::scene::Doodad::calculateTransformationmatrix(
+    const math::Transform &currentTransform,
+    const math::Transform &nextTransform,
+    const double interpolationFactor
+) {
+    const math::Vec3 interpolatedPosition = math::lerp(
+        currentTransform.position,
+        nextTransform.position,
+        interpolationFactor
+    );
+
+    const math::Quaternion interpolatedRotation = math::Quaternion::slerp(
+        currentTransform.rotation.normalize(),
+        nextTransform.rotation.normalize(),
+        interpolationFactor
+    );
+
+    const math::Vec3 interpolatedScale = math::lerp(
+        currentTransform.scale,
+        nextTransform.scale,
+        interpolationFactor
+    );
+
+    const math::Transform interpolatedTransform(
+        interpolatedPosition,
+        interpolatedRotation,
+        interpolatedScale
+    );
+
+    return interpolatedTransform.calculateTransformationMatrix();
+}
+
 quartz::scene::Doodad::Doodad(
     const quartz::rendering::Device& renderingDevice,
     quartz::managers::PhysicsManager& physicsManager,
@@ -57,7 +90,7 @@ quartz::scene::Doodad::Doodad(
             std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(transform)),
-    m_transformationMatrix(),
+    m_transformationMatrix(m_transform.calculateTransformationMatrix()),
     mo_rigidBody(
         (o_field && o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(physicsManager.createRigidBody(*o_field, m_transform, *o_rigidBodyParameters)) :
@@ -86,7 +119,7 @@ quartz::scene::Doodad::Doodad(
             std::nullopt
     ),
     m_transform(quartz::scene::Doodad::fixTransform(doodadParameters.transform)),
-    m_transformationMatrix(),
+    m_transformationMatrix(m_transform.calculateTransformationMatrix()),
     mo_rigidBody(
         (o_field && doodadParameters.o_rigidBodyParameters) ?
             std::optional<quartz::physics::RigidBody>(physicsManager.createRigidBody(*o_field, m_transform, *doodadParameters.o_rigidBodyParameters)) :
@@ -210,29 +243,11 @@ quartz::scene::Doodad::update(
         currentTransform = m_transform;
     }
 
-    const math::Vec3 interpolatedPosition = math::lerp(
-        m_transform.position,
-        currentTransform.position,
+    m_transformationMatrix = quartz::scene::Doodad::calculateTransformationmatrix(
+        m_transform,
+        currentTransform,
         frameInterpolationFactor
     );
-
-    const math::Quaternion interpolatedRotation = math::Quaternion::slerp(
-        m_transform.rotation.normalize(),
-        currentTransform.rotation.normalize(),
-        frameInterpolationFactor
-    );
-
-    const math::Vec3 interpolatedScale = math::lerp(
-        m_transform.scale,
-        currentTransform.scale,
-        frameInterpolationFactor
-    );
-
-    math::Mat4 translationMatrix = math::Mat4::translate(math::Mat4(1.0f), interpolatedPosition);
-    math::Mat4 rotationMatrix = interpolatedRotation.getRotationMatrix();
-    math::Mat4 scaleMatrix = math::Mat4::scale(math::Mat4(1.0), interpolatedScale);
-
-    m_transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
 
     m_transform = currentTransform;
 }

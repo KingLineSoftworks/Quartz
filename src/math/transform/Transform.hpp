@@ -2,6 +2,7 @@
 
 #include <reactphysics3d/mathematics/Transform.h>
 
+#include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 #include "math/transform/Quaternion.hpp"
 
@@ -24,6 +25,11 @@ public: // public methods
         const math::Vec3& scale_
     );
     ~Transform() = default;
+
+    bool operator==(const Transform& other) const;
+    bool operator!=(const Transform& other) const;
+
+    math::Mat4 calculateTransformationMatrix() const;
 
 public: // member variables
     math::Vec3 position;

@@ -40,6 +40,8 @@ public: // member functions
 
     std::array<math::Vec3, 8> getLocalVertexPositions() const;
 
+    void setHalfExtents_m(const math::Vec3& halfExtents_m);
+
 private: // member functions
     BoxShape(reactphysics3d::BoxShape* p_boxShape);
 

@@ -75,3 +75,4 @@ private: // member variables
     quartz::rendering::Pipeline m_doodadRenderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };
+

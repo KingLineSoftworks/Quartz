@@ -69,16 +69,24 @@ quartz::rendering::Scene::~Scene() {
 
 std::vector<std::shared_ptr<quartz::rendering::Node>>
 quartz::rendering::Scene::getAllNodePtrs() const {
-    std::vector<std::shared_ptr<quartz::rendering::Node>> masterList = m_rootNodePtrs;
+    std::vector<std::shared_ptr<quartz::rendering::Node>> masterList;
+
     std::queue<std::shared_ptr<quartz::rendering::Node>> workingQueue(
         std::deque(
-            masterList.begin(),
-            masterList.end()
+            m_rootNodePtrs.begin(),
+            m_rootNodePtrs.end()
         )
     );
 
     while (!workingQueue.empty()) {
+        std::shared_ptr<quartz::rendering::Node> p_currentNode = workingQueue.front();
+        workingQueue.pop();
 
+        masterList.push_back(p_currentNode);
+
+        for (const std::shared_ptr<quartz::rendering::Node>& p_childNode : p_currentNode->getChildrenNodePtrs()) {
+            workingQueue.push(p_childNode);
+        }
     }
 
     return masterList;

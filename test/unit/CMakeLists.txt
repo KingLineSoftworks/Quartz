@@ -26,3 +26,11 @@ add_subdirectory("quartz/physics/collider")
 add_subdirectory("quartz/physics/field")
 add_subdirectory("quartz/physics/rigid_body")
 
+add_subdirectory("quartz/rendering/material")
+
+add_subdirectory("quartz/scene/camera")
+add_subdirectory("quartz/scene/doodad")
+add_subdirectory("quartz/scene/light")
+add_subdirectory("quartz/scene/scene")
+add_subdirectory("quartz/scene/sky_box")
+

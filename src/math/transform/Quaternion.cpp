@@ -1,8 +1,17 @@
+#include <cmath>
 #include <limits>
 
+#include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
-#include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/trigonometric.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
+#include <glm/ext/quaternion_float.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/scalar_constants.hpp>
+
+#include <reactphysics3d/mathematics/Quaternion.h>
 
 #include "math/Loggers.hpp"
 #include "math/algorithms/Algorithms.hpp"
@@ -10,6 +19,7 @@
 #include "math/transform/Quaternion.hpp"
 #include "math/transform/Vec3.hpp"
 
+#include "util/logger/Logger.hpp"
 #include "util/macros.hpp"
 
 bool
@@ -43,7 +53,7 @@ math::Quaternion::normalize() const {
     if (x == 0.0 && y == 0.0 && z == 0.0 && w == 0.0) {
         return {0.0, 0.0, 0.0, 0.0};
     }
-    
+
     return glm::normalize(glmQuat);
 }
 
@@ -57,17 +67,30 @@ math::Quaternion::isNormalized() const {
 }
 
 math::Vec3
-math::Quaternion::getDirectionVector() const {
+math::Quaternion::rotate(
+    const math::Vec3& vec
+) const {
     QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
-    return glm::rotate(glmQuat, math::Vec3::Forward.glmVec);
+    // rotation = q * v * qInverse
+    // but because q must be unit length, qInverse == qConjugate
+    // We are using glm here for simplicity's sake
+    
+    return glm::rotate(glmQuat, vec.glmVec);
+}
+
+math::Vec3
+math::Quaternion::getDirectionVector() const {
+    QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
+    
+    return glm::normalize(glm::rotate(glmQuat, math::Vec3::Forward.glmVec));
 }
 
 float
 math::Quaternion::getAngleDegrees() const {
     QUARTZ_ASSERT(this->isNormalized(), "Quaternion is not normalized");
 
-    return glm::angle(glmQuat);
+    return glm::degrees(glm::angle(glmQuat));
 }
 
 math::Vec3
@@ -106,6 +129,50 @@ math::Quaternion::getRollDegrees() const {
 }
 
 math::Quaternion
+math::Quaternion::fromVectorDifference(
+    UNUSED const math::Vec3& a,
+    UNUSED const math::Vec3& b
+) {
+    QUARTZ_ASSERT(a.isNormalized(), "Input vector a is not normalized");
+    QUARTZ_ASSERT(b.isNormalized(), "Input vector b is not normalized");
+
+    const float dot = a.dot(b);
+    if (dot >= (1.0f - std::numeric_limits<float>::epsilon())) {
+        // Inputs are parallel so just use the identity to save some work
+        return {0, 0, 0, 1};
+    }
+    if (dot <= (-1.0f + std::numeric_limits<float>::epsilon())) {
+        // Inputs are opposite, so we need to choose an axis angle representation.
+        // Try using a generic rotation axis. If that ends up being parallel to our
+        // input, then try with a different rotation axis
+        math::Vec3 axis = math::Vec3::Up.cross(a);
+        if (axis.magnitude() < std::numeric_limits<float>::epsilon()) {
+            axis = math::Vec3::Forward.cross(a);
+        }
+        axis.normalize();
+
+        // Rotate 180 degrees (pi radians) around the chosen axis
+        // return math::Quaternion::fromAxisAngleRotation(axis, glm::degrees(glm::pi<float>()));
+        return math::Quaternion::fromAxisAngleRotation(axis, 180);
+    }
+
+    math::Vec3 c = a.cross(b);
+    math::Quaternion q(c);
+    q.w = std::sqrt((a.magnitude() * a.magnitude()) * (b.magnitude() * b.magnitude())) + a.dot(b);
+    q.normalize();
+    return q;
+}
+
+math::Quaternion
+math::Quaternion::fromDirectionVector(
+    const math::Vec3& direction
+) {
+    QUARTZ_ASSERT(direction.isNormalized(), "Direction vector is not normalized");
+
+    return math::Quaternion::fromVectorDifference(math::Vec3::Forward, direction);
+}
+
+math::Quaternion
 math::Quaternion::fromEulerAngles(
     const double yawDegrees,
     const double pitchDegrees,
@@ -115,7 +182,7 @@ math::Quaternion::fromEulerAngles(
     const double y = glm::radians(yawDegrees);
     const double z = glm::radians(rollDegrees);
 
-    return glm::normalize(glm::quat(glm::vec3(x, y, z)));
+    return math::Quaternion(reactphysics3d::Quaternion::fromEulerAngles(x, y, z)).normalize();
 }
 
 math::Quaternion
@@ -124,8 +191,23 @@ math::Quaternion::fromAxisAngleRotation(
     const float rotationAmountDegrees
 ) {
     QUARTZ_ASSERT(normalizedRotationAxis.isNormalized(), "Rotation axis is not normalized");
+    // QUARTZ_ASSERT(rotationAmountDegrees >= 0, "Rotation amount degrees is less than 0");
 
-    return glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec));
+    // This is the same as doing the following with glm:
+    // glm::normalize(glm::angleAxis(rotationAmountDegrees, normalizedRotationAxis.glmVec))
+
+    const float radians = glm::radians(rotationAmountDegrees);
+    const float theta = radians / 2.0;
+    const math::Vec3& a = normalizedRotationAxis;
+
+    const float s = std::sin(theta);
+    math::Quaternion quat(
+        a.x * s,
+        a.y * s,
+        a.z * s,
+        std::cos(theta)
+    );
+    return quat.normalize();
 }
 
 math::Quaternion

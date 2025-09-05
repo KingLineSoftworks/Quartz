@@ -17,6 +17,11 @@ union math::Mat4 {
     Mat4() : glmMat() {}
     Mat4(const float scalar) : glmMat(scalar) {}
     Mat4(const math::Quaternion& quaternion) : glmMat(quaternion.glmQuat) {}
+    /**
+     * @todo 2025/08/25 Make this array of vec4 construction do a transpose
+     *   internally. This is currently using col major instead of row major,
+     *   so constructing mat4s is a bit awkward
+     */
     Mat4(const std::array<math::Vec4, 4>& cols_) : cols(cols_) {}
 
     Mat4(const Mat4& other) : glmMat(other.glmMat) {}
@@ -121,6 +126,10 @@ union math::Mat4 {
     };
 
     std::array<math::Vec4, 4> cols;
+
+    /**
+     * @todo 2025/08/25 Union with a 16 element array
+     */
 
     glm::mat4 glmMat;
 };

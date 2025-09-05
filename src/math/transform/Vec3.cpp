@@ -2,6 +2,7 @@
 #include <glm/gtx/projection.hpp>
 
 #include "math/Loggers.hpp"
+#include "math/algorithms/Algorithms.hpp"
 #include "math/transform/Mat4.hpp"
 #include "math/transform/Vec3.hpp"
 
@@ -20,16 +21,6 @@ math::Vec3::operator==(const math::Vec3& other) const {
     bool xEquals = std::abs(x - other.x) <= std::numeric_limits<float>::epsilon();
     bool yEquals = std::abs(y - other.y) <= std::numeric_limits<float>::epsilon();
     bool zEquals = std::abs(z - other.z) <= std::numeric_limits<float>::epsilon();
-
-    if (!xEquals) {
-        LOG_INFO(TRANSFORM, "X values do not equal. {} != {}", x, other.x);
-    }
-    if (!yEquals) {
-        LOG_INFO(TRANSFORM, "Y values do not equal. {} != {}", y, other.y);
-    }
-    if (!zEquals) {
-        LOG_INFO(TRANSFORM, "Z values do not equal. {} != {}", z, other.z);
-    }
 
     return xEquals && yEquals && zEquals;
 }
@@ -92,6 +83,15 @@ math::Vec3::abs() const {
     copy.z = std::abs(z);
 
     return copy;
+}
+
+math::Vec3
+math::Vec3::lerp(
+    const math::Vec3& a,
+    const math::Vec3& b,
+    const float t
+) {
+    return math::lerp(a, b, t);
 }
 
 bool

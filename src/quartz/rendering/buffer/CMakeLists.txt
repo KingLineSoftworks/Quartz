@@ -37,8 +37,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_RENDERING_Buffer
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_RENDERING_Buffer
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(

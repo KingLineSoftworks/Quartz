@@ -55,13 +55,11 @@ quartz::rendering::Window::createGLFWwindowPtr(
             nullptr
         ),
         [] (GLFWwindow* p_window) {
-            glfwDestroyWindow(p_window);
+            glfwDestroyWindow(p_window); // So we don't have to manually do this in our destructor
         }
     );
     LOG_TRACE(WINDOW, "Created GLFW window pointer at {}", static_cast<void*>(p_glfwWindow.get()));
     if (!p_glfwWindow) {
-        LOG_CRITICAL(WINDOW, "Terminating GLFW");
-        glfwTerminate();
         LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create GLFW window pointer");
     }
 
@@ -315,13 +313,6 @@ quartz::rendering::Window::Window(
 
 quartz::rendering::Window::~Window() {
     LOG_FUNCTION_SCOPE_TRACEthis("");
-
-    LOG_TRACEthis("Destroying GLFW window at {}", static_cast<void*>(mp_glfwWindow.get()));
-    glfwDestroyWindow(mp_glfwWindow.get());
-
-    LOG_TRACEthis("Terminating GLFW");
-    glfwTerminate();
-    LOG_INFOthis("Successfully terminated GLFW");
 }
 
 void

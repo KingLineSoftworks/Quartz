@@ -193,15 +193,27 @@ quartz::rendering::Model::loadMaterialMasterIndices(
     const quartz::rendering::Device& renderingDevice,
     const tinygltf::Model& gltfModel
 ) {
+    /**
+     * @brief It is okay if the gltf model does not have any materials, and consequently it is okay if we do
+     *    not populate the material master indices vector.
+     *    This is because the primitive has a local material index, which will be less than 0 if it should
+     *    not be using a material. If this is the case, the primitive will load the default material master
+     *    index by default. When it does this, it does not rely on any values in the material master indices
+     *    vector.
+     *    We still want to ensure the master material list is initialized, but we do not need to populate
+     *    this master material indices list with the default material.
+     */
+
     LOG_FUNCTION_SCOPE_TRACE(MODEL, "");
 
-    std::vector<uint32_t> masterTextureIndices = quartz::rendering::Model::loadTextures(
-        renderingDevice,
-        gltfModel
-    );
+    quartz::rendering::Material::initializeMasterMaterialList(renderingDevice);
+
+    std::vector<uint32_t> masterTextureIndices = quartz::rendering::Model::loadTextures(renderingDevice, gltfModel);
+    LOG_TRACE(MODEL, "Loaded {} texture indices", masterTextureIndices.size());
 
     LOG_TRACE(MODEL, "Creating list of materials");
     std::vector<uint32_t> masterMaterialIndices;
+
     LOG_TRACE(MODEL, "Reserving space for {} elements in materials list", gltfModel.materials.size());
     masterMaterialIndices.reserve(gltfModel.materials.size());
 
@@ -362,8 +374,9 @@ quartz::rendering::Model::Model(
 }
 
 quartz::rendering::Model::Model(quartz::rendering::Model&& other) :
-    m_gltfModel(other.m_gltfModel),
-    m_defaultSceneIndex(other.m_defaultSceneIndex),
+    m_gltfModel(std::move(other.m_gltfModel)),
+    m_materialMasterIndices(std::move(other.m_materialMasterIndices)),
+    m_defaultSceneIndex(std::move(other.m_defaultSceneIndex)),
     m_scenes(std::move(other.m_scenes))
 {
     LOG_FUNCTION_CALL_TRACEthis("");

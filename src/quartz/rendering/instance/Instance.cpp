@@ -53,6 +53,19 @@ quartz::rendering::Instance::vulkanDebugCallback(
     return VK_FALSE;
 }
 
+bool
+quartz::rendering::Instance::initializeGLFW() {
+    LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "");
+
+    if (!glfwInit()) {
+        LOG_CRITICAL(INSTANCE, "Failed to initialize GLFW");
+        LOG_THROW(INSTANCE, util::VulkanCreationFailedError, "Failed to initialize GLFW");
+    }
+
+    LOG_INFO(INSTANCE, "GLFW initialized");
+    return true;
+}
+
 std::vector<const char*>
 quartz::rendering::Instance::getEnabledValidationLayerNames(
     const bool validationLayersEnabled
@@ -266,6 +279,7 @@ quartz::rendering::Instance::Instance(
     const uint32_t applicationPatchVersion,
     const bool validationLayersEnabled
 ) :
+    m_glfwInitialized(quartz::rendering::Instance::initializeGLFW()),
     m_validationLayerNames(
         quartz::rendering::Instance::getEnabledValidationLayerNames(
             validationLayersEnabled
@@ -302,4 +316,8 @@ quartz::rendering::Instance::Instance(
 
 quartz::rendering::Instance::~Instance() {
     LOG_FUNCTION_CALL_TRACEthis("");
+
+    LOG_TRACEthis("Terminating GLFW");
+    glfwTerminate();
+    LOG_INFOthis("Successfully terminated GLFW");
 }

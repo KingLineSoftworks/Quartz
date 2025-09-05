@@ -37,5 +37,6 @@ endfunction()
 #set_quartz_major_minor_patch_versions(0 2 7) # implement unit test runner and update unit test framework
 #set_quartz_major_minor_patch_versions(0 2 8) # math libarary fixes
 #set_quartz_major_minor_patch_versions(0 2 9) # util libarary fixes
-set_quartz_major_minor_patch_versions(0 2 10) # physics libarary fixes
+#set_quartz_major_minor_patch_versions(0 2 10) # physics libarary fixes
+set_quartz_major_minor_patch_versions(0 2 11) # scene libarary fixes
 

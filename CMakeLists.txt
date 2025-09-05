@@ -290,10 +290,12 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 #====================================================================
 include(CTest)
 include(CreateUnitTest)
+include(CreateScratchExecutable)
 enable_testing()
 set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 if (QUARTZ_COMPILE_UNIT_TESTS)
     add_subdirectory("${QUARTZ_TEST_DIR}/unit")
+    add_subdirectory("${QUARTZ_TEST_DIR}/scratch")
 endif()
 
 #====================================================================

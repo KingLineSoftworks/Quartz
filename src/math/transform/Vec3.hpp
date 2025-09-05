@@ -136,6 +136,8 @@ union math::Vec3 {
     Vec3& abs();
     Vec3 abs() const;
 
+    static Vec3 lerp(const Vec3& a, const Vec3& b, const float t);
+
     float magnitude() const { return glm::length(glmVec); }
     bool isNormalized() const;
 

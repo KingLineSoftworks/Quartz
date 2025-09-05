@@ -34,6 +34,7 @@ public: // member functions
 
     USE_LOGGER(CUBEMAP);
 
+    const quartz::rendering::StagedImageBuffer& getStagedImageBuffer() const { return m_stagedImageBuffer; }
     const vk::UniqueImageView& getVulkanImageViewPtr() const { return mp_vulkanImageView; }
     const vk::UniqueSampler& getVulkanSamplerPtr() const { return mp_vulkanCombinedImageSampler; }
     const quartz::rendering::StagedBuffer& getStagedVertexBuffer() const { return m_stagedVertexBuffer; }

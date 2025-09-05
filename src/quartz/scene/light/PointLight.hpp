@@ -18,9 +18,13 @@ public: // member functions
         const float attenuationQuadraticFactor_
     );
 
+    bool operator==(const PointLight& other) const;
+
 public: // member variables
     alignas(16) math::Vec3 color;
     alignas(16) math::Vec3 position;
     alignas(4) float attenuationLinearFactor;
     alignas(4) float attenuationQuadraticFactor;
 };
+
+std::ostream& operator<<(std::ostream& os, const quartz::scene::PointLight& pointLight);

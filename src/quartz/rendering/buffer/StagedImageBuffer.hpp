@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_handles.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/BufferUtil.hpp"
@@ -37,6 +38,7 @@ public: // member functions
 
     const vk::Format& getVulkanFormat() const { return m_format; }
     const vk::UniqueImage& getVulkanImagePtr() const { return mp_vulkanImage; }
+    const vk::UniqueDeviceMemory& getVulkanPhysicalDeviceStagingMemory() const { return mp_vulkanPhysicalDeviceStagingMemory; }
 
 private: // static functions
     static void transitionImageLayout(
