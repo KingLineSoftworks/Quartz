@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
@@ -7,8 +9,6 @@
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/instance/Instance.hpp"
 #include "quartz/scene/sky_box/SkyBox.hpp"
-#include <cstring>
-#include <vulkan/vulkan_handles.hpp>
 
 UT_FUNCTION(test_construction_same_size) {
     const uint32_t imageRows = 2;

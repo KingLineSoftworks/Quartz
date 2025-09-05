@@ -1,4 +1,5 @@
 #include "math/transform/Vec3.hpp"
+
 #include "util/unit_test/UnitTest.hpp"
 
 #include "quartz/scene/light/AmbientLight.hpp"

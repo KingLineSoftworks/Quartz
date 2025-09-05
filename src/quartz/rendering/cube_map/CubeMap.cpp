@@ -1,10 +1,11 @@
 #include <stb_image.h>
 
+#include "util/logger/Logger.hpp"
+
 #include "math/transform/Vec3.hpp"
 
 #include "quartz/rendering/cube_map/CubeMap.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
-#include "util/logger/Logger.hpp"
 
 vk::VertexInputBindingDescription
 quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription() {

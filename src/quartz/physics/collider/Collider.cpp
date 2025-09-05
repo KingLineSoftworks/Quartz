@@ -185,7 +185,7 @@ quartz::physics::Collider::getWorldRotation() const {
 
 void
 quartz::physics::Collider::setScale(
-    UNUSED const math::Vec3& scale
+    const math::Vec3& scale
 ) {
     if (mo_boxShape) {
         mo_boxShape->setHalfExtents_m(scale);

@@ -2,7 +2,6 @@
 #include <memory>
 #include <optional>
 
-#include "quartz/physics/collider/SphereShape.hpp"
 #include "util/Loggers.hpp"
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
@@ -16,6 +15,7 @@
 #include "quartz/managers/input_manager/InputManager.hpp"
 #include "quartz/managers/physics_manager/PhysicsManager.hpp"
 #include "quartz/physics/collider/Collider.hpp"
+#include "quartz/physics/collider/SphereShape.hpp"
 #include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/model/Scene.hpp"
