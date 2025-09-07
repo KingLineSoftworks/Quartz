@@ -21,7 +21,7 @@ set(QUARTZ_COMPILE_UNIT_TESTS ON CACHE BOOL "" FORCE)
 
 Unit tests will be output to the build directory's `bin/ut` directory.
 You can execute all unit tests with the `ctest` command.
-See the `Unit Test Runner Usage` section of the [contribution guidelines](docs/contributing/readme.md) for information on running individual test cases.
+See the `Unit Test Runner Usage` section of the [contribution guidelines](docs/contributing/readme.md#Unit-Test-Runner-Usage-Via-Command-Line) for information on running individual test cases.
 
 ## Scening Documentation
 
@@ -29,11 +29,11 @@ Read the [scening documentation](docs/scening).
 
 ## Physics Documentation
 
-Read the [physics documentation](docs/physics/readme.md).
+Read the [physics documentation](docs/physics).
 
 ## Contributing
 
-Read the [contribution guidelines](docs/contributing/readme.md).
+Read the [contribution guidelines](docs/contributing).
 
 ## Using Quartz
 
