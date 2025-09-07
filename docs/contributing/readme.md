@@ -36,7 +36,12 @@ Be explicit about units in the name of your variables. Make sure to also adhere 
 
 ## Errors and Exceptions
 
-Todo: Fill this out.
+TODO
+TODO
+TODO
+TODO
+TODO
+TODO
 
 ## Tests
 
