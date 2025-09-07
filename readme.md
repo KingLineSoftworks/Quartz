@@ -21,7 +21,7 @@ set(QUARTZ_COMPILE_UNIT_TESTS ON CACHE BOOL "" FORCE)
 
 Unit tests will be output to the build directory's `bin/ut` directory.
 You can execute all unit tests with the `ctest` command.
-See the `Unit Test Runner Usage` section of the [contribution guidelines](docs/contributing/readme.md#Unit-Test-Runner-Usage-Via-Command-Line) for information on running individual test cases.
+See the [Unit Test Runner Usage section](docs/contributing/readme.md#Unit-Test-Runner-Usage-Via-Command-Line) of the contribution guidelines for information on running individual test cases.
 
 ## Scening Documentation
 
