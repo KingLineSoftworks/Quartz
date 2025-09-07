@@ -19,7 +19,7 @@ set(QUARTZ_COMPILE_UNIT_TESTS ON CACHE BOOL "" FORCE)
 
 Unit tests will be output to the build directory's `bin/ut` directory.
 You can execute all unit tests with the `ctest` command.
-See the [Unit Test Runner Usage](docs/contributing/contribution_guidelines.md) section of the contribution guidelines for information on running individual test cases.
+See the `Unit Test Runner Usage` section of the [contribution guidelines](docs/contributing/contribution_guidelines.md) for information on running individual test cases.
 
 ## Scening Documentation
 - [GLTF 2.0 models](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html)
