@@ -12,6 +12,28 @@ Do `git rebase master your_branch` to take all of the commits on `your_branch` a
 Currently there is no concrete style guide or autoformatting configured.
 Try to adhere to the rest of the source's style.
 
+### Naming
+
+#### Modified Hungarian Notation
+
+When naming variables, use a subset of the hungarian notation.
+- `m_` -> member variable
+- `p_` -> pointer
+- `o_` -> optional
+If you have a member variable which is a pointer:
+- `mp_`
+If you have a member variable which is an optional:
+- `mo_`
+
+#### Units
+
+Be explicit about units in the name of your variables. Make sure to also adhere to the modified hungarian notation.
+- `speed_mps` -> meters per second
+- `delta_ns` -> nanoseconds
+- `maxAcceleration_kphps` -> kilometers per hour per second
+- `m_currentForce_N` -> newtons (member variable)
+- `p_currentTorque_Nm` -> newton meters (pointer)
+
 ## Errors and Exceptions
 
 Todo: Fill this out.

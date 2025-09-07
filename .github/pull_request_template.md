@@ -23,6 +23,6 @@
 - [ ] I have added tests to cover my changes
 - [ ] I have incremented the Quartz version appropriately
 - [ ] I have merged all upstream submodules
-- [ ] I have followed the [contribution guidelines](docs/contributing/contribution_guidelines.md)
+- [ ] I have followed the [contribution guidelines](docs/contributing/readme.md)
 - [ ] I have performed a self review of my changes
 
