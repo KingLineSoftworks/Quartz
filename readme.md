@@ -25,7 +25,7 @@ See the `Unit Test Runner Usage` section of the [contribution guidelines](docs/c
 
 ## Scening Documentation
 
-Read the [scening documentation](docs/scening/readme.md).
+Read the [scening documentation](docs/scening).
 
 ## Physics Documentation
 
