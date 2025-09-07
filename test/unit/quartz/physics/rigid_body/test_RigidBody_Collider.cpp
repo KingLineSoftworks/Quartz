@@ -307,6 +307,7 @@ UT_FUNCTION(test_collider_callback) {
 
     // Clean up and destroy the field
 
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyRigidBody(field, sphereRb);
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);
 }
 
@@ -426,6 +427,8 @@ UT_FUNCTION(test_trigger_callback) {
 
     // Clean up and destroy the field
 
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyRigidBody(field, sphereRb);
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyRigidBody(field, groundRb);
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);
 }
 

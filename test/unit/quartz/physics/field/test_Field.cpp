@@ -81,6 +81,7 @@ UT_FUNCTION(test_fixedUpdate_1) {
     field.fixedUpdate(0.5);
     UT_CHECK_EQUAL(emptyRb.getPosition(), math::Vec3(3.5, 7, 10.5));
 
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyRigidBody(field, emptyRb);
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);
 }
 
@@ -128,6 +129,7 @@ UT_FUNCTION(test_fixedUpdate_2) {
     field.fixedUpdate(1.0);
     UT_CHECK_EQUAL(emptyRb.getPosition(), math::Vec3(0, -14, 0));
 
+    quartz::unit_test::PhysicsManagerUnitTestClient::destroyRigidBody(field, emptyRb);
     quartz::unit_test::PhysicsManagerUnitTestClient::destroyField(field);
 }
 
