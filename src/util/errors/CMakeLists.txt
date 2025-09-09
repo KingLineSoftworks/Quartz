@@ -4,6 +4,9 @@
 add_library(
     UTIL_Errors
     SHARED
+    RichException.hpp
+    RichException.cpp
+
     AssetErrors.hpp
     AssetErrors.cpp
 
