@@ -18,7 +18,7 @@ void doSomething() {
         "Throwing from doSomething",
         theA,
         std::source_location::current(),
-        std::basic_stacktrace::current()
+        std::stacktrace::current()
     );
 }
 
@@ -35,9 +35,8 @@ void doTheFinalThing() {
 }
 
 int main() {
-
     try {
-
+        doTheFinalThing();
     } catch (ExceptionA& e) {
         std::cout << "Caught exception with data " << e.data().m_value << ":\n" << e << "\n";
 

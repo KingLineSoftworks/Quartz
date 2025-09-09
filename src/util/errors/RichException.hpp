@@ -21,7 +21,7 @@ public:
         const std::string& message,
         const Data_t& data,
         const std::source_location& sourceLocation,
-        const std::basic_stacktrace& stacktrace
+        const std::stacktrace& stacktrace
     ) :
         m_message(message),
         m_data(data),
@@ -32,7 +32,7 @@ public:
     const std::string& what() const { return m_message; }
     const Data_t& data() const { return m_data; }
     const std::source_location& where() const { return m_sourceLocation; }
-    const std::basics_stacktrace& trace() const { return m_stacktrace; }
+    const std::stacktrace& trace() const { return m_stacktrace; }
 
     const std::string toString() const {
         std::ostringstream os;
@@ -44,7 +44,7 @@ private:
     std::string m_message;
     Data_t m_data;
     const std::source_location m_sourceLocation;
-    const std::basic_stacktrace m_stacktrace;
+    const std::stacktrace m_stacktrace;
 };
 
 template<typename Data_t>
@@ -54,6 +54,7 @@ operator<<(
     const util::RichException<Data_t>& e
 ) {
     os << "What:\n" << e.what() << "\n";
-    os << "Where:\n" << e.where() << "\n";
+    os << "Where:\n" << e.where().line() << "\n";
     os << "Trace:\n" << e.trace() << "\n";
+    return os;
 }
