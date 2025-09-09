@@ -18,6 +18,7 @@ UT_FUNCTION(test_construction_same_size) {
     const uint32_t numImages = 6;
     const uint32_t totalSize = numImages * totalImageDataSize;
 
+    LOG_TRACE(UT, "Creating instance");
     quartz::rendering::Instance renderingInstance(
         "SKYBOX_UT",
         9,
@@ -25,8 +26,10 @@ UT_FUNCTION(test_construction_same_size) {
         9,
         true
     );
+    LOG_TRACE(UT, "Creating device");
     quartz::rendering::Device renderingDevice(renderingInstance);
 
+    LOG_TRACE(UT, "Creating skybox");
     quartz::scene::SkyBox skyBox(
         renderingDevice,
         util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/posx-00FFFF-2x2.jpg"),
@@ -37,23 +40,33 @@ UT_FUNCTION(test_construction_same_size) {
         util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/negz-0000FF-2x2.jpg")
     );
 
+    LOG_TRACE(UT, "Getting cube map from sky box");
     const quartz::rendering::CubeMap& cubeMap = skyBox.getCubeMap();
+    LOG_TRACE(UT, "Getting staged image buffer from cube map");
     const quartz::rendering::StagedImageBuffer& stagedImageBuffer = cubeMap.getStagedImageBuffer();
+    LOG_TRACE(UT, "Getting staging memory from staged image buffer");
     const vk::UniqueDeviceMemory& p_vulkanDeviceStagingMemory = stagedImageBuffer.getVulkanPhysicalDeviceStagingMemory();
-   
+ 
     /**
      * @todo 2025/08/05 Make utility within BufferUtil to read memory from a device
      */
+    LOG_TRACE(UT, "Mapping staging memory onto the device");
     void* p_mappedStagingMemory = renderingDevice.getVulkanLogicalDevicePtr()->mapMemory(
         *p_vulkanDeviceStagingMemory,
         0,
         totalSize
     );
+    LOG_TRACE(UT, "Mapped staged memory to local memory at: 0x{}", p_mappedStagingMemory);
     UT_REQUIRE(p_mappedStagingMemory);
+
+    LOG_TRACE(UT, "Allocating memory to copy into a local variable");
+    std::array<uint8_t, totalSize> actualImageBytes;
+    LOG_TRACE(UT, "Copying into our local data from our mapped staged memory");
+    memcpy(actualImageBytes.data(), p_mappedStagingMemory, totalSize);
+    LOG_TRACE(UT, "Unmapping staging memory");
     renderingDevice.getVulkanLogicalDevicePtr()->unmapMemory(*p_vulkanDeviceStagingMemory);
 
-    std::array<uint8_t, totalSize> actualImageBytes;
-    memcpy(actualImageBytes.data(), p_mappedStagingMemory, totalSize);
+    LOG_TRACE(UT, "Iterating over pixel data for each of the images");
     for (uint32_t imageIndex = 0; imageIndex < 6; ++imageIndex) {
         LOG_INFO(UT, "Displaying pixel data for image {}", imageIndex);
         UNUSED const uint32_t startIndex = totalImageDataSize * imageIndex;

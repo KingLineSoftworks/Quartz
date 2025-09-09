@@ -114,7 +114,7 @@ quartz::rendering::CubeMap::createStagedImageBufferFromFilepaths(
 
         LOG_TRACE(CUBEMAP, "  Copying data for image {}", i);
         LOG_TRACE(CUBEMAP, "    Using offset of {} bytes", pixelBufferOffset);
-        LOG_TRACE(CUBEMAP, "    Copying to destination {}", reinterpret_cast<void*>(p_copyDestination));
+        LOG_TRACE(CUBEMAP, "    Copying to destination {} through {}", reinterpret_cast<void*>(p_copyDestination), reinterpret_cast<void*>(p_copyDestination + imageSize - 1));
         LOG_TRACE(CUBEMAP, "    Copying from source    {}", reinterpret_cast<void*>(p_currPixels));
         memcpy(p_copyDestination, p_currPixels, imageSize);
 
