@@ -110,19 +110,7 @@ UT_FUNCTION(test_construction_same_size) {
     UT_CHECK_EQUAL_CONTAINERS(actualImageBytes, expectedImageBytes);
 }
 
-UT_FUNCTION(test_construction_differing_size) {
-    // std::array<std::string, 6> skyBoxInformation = {
-    //     util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/posx-00FFFF-2x2.jpg"),
-    //     util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/negx-FF0000-2x2.jpg"),
-    //     util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/posy-FF00FF-2x2.jpg"),
-    //     util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/negy-00FF00-2x2.jpg"),
-    //     util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/posz-FFFF00-1x1.jpg"),
-    //     util::FileSystem::getAbsoluteFilepathInQuartzDirectory("assets/sky_boxes/test/negz-0000FF-2x2.jpg")
-    // };
-}
-
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_construction_same_size);
-    REGISTER_UT_FUNCTION(test_construction_differing_size);
     UT_RUN_TESTS();
 }
