@@ -35,5 +35,5 @@ target_compile_definitions(
 target_link_libraries(
     UTIL_Errors
     PUBLIC
-    stdc++exp
+    stdc++exp # need to set this for std::stacktrace
 )

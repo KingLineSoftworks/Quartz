@@ -6,8 +6,7 @@
 #include <stacktrace>
 #include <string>
 
-// std::ostream& operator<<(std::ostream& os, const std::source_location& sourceLocation);
-// std::ostream& operator<<(std::ostream& os, const std::basic_stacktrace& stacktrace);
+std::ostream& operator<<(std::ostream& os, const std::source_location& sourceLocation);
 
 namespace util {
     template <typename Data_t>
@@ -53,8 +52,8 @@ operator<<(
     std::ostream& os,
     const util::RichException<Data_t>& e
 ) {
-    os << "What:\n" << e.what() << "\n";
-    os << "Where:\n" << e.where().line() << "\n";
+    os << "What:\n  " << e.what() << "\n";
+    os << "Where:\n  " << e.where() << "\n";
     os << "Trace:\n" << e.trace() << "\n";
     return os;
 }

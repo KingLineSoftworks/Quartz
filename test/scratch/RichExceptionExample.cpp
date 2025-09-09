@@ -11,15 +11,19 @@ public:
 
 using ExceptionA = util::RichException<A_t>;
 
+#define THROW_EXCEPTION_A(what, data) \
+    throw ExceptionA(what, data, std::source_location::current(), std::stacktrace::current())
+
 void doSomething() {
     A_t theA(42);
 
-    throw ExceptionA(
-        "Throwing from doSomething",
-        theA,
-        std::source_location::current(),
-        std::stacktrace::current()
-    );
+    // throw ExceptionA(
+    //     "Throwing from doSomething",
+    //     theA,
+    //     std::source_location::current(),
+    //     std::stacktrace::current()
+    // );
+    THROW_EXCEPTION_A("Throwing from doSomething using macro", theA);
 }
 
 void doSomethingElse() {
