@@ -2,8 +2,8 @@
 #include <fstream>
 #include <fstream>
 
+#include "util/platform.hpp"
 #include "util/unit_test/UnitTest.hpp"
-
 #include "util/file_system/FileSystem.hpp"
 
 UT_FUNCTION(test_getAbsoluteFilepathInQuartzDirectory) {
@@ -62,7 +62,11 @@ UT_FUNCTION(test_getCompiledShaderAbsoluteFilepath) {
 
 UT_FUNCTION(test_readBytesFromFile) {
     {
+#ifdef ON_LINUX
+        const std::string tempFilepath = std::filesystem::temp_directory_path().string() + "/" + std::string("tempfile.txt");
+#else
         const std::string tempFilepath = std::filesystem::temp_directory_path().string() + std::string("tempfile.txt");
+#endif
 
         const std::string inputString = " Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         const std::vector<char> inputData(inputString.begin(), inputString.end());

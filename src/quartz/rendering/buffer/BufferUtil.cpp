@@ -296,3 +296,4 @@ quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
 
     return p_vulkanPhysicalDeviceImageMemory;
 }
+
