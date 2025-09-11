@@ -9,7 +9,7 @@
 	url = https://github.com/glfw/glfw.git
 [submodule "vendor/vulkan"]
 	path = vendor/vulkan
-	url = https://github.com/KingLineSoftworks/vulkan.git
+	url = git@github.com:KingLineSoftworks/vulkan.git
 [submodule "vendor/stb"]
 	path = vendor/stb
 	url = https://github.com/nothings/stb.git
@@ -21,7 +21,7 @@
 	url = https://github.com/mmikk/MikkTSpace.git
 [submodule "assets"]
 	path = assets
-	url = https://github.com/KingLineSoftworks/assets.git
+	url = git@github.com:KingLineSoftworks/assets.git
 [submodule "vendor/reactphysics3d"]
 	path = vendor/reactphysics3d
 	url = https://github.com/DanielChappuis/reactphysics3d.git
