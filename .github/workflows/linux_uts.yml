@@ -11,6 +11,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Get SSH Keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.JADE_IP }}" >> ~/.ssh/known_hosts
+      - name: SSH Into Jade
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+          pwd
+          ls ~/.ssh
+          cat ~/.ssh/known_hosts
+          ssh "${{ secrets.JADE_RUNNER_USERNAME }}"."${{ secrets.JADE_IP }}"
+          pwd
       - name: Hello world
         run: echo "Hello world"
 
