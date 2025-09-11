@@ -3,7 +3,6 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 #include "util/errors/RichException.hpp"
 
 #include "quartz/rendering/Loggers.hpp"

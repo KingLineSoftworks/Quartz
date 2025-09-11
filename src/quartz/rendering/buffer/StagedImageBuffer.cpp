@@ -1,10 +1,11 @@
 #include <vulkan/vulkan.hpp>
 
+#include "util/errors/RichException.hpp"
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/BufferUtil.hpp"
 #include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
-#include "util/errors/RichException.hpp"
 
 void
 quartz::rendering::StagedImageBuffer::transitionImageLayout(

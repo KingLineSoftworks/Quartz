@@ -1,6 +1,4 @@
 #include "quartz/rendering/render_pass/RenderPass.hpp"
-#include <vulkan/vulkan_structs.hpp>
-
 
 vk::UniqueRenderPass
 quartz::rendering::RenderPass::createVulkanRenderPassPtr(
