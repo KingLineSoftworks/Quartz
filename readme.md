@@ -6,10 +6,17 @@ Quartz is an interactive realtime 3D engine. Quartz uses Vulkan.
 
 ## Building
 
-This project is built with CMake. It is currently supporting MacOS and Linux. No efforts have been made to build and run on Windows. There is a known issue on Linux environments using Wayland to manage windows where Quartz segfaults at the end of the program, when it is trying to free a vulkan surface. This issue is not noticed on MacOS or on Linux environments using Xorg.
+This project is built with CMake.
+It is currently supporting MacOS and Linux.
+No efforts have been made to build and run on Windows.
+There is a known issue on Linux environments using Wayland to manage windows where Quartz segfaults at the end of the program, when it is trying to free a vulkan surface. This issue is not noticed on MacOS or on Linux environments using Xorg.
 
-By default, the `CMakeLists.txt` is configured to build using clang as the compiler and ninja as the generator. This is configured in `PreLoad.cmake`.
-The `CMakeLists.txt` also tells GLFW to use Wayland instead of Xorg if the detected platform is Linux. This can be changeed by modifying the `GLFW_BUILD_WAYLAND` and `GLFW_BUILD_X11` flags.
+Quartz leverages C++23 for `std::basic_stacktrace`, so ensure that your toolchain allows for compilation of the C++23 standard.
+
+By default, the `CMakeLists.txt` is configured to build using clang as the compiler and ninja as the generator.
+This is configured in `PreLoad.cmake`.
+The `CMakeLists.txt` also tells GLFW to use Wayland instead of Xorg if the detected platform is Linux.
+This can be changeed by modifying the `GLFW_BUILD_WAYLAND` and `GLFW_BUILD_X11` flags.
 
 ### Running Tests
 

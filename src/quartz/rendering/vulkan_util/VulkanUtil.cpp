@@ -1,5 +1,7 @@
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
+#include "util/errors/RichException.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
@@ -140,7 +142,7 @@ quartz::rendering::VulkanUtil::createVulkanImageViewPtr(
     vk::UniqueImageView p_imageView = p_logicalDevice->createImageViewUnique(imageViewCreateInfo);
 
     if (!p_imageView) {
-        LOG_THROW(IMAGE, util::VulkanCreationFailedError, "Failed to create vk::ImageView");
+        LOG_THROW(IMAGE, util::RichException<vk::ImageViewCreateInfo>, imageViewCreateInfo, "Failed to create vk::ImageView");
     }
 
     return p_imageView;
@@ -181,12 +183,10 @@ quartz::rendering::VulkanUtil::createVulkanSamplerPtr(
         false
     );
 
-    vk::UniqueSampler p_sampler = p_vulkanLogicalDevice->createSamplerUnique(
-        samplerCreateInfo
-    );
+    vk::UniqueSampler p_sampler = p_vulkanLogicalDevice->createSamplerUnique(samplerCreateInfo);
 
     if (!p_sampler) {
-        LOG_THROW(TEXTURE, util::VulkanCreationFailedError, "Failed to create vk::Sampler");
+        LOG_THROW(TEXTURE, util::RichException<vk::SamplerCreateInfo>, samplerCreateInfo, "Failed to create vk::Sampler");
     }
 
     return p_sampler;
@@ -208,7 +208,7 @@ quartz::rendering::VulkanUtil::createVulkanCommandPoolPtr(
     vk::UniqueCommandPool p_commandPool = p_logicalDevice->createCommandPoolUnique(commandPoolCreateInfo);
 
     if (!p_commandPool) {
-        LOG_THROW(VULKANUTIL, util::VulkanCreationFailedError, "Failed to create vk::CommandPool");
+        LOG_THROW(VULKANUTIL, util::RichException<vk::CommandPoolCreateInfo>, commandPoolCreateInfo, "Failed to create vk::CommandPool");
     }
 
     return p_commandPool;
@@ -228,17 +228,15 @@ quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
         desiredCommandBufferCount
     );
 
-    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(
-        commandBufferAllocateInfo
-    );
+    std::vector<vk::UniqueCommandBuffer> commandBufferPtrs = p_logicalDevice->allocateCommandBuffersUnique(commandBufferAllocateInfo);
 
     if (commandBufferPtrs.size() != desiredCommandBufferCount) {
-        LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Allocated {} vk::CommandBuffer(s) instead of {}", commandBufferPtrs.size(), desiredCommandBufferCount);
+        LOG_THROW(SWAPCHAIN, util::RichException<vk::CommandBufferAllocateInfo>, commandBufferAllocateInfo, "Allocated {} vk::CommandBuffer(s) instead of {}", commandBufferPtrs.size(), desiredCommandBufferCount);
     }
 
     for (uint32_t i = 0; i < commandBufferPtrs.size(); ++i) {
         if (!commandBufferPtrs[i]) {
-            LOG_THROW(VULKANUTIL, util::VulkanCreationFailedError, "Failed to allocate vk::CommandBuffer {}", i);
+            LOG_THROW(SWAPCHAIN, util::RichException<vk::CommandBufferAllocateInfo>, commandBufferAllocateInfo, "Failed to allocate vk::CommandBuffer {}", i);
         }
     }
 
@@ -246,3 +244,4 @@ quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
 
     return commandBufferPtrs;
 }
+

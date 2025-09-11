@@ -3,6 +3,9 @@
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_structs.hpp>
+
+#include "util/errors/RichException.hpp"
 
 #include "math/transform/Mat4.hpp"
 
@@ -56,7 +59,7 @@ quartz::rendering::Swapchain::createVulkanSwapchainPtr(
     vk::UniqueSwapchainKHR uniqueSwapchain = p_logicalDevice->createSwapchainKHRUnique(swapchainCreateInfo);
 
     if (!uniqueSwapchain) {
-        LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create the vk::SwapchainKHR");
+        LOG_THROW(SWAPCHAIN, util::RichException<vk::SwapchainCreateInfoKHR>, swapchainCreateInfo, "Failed to create the vk::SwapchainKHR");
     }
 
     return uniqueSwapchain;
@@ -132,7 +135,7 @@ quartz::rendering::Swapchain::createVulkanFramebufferUniquePtrs(
         );
 
         if (!framebufferPtrs[i]) {
-            LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create vk::Framebuffer {}", i);
+            LOG_THROW(SWAPCHAIN, util::RichException<vk::FramebufferCreateInfo>, framebufferCreateInfo, "Failed to create vk::Framebuffer {}", i);
         }
     }
 
@@ -158,7 +161,7 @@ quartz::rendering::Swapchain::createVulkanSemaphoresUniquePtrs(
         );
 
         if (!semaphorePtrs[i]) {
-            LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create vk::Semaphore {}", i);
+            LOG_THROW(SWAPCHAIN, util::RichException<vk::SemaphoreCreateInfo>, semaphoreCreateInfo, "Failed to create vk::Semaphore {}", i);
         }
     }
     LOG_TRACE(SWAPCHAIN, "Successfully created {} vk::Semaphore(s)", semaphorePtrs.size());
@@ -185,7 +188,7 @@ quartz::rendering::Swapchain::createVulkanFenceUniquePtrs(
         );
 
         if (!fencePtrs[i]) {
-            LOG_THROW(SWAPCHAIN, util::VulkanCreationFailedError, "Failed to create vk::Fence {}", i);
+            LOG_THROW(SWAPCHAIN, util::RichException<vk::FenceCreateInfo>, fenceCreateInfo, "Failed to create vk::Fence {}", i);
         }
     }
 

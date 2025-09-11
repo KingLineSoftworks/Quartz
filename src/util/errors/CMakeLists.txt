@@ -4,11 +4,8 @@
 add_library(
     UTIL_Errors
     SHARED
-    AssetErrors.hpp
-    AssetErrors.cpp
-
-    VulkanErrors.hpp
-    VulkanErrors.cpp
+    RichException.hpp
+    RichException.cpp
 )
 
 target_include_directories(
@@ -19,10 +16,18 @@ target_include_directories(
 
 target_compile_options(
     UTIL_Errors
-    PUBLIC ${QUARTZ_CMAKE_CXX_FLAGS}
+    PUBLIC
+    ${QUARTZ_CMAKE_CXX_FLAGS}
 )
 
 target_compile_definitions(
     UTIL_Errors
-    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    PUBLIC
+    ${QUARTZ_COMPILE_DEFINITIONS}
+)
+
+target_link_libraries(
+    UTIL_Errors
+    PUBLIC
+    stdc++exp # need to set this for std::stacktrace
 )

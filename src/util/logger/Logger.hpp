@@ -11,8 +11,7 @@
 #include "spdlog/fmt/fmt.h"
 
 #include "util/macros.hpp"
-#include "util/errors/AssetErrors.hpp"
-#include "util/errors/VulkanErrors.hpp"
+#include "util/errors/RichException.hpp"
 
 namespace util {
     class Logger;
@@ -27,7 +26,6 @@ namespace unit_test {
     class LoggerUnitTestClient;
 }
 }
-
 
 /**
  * @brief A singleton-esque logger wrapping a spdlog async logger. This exposes a map
@@ -332,12 +330,22 @@ std::ostream& operator<<(std::ostream& os, const util::Logger::Level level);
 #define LOG_CRITICALthis(...) \
     util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
-#define LOG_THROW(REGISTRATION_NAME, ERROR_TYPE, ...) \
+#define LOG_THROW(REGISTRATION_NAME, ERROR_TYPE, DATA, ...) \
     util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__); \
-    throw ERROR_TYPE(fmt::format(__VA_ARGS__))
-#define LOG_THROWthis(ERROR_TYPE, ...) \
+    throw ERROR_TYPE( \
+        fmt::format(__VA_ARGS__), \
+        DATA, \
+        std::source_location::current(), \
+        std::stacktrace::current() \
+    )
+#define LOG_THROWthis(ERROR_TYPE, DATA, ...) \
     util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__); \
-    throw ERROR_TYPE(fmt::format(__VA_ARGS__))
+    throw ERROR_TYPE( \
+        fmt::format(__VA_ARGS__), \
+        DATA, \
+        std::source_location::current(), \
+        std::stacktrace::current() \
+    )
 
 /**
  * @brief Log a scope change

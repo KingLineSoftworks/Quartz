@@ -8,6 +8,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "util/errors/RichException.hpp"
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedImageBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -171,7 +173,15 @@ quartz::rendering::Texture::createImageBufferFromFilepath(
         STBI_rgb_alpha
     );
     if (!p_texturePixels) {
-        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load image from {}", filepath);
+        struct TextureBucket {
+            const std::string filepath;
+            int32_t textureWidth;
+            int32_t textureHeight;
+            int32_t textureChannelCount;
+        };
+        TextureBucket textureBucket(filepath, textureWidth, textureHeight, textureChannelCount);
+
+        LOG_THROW(TEXTURE, util::RichException<TextureBucket>, textureBucket, "Failed to load image from {}", filepath);
     }
 
     // x4 for rgba (32 bits = 4 bytes)
@@ -244,7 +254,7 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
     LOG_DEBUG(TEXTURE, "Got pixel data at {} with size of {} bytes", static_cast<const void*>(p_texturePixels), textureSizeBytes);
 
     if (!p_texturePixels) {
-        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load texture from gltfImage with name \"\"", gltfImage.name);
+        LOG_THROW(TEXTURE, util::RichException<tinygltf::Image>, gltfImage, "Failed to load texture from gltfImage with name \"{}\"", gltfImage.name);
     }
 
     // x4 for rgba (32 bits = 4 bytes)

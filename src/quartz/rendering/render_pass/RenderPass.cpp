@@ -1,6 +1,5 @@
 #include "quartz/rendering/render_pass/RenderPass.hpp"
 
-
 vk::UniqueRenderPass
 quartz::rendering::RenderPass::createVulkanRenderPassPtr(
     const vk::UniqueDevice& p_logicalDevice,
@@ -84,7 +83,7 @@ quartz::rendering::RenderPass::createVulkanRenderPassPtr(
     vk::UniqueRenderPass p_renderPass = p_logicalDevice->createRenderPassUnique(renderPassCreateInfo);
 
     if (!p_renderPass) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::RenderPass");
+        LOG_THROW(PIPELINE, util::RichException<vk::RenderPassCreateInfo>, renderPassCreateInfo, "Failed to create vk::RenderPass");
     }
 
     return p_renderPass;

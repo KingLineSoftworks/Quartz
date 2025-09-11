@@ -1,5 +1,7 @@
 #include <vulkan/vulkan.hpp>
 
+#include "util/errors/RichException.hpp"
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/BufferUtil.hpp"
 #include "quartz/rendering/buffer/StagedImageBuffer.hpp"
@@ -64,7 +66,11 @@ quartz::rendering::StagedImageBuffer::transitionImageLayout(
         sourceStage = vk::PipelineStageFlagBits::eTransfer;
         destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
     } else {
-        LOG_THROW(BUFFER_IMAGE, util::VulkanFeatureNotSupportedError, "Unsupported image layout transition");
+        struct LayoutBucket {
+            vk::ImageLayout inputLayout;
+            vk::ImageLayout outputLayout;
+        } layoutBucket(inputLayout, outputLayout);
+        LOG_THROW(BUFFER_IMAGE, util::RichException<LayoutBucket>, layoutBucket, "Unsupported image layout transition");
     }
 
     vk::ImageMemoryBarrier imageMemoryBarrier(

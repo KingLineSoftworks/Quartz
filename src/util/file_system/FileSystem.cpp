@@ -6,6 +6,7 @@
 
 #include "util/platform.hpp"
 #include "util/Loggers.hpp"
+#include "util/errors/RichException.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "util/file_system/FileSystem.hpp"
@@ -36,7 +37,7 @@ util::FileSystem::readBytesFromFile(const std::string& filepath) {
     std::ifstream infile(filepath, std::ios::ate | std::ios::binary);
 
     if (!infile.is_open()) {
-        LOG_THROW(FILESYSTEM, std::runtime_error, "Failed to open {} for binary reading", filepath);
+        LOG_THROW(FILESYSTEM, util::StringException, filepath, "Failed to open {} for binary reading", filepath);
     }
 
     uint32_t fileSizeBytes = infile.tellg(); // because we started at the end with std::ios::ate

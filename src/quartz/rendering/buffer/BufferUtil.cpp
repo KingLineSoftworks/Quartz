@@ -1,5 +1,7 @@
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
+#include "util/errors/RichException.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
@@ -63,7 +65,7 @@ quartz::rendering::BufferUtil::createVulkanBufferPtr(
     vk::UniqueBuffer p_buffer = p_logicalDevice->createBufferUnique(bufferCreateInfo);
 
     if (!p_buffer) {
-        LOG_THROW(BUFFER, util::VulkanCreationFailedError, "Failed to create vk::Buffer");
+        LOG_THROW(BUFFER, util::RichException<vk::BufferCreateInfo>, bufferCreateInfo, "Failed to create vk::Buffer");
     }
     LOG_TRACE(BUFFER, "Successfully created vk::Buffer instance at {}", static_cast<void*>(&(*p_buffer)));
 
@@ -91,7 +93,12 @@ quartz::rendering::BufferUtil::chooseMemoryTypeIndex(
         }
     }
     if (!chosenMemoryTypeIndex.has_value()) {
-        LOG_THROW(BUFFER, util::VulkanFeatureNotSupportedError, "Failed to find a suitable memory type");
+        struct MemoryBucket {
+            vk::MemoryPropertyFlags memoryPropertyFlags;
+            vk::MemoryRequirements memoryRequirements;
+        } memoryBucket(requiredMemoryProperties, memoryRequirements);
+
+        LOG_THROW(BUFFER, util::RichException<MemoryBucket>, memoryBucket, "Failed to find a suitable memory type");
     }
 
     return chosenMemoryTypeIndex.value();
@@ -125,7 +132,7 @@ quartz::rendering::BufferUtil::allocateVulkanPhysicalDeviceMemoryPtr(
     vk::UniqueDeviceMemory p_logicalBufferPhysicalMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
 
     if (!p_logicalBufferPhysicalMemory) {
-        LOG_THROW(BUFFER, util::VulkanCreationFailedError, "Failed to allocated vk::DeviceMemory");
+        LOG_THROW(BUFFER, util::RichException<vk::MemoryAllocateInfo>, memoryAllocateInfo, "Failed to allocated vk::DeviceMemory");
     }
     LOG_TRACE(BUFFER, "Successfully allocated vk::DeviceMemory instance at {}", static_cast<void*>(&(*p_logicalBufferPhysicalMemory)));
 
@@ -255,7 +262,7 @@ quartz::rendering::ImageBufferUtil::createVulkanImagePtr(
 
     vk::UniqueImage p_vulkanImage = p_logicalDevice->createImageUnique(imageCreateInfo);
     if (!p_vulkanImage) {
-        LOG_THROW(IMAGE, util::VulkanCreationFailedError, "Failed to create vk::Image");
+        LOG_THROW(IMAGE, util::RichException<vk::ImageCreateInfo>, imageCreateInfo, "Failed to create vk::Image");
     }
 
     return p_vulkanImage;
@@ -285,7 +292,7 @@ quartz::rendering::ImageBufferUtil::allocateVulkanPhysicalDeviceImageMemory(
 
     vk::UniqueDeviceMemory p_vulkanPhysicalDeviceImageMemory = p_logicalDevice->allocateMemoryUnique(memoryAllocateInfo);
     if (!p_vulkanPhysicalDeviceImageMemory) {
-        LOG_THROW(IMAGE, util::VulkanCreationFailedError, "Failed to create vk::DeviceMemory for vk::Image");
+        LOG_THROW(IMAGE, util::RichException<vk::MemoryAllocateInfo>, memoryAllocateInfo, "Failed to create vk::DeviceMemory for vk::Image");
     }
 
     p_logicalDevice->bindImageMemory(

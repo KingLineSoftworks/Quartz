@@ -111,10 +111,11 @@ endif ()
 message(STATUS "Building for ${CMAKE_SYSTEM_NAME}")
 
 # ====================================================================
-# C++ 20 Support and compiler flags
+# C++ 23 Support and compiler flags
 # ====================================================================
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSTIONS ON)
 
 set(QUARTZ_CMAKE_CXX_DESIRED_WARNING_FLAGS -Wall -Wextra -Werror)
 
