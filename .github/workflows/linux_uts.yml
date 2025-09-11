@@ -15,9 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Make and CD into build directory
-        run: mkdir .debug ; cd .debug
+        run: mkdir .debug ; cd .debug ; pwd
       - name: Run CMake
-        run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON
+        run: pwd ; cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON
       - name: Run Ninja
         run: ninja
       - name: Run unit tests
