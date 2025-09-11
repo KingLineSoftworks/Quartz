@@ -11,6 +11,14 @@ std::ostream& operator<<(std::ostream& os, const std::source_location& sourceLoc
 namespace util {
     template <typename Data_t>
     class RichException;
+
+    // Some general aliases
+    using IntException = RichException<int32_t>;
+    using UintException = RichException<uint32_t>;
+    using FloatException = RichException<float>;
+    using DoubleException = RichException<double>;
+    using StringException = RichException<std::string>;
+    using PointerException = RichException<void*>;
 }
 
 template<typename Data_t>
@@ -57,3 +65,4 @@ operator<<(
     os << "Trace:\n" << e.trace() << "\n";
     return os;
 }
+

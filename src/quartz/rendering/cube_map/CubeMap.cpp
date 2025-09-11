@@ -1,5 +1,6 @@
 #include <stb_image.h>
 
+#include "util/errors/RichException.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "math/transform/Vec3.hpp"
@@ -81,7 +82,7 @@ quartz::rendering::CubeMap::createStagedImageBufferFromFilepaths(
             STBI_rgb_alpha
         );
         if (!p_currPixels) {
-            LOG_THROW(CUBEMAP, util::AssetLoadFailedError, "Failed to load texture from {}", imageFilepath);
+            LOG_THROW(CUBEMAP, util::StringException, imageFilepath, "Failed to load texture from {}", imageFilepath);
         }
 
         // x4 for rgba (32 bits = 4 bytes)
@@ -106,7 +107,7 @@ quartz::rendering::CubeMap::createStagedImageBufferFromFilepaths(
             static_cast<uint32_t>(currChannelCount) != imageChannelCount ||
             static_cast<uint32_t>(currSize) != imageSize
         ) {
-            LOG_THROW(CUBEMAP, util::AssetInsufficientError, "Loaded image does not match {}x{} image with {} channels ( {} bytes )", imageWidth, imageHeight, imageChannelCount, imageSize);
+            LOG_THROW(CUBEMAP, util::StringException, imageFilepath, "Loaded image does not match {}x{} image with {} channels ( {} bytes )", imageWidth, imageHeight, imageChannelCount, imageSize);
         }
 
         const uint32_t pixelBufferOffset = i * imageSize;

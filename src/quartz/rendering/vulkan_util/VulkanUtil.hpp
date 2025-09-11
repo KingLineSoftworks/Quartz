@@ -5,6 +5,8 @@
 
 #include <vulkan/vulkan.hpp>
 
+#include "util/errors/RichException.hpp"
+
 namespace quartz {
 namespace rendering {
     class VulkanUtil;

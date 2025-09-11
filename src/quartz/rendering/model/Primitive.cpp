@@ -5,6 +5,8 @@
 
 #include <tiny_gltf.h>
 
+#include "util/logger/Logger.hpp"
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -33,7 +35,7 @@ quartz::rendering::Primitive::handleMissingVertexAttribute(
     switch (attributeType) {
         case quartz::rendering::Vertex::AttributeType::Position:
         case quartz::rendering::Vertex::AttributeType::Normal:
-            LOG_THROW(MODEL_PRIMITIVE, util::AssetInsufficientError, "Primitive must contain a {} attribute", attributeGltfString);
+            LOG_ERROR(MODEL_PRIMITIVE, "Primitive must contain a {} attribute", attributeGltfString);
 
         case quartz::rendering::Vertex::AttributeType::Tangent:
             LOG_TRACE(MODEL_PRIMITIVE, "Manually calculating vertex tangents. We're operating under the assumption that the other attributes are already populated");

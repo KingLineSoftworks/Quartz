@@ -1,6 +1,10 @@
 #include <set>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_structs.hpp>
+
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
+#include "util/errors/RichException.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -17,7 +21,7 @@ quartz::rendering::Device::getBestPhysicalDevice(
     std::vector<vk::PhysicalDevice> physicalDevices = p_instance->enumeratePhysicalDevices();
     LOG_TRACE(DEVICE, "{} physical devices available", physicalDevices.size());
     if (physicalDevices.empty()) {
-        LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "Failed to find GPUs with vulkan support");
+        LOG_THROW(DEVICE, util::IntException, 0, "Failed to find GPUs with vulkan support");
     }
 
     // ----- choose the best (first) suitable physical device, ----- //
@@ -66,7 +70,7 @@ quartz::rendering::Device::getBestPhysicalDevice(
     }
 
     if (suitablePhysicalDeviceIndex == -1) {
-        LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "No suitable devices found");
+        LOG_THROW(DEVICE, util::RichException<std::vector<vk::PhysicalDevice>>, physicalDevices, "No suitable devices found");
     }
 
     return physicalDevices[suitablePhysicalDeviceIndex];
@@ -91,7 +95,7 @@ quartz::rendering::Device::getGraphicsQueueFamilyIndex(
         }
     }
 
-    LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "Failed to find queue family index");
+    LOG_THROW(DEVICE, util::RichException<std::vector<vk::QueueFamilyProperties>>, queueFamilyProperties, "Failed to find queue family index");
 }
 
 std::vector<const char*>
@@ -123,7 +127,7 @@ quartz::rendering::Device::getEnabledPhysicalDeviceExtensionNames(
     }
 
     if (!swapchainExtensionFound) {
-        LOG_THROW(DEVICE, util::VulkanFeatureNotSupportedError, "{} extension not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        LOG_THROW(DEVICE, util::RichException<vk::PhysicalDevice>, physicalDevice, "Swapchain extension ({}) not found", VK_KHR_SWAPCHAIN_EXTENSION_NAME);
     }
 
     return requiredPhysicalDeviceExtensionNames;
@@ -171,7 +175,7 @@ quartz::rendering::Device::createVulkanLogicalDevicePtr(
     vk::UniqueDevice uniqueLogicalDevice = physicalDevice.createDeviceUnique(logicalDeviceCreateInfo);
 
     if (!uniqueLogicalDevice) {
-        LOG_THROW(DEVICE, util::VulkanCreationFailedError, "Failed to create logical device");
+        LOG_THROW(DEVICE, util::RichException<vk::DeviceCreateInfo>, logicalDeviceCreateInfo, "Failed to create logical device");
     }
 
     return uniqueLogicalDevice;

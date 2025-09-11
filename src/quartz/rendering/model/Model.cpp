@@ -5,6 +5,7 @@
 
 #include <tiny_gltf.h>
 
+#include "util/errors/RichException.hpp"
 #include "util/file_system/FileSystem.hpp"
 
 #include "quartz/rendering/model/Model.hpp"
@@ -42,11 +43,11 @@ quartz::rendering::Model::loadGLTFModel(
 
     if (!fileLoadedSuccessfully) {
         if (!warningString.empty()) {
-            LOG_THROW(MODEL, util::AssetLoadFailedError, "Failed to load model at {} (warning: \"{}\")", filepath, warningString);
+            LOG_THROW(MODEL, util::StringException, filepath, "Failed to load model at {} (warning: \"{}\")", filepath, warningString);
         } else if (!errorString.empty()) {
-            LOG_THROW(MODEL, util::AssetLoadFailedError, "Failed to load model at {} (error: \"{}\")", filepath, errorString);
+            LOG_THROW(MODEL, util::StringException, filepath, "Failed to load model at {} (error: \"{}\")", filepath, errorString);
         }
-        LOG_THROW(MODEL, util::AssetLoadFailedError, "Failed to load model at {} (no warning or error strings)", filepath);
+        LOG_THROW(MODEL, util::StringException, filepath, "Failed to load model at {} (no warning or error strings)", filepath);
     }
 
     if (!warningString.empty()) {

@@ -6,12 +6,6 @@ add_library(
     SHARED
     RichException.hpp
     RichException.cpp
-
-    AssetErrors.hpp
-    AssetErrors.cpp
-
-    VulkanErrors.hpp
-    VulkanErrors.cpp
 )
 
 target_include_directories(

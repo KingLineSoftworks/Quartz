@@ -1,6 +1,9 @@
 #include <GLFW/glfw3.h>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_structs.hpp>
+
+#include "util/errors/RichException.hpp"
 
 #include "quartz/rendering/instance/Instance.hpp"
 
@@ -58,8 +61,7 @@ quartz::rendering::Instance::initializeGLFW() {
     LOG_FUNCTION_SCOPE_TRACE(INSTANCE, "");
 
     if (!glfwInit()) {
-        LOG_CRITICAL(INSTANCE, "Failed to initialize GLFW");
-        LOG_THROW(INSTANCE, util::VulkanCreationFailedError, "Failed to initialize GLFW");
+        LOG_THROW(INSTANCE, util::IntException, 0, "Failed to initialize GLFW");
     }
 
     LOG_INFO(INSTANCE, "GLFW initialized");
@@ -109,7 +111,7 @@ quartz::rendering::Instance::getEnabledValidationLayerNames(
         }
 
         if (!found) {
-            LOG_THROW(INSTANCE, util::VulkanFeatureNotSupportedError, "Required validation layer {} is not available", requiredValidationLayerName);
+            LOG_THROW(INSTANCE, util::RichException<std::vector<const char*>>, requiredValidationLayerNames, "Required validation layer {} is not available", requiredValidationLayerName);
         }
     }
 
@@ -168,7 +170,7 @@ quartz::rendering::Instance::getEnabledInstanceExtensionNames(
         }
 
         if (!found) {
-            LOG_THROW(INSTANCE, util::VulkanFeatureNotSupportedError, "Required instance extension {} is not available", requiredInstanceExtensionName);
+            LOG_THROW(INSTANCE, util::RichException<std::vector<const char*>>, requiredInstanceExtensionNames, "Required instance extension {} is not available", requiredInstanceExtensionName);
         }
     }
 
@@ -214,7 +216,7 @@ quartz::rendering::Instance::createVulkanInstancePtr(
     vk::UniqueInstance p_instance = vk::createInstanceUnique(instanceCreateInfo);
 
     if (!p_instance) {
-        LOG_THROW(INSTANCE, util::VulkanCreationFailedError, "Failed to create the vk::Instance");
+        LOG_THROW(INSTANCE, util::RichException<vk::InstanceCreateInfo>, instanceCreateInfo, "Failed to create the vk::Instance");
     }
 
     return p_instance;
@@ -266,7 +268,7 @@ quartz::rendering::Instance::createVulkanDebugUtilsMessengerPtr(
     );
 
     if (!p_debugUtilsMessenger) {
-        LOG_THROW(INSTANCE, util::VulkanCreationFailedError, "Failed to create vk::DebugUtilsMessengerEXT");
+        LOG_THROW(INSTANCE, util::RichException<vk::DebugUtilsMessengerCreateInfoEXT>, debugMessengerCreateInfo, "Failed to create vk::DebugUtilsMessengerEXT");
     }
 
     return p_debugUtilsMessenger;

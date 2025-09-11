@@ -1,3 +1,4 @@
+#include "util/errors/RichException.hpp"
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_MSC_SECURE_CRT
@@ -171,7 +172,7 @@ quartz::rendering::Texture::createImageBufferFromFilepath(
         STBI_rgb_alpha
     );
     if (!p_texturePixels) {
-        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load image from {}", filepath);
+        LOG_THROW(TEXTURE, util::StringException, filepath, "Failed to load image from {}", filepath);
     }
 
     // x4 for rgba (32 bits = 4 bytes)
@@ -244,7 +245,7 @@ quartz::rendering::Texture::createImageBufferFromGLTFImage(
     LOG_DEBUG(TEXTURE, "Got pixel data at {} with size of {} bytes", static_cast<const void*>(p_texturePixels), textureSizeBytes);
 
     if (!p_texturePixels) {
-        LOG_THROW(TEXTURE, util::AssetLoadFailedError, "Failed to load texture from gltfImage with name \"\"", gltfImage.name);
+        LOG_THROW(TEXTURE, util::StringException, gltfImage.name, "Failed to load texture from gltfImage with name \"{}\"", gltfImage.name);
     }
 
     // x4 for rgba (32 bits = 4 bytes)

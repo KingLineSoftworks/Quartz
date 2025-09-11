@@ -4,11 +4,13 @@
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
+#include "util/errors/RichException.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "quartz/rendering/device/Device.hpp"
 #include "quartz/rendering/instance/Instance.hpp"
 #include "quartz/rendering/window/Window.hpp"
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 
 void
 quartz::rendering::Window::glfwFramebufferSizeCallback(
@@ -60,7 +62,7 @@ quartz::rendering::Window::createGLFWwindowPtr(
     );
     LOG_TRACE(WINDOW, "Created GLFW window pointer at {}", static_cast<void*>(p_glfwWindow.get()));
     if (!p_glfwWindow) {
-        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create GLFW window pointer");
+        LOG_THROW(WINDOW, util::RichException<GLFWwindow*>, p_glfwWindow.get(), "Failed to create GLFW window pointer");
     }
 
     LOG_TRACE(WINDOW, "Setting GLFW window user pointer");
@@ -86,7 +88,7 @@ quartz::rendering::Window::createVulkanSurfacePtr(
     LOG_FUNCTION_SCOPE_TRACE(WINDOW, "");
 
 #if !defined ON_MAC && !defined ON_LINUX
-    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No support for non mac or linux platforms currently. Unable to create vk::SurfaceKHR");
+    LOG_THROW(WINDOW, util::IntException, 0, "No support for windows platforms currently. Unable to create vk::SurfaceKHR");
 #endif
 
     VkSurfaceKHR rawVulkanSurface;
@@ -97,7 +99,7 @@ quartz::rendering::Window::createVulkanSurfacePtr(
         &rawVulkanSurface
     );
     if (createResult != VK_SUCCESS) {
-        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create VkSurfaceKHR ( {} )", static_cast<int64_t>(createResult));
+        LOG_THROW(WINDOW, util::RichException<VkResult>, createResult, "Failed to create VkSurfaceKHR ( {} )", static_cast<int64_t>(createResult));
     }
 
     vk::UniqueSurfaceKHR p_surface(
@@ -105,7 +107,7 @@ quartz::rendering::Window::createVulkanSurfacePtr(
         *uniqueInstance
     );
     if (!p_surface) {
-        LOG_THROW(WINDOW, util::VulkanCreationFailedError, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
+        LOG_THROW(WINDOW, util::RichException<VkSurfaceKHR>, rawVulkanSurface, "Failed to create vk::SurfaceKHR from VkSurfaceKHR");
     }
 
     return p_surface;
@@ -121,7 +123,7 @@ quartz::rendering::Window::getBestSurfaceFormat(
     std::vector<vk::SurfaceFormatKHR> surfaceFormats = physicalDevice.getSurfaceFormatsKHR(*p_surface);
 
     if (surfaceFormats.empty()) {
-        LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No surface formats available for chosen physical device");
+        LOG_THROW(WINDOW, util::RichException<vk::PhysicalDevice>, physicalDevice, "No surface formats available for chosen physical device");
     }
 
     LOG_TRACE(WINDOW, "Choosing suitable surface format");
@@ -135,7 +137,7 @@ quartz::rendering::Window::getBestSurfaceFormat(
         }
     }
 
-    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No suitable surface formats found");
+    LOG_THROW(WINDOW, util::RichException<vk::PhysicalDevice>, physicalDevice, "No suitable surface formats found");
 }
 
 vk::PresentModeKHR
@@ -148,7 +150,7 @@ quartz::rendering::Window::getBestPresentMode(
     std::vector<vk::PresentModeKHR> presentModes = physicalDevice.getSurfacePresentModesKHR(*p_surface);
 
     if (presentModes.empty()) {
-        LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "No present modes available for chosen physical device");
+        LOG_THROW(WINDOW, util::RichException<vk::PhysicalDevice>, physicalDevice, "No present modes available for chosen physical device");
     }
 
     vk::PresentModeKHR bestPresentMode = vk::PresentModeKHR::eFifo;
@@ -251,7 +253,7 @@ quartz::rendering::Window::getBestVulkanDepthBufferFormat(
         }
     }
 
-    LOG_THROW(WINDOW, util::VulkanFeatureNotSupportedError, "Failed to find supported depth buffer image format");
+    LOG_THROW(WINDOW, util::RichException<vk::PhysicalDevice>, physicalDevice, "Failed to find supported depth buffer image format");
 }
 
 quartz::rendering::Window::Window(

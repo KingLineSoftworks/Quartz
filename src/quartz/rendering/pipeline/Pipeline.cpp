@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "util/macros.hpp"
+#include "util/errors/RichException.hpp"
 #include "util/file_system/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 
@@ -32,7 +33,7 @@ quartz::rendering::Pipeline::createVulkanShaderModulePtr(
     vk::UniqueShaderModule p_shaderModule = p_logicalDevice->createShaderModuleUnique(shaderModuleCreateInfo);
 
     if (!p_shaderModule) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::ShaderModule");
+        LOG_THROW(PIPELINE, util::RichException<vk::ShaderModuleCreateInfo>, shaderModuleCreateInfo, "Failed to create vk::ShaderModule");
     }
 
     return p_shaderModule;
@@ -67,7 +68,7 @@ quartz::rendering::Pipeline::createLocallyMappedBuffers(
     LOG_TRACE(PIPELINE, "Created {} locally mapped buffers", buffers.size());
 
     if (buffers.size() != maxNumFramesInFlight * uniformBufferInfos.size()) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Created {} locally mapped buffers instead of expected {}", buffers.size(), maxNumFramesInFlight * uniformBufferInfos.size());
+        LOG_THROW(PIPELINE, util::IntException, buffers.size(), "Created {} locally mapped buffers instead of expected {}", buffers.size(), maxNumFramesInFlight * uniformBufferInfos.size());
     }
 
     return buffers;
@@ -140,7 +141,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorSetLayoutPtr(
     vk::UniqueDescriptorSetLayout p_descriptorSetLayout = p_logicalDevice->createDescriptorSetLayoutUnique(layoutCreateInfo);
 
     if (!p_descriptorSetLayout) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::DescriptorSetLayout");
+        LOG_THROW(PIPELINE, util::RichException<vk::DescriptorSetLayoutCreateInfo>, layoutCreateInfo, "Failed to create vk::DescriptorSetLayout");
     }
 
     return p_descriptorSetLayout;
@@ -209,7 +210,7 @@ quartz::rendering::Pipeline::createVulkanDescriptorPoolPtr(
     vk::UniqueDescriptorPool uniqueDescriptorPool = p_logicalDevice->createDescriptorPoolUnique(poolCreateInfo);
 
     if (!uniqueDescriptorPool) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::DescriptorPool");
+        LOG_THROW(PIPELINE, util::RichException<vk::DescriptorPoolCreateInfo>, poolCreateInfo, "Failed to create vk::DescriptorPool");
     }
 
     return uniqueDescriptorPool;
@@ -239,15 +240,15 @@ quartz::rendering::Pipeline::allocateVulkanDescriptorSets(
     std::vector<vk::DescriptorSet> descriptorSets = p_logicalDevice->allocateDescriptorSets(allocateInfo);
 
     if (descriptorSets.size() != descriptorSetLayouts.size()) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Allocated {} vk::DescriptorSet(s) instead of requested amount: {}", descriptorSets.size(), descriptorSetLayouts.size());
+        LOG_THROW(PIPELINE, util::RichException<vk::DescriptorSetAllocateInfo>, allocateInfo, "Allocated {} vk::DescriptorSet(s) instead of requested amount: {}", descriptorSets.size(), descriptorSetLayouts.size());
     } else if (descriptorSets.size() != maxNumFramesInFlight) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Allocated {} vk::DescriptorSet(s) count does not match the max number of frames in flight: {}", descriptorSets.size(), maxNumFramesInFlight);
+        LOG_THROW(PIPELINE, util::RichException<vk::DescriptorSetAllocateInfo>, allocateInfo, "Allocated {} vk::DescriptorSet(s) count does not match the max number of frames in flight: {}", descriptorSets.size(), maxNumFramesInFlight);
     }
     LOG_TRACE(PIPELINE, "Successfully allocated {} vk::DescriptorSet(s)", descriptorSets.size());
 
     for (uint32_t i = 0; i < descriptorSets.size(); ++i) {
         if (!descriptorSets[i]) {
-            LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to allocate vk::DescriptorSet {}", i);
+            LOG_THROW(PIPELINE, util::RichException<vk::DescriptorSetAllocateInfo>, allocateInfo, "Failed to allocate vk::DescriptorSet {}", i);
         }
         LOG_TRACE(PIPELINE, "Successfully allocated vk::DescriptorSet {}", i);
     }
@@ -512,7 +513,7 @@ quartz::rendering::Pipeline::createVulkanPipelineLayoutPtr(
     vk::UniquePipelineLayout p_pipelineLayout = p_logicalDevice->createPipelineLayoutUnique(pipelineLayoutCreateInfo);
 
     if (!p_pipelineLayout) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::PipelineLayout");
+        LOG_THROW(PIPELINE, util::RichException<vk::PipelineLayoutCreateInfo>, pipelineLayoutCreateInfo, "Failed to create vk::PipelineLayout");
     }
 
     return p_pipelineLayout;
@@ -683,7 +684,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     );
 
     if (graphicsPipelineCreationResult.result != vk::Result::eSuccess) {
-        LOG_THROW(PIPELINE, util::VulkanCreationFailedError, "Failed to create vk::Pipeline");
+        LOG_THROW(PIPELINE, util::RichException<vk::GraphicsPipelineCreateInfo>, graphicsPipelineCreateInfo, "Failed to create vk::Pipeline");
     }
 
     return std::move(graphicsPipelineCreationResult.value);
