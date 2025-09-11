@@ -71,6 +71,12 @@ We do not promote using `std::logic_error`, because it is functionally the same 
     - We don't want to catch by value because that will result in unnecessary copies and could result in slicing data
     - This will also allow us to modify the data within the object we are catching if we choose to rethrow it with more context
 
+### On `noexcept`
+
+Unless you have a *__really__*, *__very__* strong reason to do so, avoid using the `noexcept` specifier.
+Best case, this makes the move constructors and move assignments marginally faster.
+Worst case, you cause things to explode if an exception is ever thrown.
+
 ## Tests
 
 Make sure your additions are tested. There are examples of how to write unit tests and use the quartz testing framework.

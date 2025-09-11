@@ -113,7 +113,7 @@ void quartz::Application::run() {
      *    If all of the Scene's vulkan information is freed up before we return from this function, then we can have
      *    the SceneManager destruct normally and Vulkan won't care about destructing the Device first because there
      *    will be no resources allocated.
-    */
+     */
     m_renderingContext.finish();
 }
 
