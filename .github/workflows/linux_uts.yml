@@ -14,6 +14,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Do it all
-        run: mkdir .debug ; cd .debug ; cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON ; ninja ; ctest
+      - name: Clone subdirectories
+        run: git submodule update --init --recursive
+      - name: Make and CD into build directory
+        run: mkdir .debug ; cd .debug
+      - name: Run CMake
+        run: cd .debug ; cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON
+      - name: Run Ninja
+        run: cd .debug ; ninja
+      - name: Run unit tests
+        run: cd .debug ; ctest
 
