@@ -31,9 +31,6 @@ jobs:
           echo "populate private key with secret"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo ""
-          echo "ping google"
-          ping google.com
-          echo ""
           echo "keyscan google"
           ssh-keyscan google.com
           echo ""
