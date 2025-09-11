@@ -13,11 +13,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get SSH Keys
         run: |
+          pwd
+          whoami
+          mkdir ~/.ssh
+          ls ~
           touch ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.JADE_IP }}" >> ~/.ssh/known_hosts
       - name: SSH Into Jade
         run: |
+          pwd
+          whoami
+          ls ~
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/id_rsa
           pwd
