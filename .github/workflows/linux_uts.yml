@@ -3,7 +3,7 @@ name: Quartz Linux Unit Tests
 on:
   push:
     branches:
-      - "master"
+      - "ci_ssh"
 
 jobs:
   build:
