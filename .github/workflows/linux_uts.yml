@@ -1,0 +1,22 @@
+name: Quartz Linux Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make and CD into build directory
+        run: mkdir .debug ; cd .debug
+      - name: Run CMake
+        run: cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON
+      - name: Run Ninja
+        run: ninja
+      - name: Run unit tests
+        run: ctest
+
