@@ -22,7 +22,7 @@ jobs:
           echo "mkdir ~/.ssh"
           mkdir ~/.ssh
           echo ""
-          echo "ls ~"
+          echo "ls lash ~"
           ls ~
           echo ""
           echo "touch ~/.ssh/id_rsa"
@@ -30,6 +30,12 @@ jobs:
           echo ""
           echo "populate private key with secret"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo ""
+          echo "ping google"
+          ping google.com
+          echo ""
+          echo "keyscan google"
+          ssh-keyscan google.com
           echo ""
           echo "populate known hosts"
           ssh-keyscan -H "${{ secrets.JADE_IP }}" >> ~/.ssh/known_hosts
