@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get SSH Keys
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          touch ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.JADE_IP }}" >> ~/.ssh/known_hosts
       - name: SSH Into Jade
