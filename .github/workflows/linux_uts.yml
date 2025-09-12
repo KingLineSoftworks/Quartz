@@ -6,6 +6,7 @@ on:
       - "master"
 
 jobs:
+
   # ===========================================================================================
   # This is the variant which attempts to build and run tests on a github hosted runner
   #
@@ -58,3 +59,4 @@ jobs:
         run: sshpass -e ssh -vvv -tt ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
         env:
           SSHPASS: ${{ secrets.JADE_RUNNER_PASSWORD }}
+
