@@ -3,9 +3,19 @@ name: Quartz Linux Unit Tests
 on:
   push:
     branches:
-      - "kjk/ci_ssh"
+      - "master"
 
 jobs:
+  all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Print user"
+        run: whoami
+      - name: "Print directory"
+        run: pwd 
+      - name: "List contents"
+        run: ls -lash
 
   # ===========================================================================================
   # This is the variant which attempts to use ssh to get into jade for building and running
