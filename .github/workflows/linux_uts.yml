@@ -6,11 +6,31 @@ on:
       - "kjk/ci_ssh"
 
 jobs:
-  build:
+  ssh-build-test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+      - name: SSH Set up
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/private_key
+          echo "$PRIVATE_KEY" >> ~/.ssh/private_key
+          chmod 600 ~/.ssh/private_key
+          cat >>~/.ssh/config <<END
+          Host jade-runner
+            HostName $JADE_IP
+            User $JADE_USER
+            IdentityFile ~/.ssh/private_key
+            StrictHostKeyChecking no
+          END
+        env:
+          JADE_USER: ${{ secrets.JADE_RUNNER_USERNAME }}
+          JADE_IP: ${{ secrets.JADE_IP }}
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: SSH In
+        run: ssh jade-runner 'whoami ; pwd ; echo hello world'
+
       - name: Get SSH Keys
         run: |
           echo "working directory:"
