@@ -27,6 +27,7 @@ jobs:
           echo ""
           echo "create private key file"
           touch ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           echo ""
           echo "populate private key with secret"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
