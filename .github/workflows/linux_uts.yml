@@ -11,6 +11,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # ===========================================================================================
+      # This is the variant which attempts to use ssh to get into jade for building and running
+      # tests there
+      #
+      # This is not working because jade is not configured to accept ssh sessions from outside of
+      # the local network
+      # ===========================================================================================
       - name: Validate sshpass exists
         run: sshpass -h
       - name: Setup ~/.ssh directory
@@ -23,6 +31,4 @@ jobs:
         run: sshpass -e ssh -vvv -tt ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
         env:
           SSHPASS: ${{ secrets.JADE_RUNNER_PASSWORD }}
-      - name: Hello world
-        run: echo "Hello world"
 
