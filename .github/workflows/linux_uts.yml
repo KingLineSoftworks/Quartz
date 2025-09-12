@@ -20,7 +20,7 @@ jobs:
       - name: Populate known hosts file
         run: echo "${{ secrets.JADE_HOST_SIGNATURES }}" >> ~/.ssh/known_hosts
       - name: SSH With Password
-        run: sshpass -e ssh -vv -tt ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
+        run: sshpass -e ssh -vvv -tt ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
         env:
           SSHPASS: ${{ secrets.JADE_RUNNER_PASSWORD }}
       - name: Hello world
