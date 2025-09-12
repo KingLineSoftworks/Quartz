@@ -15,57 +15,57 @@ jobs:
         run: |
           echo "working directory:"
           pwd
-          echo ""
+          echo " "
           echo "user:"
           whoami
-          echo ""
+          echo " "
           echo "make ssh directory"
           mkdir ~/.ssh
-          echo ""
+          echo " "
           echo "home directory contents:"
-          ls ~
-          echo ""
+          ls -lash ~
+          echo " "
           echo "create private key file"
           touch ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          echo ""
+          echo " "
           echo "populate private key with secret"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo ""
+          echo " "
           echo "create known hosts file"
           touch ~/.ssh/known_hosts
-          echo ""
+          echo " "
           echo "populate known hosts"
           echo "${{ secrets.JADE_HOST_SIGNATURES }}" >> ~/.ssh/known_hosts
       - name: SSH Into Jade
         run: |
           echo "working directory:"
           pwd
-          echo ""
+          echo " "
           echo "user:"
           whoami
-          echo ""
+          echo " "
           echo "home directory contents:"
-          ls ~
-          echo ""
+          ls -lash ~
+          echo " "
           echo "starting ssh agent"
           eval $(ssh-agent -s)
-          echo ""
+          echo " "
           echo "adding private key to ssh agent"
           ssh-add ~/.ssh/id_rsa
-          echo ""
+          echo " "
           echo "working directory:"
           pwd
-          echo ""
+          echo " "
           echo "ssh directory contents:"
-          ls ~/.ssh
-          echo ""
+          ls -lash ~/.ssh
+          echo " "
           echo "sshing into jade"
           ssh -t -t "${{ secrets.JADE_RUNNER_USERNAME }}"@"${{ secrets.JADE_IP }}"
-          echo ""
+          echo " "
           echo "working directory:"
           pwd
-          echo ""
+          echo " "
           echo "user:"
           whoami
       - name: Hello world
