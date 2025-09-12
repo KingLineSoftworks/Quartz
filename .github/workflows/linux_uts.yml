@@ -6,19 +6,18 @@ on:
       - "kjk/ci_ssh"
 
 jobs:
+
+  # ===========================================================================================
+  # This is the variant which attempts to use ssh to get into jade for building and running
+  # tests there
+  #
+  # This is not working because jade is not configured to accept ssh sessions from outside of
+  # the local network
+  # ===========================================================================================
   ssh-build-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      # ===========================================================================================
-      # This is the variant which attempts to use ssh to get into jade for building and running
-      # tests there
-      #
-      # This is not working because jade is not configured to accept ssh sessions from outside of
-      # the local network
-      # ===========================================================================================
       - name: Validate sshpass exists
         run: sshpass -h
       - name: Setup ~/.ssh directory
