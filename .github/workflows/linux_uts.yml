@@ -6,7 +6,13 @@ on:
       - "master"
 
 jobs:
-  all:
+  # ===========================================================================================
+  # This is the variant which attempts to build and run tests on a github hosted runner
+  #
+  # This is not working because the github runners do not have x11 or wayland installed so we
+  # cannot actually do any testing there
+  # ===========================================================================================
+  github-build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
