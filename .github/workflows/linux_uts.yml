@@ -11,6 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Validate sshpass exists
+        run: sshpass -version
       - name: SSH With Password
         run: sshpass -p "${{ secrets.JADE_RUNNER_PASSWORD }}" "${{ secrets.JADE_RUNNER_USERNAME }}"@"${{ secrets.JADE_IP }}"
       - name: SSH Set up
