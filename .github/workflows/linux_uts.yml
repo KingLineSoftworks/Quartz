@@ -13,10 +13,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate sshpass exists
         run: sshpass -h
-      - name: SSH With Password
+      - name: Populate known hosts file
         run: |
-          sshpass -h
-          sshpass -e ssh -vv -tt -o 'StrictHostKeyChecking=no' ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
+          touch ~/.ssh/known_hosts
+          echo "${{ secrets.JADE_HOST_SIGNATURES }}" >> ~/.ssh/known_hosts
+      - name: SSH With Password
+        run: sshpass -e ssh -vv -tt ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
         env:
           SSHPASS: ${{ secrets.JADE_RUNNER_PASSWORD }}
       - name: SSH Set up
