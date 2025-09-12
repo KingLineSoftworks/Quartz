@@ -61,7 +61,7 @@ jobs:
           ls ~/.ssh
           echo ""
           echo "sshing into jade"
-          ssh -t -t "${{ secrets.JADE_RUNNER_USERNAME }}"."${{ secrets.JADE_IP }}"
+          ssh -t -t "${{ secrets.JADE_RUNNER_USERNAME }}"@"${{ secrets.JADE_IP }}"
           echo ""
           echo "working directory:"
           pwd
