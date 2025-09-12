@@ -19,7 +19,7 @@ jobs:
       - name: Debug Build CMake
         run: |
           cd .debug
-          cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON
+          cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True
       - name: Debug Build Ninja 
         run: |
           cd .debug
@@ -52,4 +52,3 @@ jobs:
         run: sshpass -e ssh -vvv -tt ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }} "whoami ; pwd"
         env:
           SSHPASS: ${{ secrets.JADE_RUNNER_PASSWORD }}
-
