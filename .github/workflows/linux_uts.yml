@@ -16,7 +16,7 @@ jobs:
       - name: SSH With Password
         run: |
           sshpass -h
-          sshpass -e ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }}
+          sshpass -e ssh -o 'StrictHostKeyChecking=no' ${{ secrets.JADE_RUNNER_USERNAME }}@${{ secrets.JADE_IP }}
         env:
           SSHPASS: ${{ secrets.JADE_RUNNER_PASSWORD }}
       - name: SSH Set up
