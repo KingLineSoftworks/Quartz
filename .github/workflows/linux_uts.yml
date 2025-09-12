@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ssh-key: ${{ secrets.QUARTZ_GITHUB_SSH_PRIVATE_KEY }}
           token: ${{ secrets.QUARTZ_PERSONAL_ACCESS_TOKEN }}
           submodules: recursive
       - name: "Print user"
