@@ -14,12 +14,20 @@ jobs:
           ssh-key: ${{ secrets.QUARTZ_GITHUB_SSH_PRIVATE_KEY }}
           token: ${{ secrets.QUARTZ_PERSONAL_ACCESS_TOKEN }}
           submodules: recursive
-      - name: "Print user"
-        run: whoami
-      - name: "Print directory"
-        run: pwd 
-      - name: "List contents"
-        run: ls -lash
+      - name: Setup Debug Build Dir
+        run: mkdir .debug
+      - name: Debug Build CMake
+        run: |
+          cd .debug
+          cmake .. -DCMAKE_BUILD_TYPE=Debug -DQUARTZ_COMPILE_UNIT_TESTS=True -DGLFW_BUILD_WAYLAND=OFF -DGLFW_BUILD_X11=ON
+      - name: Debug Build Ninja 
+        run: |
+          cd .debug
+          ninja
+      - name: Debug Build CTest
+        run: |
+          cd .debug
+          ctest
 
   # ===========================================================================================
   # This is the variant which attempts to use ssh to get into jade for building and running
