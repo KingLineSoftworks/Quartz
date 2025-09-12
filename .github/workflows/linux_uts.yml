@@ -35,7 +35,7 @@ jobs:
           touch ~/.ssh/known_hosts
           echo ""
           echo "populate known hosts"
-          "${{ secrets.JADE_HOST_SIGNATURES }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.JADE_HOST_SIGNATURES }}" >> ~/.ssh/known_hosts
       - name: SSH Into Jade
         run: |
           echo "working directory:"
