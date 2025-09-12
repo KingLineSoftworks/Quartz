@@ -12,11 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: SSH With Password
-        run: sshpass -p "$JADE_PASSWORD" $JADE_USER@$JADE_IP
-        env:
-          JADE_USER: ${{ secrets.JADE_RUNNER_USERNAME }}
-          JADE_IP: ${{ secrets.JADE_IP }}
-          JADE_PASSWORD: ${{ secrets.JADE_RUNNER_PASSWORD }}
+        run: sshpass -p "${{ secrets.JADE_RUNNER_PASSWORD }}" "${{ secrets.JADE_RUNNER_USERNAME }}"@"${{ secrets.JADE_IP }}"
       - name: SSH Set up
         run: |
           mkdir -p ~/.ssh
