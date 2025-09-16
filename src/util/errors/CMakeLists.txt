@@ -26,8 +26,18 @@ target_compile_definitions(
     ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
+# On mac we do not have access to std::stacktrace and std::source_location,
+# so we are going to provide our own versions instead
+set(STACKTRACE_LIBS "")
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    list(APPEND STACKTRACE_LIBS UTIL_SourceLocation)
+else ()
+    list(APPEND STACKTRACE_LIBS stdc++exp)
+endif ()
+
 target_link_libraries(
     UTIL_Errors
+
     PUBLIC
-    stdc++exp # need to set this for std::stacktrace
+    ${STACKTRACE_LIBS}
 )

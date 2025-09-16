@@ -1,10 +1,26 @@
 #pragma once
 
 #include <ostream>
-#include <source_location>
 #include <sstream>
-#include <stacktrace>
 #include <string>
+
+#include "util/platform.hpp"
+
+#ifdef ON_MAC
+
+#include "util/source_location/SourceLocation.hpp"
+
+namespace std {
+    using source_location = util::SourceLocation;
+    using stacktrace = util::SourceLocation;
+}
+
+#else
+
+#include <source_location>
+#include <stacktrace>
+
+#endif
 
 std::ostream& operator<<(std::ostream& os, const std::source_location& sourceLocation);
 

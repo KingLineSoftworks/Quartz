@@ -1,5 +1,4 @@
 #include <ostream>
-#include <source_location>
 
 #include "util/errors/RichException.hpp"
 
@@ -13,3 +12,4 @@ operator<<(
     os << sourceLocation.function_name();
     return os; 
 }
+
