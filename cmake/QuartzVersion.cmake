@@ -46,5 +46,6 @@ endfunction()
 # set_quartz_major_minor_patch_versions(0 2 10) # physics libarary fixes
 # set_quartz_major_minor_patch_versions(0 2 11) # scene libarary fixes
 # set_quartz_major_minor_patch_versions(0 2 12) # fixes for linux
-set_quartz_major_minor_patch_versions(0 2 13) # RichException implementation and usage
+# set_quartz_major_minor_patch_versions(0 2 13) # RichException implementation and usage
+set_quartz_major_minor_patch_versions(0 2 14) # Custom source_location and mocked stacktrace for Mac so we can still use rich exceptions
 

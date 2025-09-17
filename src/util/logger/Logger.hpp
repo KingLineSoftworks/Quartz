@@ -330,6 +330,24 @@ std::ostream& operator<<(std::ostream& os, const util::Logger::Level level);
 #define LOG_CRITICALthis(...) \
     util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__)
 
+#ifdef ON_MAC
+#define LOG_THROW(REGISTRATION_NAME, ERROR_TYPE, DATA, ...) \
+    util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__); \
+    throw ERROR_TYPE( \
+        fmt::format(__VA_ARGS__), \
+        DATA, \
+        std::source_location(__LINE__, 0, __FILE_NAME__, __PRETTY_FUNCTION__), \
+        std::stacktrace::current() \
+    )
+#define LOG_THROWthis(ERROR_TYPE, DATA, ...) \
+    util::Logger::critical(this->getLoggerRegistrationInfo().loggerName, __VA_ARGS__); \
+    throw ERROR_TYPE( \
+        fmt::format(__VA_ARGS__), \
+        DATA, \
+        std::source_location(__LINE__, 0, __FILE_NAME__, __PRETTY_FUNCTION__), \
+        std::stacktrace::current() \
+    )
+#else
 #define LOG_THROW(REGISTRATION_NAME, ERROR_TYPE, DATA, ...) \
     util::Logger::critical(quartz::loggers::REGISTRATION_NAME.loggerName, __VA_ARGS__); \
     throw ERROR_TYPE( \
@@ -346,6 +364,7 @@ std::ostream& operator<<(std::ostream& os, const util::Logger::Level level);
         std::source_location::current(), \
         std::stacktrace::current() \
     )
+#endif
 
 /**
  * @brief Log a scope change

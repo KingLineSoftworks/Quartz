@@ -1,11 +1,11 @@
 #include <ostream>
 
-#include "util/errors/RichException.hpp"
+#include "util/source_location/SourceLocation.hpp"
 
 std::ostream&
 operator<<(
     std::ostream& os,
-    const std::source_location& sourceLocation
+    const util::SourceLocation& sourceLocation
 ) {
     os << sourceLocation.file_name() << " ";
     os << "(line " << sourceLocation.line() << ") - ";
