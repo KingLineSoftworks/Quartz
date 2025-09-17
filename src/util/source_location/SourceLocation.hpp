@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <ostream>
 
 namespace util {
     class SourceLocation;
@@ -15,15 +16,27 @@ namespace util {
  */
 class util::SourceLocation {
 public:
-    static constexpr SourceLocation current() noexcept {
+    static inline constexpr SourceLocation current() noexcept {
         return util::SourceLocation();
     }
 
     constexpr SourceLocation() noexcept :
         m_line(0),
         m_column(0),
-        m_fileName("BoogerFile"),
-        m_functionName("FooberFunction")
+        m_fileName(""),
+        m_functionName("")
+    {}
+
+    constexpr SourceLocation(
+        const uint32_t line,
+        const uint32_t column,
+        const char* fileName,
+        const char* functionName
+    ) noexcept :
+        m_line(line),
+        m_column(column),
+        m_fileName(fileName),
+        m_functionName(functionName)
     {}
 
     constexpr uint32_t line() const noexcept { return m_line; };
@@ -38,3 +51,4 @@ private:
     const char* m_functionName;
 };
 
+std::ostream& operator<<(std::ostream& os, const util::SourceLocation& sourceLocation);

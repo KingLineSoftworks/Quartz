@@ -12,7 +12,7 @@
 
 namespace std {
     using source_location = util::SourceLocation;
-    using stacktrace = util::SourceLocation;
+    using stacktrace = util::SourceLocation; // Just for the ::current() function to use in logger
 }
 
 #else
@@ -20,9 +20,10 @@ namespace std {
 #include <source_location>
 #include <stacktrace>
 
+std::ostream& operator<<(std::ostream& os, const std::source_location& sourceLocation);
+
 #endif
 
-std::ostream& operator<<(std::ostream& os, const std::source_location& sourceLocation);
 
 namespace util {
     template <typename Data_t>
@@ -78,7 +79,11 @@ operator<<(
 ) {
     os << "What:\n  " << e.what() << "\n";
     os << "Where:\n  " << e.where() << "\n";
+#ifdef ON_MAC
+    os << "Trace:\n  " << "No stacktrace on mac" << "\n";
+#else
     os << "Trace:\n" << e.trace() << "\n";
+#endif
     return os;
 }
 
