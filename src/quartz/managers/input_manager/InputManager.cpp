@@ -79,9 +79,8 @@ quartz::managers::InputManager::collectInput() {
 
     glfwPollEvents();
 
-    bool keyDown_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
-    m_keyDown_q = keyDown_q && !m_keyDown_q;
-    m_keyDown_q = keyDown_q;
+    m_keyDown_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
+
     bool keyDown_esc = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_ESCAPE);
     m_keyImpact_esc = keyDown_esc && !m_keyDown_esc;
     m_keyDown_esc = keyDown_esc;
