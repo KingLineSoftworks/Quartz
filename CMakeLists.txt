@@ -1,6 +1,7 @@
 # ====================================================================
-# Quartz project and version
+# Quartz
 # ====================================================================
+
 set(PROJECT_NAME "Quartz")
 
 cmake_policy(SET CMP0042 NEW)
@@ -36,11 +37,8 @@ if(PROJECT_IS_TOP_LEVEL)
         message(STATUS "CMake binary directory does not contain compile_commands.json file. This is probably the first time running cmake")
     endif ()
 
-    list(
-        APPEND QUARTZ_COMPILE_DEFINITIONS
-        QUARTZ_IS_TOP_LEVEL
-        PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-    )
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_IS_TOP_LEVEL)
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 else()
     if(PROJECT_ROOT_DIR)
         message(STATUS "Quartz is not the top level project. PROJECT_ROOT_DIR is defined to ${PROJECT_ROOT_DIR}")
@@ -113,6 +111,7 @@ message(STATUS "Building for ${CMAKE_SYSTEM_NAME}")
 # ====================================================================
 # C++ 23 Support and compiler flags
 # ====================================================================
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSTIONS ON)
@@ -135,6 +134,7 @@ endforeach()
 # ====================================================================
 # Third party vendor libraries
 # ====================================================================
+
 set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
 
 # glfw
@@ -207,6 +207,16 @@ add_library(vulkan SHARED IMPORTED)
 set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION "${VULKAN_LIBRARIES}" INTERFACE_INCLUDE_DIRECTORIES "${VULKAN_INCLUDE_DIRS}")
 
 # ====================================================================
+# Determine whether or not we should enable debug and edit modes
+# ====================================================================
+
+option(QUARTZ_SCENE_DEBUG_MODE_ENABLED "Enable debug information within the scene" TRUE)
+message(STATUS "Quartz debug mode enabled: ${QUARTZ_SCENE_DEBUG_MODE_ENABLED}")
+if (QUARTZ_SCENE_DEBUG_MODE_ENABLED)
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_SCENE_DEBUG_MODE_ENABLED)
+endif ()
+
+# ====================================================================
 # Define preprocessor directives for the Quartz libraries
 #====================================================================
 
@@ -241,6 +251,7 @@ endforeach()
 # ====================================================================
 # Utility and Quartz libraries
 # ====================================================================
+
 set(QUARTZ_ROOT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 set(QUARTZ_INCLUDE_DIRS ${QUARTZ_ROOT_SOURCE_DIR})
 
@@ -290,28 +301,17 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 #====================================================================
 # The tests
 #====================================================================
+
 include(CTest)
 include(CreateUnitTest)
 include(CreateScratchExecutable)
+
 enable_testing()
+
 set(QUARTZ_TEST_DIR "${PROJECT_SOURCE_DIR}/test")
+
 if (QUARTZ_COMPILE_UNIT_TESTS)
     add_subdirectory("${QUARTZ_TEST_DIR}/unit")
     add_subdirectory("${QUARTZ_TEST_DIR}/scratch")
 endif()
 
-#====================================================================
-# The demo application
-# @brief This is currently commented out because we do not have a demo
-#    application within the Quartz repository. If you wish to see an
-#    up-to-date demo application, check out the PolePosition repo.
-# ====================================================================
-# set(DEMO_APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/demo_app")
-#
-# set(DEMO_APPLICATION_SOURCE_DIR "${DEMO_APPLICATION_ROOT_DIR}/demo_app")
-# if (QUARTZ_COMPILE_DEMO_APPLICATION)
-#     message(STATUS "Adding Quartz's demo application")
-#     add_subdirectory("${DEMO_APPLICATION_SOURCE_DIR}")
-# else()
-#     message(STATUS "Not adding Quart'z demo application")
-# endif()

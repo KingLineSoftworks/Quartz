@@ -56,5 +56,9 @@ private: // member variables
     const double m_targetTicksPerSecond;
 
     bool m_shouldQuit;
-    bool m_isPaused;
+    bool m_isPaused; /** @todo 2025/09/18 Get rid of this - this should be implemented in the client */
+
+    UNUSED bool m_sceneDebugMode;
+    UNUSED bool m_wireframeDoodadMode;
+    UNUSED bool m_wireframeColliderMode;
 };

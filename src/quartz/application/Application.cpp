@@ -37,7 +37,10 @@ quartz::Application::Application(
     m_sceneManager(quartz::managers::SceneManager::Client::getInstance(sceneParameters)),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
-    m_isPaused(false)
+    m_isPaused(false),
+    m_sceneDebugMode(false),
+    m_wireframeDoodadMode(false),
+    m_wireframeColliderMode(false)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -132,5 +135,15 @@ quartz::Application::processInput() {
         m_inputManager.setShouldCollectMouseInput(!m_isPaused);
         m_inputManager.setShouldCollectKeyInput(!m_isPaused);
     }
+
+#if QUARTZ_SCENE_DEBUG_MODE_ENABLED
+    /**
+     * @todo 2025/09/18 Check if we should toggle debug mode
+     *
+     * @todo 2025/09/18 If debug mode is enabled, check if we should toggle doodad wireframe mode
+     *
+     * @todo 2025/09/18 If debug mode is enabled, check if we should toggle collider wireframe mode
+     */
+#endif
 }
 
