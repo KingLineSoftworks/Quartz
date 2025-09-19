@@ -58,7 +58,7 @@ private: // member variables
     bool m_shouldQuit;
     bool m_isPaused; /** @todo 2025/09/18 Get rid of this - this should be implemented in the client */
 
-    UNUSED bool m_sceneDebugMode;
-    UNUSED bool m_wireframeDoodadMode;
-    UNUSED bool m_wireframeColliderMode;
+    bool m_sceneDebugMode;
+    bool m_wireframeDoodadMode;
+    bool m_wireframeColliderMode;
 };

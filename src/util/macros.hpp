@@ -130,8 +130,8 @@
  * @brief Make sure the scene debug mode definition is present for linting purposes
  */
 
-#ifndef QUARTZ_SCENE_DEBUG_MODE_ENABLED
-#define QUARTZ_SCENE_DEBUG_MODE_ENABLED false
+#ifndef QUARTZ_SCENE_DEBUG_MODE_ALLOWED
+#define QUARTZ_SCENE_DEBUG_MODE_ALLOWED false
 #endif
 
 /**

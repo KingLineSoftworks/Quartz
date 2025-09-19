@@ -136,7 +136,7 @@ quartz::Application::processInput() {
         m_inputManager.setShouldCollectKeyInput(!m_isPaused);
     }
 
-#if QUARTZ_SCENE_DEBUG_MODE_ENABLED
+#if QUARTZ_SCENE_DEBUG_MODE_ALLOWED
     if (
         m_inputManager.getKeyInfo_ctrl().down &&
         m_inputManager.getKeyInfo_shift().down &&
@@ -146,13 +146,29 @@ quartz::Application::processInput() {
         LOG_INFOthis("{} scene debug mode", (m_sceneDebugMode ? "Entering" : "Exiting"));
     }
 
-    /**
-     * @todo 2025/09/18 Check if we should toggle debug mode
-     *
-     * @todo 2025/09/18 If debug mode is enabled, check if we should toggle doodad wireframe mode
-     *
-     * @todo 2025/09/18 If debug mode is enabled, check if we should toggle collider wireframe mode
-     */
+    if (!m_sceneDebugMode) {
+        m_wireframeDoodadMode = false;
+        m_wireframeColliderMode = false;
+        return;
+    }
+
+    if (
+        m_inputManager.getKeyInfo_ctrl().down &&
+        m_inputManager.getKeyInfo_shift().down &&
+        m_inputManager.getKeyInfo_l().impacted
+    ) {
+        m_wireframeDoodadMode = !m_wireframeDoodadMode;
+        LOG_INFOthis("{} scene doodad wireframe mode", (m_wireframeDoodadMode ? "Entering" : "Exiting"));
+    }
+
+    if (
+        m_inputManager.getKeyInfo_ctrl().down &&
+        m_inputManager.getKeyInfo_shift().down &&
+        m_inputManager.getKeyInfo_p().impacted
+    ) {
+        m_wireframeColliderMode = !m_wireframeColliderMode;
+        LOG_INFOthis("{} collider wireframe mode", (m_wireframeColliderMode ? "Entering" : "Exiting"));
+    }
 #endif
 }
 

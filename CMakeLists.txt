@@ -210,12 +210,12 @@ set_target_properties(vulkan PROPERTIES IMPORTED_LOCATION "${VULKAN_LIBRARIES}" 
 # Determine whether or not we should enable debug and edit modes
 # ====================================================================
 
-option(QUARTZ_SCENE_DEBUG_MODE_ENABLED "Enable debug information within the scene" TRUE)
-message(STATUS "Quartz debug mode enabled: ${QUARTZ_SCENE_DEBUG_MODE_ENABLED}")
-if (QUARTZ_SCENE_DEBUG_MODE_ENABLED)
-    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_SCENE_DEBUG_MODE_ENABLED=true)
+option(QUARTZ_SCENE_DEBUG_MODE_ALLOWED "Allow the toggling of debug information within the scene" TRUE)
+message(STATUS "Quartz debug mode allowed: ${QUARTZ_SCENE_DEBUG_MODE_ALLOWED}")
+if (QUARTZ_SCENE_DEBUG_MODE_ALLOWED)
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_SCENE_DEBUG_MODE_ALLOWED=true)
 else ()
-    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_SCENE_DEBUG_MODE_ENABLED=false)
+    list(APPEND QUARTZ_COMPILE_DEFINITIONS QUARTZ_SCENE_DEBUG_MODE_ALLOWED=false)
 endif ()
 
 # ====================================================================
