@@ -124,9 +124,9 @@ void
 quartz::Application::processInput() {
     m_inputManager.collectInput();
 
-    m_shouldQuit = m_renderingContext.getRenderingWindow().shouldClose() || m_inputManager.getKeyDown_q();
+    m_shouldQuit = m_renderingContext.getRenderingWindow().shouldClose() || m_inputManager.getKeyInfo_q().down;
 
-    if (m_inputManager.getKeyImpact_esc()) {
+    if (m_inputManager.getKeyInfo_esc().impacted) {
         m_isPaused = !m_isPaused;
 
         LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));
@@ -137,6 +137,15 @@ quartz::Application::processInput() {
     }
 
 #if QUARTZ_SCENE_DEBUG_MODE_ENABLED
+    if (
+        m_inputManager.getKeyInfo_ctrl().down &&
+        m_inputManager.getKeyInfo_shift().down &&
+        m_inputManager.getKeyInfo_period().impacted
+    ) {
+        m_sceneDebugMode = !m_sceneDebugMode;
+        LOG_INFOthis("{} scene debug mode", (m_sceneDebugMode ? "Entering" : "Exiting"));
+    }
+
     /**
      * @todo 2025/09/18 Check if we should toggle debug mode
      *

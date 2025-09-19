@@ -127,6 +127,14 @@
 #endif
 
 /**
+ * @brief Make sure the scene debug mode definition is present for linting purposes
+ */
+
+#ifndef QUARTZ_SCENE_DEBUG_MODE_ENABLED
+#define QUARTZ_SCENE_DEBUG_MODE_ENABLED false
+#endif
+
+/**
  * @brief Macros determining the quanitity of things we can have in a scene. These
  * should be defined at compile time by cmake. If these aren't defined for us at
  * compile time then we should set these to values that should invoke errors
@@ -147,3 +155,4 @@
 #ifndef QUARTZ_MAX_NUMBER_SPOT_LIGHTS
 #define QUARTZ_MAX_NUMBER_SPOT_LIGHTS -1
 #endif
+
