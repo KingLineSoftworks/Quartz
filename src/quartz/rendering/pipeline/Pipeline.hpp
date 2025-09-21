@@ -90,7 +90,7 @@ public: // member functions
     void updateUniformBuffer(
         const uint32_t currentInFlightFrameIndex,
         const uint32_t uniformIndex,
-        void* p_dataToCopy
+        const void* p_dataToCopy
     );
 
 private: // static functions

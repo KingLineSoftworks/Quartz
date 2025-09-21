@@ -37,7 +37,10 @@ quartz::Application::Application(
     m_sceneManager(quartz::managers::SceneManager::Client::getInstance(sceneParameters)),
     m_targetTicksPerSecond(120.0),
     m_shouldQuit(false),
-    m_isPaused(false)
+    m_isPaused(false),
+    m_sceneDebugMode(false),
+    m_wireframeDoodadMode(false),
+    m_wireframeColliderMode(false)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -100,7 +103,7 @@ void quartz::Application::run() {
         double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
         currentScene.update(m_renderingContext.getRenderingWindow(), m_inputManager, totalElapsedTime, currentFrameTimeDelta, frameInterpolationFactor);
-        m_renderingContext.draw(currentScene);
+        m_renderingContext.draw(currentScene, m_wireframeDoodadMode, m_wireframeColliderMode);
     }
 
     LOG_INFOthis("Unloading scene");
@@ -121,9 +124,9 @@ void
 quartz::Application::processInput() {
     m_inputManager.collectInput();
 
-    m_shouldQuit = m_renderingContext.getRenderingWindow().shouldClose() || m_inputManager.getKeyDown_q();
+    m_shouldQuit = m_renderingContext.getRenderingWindow().shouldClose() || m_inputManager.getKeyInfo_q().down;
 
-    if (m_inputManager.getKeyImpact_esc()) {
+    if (m_inputManager.getKeyInfo_esc().impacted) {
         m_isPaused = !m_isPaused;
 
         LOG_DEBUGthis("{}ausing", (m_isPaused ? "P" : "Unp"));
@@ -132,5 +135,40 @@ quartz::Application::processInput() {
         m_inputManager.setShouldCollectMouseInput(!m_isPaused);
         m_inputManager.setShouldCollectKeyInput(!m_isPaused);
     }
+
+#if QUARTZ_SCENE_DEBUG_MODE_ALLOWED
+    const bool super = m_inputManager.getKeyInfo_ctrl().down && m_inputManager.getKeyInfo_shift().down;
+    const bool shouldToggleSceneDebugMode = super && m_inputManager.getKeyInfo_period().impacted;
+    const bool shouldToggleWireframeDoodadMode = super && m_inputManager.getKeyInfo_l().impacted;
+    const bool shouldToggleWireframeColliderMode = super && m_inputManager.getKeyInfo_p().impacted;
+    determineSceneDebugMode(shouldToggleSceneDebugMode, shouldToggleWireframeDoodadMode, shouldToggleWireframeColliderMode);
+#endif
 }
 
+void
+quartz::Application::determineSceneDebugMode(
+    const bool shouldToggleSceneDebugMode,
+    const bool shouldToggleWireframeDoodadMode,
+    const bool shouldToggleWireframeColliderMode
+) {
+    if (shouldToggleSceneDebugMode) {
+        m_sceneDebugMode = !m_sceneDebugMode;
+        LOG_INFOthis("{} scene debug mode", (m_sceneDebugMode ? "Entering" : "Exiting"));
+    }
+
+    if (!m_sceneDebugMode) {
+        m_wireframeDoodadMode = false;
+        m_wireframeColliderMode = false;
+        return;
+    }
+
+    if (shouldToggleWireframeDoodadMode) {
+        m_wireframeDoodadMode = !m_wireframeDoodadMode;
+        LOG_INFOthis("{} scene doodad wireframe mode", (m_wireframeDoodadMode ? "Entering" : "Exiting"));
+    }
+
+    if (shouldToggleWireframeColliderMode) {
+        m_wireframeColliderMode = !m_wireframeColliderMode;
+        LOG_INFOthis("{} collider wireframe mode", (m_wireframeColliderMode ? "Entering" : "Exiting"));
+    }
+}

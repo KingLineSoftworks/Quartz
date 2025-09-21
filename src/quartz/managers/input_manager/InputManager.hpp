@@ -23,6 +23,12 @@ namespace unit_test {
 
 class quartz::managers::InputManager {
 public: // classes
+    struct KeyPressInfo {
+        bool down;
+        bool impacted;
+        bool released;
+    };
+
     class Client {
     public: // member functions
         Client() = delete;
@@ -44,17 +50,20 @@ public: // member functions
 
     void collectInput();
 
-    bool getKeyDown_q() const { return m_keyDown_q; }
-    bool getKeyImpact_q() const { return m_keyImpact_q; }
-    bool getKeyDown_esc() const { return m_keyDown_esc; }
-    bool getKeyImpact_esc() const { return m_keyImpact_esc; }
+    const KeyPressInfo& getKeyInfo_a() const { return m_a; }
+    const KeyPressInfo& getKeyInfo_d() const { return m_d; }
+    const KeyPressInfo& getKeyInfo_l() const { return m_l; }
+    const KeyPressInfo& getKeyInfo_p() const { return m_p; }
+    const KeyPressInfo& getKeyInfo_q() const { return m_q; }
+    const KeyPressInfo& getKeyInfo_s() const { return m_s; }
+    const KeyPressInfo& getKeyInfo_w() const { return m_w; }
 
-    bool getKeyDown_w() const { return m_keyDown_w; }
-    bool getKeyDown_a() const { return m_keyDown_a; }
-    bool getKeyDown_s() const { return m_keyDown_s; }
-    bool getKeyDown_d() const { return m_keyDown_d; }
-    bool getKeyDown_space() const { return m_keyDown_space; }
-    bool getKeyDown_shift() const { return m_keyDown_shift; }
+    const KeyPressInfo& getKeyInfo_esc() const { return m_esc; }
+    const KeyPressInfo& getKeyInfo_shift() const { return m_shift; }
+    const KeyPressInfo& getKeyInfo_ctrl() const { return m_ctrl; }
+    const KeyPressInfo& getKeyInfo_space() const { return m_space; }
+
+    const KeyPressInfo& getKeyInfo_period() const { return m_period; }
 
     float getMousePosition_x() const { return m_mousePosition_x; }
     float getMousePosition_y() const { return m_mousePosition_y; }
@@ -80,6 +89,7 @@ public: // static functions
     );
 
 private: // member functions
+    KeyPressInfo  getKeyPressInfo(const bool currentDown, const int glfwKey);
     static InputManager& getInstance(const std::shared_ptr<GLFWwindow>& p_glfwWindow);
 
 private: // member functions
@@ -96,17 +106,20 @@ private: // member variables
 
     bool m_shouldCollectKeyInput;
 
-    bool m_keyDown_q;
-    bool m_keyImpact_q;
-    bool m_keyDown_esc;
-    bool m_keyImpact_esc;
+    KeyPressInfo m_a;
+    KeyPressInfo m_d;
+    KeyPressInfo m_l;
+    KeyPressInfo m_p;
+    KeyPressInfo m_q;
+    KeyPressInfo m_s;
+    KeyPressInfo m_w;
 
-    bool m_keyDown_w;
-    bool m_keyDown_a;
-    bool m_keyDown_s;
-    bool m_keyDown_d;
-    bool m_keyDown_space;
-    bool m_keyDown_shift;
+    KeyPressInfo m_esc;
+    KeyPressInfo m_shift;
+    KeyPressInfo m_ctrl;
+    KeyPressInfo m_space;
+
+    KeyPressInfo m_period;
 
     float m_mousePosition_x;
     float m_mousePosition_y;

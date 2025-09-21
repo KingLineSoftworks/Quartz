@@ -15,17 +15,21 @@ quartz::managers::InputManager::InputManager(
 
     m_shouldCollectKeyInput(true),
 
-    m_keyDown_q(false),
-    m_keyImpact_q(false),
-    m_keyDown_esc(false),
-    m_keyImpact_esc(false),
+    m_a(false, false, false),
+    m_d(false, false, false),
+    m_l(false, false, false),
+    m_p(false, false, false),
+    m_q(false, false, false),
+    m_s(false, false, false),
+    m_w(false, false, false),
 
-    m_keyDown_w(false),
-    m_keyDown_a(false),
-    m_keyDown_s(false),
-    m_keyDown_d(false),
-    m_keyDown_space(false),
-    m_keyDown_shift(false),
+    m_esc(false, false, false),
+    m_shift(false, false, false),
+    m_ctrl(false, false, false),
+    m_space(false, false, false),
+
+    m_period(false, false, false),
+
 
     m_mousePosition_x(0.0f),
     m_mousePosition_y(0.0f),
@@ -48,17 +52,20 @@ quartz::managers::InputManager::InputManager(
 
     m_shouldCollectKeyInput(other.m_shouldCollectKeyInput),
 
-    m_keyDown_q(other.m_keyDown_q),
-    m_keyImpact_q(other.m_keyImpact_q),
-    m_keyDown_esc(other.m_keyDown_esc),
-    m_keyImpact_esc(other.m_keyImpact_esc),
+    m_a(other.m_a),
+    m_d(other.m_d),
+    m_l(other.m_l),
+    m_p(other.m_p),
+    m_q(other.m_q),
+    m_s(other.m_s),
+    m_w(other.m_w),
 
-    m_keyDown_w(other.m_keyDown_w),
-    m_keyDown_a(other.m_keyDown_a),
-    m_keyDown_s(other.m_keyDown_s),
-    m_keyDown_d(other.m_keyDown_d),
-    m_keyDown_space(other.m_keyDown_space),
-    m_keyDown_shift(other.m_keyDown_shift),
+    m_esc(other.m_esc),
+    m_shift(other.m_shift),
+    m_ctrl(other.m_ctrl),
+    m_space(other.m_space),
+
+    m_period(other.m_period),
 
     m_mousePosition_x(other.m_mousePosition_x),
     m_mousePosition_y(other.m_mousePosition_y),
@@ -79,23 +86,25 @@ quartz::managers::InputManager::collectInput() {
 
     glfwPollEvents();
 
-    bool keyDown_q = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_Q);
-    m_keyDown_q = keyDown_q && !m_keyDown_q;
-    m_keyDown_q = keyDown_q;
-    bool keyDown_esc = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_ESCAPE);
-    m_keyImpact_esc = keyDown_esc && !m_keyDown_esc;
-    m_keyDown_esc = keyDown_esc;
+    m_esc = getKeyPressInfo(m_w.down, GLFW_KEY_ESCAPE);
+    m_q = getKeyPressInfo(m_q.down, GLFW_KEY_Q);
 
     if (!m_shouldCollectKeyInput) {
         return;
     }
 
-    m_keyDown_w = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_W);
-    m_keyDown_a = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_A);
-    m_keyDown_s = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_S);
-    m_keyDown_d = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_D);
-    m_keyDown_space = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_SPACE);
-    m_keyDown_shift = glfwGetKey(mp_glfwWindow.get(), GLFW_KEY_LEFT_SHIFT);
+    m_a = getKeyPressInfo(m_a.down, GLFW_KEY_A);
+    m_d = getKeyPressInfo(m_d.down, GLFW_KEY_D);
+    m_l = getKeyPressInfo(m_l.down, GLFW_KEY_L);
+    m_p = getKeyPressInfo(m_p.down, GLFW_KEY_P);
+    m_s = getKeyPressInfo(m_s.down, GLFW_KEY_S);
+    m_w = getKeyPressInfo(m_w.down, GLFW_KEY_W);
+
+    m_shift = getKeyPressInfo(m_shift.down, GLFW_KEY_LEFT_SHIFT);
+    m_ctrl = getKeyPressInfo(m_ctrl.down, GLFW_KEY_LEFT_CONTROL);
+    m_space = getKeyPressInfo(m_space.down, GLFW_KEY_SPACE);
+
+    m_period = getKeyPressInfo(m_period.down, GLFW_KEY_PERIOD);
 }
 
 void
@@ -111,6 +120,18 @@ quartz::managers::InputManager::setShouldCollectKeyInput(const bool shouldCollec
     m_shouldCollectKeyInput = shouldCollect;
 
     LOG_DEBUGthis("{} mouse input", (m_shouldCollectKeyInput ? "Enabling" : "Disabling"));
+}
+
+quartz::managers::InputManager::KeyPressInfo
+quartz::managers::InputManager::getKeyPressInfo(
+    const bool currentDown,
+    const int glfwKey
+) {
+    const bool keyDown = glfwGetKey(mp_glfwWindow.get(), glfwKey);
+    const bool keyImpacted = keyDown && !currentDown;
+    const bool keyReleased = !keyDown && currentDown;
+
+    return quartz::managers::InputManager::KeyPressInfo(keyDown, keyImpacted, keyReleased);
 }
 
 quartz::managers::InputManager&

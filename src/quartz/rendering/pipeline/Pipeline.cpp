@@ -925,7 +925,7 @@ void
 quartz::rendering::Pipeline::updateUniformBuffer(
     const uint32_t currentInFlightFrameIndex,
     const uint32_t uniformIndex,
-    void* p_dataToCopy
+    const void* p_dataToCopy
 ) {
     const quartz::rendering::UniformBufferInfo& uniformBufferInfo = m_uniformBufferInfos[uniformIndex];
 
