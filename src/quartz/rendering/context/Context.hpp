@@ -44,7 +44,11 @@ public: // member functions
 
     void loadScene(const quartz::scene::Scene& scene);
 
-    void draw(const quartz::scene::Scene& scene);
+    void draw(
+        const quartz::scene::Scene& scene,
+        const bool wireframeDoodadMode,
+        const bool wireframeColliderMode
+    );
     void finish();
 
 private: // static functions
@@ -63,6 +67,16 @@ private: // static functions
 
 private: // member functions
     void recreateSwapchain();
+    void updateSkyBoxPipeline(
+        const quartz::scene::Scene& scene,
+        quartz::scene::Camera::UniformBufferObject& cameraUBO
+    );
+    void updateDoodadPipeline(
+        const quartz::scene::Scene& scene,
+        quartz::scene::Camera::UniformBufferObject& cameraUBO
+    );
+    void recordSkyBoxPipeline(const quartz::scene::Scene& scene);
+    void recordDoodadPipeline(const quartz::scene::Scene& scene);
 
 private: // member variables
     const uint32_t m_maxNumFramesInFlight;

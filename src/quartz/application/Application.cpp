@@ -103,7 +103,7 @@ void quartz::Application::run() {
         double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
         currentScene.update(m_renderingContext.getRenderingWindow(), m_inputManager, totalElapsedTime, currentFrameTimeDelta, frameInterpolationFactor);
-        m_renderingContext.draw(currentScene);
+        m_renderingContext.draw(currentScene, m_wireframeDoodadMode, m_wireframeColliderMode);
     }
 
     LOG_INFOthis("Unloading scene");
