@@ -137,11 +137,21 @@ quartz::Application::processInput() {
     }
 
 #if QUARTZ_SCENE_DEBUG_MODE_ALLOWED
-    if (
-        m_inputManager.getKeyInfo_ctrl().down &&
-        m_inputManager.getKeyInfo_shift().down &&
-        m_inputManager.getKeyInfo_period().impacted
-    ) {
+    const bool super = m_inputManager.getKeyInfo_ctrl().down && m_inputManager.getKeyInfo_shift().down;
+    const bool shouldToggleSceneDebugMode = super && m_inputManager.getKeyInfo_period().impacted;
+    const bool shouldToggleWireframeDoodadMode = super && m_inputManager.getKeyInfo_l().impacted;
+    const bool shouldToggleWireframeColliderMode = super && m_inputManager.getKeyInfo_p().impacted;
+    determineSceneDebugMode(shouldToggleSceneDebugMode, shouldToggleWireframeDoodadMode, shouldToggleWireframeColliderMode);
+#endif
+}
+
+void
+quartz::Application::determineSceneDebugMode(
+    const bool shouldToggleSceneDebugMode,
+    const bool shouldToggleWireframeDoodadMode,
+    const bool shouldToggleWireframeColliderMode
+) {
+    if (shouldToggleSceneDebugMode) {
         m_sceneDebugMode = !m_sceneDebugMode;
         LOG_INFOthis("{} scene debug mode", (m_sceneDebugMode ? "Entering" : "Exiting"));
     }
@@ -152,23 +162,13 @@ quartz::Application::processInput() {
         return;
     }
 
-    if (
-        m_inputManager.getKeyInfo_ctrl().down &&
-        m_inputManager.getKeyInfo_shift().down &&
-        m_inputManager.getKeyInfo_l().impacted
-    ) {
+    if (shouldToggleWireframeDoodadMode) {
         m_wireframeDoodadMode = !m_wireframeDoodadMode;
         LOG_INFOthis("{} scene doodad wireframe mode", (m_wireframeDoodadMode ? "Entering" : "Exiting"));
     }
 
-    if (
-        m_inputManager.getKeyInfo_ctrl().down &&
-        m_inputManager.getKeyInfo_shift().down &&
-        m_inputManager.getKeyInfo_p().impacted
-    ) {
+    if (shouldToggleWireframeColliderMode) {
         m_wireframeColliderMode = !m_wireframeColliderMode;
         LOG_INFOthis("{} collider wireframe mode", (m_wireframeColliderMode ? "Entering" : "Exiting"));
     }
-#endif
 }
-

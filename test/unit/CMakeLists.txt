@@ -22,6 +22,8 @@ add_subdirectory("util/logger")
 # Quartz unit tests
 #====================================================================
 
+add_subdirectory("quartz/application")
+
 add_subdirectory("quartz/physics/collider")
 add_subdirectory("quartz/physics/field")
 add_subdirectory("quartz/physics/rigid_body")

@@ -11,8 +11,14 @@
 #include "quartz/scene/scene/Scene.hpp"
 
 namespace quartz {
-    class Application;
+
+class Application;
+
+namespace unit_test {
+    class ApplicationUnitTestClient;
 }
+
+} // namespace Quartz
 
 class quartz::Application {
 public: // member functions
@@ -35,10 +41,19 @@ public: // member functions
 
     USE_LOGGER(APPLICATION);
 
+    bool getSceneDebugMode() const { return m_sceneDebugMode; }
+    bool getWireframeDoodadMode() const { return m_wireframeDoodadMode; }
+    bool getWireframeColliderMode() const { return m_wireframeColliderMode; }
+
     void run();
 
 private: // member functions
     void processInput();
+    void determineSceneDebugMode(
+        const bool shouldToggleSceneDebugMode,
+        const bool shouldToggleWireframeDoodadMode,
+        const bool shouldToggleWireframeColliderMode
+    );
 
 private: // static functions
 
@@ -61,4 +76,8 @@ private: // member variables
     bool m_sceneDebugMode;
     bool m_wireframeDoodadMode;
     bool m_wireframeColliderMode;
+
+private: // friends
+    friend class quartz::unit_test::ApplicationUnitTestClient;
 };
+
