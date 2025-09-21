@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <string>
 
 #include "math/transform/Mat4.hpp"
@@ -295,6 +296,8 @@ quartz::rendering::Context::draw(
     UNUSED const bool wireframeDoodadMode,
     UNUSED const bool wireframeColliderMode
 ) {
+    // set up
+
     m_renderingSwapchain.waitForInFlightFence(
         m_renderingDevice,
         m_currentInFlightFrameIndex
@@ -312,71 +315,21 @@ quartz::rendering::Context::draw(
 
     quartz::scene::Camera::UniformBufferObject cameraUBO(scene.getCamera());
 
-    // update skybox pipeline //
-    
-    updateSkyBoxPipeline(scene, cameraUBO);
-
-    // update doodad drawing pipeline //
-
+    // update pipelines
+    updateSkyBoxPipeline(cameraUBO);
     updateDoodadPipeline(scene, cameraUBO);
 
-    // reset //
+    // reset
+    resetSwapchain(availableSwapchainImageIndex);
 
-    m_renderingSwapchain.resetInFlightFence(
-        m_renderingDevice,
-        m_currentInFlightFrameIndex
-    );
+    // record pipelines
+    recordSkyBoxPipeline(scene);
+    recordDoodadPipeline(scene);
 
-    m_renderingSwapchain.resetAndBeginDrawingCommandBuffer(
-        m_renderingWindow,
-        m_renderingRenderPass,
-        m_currentInFlightFrameIndex,
-        availableSwapchainImageIndex
-    );
+    // submit
+    submitImage(availableSwapchainImageIndex);
 
-    // skybox pipeline //
-
-    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
-        m_renderingWindow,
-        m_skyBoxRenderingPipeline,
-        m_currentInFlightFrameIndex
-    );
-
-    m_renderingSwapchain.recordSkyBoxToDrawingCommandBuffer(
-        m_skyBoxRenderingPipeline,
-        scene.getSkyBox(),
-        m_currentInFlightFrameIndex
-    );
-
-    // doodad drawing pipeline //
-
-    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
-        m_renderingWindow,
-        m_doodadRenderingPipeline,
-        m_currentInFlightFrameIndex
-    );
-
-    for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
-        m_renderingSwapchain.recordDoodadToDrawingCommandBuffer(
-            m_renderingDevice,
-            m_doodadRenderingPipeline,
-            doodad,
-            m_currentInFlightFrameIndex
-        );
-    }
-
-    // submit //
-
-    m_renderingSwapchain.endAndSubmitDrawingCommandBuffer(
-        m_renderingDevice,
-        m_currentInFlightFrameIndex
-    );
-
-    m_renderingSwapchain.presentImage(
-        m_renderingDevice,
-        m_currentInFlightFrameIndex,
-        availableSwapchainImageIndex
-    );
+    // housekeeping
 
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
         recreateSwapchain();
@@ -422,8 +375,7 @@ quartz::rendering::Context::recreateSwapchain() {
 
 void
 quartz::rendering::Context::updateSkyBoxPipeline(
-    UNUSED const quartz::scene::Scene& scene,
-    quartz::scene::Camera::UniformBufferObject& cameraUBO
+    const quartz::scene::Camera::UniformBufferObject& cameraUBO
 ) {
     m_skyBoxRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
 }
@@ -431,7 +383,7 @@ quartz::rendering::Context::updateSkyBoxPipeline(
 void
 quartz::rendering::Context::updateDoodadPipeline(
     const quartz::scene::Scene& scene,
-    quartz::scene::Camera::UniformBufferObject& cameraUBO
+    const quartz::scene::Camera::UniformBufferObject& cameraUBO
 ) {
     m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
 
@@ -468,17 +420,73 @@ quartz::rendering::Context::updateDoodadPipeline(
 }
 
 void
-quartz::rendering::Context::recordSkyBoxPipeline(
-    UNUSED const quartz::scene::Scene& scene
+quartz::rendering::Context::resetSwapchain(
+    const uint32_t availableSwapchainImageIndex
 ) {
+    m_renderingSwapchain.resetInFlightFence(
+        m_renderingDevice,
+        m_currentInFlightFrameIndex
+    );
 
+    m_renderingSwapchain.resetAndBeginDrawingCommandBuffer(
+        m_renderingWindow,
+        m_renderingRenderPass,
+        m_currentInFlightFrameIndex,
+        availableSwapchainImageIndex
+    );
+}
+
+void
+quartz::rendering::Context::recordSkyBoxPipeline(
+    const quartz::scene::Scene& scene
+) {
+    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
+        m_renderingWindow,
+        m_skyBoxRenderingPipeline,
+        m_currentInFlightFrameIndex
+    );
+
+    m_renderingSwapchain.recordSkyBoxToDrawingCommandBuffer(
+        m_skyBoxRenderingPipeline,
+        scene.getSkyBox(),
+        m_currentInFlightFrameIndex
+    );
 }
 
 void
 quartz::rendering::Context::recordDoodadPipeline(
-    UNUSED const quartz::scene::Scene& scene
+    const quartz::scene::Scene& scene
 ) {
+    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
+        m_renderingWindow,
+        m_doodadRenderingPipeline,
+        m_currentInFlightFrameIndex
+    );
 
+    for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
+        m_renderingSwapchain.recordDoodadToDrawingCommandBuffer(
+            m_renderingDevice,
+            m_doodadRenderingPipeline,
+            doodad,
+            m_currentInFlightFrameIndex
+        );
+    }
+}
+
+void
+quartz::rendering::Context::submitImage(
+    const uint32_t availableSwapchainImageIndex
+) {
+    m_renderingSwapchain.endAndSubmitDrawingCommandBuffer(
+        m_renderingDevice,
+        m_currentInFlightFrameIndex
+    );
+
+    m_renderingSwapchain.presentImage(
+        m_renderingDevice,
+        m_currentInFlightFrameIndex,
+        availableSwapchainImageIndex
+    );
 }
 
 void

@@ -67,16 +67,16 @@ private: // static functions
 
 private: // member functions
     void recreateSwapchain();
-    void updateSkyBoxPipeline(
-        const quartz::scene::Scene& scene,
-        quartz::scene::Camera::UniformBufferObject& cameraUBO
-    );
+    void waitForImage();
+    void updateSkyBoxPipeline( const quartz::scene::Camera::UniformBufferObject& cameraUBO);
     void updateDoodadPipeline(
         const quartz::scene::Scene& scene,
-        quartz::scene::Camera::UniformBufferObject& cameraUBO
+        const quartz::scene::Camera::UniformBufferObject& cameraUBO
     );
+    void resetSwapchain(const uint32_t availableSwapchainImageIndex);
     void recordSkyBoxPipeline(const quartz::scene::Scene& scene);
     void recordDoodadPipeline(const quartz::scene::Scene& scene);
+    void submitImage(const uint32_t availableSwapchainImageIndex);
 
 private: // member variables
     const uint32_t m_maxNumFramesInFlight;
