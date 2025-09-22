@@ -6,6 +6,7 @@
 #include <glm/mat4x4.hpp>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/LocallyMappedBuffer.hpp"
@@ -42,6 +43,7 @@ public: // member functions
         const uint32_t maxNumFramesInFlight,
         const vk::VertexInputBindingDescription& vertexInputBindingDescription,
         const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
+        const vk::PolygonMode polygonMode,
         const vk::CullModeFlags cullModeFlags,
         const bool shouldDepthTest,
         const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
@@ -75,6 +77,8 @@ public: // member functions
         const std::vector<std::shared_ptr<quartz::rendering::Texture>>& texturePtrs
     );
 
+    void setPolygonMode(const vk::PolygonMode polygonMode) { m_polygonMode = polygonMode; }
+
     USE_LOGGER(PIPELINE);
 
     const std::vector<quartz::rendering::PushConstantInfo>& getPushConstantInfos() const { return m_pushConstantInfos; }
@@ -83,6 +87,9 @@ public: // member functions
 
     const std::vector<vk::Viewport>& getVulkanViewports() const { return m_vulkanViewports; }
     const std::vector<vk::Rect2D>& getVulkanScissorRectangles() const { return m_vulkanScissorRectangles; }
+
+    vk::PolygonMode getPolygonMode() const { return m_polygonMode; }
+
     const std::vector<vk::DescriptorSet>& getVulkanDescriptorSets() const { return m_vulkanDescriptorSets; }
     const vk::UniquePipelineLayout& getVulkanPipelineLayoutPtr() const { return mp_vulkanPipelineLayout; }
     const vk::UniquePipeline& getVulkanGraphicsPipelinePtr() const { return mp_vulkanGraphicsPipeline; }
@@ -160,6 +167,7 @@ private: // static functions
         const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
         const std::vector<vk::Viewport> viewports,
         const std::vector<vk::Rect2D> scissorRectangles,
+        const vk::PolygonMode polygonMode,
         const vk::CullModeFlags cullModeFlags,
         const bool shouldDepthTest,
         const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -175,6 +183,7 @@ private: // member variables
     std::vector<vk::VertexInputAttributeDescription> m_vulkanVertexInputAttributeDescriptions;
     std::vector<vk::Viewport> m_vulkanViewports;
     std::vector<vk::Rect2D> m_vulkanScissorRectangles;
+    vk::PolygonMode m_polygonMode;
     vk::CullModeFlags m_vulkanCullModeFlags;
     bool m_shouldDepthTest;
     std::vector<vk::PipelineColorBlendAttachmentState> m_vulkanColorBlendAttachmentStates;

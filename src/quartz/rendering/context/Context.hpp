@@ -66,7 +66,10 @@ private: // static functions
     );
 
 private: // member functions
-    void recreateSwapchain();
+    void recreateSwapchain(
+        const bool wireframeDoodadMode,
+        const bool wireframeColliderMode
+    );
     void waitForImage();
     void updateSkyBoxPipeline( const quartz::scene::Camera::UniformBufferObject& cameraUBO);
     void updateDoodadPipeline(

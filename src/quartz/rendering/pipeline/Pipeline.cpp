@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 #include "util/macros.hpp"
 #include "util/errors/RichException.hpp"
@@ -526,6 +527,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
     const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions,
     const std::vector<vk::Viewport> viewports,
     const std::vector<vk::Rect2D> scissorRectangles,
+    const vk::PolygonMode polygonMode,
     const vk::CullModeFlags cullModeFlags,
     const bool shouldDepthTest,
     const std::vector<vk::PipelineColorBlendAttachmentState> colorBlendAttachmentStates,
@@ -598,7 +600,7 @@ quartz::rendering::Pipeline::createVulkanGraphicsPipelinePtr(
         {},
         false,
         false,
-        vk::PolygonMode::eFill,
+        polygonMode,
         cullModeFlags,
         vk::FrontFace::eCounterClockwise,
         false,
@@ -699,6 +701,7 @@ quartz::rendering::Pipeline::Pipeline(
     const uint32_t maxNumFramesInFlight,
     const vk::VertexInputBindingDescription& vertexInputBindingDescription,
     const std::vector<vk::VertexInputAttributeDescription>& vertexInputAttributeDescriptions,
+    const vk::PolygonMode polygonMode,
     const vk::CullModeFlags cullModeFlags,
     const bool shouldDepthTest,
     const std::vector<quartz::rendering::PushConstantInfo>& pushConstantInfos,
@@ -725,6 +728,7 @@ quartz::rendering::Pipeline::Pipeline(
             renderingWindow.getVulkanExtent()
         )
     }),
+    m_polygonMode(polygonMode),
     m_vulkanCullModeFlags(cullModeFlags),
     m_shouldDepthTest(shouldDepthTest),
     m_vulkanColorBlendAttachmentStates({
@@ -813,6 +817,7 @@ quartz::rendering::Pipeline::Pipeline(
             m_vulkanVertexInputAttributeDescriptions,
             m_vulkanViewports,
             m_vulkanScissorRectangles,
+            m_polygonMode,
             m_vulkanCullModeFlags,
             m_shouldDepthTest,
             m_vulkanColorBlendAttachmentStates,
@@ -857,6 +862,7 @@ quartz::rendering::Pipeline::recreate(
         m_vulkanVertexInputAttributeDescriptions,
         m_vulkanViewports,
         m_vulkanScissorRectangles,
+        m_polygonMode,
         m_vulkanCullModeFlags,
         m_shouldDepthTest,
         m_vulkanColorBlendAttachmentStates,

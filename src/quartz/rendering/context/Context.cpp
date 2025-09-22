@@ -1,8 +1,12 @@
 #include <cstdint>
 #include <string>
 
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
+
 #include "math/transform/Mat4.hpp"
 
+#include "util/logger/Logger.hpp"
 #include "util/file_system/FileSystem.hpp"
 
 #include "quartz/rendering/Loggers.hpp"
@@ -19,7 +23,6 @@
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
 #include "quartz/scene/light/SpotLight.hpp"
-#include "util/logger/Logger.hpp"
 
 quartz::rendering::Pipeline
 quartz::rendering::Context::createSkyBoxRenderingPipeline(
@@ -60,6 +63,7 @@ quartz::rendering::Context::createSkyBoxRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription(),
         quartz::rendering::CubeMap::getVulkanVertexInputAttributeDescriptions(),
+        vk::PolygonMode::eFill,
         vk::CullModeFlagBits::eFront,
         false,
         {},
@@ -204,6 +208,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription(),
         quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions(),
+        vk::PolygonMode::eFill,
         vk::CullModeFlagBits::eBack,
         true,
         pushConstantInfos,
@@ -308,8 +313,15 @@ quartz::rendering::Context::draw(
         m_currentInFlightFrameIndex
     );
 
-    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        recreateSwapchain();
+    const bool shouldRecreateDoodadPipeline = (m_doodadRenderingPipeline.getPolygonMode() == vk::PolygonMode::eFill) ?
+        wireframeDoodadMode :
+        !wireframeDoodadMode;
+    if (
+        m_renderingSwapchain.getShouldRecreate() ||
+        m_renderingWindow.getWasResized() ||
+        shouldRecreateDoodadPipeline 
+    ) {
+        recreateSwapchain(wireframeDoodadMode, wireframeColliderMode);
         return;
     }
 
@@ -332,7 +344,7 @@ quartz::rendering::Context::draw(
     // housekeeping
 
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        recreateSwapchain();
+        recreateSwapchain(wireframeDoodadMode, wireframeColliderMode);
         return;
     }
 
@@ -340,7 +352,10 @@ quartz::rendering::Context::draw(
 }
 
 void
-quartz::rendering::Context::recreateSwapchain() {
+quartz::rendering::Context::recreateSwapchain(
+    const bool wireframeDoodadMode,
+    UNUSED const bool wireframeColliderMode
+) {
     LOG_FUNCTION_SCOPE_INFOthis("");
     m_renderingDevice.waitIdle();
 
@@ -353,18 +368,25 @@ quartz::rendering::Context::recreateSwapchain() {
         m_renderingInstance,
         m_renderingDevice
     );
+    
     m_renderingRenderPass.recreate(
         m_renderingDevice,
         m_renderingWindow
     );
+
     m_skyBoxRenderingPipeline.recreate(
         m_renderingDevice,
         m_renderingRenderPass
     );
+
+    LOG_INFOthis("Setting doodad pipeline polygon mode to: {}", wireframeDoodadMode ? "line" : "fill");
+    const vk::PolygonMode polygonMode = wireframeDoodadMode ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
+    m_doodadRenderingPipeline.setPolygonMode(polygonMode);
     m_doodadRenderingPipeline.recreate(
         m_renderingDevice,
         m_renderingRenderPass
     );
+
     m_renderingSwapchain.recreate(
         m_renderingDevice,
         m_renderingWindow,
