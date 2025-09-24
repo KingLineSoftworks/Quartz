@@ -98,7 +98,8 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         }
     };
 
-    const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(renderingDevice, sizeof(quartz::rendering::Material::UniformBufferObject));
+    const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
+    const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(minUniformBufferOffsetAlignment, sizeof(quartz::rendering::Material::UniformBufferObject));
     std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
         // the camera
         {

@@ -206,3 +206,4 @@ private: // member variables
     vk::UniquePipelineLayout mp_vulkanPipelineLayout;
     vk::UniquePipeline mp_vulkanGraphicsPipeline;
 };
+
