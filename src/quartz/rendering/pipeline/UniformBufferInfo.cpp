@@ -5,11 +5,9 @@
 
 uint32_t
 quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(
-    const quartz::rendering::Device& renderingDevice,
+    const uint32_t minUniformBufferOffsetAlignment,
     const uint32_t uniformBufferObjectSizeBytes
 ) {
-    const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
-
     const uint32_t byteStride = minUniformBufferOffsetAlignment > 0 ?
         (uniformBufferObjectSizeBytes + minUniformBufferOffsetAlignment - 1) & ~(minUniformBufferOffsetAlignment - 1) :
         uniformBufferObjectSizeBytes;

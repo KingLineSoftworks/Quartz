@@ -1,4 +1,7 @@
+#include <string>
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 #include "util/errors/RichException.hpp"
@@ -9,9 +12,9 @@
 
 std::string
 quartz::rendering::VulkanUtil::toString(
-    const vk::DescriptorType descriptorType
+    const vk::DescriptorType type 
 ) {
-    switch (descriptorType) {
+    switch (type) {
         case vk::DescriptorType::eSampler:
             return "eSampler";
         case vk::DescriptorType::eCombinedImageSampler:
@@ -42,6 +45,30 @@ quartz::rendering::VulkanUtil::toString(
             return "eAccelerationStructureNV";
         default:
             return "Unknown vk::DescriptorType";
+    }
+}
+
+std::string
+quartz::rendering::VulkanUtil::toString(
+    const vk::ImageViewType type
+) {
+    switch (type) {
+        case vk::ImageViewType::e1D:
+            return "1D";
+        case vk::ImageViewType::e2D:
+            return "2D";
+        case vk::ImageViewType::e3D:
+            return "3D";
+        case vk::ImageViewType::eCube:
+            return "Cube";
+        case vk::ImageViewType::e1DArray:
+            return "1D Array";
+        case vk::ImageViewType::e2DArray:
+            return "2D Array";
+        case vk::ImageViewType::eCubeArray:
+            return "Cube Array";
+        default:
+            return "Unknown vk::ImageViewType";
     }
 }
 
@@ -86,26 +113,130 @@ quartz::rendering::VulkanUtil::toString(
 
 std::string
 quartz::rendering::VulkanUtil::toString(
-    const vk::ImageViewType type
+    const vk::BufferUsageFlags flags
 ) {
-    switch (type) {
-        case vk::ImageViewType::e1D:
-            return "1D";
-        case vk::ImageViewType::e2D:
-            return "2D";
-        case vk::ImageViewType::e3D:
-            return "3D";
-        case vk::ImageViewType::eCube:
-            return "Cube";
-        case vk::ImageViewType::e1DArray:
-            return "1D Array";
-        case vk::ImageViewType::e2DArray:
-            return "2D Array";
-        case vk::ImageViewType::eCubeArray:
-            return "Cube Array";
-        default:
-            return "Unknown vk::ImageViewType";
+    std::vector<std::string> flagStrings;
+
+    if (flags & vk::BufferUsageFlagBits::eUniformBuffer) { flagStrings.push_back("UniformBuffer"); }
+    if (flags & vk::BufferUsageFlagBits::eIndexBuffer) { flagStrings.push_back("IndexBuffer"); }
+    if (flags & vk::BufferUsageFlagBits::eVertexBuffer) { flagStrings.push_back("VertexBuffer"); }
+    if (flags & vk::BufferUsageFlagBits::eStorageBuffer) { flagStrings.push_back("StorageBuffer"); }
+    if (flags & vk::BufferUsageFlagBits::eIndirectBuffer) { flagStrings.push_back("IndirectBuffer"); }
+    if (flags & vk::BufferUsageFlagBits::eStorageTexelBuffer) { flagStrings.push_back("StorageTexelBuffer"); }
+    if (flags & vk::BufferUsageFlagBits::eUniformTexelBuffer) { flagStrings.push_back("UniformTexelBuffer"); }
+
+    if (flags & vk::BufferUsageFlagBits::eTransferDst) { flagStrings.push_back("TransferDst"); }
+    if (flags & vk::BufferUsageFlagBits::eTransferSrc) { flagStrings.push_back("TransferSrc"); }
+
+    if (flags & vk::BufferUsageFlagBits::eRayTracingNV) { flagStrings.push_back("RayTracingNV"); }
+
+    if (flags & vk::BufferUsageFlagBits::eShaderDeviceAddress) { flagStrings.push_back("ShaderDeviceAddress"); }
+
+    if (flags & vk::BufferUsageFlagBits::eShaderDeviceAddressEXT) { flagStrings.push_back("ShaderDeviceAddressEXT"); }
+    if (flags & vk::BufferUsageFlagBits::eConditionalRenderingEXT) { flagStrings.push_back("ConditionalRenderingEXT"); }
+    if (flags & vk::BufferUsageFlagBits::eTransformFeedbackBufferEXT) { flagStrings.push_back("TransformFeedbackBufferEXT"); }
+    if (flags & vk::BufferUsageFlagBits::eTransformFeedbackCounterBufferEXT) { flagStrings.push_back("TransformFeedbackCounterBufferEXT"); }
+
+    if (flags & vk::BufferUsageFlagBits::eShaderDeviceAddressKHR) { flagStrings.push_back("ShaderDeviceAddressKHR"); }
+    if (flags & vk::BufferUsageFlagBits::eShaderBindingTableKHR) { flagStrings.push_back("ShaderBindingTableKHR"); }
+    if (flags & vk::BufferUsageFlagBits::eAccelerationStructureStorageKHR) { flagStrings.push_back("AccelerationStructureStorageKHR"); }
+    if (flags & vk::BufferUsageFlagBits::eAccelerationStructureBuildInputReadOnlyKHR) { flagStrings.push_back("AccelerationStructureBuildInputReadOnlyKHR"); }
+    
+    if (flagStrings.empty()) {
+        return "[ None ]";
     }
+
+    // Join the flag strings with a separator
+    std::string result = "[ ";
+    for (const std::string& flagString : flagStrings) {
+        if (!result.empty()) {
+            result += " | ";
+        }
+        result += flagString;
+    }
+    result += " ]";
+
+    return result;
+}
+
+std::string
+quartz::rendering::VulkanUtil::toString(
+    const vk::MemoryPropertyFlags flags
+) {
+    std::vector<std::string> flagStrings;
+
+    if (flags & vk::MemoryPropertyFlagBits::eProtected) { flagStrings.push_back("Protected"); }
+    if (flags & vk::MemoryPropertyFlagBits::eHostCached) { flagStrings.push_back("HostCached"); }
+    if (flags & vk::MemoryPropertyFlagBits::eHostVisible) { flagStrings.push_back("HostVisible"); }
+    if (flags & vk::MemoryPropertyFlagBits::eDeviceLocal) { flagStrings.push_back("DeviceLocal"); }
+    if (flags & vk::MemoryPropertyFlagBits::eHostCoherent) { flagStrings.push_back("HostCoherent"); }
+    if (flags & vk::MemoryPropertyFlagBits::eRdmaCapableNV) { flagStrings.push_back("RdmaCapableNV"); }
+    if (flags & vk::MemoryPropertyFlagBits::eLazilyAllocated) { flagStrings.push_back("LazilyAllocated"); }
+    if (flags & vk::MemoryPropertyFlagBits::eDeviceCoherentAMD) { flagStrings.push_back("DeviceCoherentAMD"); }
+    if (flags & vk::MemoryPropertyFlagBits::eDeviceUncachedAMD) { flagStrings.push_back("DeviceUncachedAMD"); }
+
+    if (flagStrings.empty()) {
+        return "[ None ]";
+    }
+
+    // Join the flag strings with a separator
+    std::string result = "[ ";
+    for (const std::string& flagString : flagStrings) {
+        if (!result.empty()) {
+            result += " | ";
+        }
+        result += flagString;
+    }
+    result += " ]";
+
+    return result;
+}
+
+std::string
+quartz::rendering::VulkanUtil::toString(
+    const vk::ShaderStageFlags flags
+) {
+    std::vector<std::string> flagStrings;
+
+    if (flags & vk::ShaderStageFlagBits::eAll) { flagStrings.push_back("All"); }
+    if (flags & vk::ShaderStageFlagBits::eMeshNV) { flagStrings.push_back("MeshNV"); }
+    if (flags & vk::ShaderStageFlagBits::eMissNV) { flagStrings.push_back("MissNV"); }
+    if (flags & vk::ShaderStageFlagBits::eTaskNV) { flagStrings.push_back("TaskNV"); }
+    if (flags & vk::ShaderStageFlagBits::eVertex) { flagStrings.push_back("Vertex"); }
+    if (flags & vk::ShaderStageFlagBits::eCompute) { flagStrings.push_back("Compute"); }
+    if (flags & vk::ShaderStageFlagBits::eMissKHR) { flagStrings.push_back("MissKHR"); }
+    if (flags & vk::ShaderStageFlagBits::eAnyHitNV) { flagStrings.push_back("AnyHitNV"); }
+    if (flags & vk::ShaderStageFlagBits::eFragment) { flagStrings.push_back("Fragment"); }
+    if (flags & vk::ShaderStageFlagBits::eGeometry) { flagStrings.push_back("Geometry"); }
+    if (flags & vk::ShaderStageFlagBits::eRaygenNV) { flagStrings.push_back("RaygenNV"); }
+    if (flags & vk::ShaderStageFlagBits::eRaygenKHR) { flagStrings.push_back("RaygenKHR"); }
+    if (flags & vk::ShaderStageFlagBits::eAnyHitKHR) { flagStrings.push_back("AnyHitKHR"); }
+    if (flags & vk::ShaderStageFlagBits::eCallableNV) { flagStrings.push_back("CallableNV"); }
+    if (flags & vk::ShaderStageFlagBits::eCallableKHR) { flagStrings.push_back("CallableKHR"); }
+    if (flags & vk::ShaderStageFlagBits::eAllGraphics) { flagStrings.push_back("AllGraphics"); }
+    if (flags & vk::ShaderStageFlagBits::eClosestHitNV) { flagStrings.push_back("ClosestHitNV"); }
+    if (flags & vk::ShaderStageFlagBits::eClosestHitKHR) { flagStrings.push_back("ClosestHitKHR"); }
+    if (flags & vk::ShaderStageFlagBits::eIntersectionNV) { flagStrings.push_back("IntersectionNV"); }
+    if (flags & vk::ShaderStageFlagBits::eIntersectionKHR) { flagStrings.push_back("IntersectionKHR"); }
+    if (flags & vk::ShaderStageFlagBits::eTessellationControl) { flagStrings.push_back("TessellationControl"); }
+    if (flags & vk::ShaderStageFlagBits::eSubpassShadingHUAWEI) { flagStrings.push_back("SubpassShadingHUAWEI"); }
+    if (flags & vk::ShaderStageFlagBits::eTessellationEvaluation) { flagStrings.push_back("TessellationEvaluation"); }
+
+    if (flagStrings.empty()) {
+        return "[ None ]";
+    }
+
+    // Join the flag strings with a separator
+    std::string result = "[ ";
+    for (const std::string& flagString : flagStrings) {
+        if (!result.empty()) {
+            result += " | ";
+        }
+        result += flagString;
+    }
+    result += " ]";
+
+    return result;
 }
 
 vk::UniqueImageView
@@ -243,5 +374,41 @@ quartz::rendering::VulkanUtil::allocateVulkanCommandBufferPtr(
     LOG_TRACE(VULKANUTIL, "Successfully allocated {} vk::CommandBuffer(s)", commandBufferPtrs.size());
 
     return commandBufferPtrs;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const vk::DescriptorType type
+) {
+    os << quartz::rendering::VulkanUtil::toString(type);
+    return os;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const vk::BufferUsageFlags flags 
+) {
+    os << quartz::rendering::VulkanUtil::toString(flags);
+    return os;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const vk::MemoryPropertyFlags flags 
+) {
+    os << quartz::rendering::VulkanUtil::toString(flags);
+    return os;
+}
+
+std::ostream&
+operator<<(
+    std::ostream& os,
+    const vk::ShaderStageFlags flags 
+) {
+    os << quartz::rendering::VulkanUtil::toString(flags);
+    return os;
 }
 

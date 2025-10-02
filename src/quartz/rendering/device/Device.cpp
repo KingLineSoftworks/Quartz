@@ -161,6 +161,7 @@ quartz::rendering::Device::createVulkanLogicalDevicePtr(
 
     vk::PhysicalDeviceFeatures requestedPhysicalDeviceFeatures;
     requestedPhysicalDeviceFeatures.samplerAnisotropy = true;
+    requestedPhysicalDeviceFeatures.fillModeNonSolid = true;
     /// @todo 2023/11/01 enable requestedPhysicalDeviceFeatures.depthBounds
 
     vk::DeviceCreateInfo logicalDeviceCreateInfo(

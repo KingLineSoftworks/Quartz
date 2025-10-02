@@ -42,7 +42,7 @@ public: // member functions
 
 public: // static functions
     static uint32_t calculateDynamicUniformBufferByteStride(
-        const quartz::rendering::Device& renderingDevice,
+        const uint32_t minUniformBufferOffsetAlignment,
         const uint32_t uniformBufferObjectSizeBytes
     );
 
