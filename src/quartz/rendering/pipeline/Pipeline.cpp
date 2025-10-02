@@ -943,3 +943,4 @@ quartz::rendering::Pipeline::updateUniformBuffer(
         uniformBufferInfo.getLocallyMappedBufferSize()
     );
 }
+

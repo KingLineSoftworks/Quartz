@@ -28,6 +28,7 @@ public: // member functions
     USE_LOGGER(BUFFER_MAPPED);
 
     const vk::UniqueBuffer& getVulkanLogicalBufferPtr() const { return mp_vulkanLogicalBuffer; }
+    const vk::UniqueDeviceMemory& getVulkanPhysicalDeviceMemoryPtr() const { return mp_vulkanPhysicalDeviceMemory; }
     void* getMappedLocalMemoryPtr() { return mp_mappedLocalMemory; }
 
 private: // static functions
