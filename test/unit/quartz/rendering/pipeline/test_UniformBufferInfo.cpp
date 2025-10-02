@@ -4,7 +4,10 @@
 #include "util/logger/Logger.hpp"
 #include "util/unit_test/UnitTest.hpp"
 
+#include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 #include "quartz/rendering/pipeline/UniformBufferInfo.hpp"
+
+#include <vulkan/vulkan_enums.hpp> // so linting stops complaining - and to prevent this from being auto included at the beginning
 
 uint32_t manualStride(
     const uint32_t minAlignment,
@@ -68,8 +71,76 @@ UT_FUNCTION(test_calculateDynamicUniformBufferByteStride) {
     }
 }
 
+UT_FUNCTION(test_construction) {
+    struct UBOInfoParameters {
+        uint32_t locallyMappedBufferSizeBytes;
+        vk::MemoryPropertyFlags locallyMappedBufferPropertyFlags;
+        uint32_t bindingLocation;
+        uint32_t descriptorCount;
+        uint32_t objectStrideBytes;
+        bool isDynamic;
+        vk::ShaderStageFlags shaderStageFlags;
+    };
+
+    std::vector<UBOInfoParameters> allParameters = {
+        UBOInfoParameters(
+            99,
+            vk::MemoryPropertyFlagBits::eHostCoherent,
+            42,
+            102,
+            88,
+            true,
+            vk::ShaderStageFlagBits::eMeshNV
+        ),
+
+        UBOInfoParameters(
+            233,
+            vk::MemoryPropertyFlagBits::eDeviceCoherentAMD | vk::MemoryPropertyFlagBits::eHostVisible,
+            4,
+            12,
+            8,
+            false,
+            vk::ShaderStageFlagBits::eClosestHitNV | vk::ShaderStageFlagBits::eAnyHitKHR
+        )
+    };
+
+    for (uint32_t iParameter = 0; iParameter < allParameters.size(); ++iParameter) {
+        LOG_SCOPE_CHANGE_TRACE(UT);
+        LOG_TRACE(UT, "UBO Info {}", iParameter);
+
+        const UBOInfoParameters& parameters = allParameters[iParameter];
+
+        const quartz::rendering::UniformBufferInfo uboInfo(
+            parameters.locallyMappedBufferSizeBytes,
+            parameters.locallyMappedBufferPropertyFlags,
+            parameters.bindingLocation,
+            parameters.descriptorCount,
+            parameters.objectStrideBytes,
+            parameters.isDynamic,
+            parameters.shaderStageFlags
+        );
+
+        UT_CHECK_EQUAL(uboInfo.getLocallyMappedBufferSize(), parameters.locallyMappedBufferSizeBytes);
+        UT_CHECK_EQUAL(uboInfo.getLocallyMappedBufferVulkanUsageFlags(), vk::BufferUsageFlagBits::eUniformBuffer);
+        UT_CHECK_EQUAL(uboInfo.getLocallyMappedBufferVulkanPropertyFlags(), parameters.locallyMappedBufferPropertyFlags);
+
+        UT_CHECK_EQUAL(uboInfo.getBindingLocation(), parameters.bindingLocation);
+        UT_CHECK_EQUAL(uboInfo.getDescriptorCount(), parameters.descriptorCount);
+        UT_CHECK_EQUAL(uboInfo.getObjectStrideBytes(), parameters.objectStrideBytes);
+
+        if (parameters.isDynamic) {
+            UT_CHECK_EQUAL(uboInfo.getVulkanDescriptorType(), vk::DescriptorType::eUniformBufferDynamic);
+        } else {
+            UT_CHECK_EQUAL(uboInfo.getVulkanDescriptorType(), vk::DescriptorType::eUniformBuffer);
+        }
+
+        UT_CHECK_EQUAL(uboInfo.getVulkanShaderStageFlags(), parameters.shaderStageFlags);
+    }
+}
+
 UT_MAIN() {
     REGISTER_UT_FUNCTION(test_calculateDynamicUniformBufferByteStride);
+    REGISTER_UT_FUNCTION(test_construction);
     UT_RUN_TESTS();
 }
 

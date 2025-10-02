@@ -46,3 +46,4 @@ private: // member variables
     vk::UniqueDeviceMemory mp_vulkanPhysicalDeviceMemory;
     void* mp_mappedLocalMemory;
 };
+

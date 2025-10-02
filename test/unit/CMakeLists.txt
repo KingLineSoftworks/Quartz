@@ -28,6 +28,7 @@ add_subdirectory("quartz/physics/collider")
 add_subdirectory("quartz/physics/field")
 add_subdirectory("quartz/physics/rigid_body")
 
+add_subdirectory("quartz/rendering/buffer")
 add_subdirectory("quartz/rendering/material")
 add_subdirectory("quartz/rendering/pipeline")
 
