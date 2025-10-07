@@ -3,8 +3,10 @@
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
+#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "util/errors/RichException.hpp"
 
 #include "math/transform/Mat4.hpp"
@@ -672,13 +674,130 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 
 void
 quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
-    UNUSED const quartz::rendering::Device& renderingDevice,
-    UNUSED const quartz::rendering::Pipeline& colliderRenderingPipeline,
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Pipeline& colliderRenderingPipeline,
     UNUSED const quartz::physics::Collider& collider,
-    UNUSED const math::Vec3& position,
-    UNUSED const math::Quaternion& rotation
+    const math::Vec3& position,
+    const math::Quaternion& rotation,
+    const uint32_t inFlightFrameIndex
 ) {
+    uint32_t offset = 0;
 
+    /**
+     * @todo 2025/10/06 Calculate the transformation matrix from the position, rotation, and scale of the collider.
+     *    We will be getting the scale from the collider itself (extents for collider, radius for sphere)
+     */
+    const math::Transform transform(
+        position,
+        rotation,
+        {2, 2, 2}
+    );
+    math::Mat4 transformationMatrix = transform.calculateTransformationMatrix();
+
+    // Model matrix push constant info
+    const quartz::rendering::PushConstantInfo& transformationmatrixPushConstantInfo = colliderRenderingPipeline.getPushConstantInfos()[0];
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+        *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        transformationmatrixPushConstantInfo.getVulkanShaderStageFlags(),
+        transformationmatrixPushConstantInfo.getOffset(),
+        transformationmatrixPushConstantInfo.getSize(),
+        reinterpret_cast<void*>(&transformationMatrix)
+    );
+
+    // Bind the descriptor set
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(colliderRenderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        &offset
+    );
+
+    // Vertex buffer
+    static std::vector<math::Vec3> vertices = {
+        {0.0f , 0.0f , 0.0f},
+        {1.0f , 0.0f , 0.0f},
+        {1.0f , 1.0f , 0.0f},
+        {0.0f , 1.0f , 0.0f},
+        {1.0f , 0.0f , 1.0f},
+        {0.0f , 0.0f , 1.0f},
+        {0.0f , 1.0f , 1.0f},
+        {1.0f , 1.0f , 1.0f},
+        {1.0f , 0.0f , 0.0f},
+        {1.0f , 0.0f , 1.0f},
+        {1.0f , 1.0f , 1.0f},
+        {1.0f , 1.0f , 0.0f},
+        {0.0f , 0.0f , 1.0f},
+        {0.0f , 0.0f , .0f},
+        {0.0f , 1.0f , 0.0f},
+        {0.0f , 1.0f , 1.0f},
+        {0.0f , 1.0f , 0.0f},
+        {1.0f , 1.0f , 0.0f},
+        {1.0f , 1.0f , 1.0f},
+        {0.0f , 1.0f , 1.0f},
+        {0.0f , 0.0f , 1.0f},
+        {1.0f , 0.0f , 1.0f},
+        {1.0f , 0.0f , 0.0f},
+        {0.0f , 0.0f , 0.0f},
+    };
+    for (uint32_t i = 0; i < vertices.size(); ++i) {
+        vertices[i] = (2.0f * vertices[i]) - math::Vec3(1.0f, 1.0f, 1.0f);
+    }
+    static quartz::rendering::StagedBuffer stagedVertexBuffer(
+        renderingDevice,
+        sizeof(math::Vec3) * vertices.size(),
+        vk::BufferUsageFlagBits::eVertexBuffer,
+        vertices.data()
+    );
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+        0,
+        *(stagedVertexBuffer.getVulkanLogicalBufferPtr()),
+        offset
+    );
+    
+    // Index buffer
+    static const std::vector<uint32_t> indices = {
+        // tri 0
+         0,  2,  1,
+         0,  3,  2,
+        // tri 1
+         4,  6,  5,
+         4,  7,  6,
+        // tri 2
+         8, 10,  9,
+         8, 11, 10,
+        // tri 3
+        12, 14, 13,
+        12, 15, 14,
+        // tri 4
+        16, 18, 17,
+        16, 19, 18,
+        // tri 5
+        20, 22, 21,
+        20, 23, 22,
+    };
+    static quartz::rendering::StagedBuffer indexBuffer(
+        renderingDevice,
+        sizeof(uint32_t) * indices.size(),
+        vk::BufferUsageFlagBits::eIndexBuffer,
+        indices.data()
+    );
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+        *(indexBuffer.getVulkanLogicalBufferPtr()),
+        0,
+        vk::IndexType::eUint32
+    );
+
+    // Draw using vertex and index buffer
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+        36, /** @todo 2025/10/06 Needs to change based on the type of collider (type of model) */
+        1,
+        0,
+        0,
+        0
+    );
 }
 
 void

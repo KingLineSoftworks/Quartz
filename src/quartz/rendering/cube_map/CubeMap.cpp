@@ -159,7 +159,7 @@ quartz::rendering::CubeMap::createStagedVertexBuffer(
         {1.0f , 1.0f , 1.0f},
         {1.0f , 1.0f , 0.0f},
         {0.0f , 0.0f , 1.0f},
-        {0.0f , 0.0f , 0.0f},
+        {0.0f , 0.0f , .0f},
         {0.0f , 1.0f , 0.0f},
         {0.0f , 1.0f , 1.0f},
         {0.0f , 1.0f , 0.0f},
@@ -171,6 +171,8 @@ quartz::rendering::CubeMap::createStagedVertexBuffer(
         {1.0f , 0.0f , 0.0f},
         {0.0f , 0.0f , 0.0f},
     };
+
+    // Convert the vertices from [0,1] to [-1,1]
     for (uint32_t i = 0; i < vertices.size(); ++i) {
         vertices[i] = (2.0f * vertices[i]) - math::Vec3(1.0f, 1.0f, 1.0f);
     }

@@ -236,7 +236,7 @@ quartz::rendering::Context::createColliderRenderingPipeline(
 
     const vk::VertexInputBindingDescription vertexInputBindingDescription(
         0,
-        sizeof(math::Vec3),
+        sizeof(math::Vec3), // + sizeof(uint32_t),
         vk::VertexInputRate::eVertex
     );
 
@@ -246,13 +246,13 @@ quartz::rendering::Context::createColliderRenderingPipeline(
             0,
             vk::Format::eR32G32B32Sfloat,
             0
-        ),
-        vk::VertexInputAttributeDescription(
-            1,
-            0,
-            vk::Format::eR32Uint,
-            sizeof(math::Vec3)
-        )
+        ) //,
+        // vk::VertexInputAttributeDescription(
+        //     1,
+        //     0,
+        //     vk::Format::eR32Uint,
+        //     sizeof(math::Vec3)
+        // )
     };
 
     std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos = {
@@ -273,14 +273,12 @@ quartz::rendering::Context::createColliderRenderingPipeline(
             1,
             sizeof(quartz::scene::Camera::UniformBufferObject),
             false,
-            vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+            vk::ShaderStageFlagBits::eVertex
         )
     };
 
     LOG_DEBUG(PIPELINE, "Using {} push constants", pushConstantInfos.size());
     LOG_DEBUG(PIPELINE, "Using {} uniform buffers", uniformBufferInfos.size());
-    LOG_DEBUG(PIPELINE, "Using a uniform sampler");
-    LOG_DEBUG(PIPELINE, "Using a uniform texture array");
 
     return {
         renderingDevice,
@@ -383,6 +381,9 @@ quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     m_doodadRenderingPipeline.updateSamplerDescriptorSets(m_renderingDevice, quartz::rendering::Texture::getDefaultVulkanSamplerPtr());
     m_doodadRenderingPipeline.updateTextureArrayDescriptorSets(m_renderingDevice, quartz::rendering::Texture::getMasterTextureList());
 
+    LOG_DEBUGthis("Updating collider rendering pipeline's descriptor sets");
+    m_colliderRenderingPipeline.updateUniformBufferDescriptorSets(m_renderingDevice);
+
     m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
 }
 
@@ -422,7 +423,7 @@ quartz::rendering::Context::draw(
     updateSkyBoxPipeline(cameraUBO);
     updateDoodadPipeline(scene, cameraUBO);
     if (wireframeColliderMode) {
-        updateColliderPipeline(scene, cameraUBO);
+        updateColliderPipeline(cameraUBO);
     }
 
     // reset
@@ -548,10 +549,9 @@ quartz::rendering::Context::updateDoodadPipeline(
 
 void
 quartz::rendering::Context::updateColliderPipeline(
-    UNUSED const quartz::scene::Scene& scene,
     const quartz::scene::Camera::UniformBufferObject& cameraUBO
 ) {
-    m_doodadRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
+    m_colliderRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
 }
 
 void
@@ -610,7 +610,7 @@ quartz::rendering::Context::recordDoodadPipeline(
 
 void
 quartz::rendering::Context::recordColliderPipeline(
-    UNUSED const quartz::scene::Scene& scene
+    const quartz::scene::Scene& scene
 ) {
     m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
         m_renderingWindow,
@@ -636,7 +636,8 @@ quartz::rendering::Context::recordColliderPipeline(
             m_colliderRenderingPipeline,
             *o_collider,
             colliderPosition,
-            colliderRotation
+            colliderRotation,
+            m_currentInFlightFrameIndex
         );
     }
 }

@@ -85,7 +85,8 @@ public: // member functions
         const quartz::rendering::Pipeline& colliderRenderingPipeline,
         const quartz::physics::Collider& collider,
         const math::Vec3& position,
-        const math::Quaternion& rotation
+        const math::Quaternion& rotation,
+        const uint32_t inFlightFrameIndex
     );
     void endAndSubmitDrawingCommandBuffer(
         const quartz::rendering::Device& renderingDevice,

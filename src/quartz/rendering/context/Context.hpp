@@ -83,7 +83,6 @@ private: // member functions
         const quartz::scene::Camera::UniformBufferObject& cameraUBO
     );
     void updateColliderPipeline(
-        const quartz::scene::Scene& scene,
         const quartz::scene::Camera::UniformBufferObject& cameraUBO
     );
     void resetSwapchain(const uint32_t availableSwapchainImageIndex);

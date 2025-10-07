@@ -28,12 +28,11 @@ layout(push_constant) uniform perObjectVertexPushConstant {
  */
 
 layout(location = 0) in vec3 in_vertexPosition;
-layout(location = 1) in uint in_colliderInfoBits;
+// layout(location = 1) in uint in_colliderInfoBits;
 
 // -----==== Outputs to fragment shader =====----- //
 
-layout(location = 0) out vec3 out_fragmentPosition;
-layout(location = 1) out uint out_colliderInfoBits;
+// layout(location = 1) out uint out_colliderInfoBits;
 
 // -----==== Logic =====----- //
 
@@ -47,11 +46,8 @@ void main() {
         pushConstant.modelMatrix *
         vec4(in_vertexPosition, 1.0);
 
-    // ----- Calculate the position of the fragment ----- //
-
-    out_fragmentPosition = vec3(pushConstant.modelMatrix * vec4(in_vertexPosition, 1.0));
-
     // ----- set output for fragment shader to use as input ----- //
 
-    out_colliderInfoBits = in_colliderInfoBits;
+    // out_colliderInfoBits = in_colliderInfoBits;
 }
+
