@@ -64,6 +64,12 @@ private: // static functions
         const quartz::rendering::RenderPass& renderingRenderPass,
         const uint32_t maxNumFramesInFlight
     );
+    static quartz::rendering::Pipeline createColliderRenderingPipeline(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Window& renderingWindow,
+        const quartz::rendering::RenderPass& renderingRenderPass,
+        const uint32_t maxNumFramesInFlight
+    );
 
 private: // member functions
     void recreateSwapchain(
@@ -76,9 +82,14 @@ private: // member functions
         const quartz::scene::Scene& scene,
         const quartz::scene::Camera::UniformBufferObject& cameraUBO
     );
+    void updateColliderPipeline(
+        const quartz::scene::Scene& scene,
+        const quartz::scene::Camera::UniformBufferObject& cameraUBO
+    );
     void resetSwapchain(const uint32_t availableSwapchainImageIndex);
     void recordSkyBoxPipeline(const quartz::scene::Scene& scene);
     void recordDoodadPipeline(const quartz::scene::Scene& scene);
+    void recordColliderPipeline(const quartz::scene::Scene& scene);
     void submitImage(const uint32_t availableSwapchainImageIndex);
 
 private: // member variables
@@ -90,6 +101,7 @@ private: // member variables
     quartz::rendering::RenderPass m_renderingRenderPass;
     quartz::rendering::Pipeline m_skyBoxRenderingPipeline;
     quartz::rendering::Pipeline m_doodadRenderingPipeline;
+    quartz::rendering::Pipeline m_colliderRenderingPipeline;
     quartz::rendering::Swapchain m_renderingSwapchain;
 };
 

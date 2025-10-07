@@ -6,6 +6,7 @@
 
 #include "math/transform/Vec3.hpp"
 
+#include "quartz/physics/collider/Collider.hpp"
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/depth_buffer/DepthBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -78,6 +79,13 @@ public: // member functions
         const quartz::rendering::Pipeline& doodadRenderingPipeline,
         const quartz::scene::Doodad& doodad,
         const uint32_t inFlightFrameIndex
+    );
+    void recordColliderToDrawingCommandBuffer(
+        const quartz::rendering::Device& renderingDevice,
+        const quartz::rendering::Pipeline& colliderRenderingPipeline,
+        const quartz::physics::Collider& collider,
+        const math::Vec3& position,
+        const math::Quaternion& rotation
     );
     void endAndSubmitDrawingCommandBuffer(
         const quartz::rendering::Device& renderingDevice,

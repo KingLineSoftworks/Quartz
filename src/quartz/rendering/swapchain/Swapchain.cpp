@@ -671,6 +671,17 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 }
 
 void
+quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
+    UNUSED const quartz::rendering::Device& renderingDevice,
+    UNUSED const quartz::rendering::Pipeline& colliderRenderingPipeline,
+    UNUSED const quartz::physics::Collider& collider,
+    UNUSED const math::Vec3& position,
+    UNUSED const math::Quaternion& rotation
+) {
+
+}
+
+void
 quartz::rendering::Swapchain::endAndSubmitDrawingCommandBuffer(
     const quartz::rendering::Device& renderingDevice,
     const uint32_t inFlightFrameIndex
