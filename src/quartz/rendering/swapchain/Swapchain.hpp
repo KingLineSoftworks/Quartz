@@ -146,4 +146,11 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphorePtrs;
     std::vector<vk::UniqueSemaphore> m_vulkanRenderFinishedSemaphorePtrs;
     std::vector<vk::UniqueFence> m_vulkanInFlightFencePtrs;
+
+    /**
+     * @brief 2025/10/19 I don't really think that these belong here, but I can't
+     *    think of a better place to put them
+     */
+    quartz::rendering::Primitive m_boxColliderPrimitive;
 };
+

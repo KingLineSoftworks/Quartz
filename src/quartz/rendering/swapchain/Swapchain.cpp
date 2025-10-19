@@ -278,6 +278,55 @@ quartz::rendering::Swapchain::Swapchain(
             renderingDevice.getVulkanLogicalDevicePtr(),
             maxNumFramesInFlight
         )
+    ),
+    m_boxColliderPrimitive(
+        renderingDevice,
+        {
+            {-1.0f , -1.0f , -1.0f},
+            { 1.0f , -1.0f , -1.0f},
+            { 1.0f ,  1.0f , -1.0f},
+            {-1.0f ,  1.0f , -1.0f},
+            { 1.0f , -1.0f ,  1.0f},
+            {-1.0f , -1.0f ,  1.0f},
+            {-1.0f ,  1.0f ,  1.0f},
+            { 1.0f ,  1.0f ,  1.0f},
+            { 1.0f , -1.0f , -1.0f},
+            { 1.0f , -1.0f ,  1.0f},
+            { 1.0f ,  1.0f ,  1.0f},
+            { 1.0f ,  1.0f , -1.0f},
+            {-1.0f , -1.0f ,  1.0f},
+            {-1.0f , -1.0f , -1.0f},
+            {-1.0f ,  1.0f , -1.0f},
+            {-1.0f ,  1.0f ,  1.0f},
+            {-1.0f ,  1.0f , -1.0f},
+            { 1.0f ,  1.0f , -1.0f},
+            { 1.0f ,  1.0f ,  1.0f},
+            {-1.0f ,  1.0f ,  1.0f},
+            {-1.0f , -1.0f ,  1.0f},
+            { 1.0f , -1.0f ,  1.0f},
+            { 1.0f , -1.0f , -1.0f},
+            {-1.0f , -1.0f , -1.0f},
+        },
+        {
+            // tri 0
+             0,  2,  1,
+             0,  3,  2,
+            // tri 1
+             4,  6,  5,
+             4,  7,  6,
+            // tri 2
+             8, 10,  9,
+             8, 11, 10,
+            // tri 3
+            12, 14, 13,
+            12, 15, 14,
+            // tri 4
+            16, 18, 17,
+            16, 19, 18,
+            // tri 5
+            20, 22, 21,
+            20, 23, 22,
+        }
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");
@@ -675,7 +724,7 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 
 void
 quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
-    const quartz::rendering::Device& renderingDevice,
+    UNUSED const quartz::rendering::Device& renderingDevice, /** @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter?? */
     const quartz::rendering::Pipeline& colliderRenderingPipeline,
     UNUSED const quartz::physics::Collider& collider,
     const math::Vec3& position,
@@ -716,77 +765,21 @@ quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
         &offset
     );
 
-    // Vertex buffer
-    static std::vector<math::Vec3> vertices = {
-        {0.0f , 0.0f , 0.0f},
-        {1.0f , 0.0f , 0.0f},
-        {1.0f , 1.0f , 0.0f},
-        {0.0f , 1.0f , 0.0f},
-        {1.0f , 0.0f , 1.0f},
-        {0.0f , 0.0f , 1.0f},
-        {0.0f , 1.0f , 1.0f},
-        {1.0f , 1.0f , 1.0f},
-        {1.0f , 0.0f , 0.0f},
-        {1.0f , 0.0f , 1.0f},
-        {1.0f , 1.0f , 1.0f},
-        {1.0f , 1.0f , 0.0f},
-        {0.0f , 0.0f , 1.0f},
-        {0.0f , 0.0f , 0.0f},
-        {0.0f , 1.0f , 0.0f},
-        {0.0f , 1.0f , 1.0f},
-        {0.0f , 1.0f , 0.0f},
-        {1.0f , 1.0f , 0.0f},
-        {1.0f , 1.0f , 1.0f},
-        {0.0f , 1.0f , 1.0f},
-        {0.0f , 0.0f , 1.0f},
-        {1.0f , 0.0f , 1.0f},
-        {1.0f , 0.0f , 0.0f},
-        {0.0f , 0.0f , 0.0f},
-    };
-    for (uint32_t i = 0; i < vertices.size(); ++i) {
-        vertices[i] = (2.0f * vertices[i]) - math::Vec3(1.0f, 1.0f, 1.0f);
-    }
-    // Index buffer
-    static const std::vector<uint32_t> indices = {
-        // tri 0
-         0,  2,  1,
-         0,  3,  2,
-        // tri 1
-         4,  6,  5,
-         4,  7,  6,
-        // tri 2
-         8, 10,  9,
-         8, 11, 10,
-        // tri 3
-        12, 14, 13,
-        12, 15, 14,
-        // tri 4
-        16, 18, 17,
-        16, 19, 18,
-        // tri 5
-        20, 22, 21,
-        20, 23, 22,
-    };
-    static quartz::rendering::Primitive colliderPrimitive(
-        renderingDevice,
-        vertices,
-        indices
-    );
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
-        *(colliderPrimitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        *(m_boxColliderPrimitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
         offset
     );
     
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(colliderPrimitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        *(m_boxColliderPrimitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );
 
     // Draw using vertex and index buffer
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        36, /** @todo 2025/10/06 Needs to change based on the type of collider (type of model) */
+        m_boxColliderPrimitive.getIndexCount(),
         1,
         0,
         0,
