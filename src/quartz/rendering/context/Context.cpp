@@ -466,7 +466,7 @@ quartz::rendering::Context::recreateSwapchain(
         m_renderingInstance,
         m_renderingDevice
     );
-    
+
     m_renderingRenderPass.recreate(
         m_renderingDevice,
         m_renderingWindow

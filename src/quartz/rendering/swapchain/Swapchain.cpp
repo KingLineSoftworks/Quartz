@@ -6,6 +6,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
+#include "quartz/rendering/model/Primitive.hpp"
 #include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "util/errors/RichException.hpp"
 
@@ -730,7 +731,7 @@ quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
         {1.0f , 1.0f , 1.0f},
         {1.0f , 1.0f , 0.0f},
         {0.0f , 0.0f , 1.0f},
-        {0.0f , 0.0f , .0f},
+        {0.0f , 0.0f , 0.0f},
         {0.0f , 1.0f , 0.0f},
         {0.0f , 1.0f , 1.0f},
         {0.0f , 1.0f , 0.0f},
@@ -745,18 +746,6 @@ quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
     for (uint32_t i = 0; i < vertices.size(); ++i) {
         vertices[i] = (2.0f * vertices[i]) - math::Vec3(1.0f, 1.0f, 1.0f);
     }
-    static quartz::rendering::StagedBuffer stagedVertexBuffer(
-        renderingDevice,
-        sizeof(math::Vec3) * vertices.size(),
-        vk::BufferUsageFlagBits::eVertexBuffer,
-        vertices.data()
-    );
-    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
-        0,
-        *(stagedVertexBuffer.getVulkanLogicalBufferPtr()),
-        offset
-    );
-    
     // Index buffer
     static const std::vector<uint32_t> indices = {
         // tri 0
@@ -778,14 +767,19 @@ quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
         20, 22, 21,
         20, 23, 22,
     };
-    static quartz::rendering::StagedBuffer indexBuffer(
+    static quartz::rendering::Primitive colliderPrimitive(
         renderingDevice,
-        sizeof(uint32_t) * indices.size(),
-        vk::BufferUsageFlagBits::eIndexBuffer,
-        indices.data()
+        vertices,
+        indices
     );
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+        0,
+        *(colliderPrimitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        offset
+    );
+    
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(indexBuffer.getVulkanLogicalBufferPtr()),
+        *(colliderPrimitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );

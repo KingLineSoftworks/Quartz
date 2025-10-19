@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <vector>
 
 #include <glm/vec3.hpp>
@@ -362,6 +363,27 @@ quartz::rendering::Primitive::createStagedVertexBuffer(
 
     return stagedVertexBuffer;
 }
+
+quartz::rendering::Primitive::Primitive(
+    const quartz::rendering::Device& renderingDevice,
+    const std::vector<math::Vec3>& vertices,
+    const std::vector<uint32_t>& indices
+) :
+    m_materialMasterIndex(0),
+    m_indices(indices),
+    m_stagedVertexBuffer(
+        renderingDevice,
+        sizeof(math::Vec3) * vertices.size(),
+        vk::BufferUsageFlagBits::eVertexBuffer,
+        vertices.data()
+    ),
+    m_stagedIndexBuffer(
+        renderingDevice,
+        sizeof(uint32_t) * indices.size(),
+        vk::BufferUsageFlagBits::eIndexBuffer,
+        indices.data()
+    )
+{}
 
 quartz::rendering::Primitive::Primitive(
     const quartz::rendering::Device& renderingDevice,

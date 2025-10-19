@@ -2,6 +2,8 @@
 
 #include <tiny_gltf.h>
 
+#include "math/transform/Vec3.hpp"
+
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/buffer/StagedBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -16,6 +18,11 @@ namespace rendering {
 
 class quartz::rendering::Primitive {
 public: // member functions
+    Primitive(
+        const quartz::rendering::Device& renderingDevice,
+        const std::vector<math::Vec3>& vertices,
+        const std::vector<uint32_t>& indices
+    );
     Primitive(
         const quartz::rendering::Device& renderingDevice,
         const tinygltf::Model& gltfModel,
@@ -83,3 +90,4 @@ private: // member variables
     quartz::rendering::StagedBuffer m_stagedVertexBuffer;
     quartz::rendering::StagedBuffer m_stagedIndexBuffer;
 };
+
