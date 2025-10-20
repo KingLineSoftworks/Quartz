@@ -281,6 +281,10 @@ quartz::rendering::Swapchain::Swapchain(
     ),
     m_boxColliderPrimitive(
         renderingDevice,
+        /**
+         * @todo 2025/10/20 Move these anywhere else. Maybe these should be retrieved from a static variable or static
+         *    function within the primitive class
+         */
         {
             {-1.0f , -1.0f , -1.0f},
             { 1.0f , -1.0f , -1.0f},
@@ -724,34 +728,45 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 
 void
 quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
-    UNUSED const quartz::rendering::Device& renderingDevice, /** @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter @todo 2025/10/19 remove this parameter?? */
+    UNUSED const quartz::rendering::Device& renderingDevice, /** @todo 2025/10/19 remove this parameter ?? */
     const quartz::rendering::Pipeline& colliderRenderingPipeline,
-    UNUSED const quartz::physics::Collider& collider,
+    const quartz::physics::Collider& collider,
     const math::Vec3& position,
     const math::Quaternion& rotation,
     const uint32_t inFlightFrameIndex
 ) {
+    if (collider.getSphereShapeOptional()) {
+        return;
+    }
+    
     uint32_t offset = 0;
 
-    /**
-     * @todo 2025/10/06 Calculate the transformation matrix from the position, rotation, and scale of the collider.
-     *    We will be getting the scale from the collider itself (extents for collider, radius for sphere)
-     */
     const math::Transform transform(
         position,
         rotation,
-        {2, 2, 2}
+        collider.getBoxShapeOptional()->getHalfExtents_m()
     );
-    math::Mat4 transformationMatrix = transform.calculateTransformationMatrix();
+    const math::Mat4 transformationMatrix = transform.calculateTransformationMatrix();
 
     // Model matrix push constant info
-    const quartz::rendering::PushConstantInfo& transformationmatrixPushConstantInfo = colliderRenderingPipeline.getPushConstantInfos()[0];
+    const quartz::rendering::PushConstantInfo& transformationMatrixPushConstantInfo = colliderRenderingPipeline.getPushConstantInfos()[0];
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
         *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
-        transformationmatrixPushConstantInfo.getVulkanShaderStageFlags(),
-        transformationmatrixPushConstantInfo.getOffset(),
-        transformationmatrixPushConstantInfo.getSize(),
-        reinterpret_cast<void*>(&transformationMatrix)
+        transformationMatrixPushConstantInfo.getVulkanShaderStageFlags(),
+        transformationMatrixPushConstantInfo.getOffset(),
+        transformationMatrixPushConstantInfo.getSize(),
+        reinterpret_cast<const void*>(&transformationMatrix)
+    );
+
+    // Collider id push constant info
+    const uint32_t colliderId = collider.getId();
+    const quartz::rendering::PushConstantInfo& colliderIdPushConstantInfo = colliderRenderingPipeline.getPushConstantInfos()[1];
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+        *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        colliderIdPushConstantInfo.getVulkanShaderStageFlags(),
+        colliderIdPushConstantInfo.getOffset(),
+        colliderIdPushConstantInfo.getSize(),
+        reinterpret_cast<const void*>(&colliderId)
     );
 
     // Bind the descriptor set

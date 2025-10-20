@@ -236,7 +236,7 @@ quartz::rendering::Context::createColliderRenderingPipeline(
 
     const vk::VertexInputBindingDescription vertexInputBindingDescription(
         0,
-        sizeof(math::Vec3), // + sizeof(uint32_t),
+        sizeof(math::Vec3),
         vk::VertexInputRate::eVertex
     );
 
@@ -246,13 +246,7 @@ quartz::rendering::Context::createColliderRenderingPipeline(
             0,
             vk::Format::eR32G32B32Sfloat,
             0
-        ) //,
-        // vk::VertexInputAttributeDescription(
-        //     1,
-        //     0,
-        //     vk::Format::eR32Uint,
-        //     sizeof(math::Vec3)
-        // )
+        )
     };
 
     std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos = {
@@ -261,6 +255,12 @@ quartz::rendering::Context::createColliderRenderingPipeline(
             vk::ShaderStageFlagBits::eVertex,
             0,
             sizeof(math::Mat4)
+        ),
+        // perColliderVertexPushConstant (for collider id) 
+        quartz::rendering::PushConstantInfo(
+            vk::ShaderStageFlagBits::eFragment,
+            sizeof(math::Mat4),
+            sizeof(uint32_t)
         )
     };
 

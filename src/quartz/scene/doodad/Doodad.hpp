@@ -131,6 +131,7 @@ public: // member functions
 
     USE_LOGGER(DOODAD);
 
+    uint32_t getId() const { return m_id; }
     const std::optional<quartz::rendering::Model>& getModelOptional() const { return mo_model; }
     const math::Transform& getTransform() const { return m_transform; }
     const math::Mat4& getTransformationMatrix() const { return m_transformationMatrix; }
@@ -176,7 +177,12 @@ private: // static functions
     static void noopFixedUpdateCallback(FixedUpdateCallbackParameters parameters);
     static void noopUpdateCallback(UpdateCallbackParameters parameters);
 
+private: // static variables
+    static uint32_t doodadCount;
+
 private: // member variables
+    const uint32_t m_id;
+
     std::optional<quartz::rendering::Model> mo_model;
 
     math::Transform m_transform;
