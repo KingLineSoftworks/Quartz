@@ -391,7 +391,7 @@ void
 quartz::rendering::Context::draw(
     const quartz::scene::Scene& scene,
     const bool wireframeDoodadMode,
-    const bool wireframeColliderMode
+    const bool displayColliderMode
 ) {
     // set up
 
@@ -406,14 +406,14 @@ quartz::rendering::Context::draw(
     );
 
     const bool shouldRecreateDoodadPipeline = (m_doodadRenderingPipeline.getPolygonMode() == vk::PolygonMode::eFill) ?
-        wireframeDoodadMode || wireframeColliderMode:
-        !wireframeDoodadMode && !wireframeColliderMode;
+        wireframeDoodadMode || displayColliderMode:
+        !wireframeDoodadMode && !displayColliderMode;
     if (
         m_renderingSwapchain.getShouldRecreate() ||
         m_renderingWindow.getWasResized() ||
         shouldRecreateDoodadPipeline 
     ) {
-        recreateSwapchain(wireframeDoodadMode, wireframeColliderMode);
+        recreateSwapchain(wireframeDoodadMode, displayColliderMode);
         return;
     }
 
@@ -422,7 +422,7 @@ quartz::rendering::Context::draw(
     // update pipelines
     updateSkyBoxPipeline(cameraUBO);
     updateDoodadPipeline(scene, cameraUBO);
-    if (wireframeColliderMode) {
+    if (displayColliderMode) {
         updateColliderPipeline(cameraUBO);
     }
 
@@ -432,7 +432,7 @@ quartz::rendering::Context::draw(
     // record pipelines
     recordSkyBoxPipeline(scene);
     recordDoodadPipeline(scene);
-    if (wireframeColliderMode) {
+    if (displayColliderMode) {
         recordColliderPipeline(scene);
     }
 
@@ -442,7 +442,7 @@ quartz::rendering::Context::draw(
     // housekeeping
 
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        recreateSwapchain(wireframeDoodadMode, wireframeColliderMode);
+        recreateSwapchain(wireframeDoodadMode, displayColliderMode);
         return;
     }
 
@@ -452,7 +452,7 @@ quartz::rendering::Context::draw(
 void
 quartz::rendering::Context::recreateSwapchain(
     const bool wireframeDoodadMode,
-    const bool wireframeColliderMode
+    const bool displayColliderMode
 ) {
     LOG_FUNCTION_SCOPE_INFOthis("");
     m_renderingDevice.waitIdle();
@@ -477,8 +477,8 @@ quartz::rendering::Context::recreateSwapchain(
         m_renderingRenderPass
     );
 
-    LOG_INFOthis("Setting doodad pipeline polygon mode to: {}", wireframeDoodadMode || wireframeColliderMode ? "line" : "fill");
-    const vk::PolygonMode polygonMode = wireframeDoodadMode || wireframeColliderMode ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
+    LOG_INFOthis("Setting doodad pipeline polygon mode to: {}", wireframeDoodadMode || displayColliderMode ? "line" : "fill");
+    const vk::PolygonMode polygonMode = wireframeDoodadMode || displayColliderMode ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
     m_doodadRenderingPipeline.setPolygonMode(polygonMode);
     m_doodadRenderingPipeline.recreate(
         m_renderingDevice,
@@ -486,7 +486,7 @@ quartz::rendering::Context::recreateSwapchain(
     );
 
     /**
-     * @todo 2025/10/02 If we are not in wireframeColliderMode, we do not need to recreate this pipeline. Disable it somehow??
+     * @todo 2025/10/02 If we are not in displayColliderMode, we do not need to recreate this pipeline. Disable it somehow??
      */
     m_colliderRenderingPipeline.recreate(
         m_renderingDevice,

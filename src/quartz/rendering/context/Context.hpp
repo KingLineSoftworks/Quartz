@@ -47,7 +47,7 @@ public: // member functions
     void draw(
         const quartz::scene::Scene& scene,
         const bool wireframeDoodadMode,
-        const bool wireframeColliderMode
+        const bool displayColliderMode
     );
     void finish();
 
@@ -74,7 +74,7 @@ private: // static functions
 private: // member functions
     void recreateSwapchain(
         const bool wireframeDoodadMode,
-        const bool wireframeColliderMode
+        const bool displayColliderMode
     );
     void waitForImage();
     void updateSkyBoxPipeline( const quartz::scene::Camera::UniformBufferObject& cameraUBO);
