@@ -27,5 +27,5 @@ void main() {
     float greenValue = sin((pushConstant.colliderId * 3.4567) + (M_PI / 5.0)) * 0.5 + 0.5;
     float blueValue = sin((pushConstant.colliderId * 2.2222) + (M_PI / 7.0)) * 0.5 + 0.5;
 
-    out_fragmentColor = vec4(redValue, greenValue, blueValue, 0.50);
+    out_fragmentColor = vec4(redValue, greenValue, blueValue, 0.650);
 }
