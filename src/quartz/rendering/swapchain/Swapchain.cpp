@@ -287,8 +287,8 @@ quartz::rendering::Swapchain::Swapchain(
     ),
     m_sphereColliderPrimitive(
         renderingDevice,
-        quartz::rendering::Primitive::getCubeVertices(),
-        quartz::rendering::Primitive::getCubeIndices()
+        quartz::rendering::Primitive::getSphereVertices(),
+        quartz::rendering::Primitive::getSphereIndices()
     )
 
 {
