@@ -281,56 +281,8 @@ quartz::rendering::Swapchain::Swapchain(
     ),
     m_boxColliderPrimitive(
         renderingDevice,
-        /**
-         * @todo 2025/10/20 Move these anywhere else. Maybe these should be retrieved from a static variable or static
-         *    function within the primitive class
-         */
-        {
-            {-1.0f , -1.0f , -1.0f},
-            { 1.0f , -1.0f , -1.0f},
-            { 1.0f ,  1.0f , -1.0f},
-            {-1.0f ,  1.0f , -1.0f},
-            { 1.0f , -1.0f ,  1.0f},
-            {-1.0f , -1.0f ,  1.0f},
-            {-1.0f ,  1.0f ,  1.0f},
-            { 1.0f ,  1.0f ,  1.0f},
-            { 1.0f , -1.0f , -1.0f},
-            { 1.0f , -1.0f ,  1.0f},
-            { 1.0f ,  1.0f ,  1.0f},
-            { 1.0f ,  1.0f , -1.0f},
-            {-1.0f , -1.0f ,  1.0f},
-            {-1.0f , -1.0f , -1.0f},
-            {-1.0f ,  1.0f , -1.0f},
-            {-1.0f ,  1.0f ,  1.0f},
-            {-1.0f ,  1.0f , -1.0f},
-            { 1.0f ,  1.0f , -1.0f},
-            { 1.0f ,  1.0f ,  1.0f},
-            {-1.0f ,  1.0f ,  1.0f},
-            {-1.0f , -1.0f ,  1.0f},
-            { 1.0f , -1.0f ,  1.0f},
-            { 1.0f , -1.0f , -1.0f},
-            {-1.0f , -1.0f , -1.0f},
-        },
-        {
-            // tri 0
-             0,  2,  1,
-             0,  3,  2,
-            // tri 1
-             4,  6,  5,
-             4,  7,  6,
-            // tri 2
-             8, 10,  9,
-             8, 11, 10,
-            // tri 3
-            12, 14, 13,
-            12, 15, 14,
-            // tri 4
-            16, 18, 17,
-            16, 19, 18,
-            // tri 5
-            20, 22, 21,
-            20, 23, 22,
-        }
+        quartz::rendering::Primitive::getCubeVertices(),
+        quartz::rendering::Primitive::getCubeIndices()
     )
 {
     LOG_FUNCTION_CALL_TRACEthis("");

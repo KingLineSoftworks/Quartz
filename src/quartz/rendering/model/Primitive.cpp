@@ -17,6 +17,65 @@
 #include "quartz/rendering/model/Vertex.hpp"
 #include "quartz/rendering/texture/Texture.hpp"
 
+std::vector<math::Vec3>
+quartz::rendering::Primitive::getCubeVertices() {
+    return {
+        {-1.0f , -1.0f , -1.0f},
+        { 1.0f , -1.0f , -1.0f},
+        { 1.0f ,  1.0f , -1.0f},
+        {-1.0f ,  1.0f , -1.0f},
+        { 1.0f , -1.0f ,  1.0f},
+        {-1.0f , -1.0f ,  1.0f},
+        {-1.0f ,  1.0f ,  1.0f},
+        { 1.0f ,  1.0f ,  1.0f},
+        { 1.0f , -1.0f , -1.0f},
+        { 1.0f , -1.0f ,  1.0f},
+        { 1.0f ,  1.0f ,  1.0f},
+        { 1.0f ,  1.0f , -1.0f},
+        {-1.0f , -1.0f ,  1.0f},
+        {-1.0f , -1.0f , -1.0f},
+        {-1.0f ,  1.0f , -1.0f},
+        {-1.0f ,  1.0f ,  1.0f},
+        {-1.0f ,  1.0f , -1.0f},
+        { 1.0f ,  1.0f , -1.0f},
+        { 1.0f ,  1.0f ,  1.0f},
+        {-1.0f ,  1.0f ,  1.0f},
+        {-1.0f , -1.0f ,  1.0f},
+        { 1.0f , -1.0f ,  1.0f},
+        { 1.0f , -1.0f , -1.0f},
+        {-1.0f , -1.0f , -1.0f},
+    };
+}
+
+std::vector<uint32_t>
+quartz::rendering::Primitive::getCubeIndices() {
+    return {
+        // tri 0
+         0,  2,  1,
+         0,  3,  2,
+
+        // tri 1
+         4,  6,  5,
+         4,  7,  6,
+
+        // tri 2
+         8, 10,  9,
+         8, 11, 10,
+
+        // tri 3
+        12, 14, 13,
+        12, 15, 14,
+
+        // tri 4
+        16, 18, 17,
+        16, 19, 18,
+
+        // tri 5
+        20, 22, 21,
+        20, 23, 22,
+    };
+}
+
 bool
 quartz::rendering::Primitive::handleMissingVertexAttribute(
     std::vector<quartz::rendering::Vertex>& verticesToPopulate,
