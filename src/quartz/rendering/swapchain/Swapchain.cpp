@@ -12,6 +12,7 @@
 #include "math/transform/Mat4.hpp"
 
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/model/Basics.hpp"
 #include "quartz/rendering/model/Primitive.hpp"
 #include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
@@ -282,13 +283,13 @@ quartz::rendering::Swapchain::Swapchain(
     ),
     m_boxColliderPrimitive(
         renderingDevice,
-        quartz::rendering::Primitive::getCubeVertices(),
-        quartz::rendering::Primitive::getCubeIndices()
+        quartz::rendering::Basics::getCubeVertices(),
+        quartz::rendering::Basics::getCubeIndices()
     ),
     m_sphereColliderPrimitive(
         renderingDevice,
-        quartz::rendering::Primitive::getSphereVertices(),
-        quartz::rendering::Primitive::getSphereIndices()
+        quartz::rendering::Basics::getSphereVertices(),
+        quartz::rendering::Basics::getSphereIndices()
     )
 
 {

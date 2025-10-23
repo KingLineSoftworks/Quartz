@@ -4,6 +4,10 @@
 add_library(
     QUARTZ_RENDERING_Model
     SHARED
+
+    Basics.hpp
+    Basics.cpp
+
     Mesh.hpp
     Mesh.cpp
 
@@ -43,8 +47,8 @@ target_compile_definitions(
 )
 
 target_compile_definitions(
-        QUARTZ_RENDERING_Model
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_RENDERING_Model
+    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
@@ -66,3 +70,4 @@ target_link_libraries(
     QUARTZ_RENDERING_Material
     QUARTZ_RENDERING_Texture
 )
+

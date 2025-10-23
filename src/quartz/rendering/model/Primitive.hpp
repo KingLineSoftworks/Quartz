@@ -17,12 +17,6 @@ namespace rendering {
 }
 
 class quartz::rendering::Primitive {
-public: // static functions
-    static std::vector<math::Vec3> getCubeVertices();
-    static std::vector<uint32_t> getCubeIndices();
-    static std::vector<math::Vec3> getSphereVertices();
-    static std::vector<uint32_t> getSphereIndices();
-
 public: // member functions
     Primitive(
         const quartz::rendering::Device& renderingDevice,
