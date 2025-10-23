@@ -301,6 +301,13 @@ add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/scene")
 add_subdirectory("${QUARTZ_SOURCE_DIR}/scene/sky_box")
 
 #====================================================================
+# Tooling
+#====================================================================
+
+include(CreateToolExecutable)
+add_subdirectory("${QUARTZ_ROOT_SOURCE_DIR}/tools")
+
+#====================================================================
 # The tests
 #====================================================================
 
