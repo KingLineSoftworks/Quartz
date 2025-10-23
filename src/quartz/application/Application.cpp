@@ -40,7 +40,7 @@ quartz::Application::Application(
     m_isPaused(false),
     m_sceneDebugMode(false),
     m_wireframeDoodadMode(false),
-    m_wireframeColliderMode(false)
+    m_displayColliderMode(false)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -103,7 +103,7 @@ void quartz::Application::run() {
         double frameInterpolationFactor = (frameTimeAccumulator + targetTickTimeDelta) / targetTickTimeDelta;
 
         currentScene.update(m_renderingContext.getRenderingWindow(), m_inputManager, totalElapsedTime, currentFrameTimeDelta, frameInterpolationFactor);
-        m_renderingContext.draw(currentScene, m_wireframeDoodadMode, m_wireframeColliderMode);
+        m_renderingContext.draw(currentScene, m_wireframeDoodadMode, m_displayColliderMode);
     }
 
     LOG_INFOthis("Unloading scene");
@@ -158,7 +158,7 @@ quartz::Application::determineSceneDebugMode(
 
     if (!m_sceneDebugMode) {
         m_wireframeDoodadMode = false;
-        m_wireframeColliderMode = false;
+        m_displayColliderMode = false;
         return;
     }
 
@@ -168,7 +168,7 @@ quartz::Application::determineSceneDebugMode(
     }
 
     if (shouldToggleWireframeColliderMode) {
-        m_wireframeColliderMode = !m_wireframeColliderMode;
-        LOG_INFOthis("{} collider wireframe mode", (m_wireframeColliderMode ? "Entering" : "Exiting"));
+        m_displayColliderMode = !m_displayColliderMode;
+        LOG_INFOthis("{} collider wireframe mode", (m_displayColliderMode ? "Entering" : "Exiting"));
     }
 }

@@ -3,13 +3,18 @@
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 #include "util/errors/RichException.hpp"
+#include "util/logger/Logger.hpp"
 
 #include "math/transform/Mat4.hpp"
 
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/model/Basics.hpp"
+#include "quartz/rendering/model/Primitive.hpp"
+#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -275,7 +280,18 @@ quartz::rendering::Swapchain::Swapchain(
             renderingDevice.getVulkanLogicalDevicePtr(),
             maxNumFramesInFlight
         )
+    ),
+    m_boxColliderPrimitive(
+        renderingDevice,
+        quartz::rendering::Basics::getCubeVertices(),
+        quartz::rendering::Basics::getCubeIndices()
+    ),
+    m_sphereColliderPrimitive(
+        renderingDevice,
+        quartz::rendering::Basics::getSphereVertices(),
+        quartz::rendering::Basics::getSphereIndices()
     )
+
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -668,6 +684,84 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
             );
         }
     }
+}
+
+void
+quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
+    const quartz::rendering::Pipeline& colliderRenderingPipeline,
+    const quartz::physics::Collider& collider,
+    const math::Vec3& position,
+    const math::Quaternion& rotation,
+    const uint32_t inFlightFrameIndex
+) {
+    const quartz::rendering::Primitive& colliderPrimitive = collider.getBoxShapeOptional() ?
+        m_boxColliderPrimitive :
+        m_sphereColliderPrimitive;
+    
+    uint32_t offset = 0;
+
+    const math::Vec3 scale = collider.getBoxShapeOptional() ?
+        collider.getBoxShapeOptional()->getHalfExtents_m() :
+        math::Vec3(collider.getSphereShapeOptional()->getRadius_m());
+    const math::Transform transform(
+        position,
+        rotation,
+        scale
+    );
+    const math::Mat4 transformationMatrix = transform.calculateTransformationMatrix();
+
+    // Model matrix push constant info
+    const quartz::rendering::PushConstantInfo& transformationMatrixPushConstantInfo = colliderRenderingPipeline.getPushConstantInfos()[0];
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+        *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        transformationMatrixPushConstantInfo.getVulkanShaderStageFlags(),
+        transformationMatrixPushConstantInfo.getOffset(),
+        transformationMatrixPushConstantInfo.getSize(),
+        reinterpret_cast<const void*>(&transformationMatrix)
+    );
+
+    // Collider id push constant info
+    const uint32_t colliderId = collider.getId();
+    const quartz::rendering::PushConstantInfo& colliderIdPushConstantInfo = colliderRenderingPipeline.getPushConstantInfos()[1];
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->pushConstants(
+        *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        colliderIdPushConstantInfo.getVulkanShaderStageFlags(),
+        colliderIdPushConstantInfo.getOffset(),
+        colliderIdPushConstantInfo.getSize(),
+        reinterpret_cast<const void*>(&colliderId)
+    );
+
+    // Bind the descriptor set
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        *colliderRenderingPipeline.getVulkanPipelineLayoutPtr(),
+        0,
+        1,
+        &(colliderRenderingPipeline.getVulkanDescriptorSets()[inFlightFrameIndex]),
+        0,
+        &offset
+    );
+
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
+        0,
+        *(colliderPrimitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        offset
+    );
+    
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
+        *(colliderPrimitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        0,
+        vk::IndexType::eUint32
+    );
+
+    // Draw using vertex and index buffer
+    m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
+        colliderPrimitive.getIndexCount(),
+        1,
+        0,
+        0,
+        0
+    );
 }
 
 void

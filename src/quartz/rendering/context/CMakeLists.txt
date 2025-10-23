@@ -21,12 +21,14 @@ target_compile_options(
 
 target_compile_definitions(
     QUARTZ_RENDERING_Context
-    PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    PUBLIC
+    ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_compile_definitions(
-        QUARTZ_RENDERING_Context
-        PUBLIC ${QUARTZ_COMPILE_DEFINITIONS}
+    QUARTZ_RENDERING_Context
+    PUBLIC
+    ${QUARTZ_COMPILE_DEFINITIONS}
 )
 
 target_link_libraries(
@@ -57,3 +59,4 @@ target_link_libraries(
     QUARTZ_SCENE_Light
     QUARTZ_SCENE_Scene
 )
+

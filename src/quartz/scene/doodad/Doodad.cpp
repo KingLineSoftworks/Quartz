@@ -12,6 +12,8 @@
 #include "quartz/physics/field/Field.hpp"
 #include "quartz/scene/doodad/Doodad.hpp"
 
+uint32_t quartz::scene::Doodad::doodadCount = 0;
+
 void
 quartz::scene::Doodad::noopAwakenCallback(
     UNUSED quartz::scene::Doodad::AwakenCallbackParameters parameters
@@ -84,6 +86,7 @@ quartz::scene::Doodad::Doodad(
     const quartz::scene::Doodad::FixedUpdateCallback& fixedUpdateCallback,
     const quartz::scene::Doodad::UpdateCallback& updateCallback
 ) :
+    m_id(quartz::scene::Doodad::doodadCount++),
     mo_model(
         o_objectFilepath ?
             std::optional<quartz::rendering::Model>(quartz::rendering::Model(renderingDevice, *o_objectFilepath)) :
@@ -101,7 +104,7 @@ quartz::scene::Doodad::Doodad(
     m_updateCallback(updateCallback ? updateCallback : quartz::scene::Doodad::noopUpdateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
-    LOG_TRACEthis("Constructing doodad with transform:");
+    LOG_TRACEthis("Constructing doodad {} with transform:", m_id);
     LOG_TRACE(DOODAD, "  position = {}", m_transform.position.toString());
     LOG_TRACE(DOODAD, "  rotation = {}", m_transform.rotation.toString());
     LOG_TRACE(DOODAD, "  scale    = {}", m_transform.scale.toString());
@@ -113,6 +116,7 @@ quartz::scene::Doodad::Doodad(
     std::optional<quartz::physics::Field>& o_field,
     const quartz::scene::Doodad::Parameters& doodadParameters
 ) :
+    m_id(quartz::scene::Doodad::doodadCount++),
     mo_model(
         doodadParameters.o_objectFilepath ?
             std::optional<quartz::rendering::Model>(quartz::rendering::Model(renderingDevice, *doodadParameters.o_objectFilepath)) :
@@ -130,7 +134,7 @@ quartz::scene::Doodad::Doodad(
     m_updateCallback(doodadParameters.updateCallback ? doodadParameters.updateCallback : quartz::scene::Doodad::noopUpdateCallback)
 {
     LOG_FUNCTION_CALL_TRACEthis("");
-    LOG_TRACEthis("Constructing doodad with transform:");
+    LOG_TRACEthis("Constructing doodad {} with transform:", m_id);
     LOG_TRACE(DOODAD, "  position = {}", m_transform.position.toString());
     LOG_TRACE(DOODAD, "  rotation = {}", m_transform.rotation.toString());
     LOG_TRACE(DOODAD, "  scale    = {}", m_transform.scale.toString());
@@ -139,6 +143,7 @@ quartz::scene::Doodad::Doodad(
 quartz::scene::Doodad::Doodad(
     quartz::scene::Doodad&& other
 ) :
+    m_id(other.m_id),
     mo_model(std::move(other.mo_model)),
     m_transform(other.m_transform),
     m_transformationMatrix(other.m_transformationMatrix),

@@ -56,7 +56,7 @@ UT_FUNCTION(test_construction) {
 }
 
 UT_FUNCTION(test_high_level) {
-    quartz::rendering::Instance renderingInstance("DOODAD_UT", 9, 9, 9, true);
+    quartz::rendering::Instance renderingInstance("SCENE_UT", 9, 9, 9, true);
     quartz::rendering::Device renderingDevice(renderingInstance);
 
     quartz::managers::PhysicsManager& physicsManager = quartz::unit_test::PhysicsManagerUnitTestClient::getInstance();

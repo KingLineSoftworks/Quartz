@@ -1,8 +1,8 @@
 #====================================================================
-# Functionality for easily creating scratch tests
+# Functionality for easily creating tooling executables tests
 #====================================================================
 
-function(create_scratch_executable main_file)
+function(create_tool_executable main_file)
     get_filename_component(executable_name ${main_file} NAME_WE)
     add_executable(${executable_name} ${main_file})
 
@@ -14,6 +14,6 @@ function(create_scratch_executable main_file)
 
     target_link_libraries(${executable_name} PRIVATE ${link_libraries} UTIL_Logger)
 
-    set_target_properties(${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/scratch)
+    set_target_properties(${executable_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tools)
 endfunction()
 

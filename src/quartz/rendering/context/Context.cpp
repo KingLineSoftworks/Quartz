@@ -1,10 +1,19 @@
 #include <cstdint>
 #include <string>
 
-#include "math/transform/Mat4.hpp"
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
+#include "math/transform/Mat4.hpp"
+#include "math/transform/Quaternion.hpp"
+#include "math/transform/Vec3.hpp"
+
+#include "util/logger/Logger.hpp"
 #include "util/file_system/FileSystem.hpp"
 
+#include "quartz/physics/collider/Collider.hpp"
+#include "quartz/physics/rigid_body/RigidBody.hpp"
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/context/Context.hpp"
 #include "quartz/rendering/cube_map/CubeMap.hpp"
@@ -19,7 +28,6 @@
 #include "quartz/scene/light/DirectionalLight.hpp"
 #include "quartz/scene/light/PointLight.hpp"
 #include "quartz/scene/light/SpotLight.hpp"
-#include "util/logger/Logger.hpp"
 
 quartz::rendering::Pipeline
 quartz::rendering::Context::createSkyBoxRenderingPipeline(
@@ -32,7 +40,7 @@ quartz::rendering::Context::createSkyBoxRenderingPipeline(
 
     std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
         // camera
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(quartz::scene::Camera::UniformBufferObject),
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             0,
@@ -40,7 +48,7 @@ quartz::rendering::Context::createSkyBoxRenderingPipeline(
             sizeof(quartz::scene::Camera::UniformBufferObject),
             false,
             vk::ShaderStageFlagBits::eVertex
-        }
+        )
     };
 
     quartz::rendering::UniformSamplerCubeInfo uniformSamplerCubeInfo(
@@ -60,6 +68,7 @@ quartz::rendering::Context::createSkyBoxRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::CubeMap::getVulkanVertexInputBindingDescription(),
         quartz::rendering::CubeMap::getVulkanVertexInputAttributeDescriptions(),
+        vk::PolygonMode::eFill,
         vk::CullModeFlagBits::eFront,
         false,
         {},
@@ -81,23 +90,24 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
 
     std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos = {
         // perObjectVertexPushConstant (for model matrix)
-        {
+        quartz::rendering::PushConstantInfo(
             vk::ShaderStageFlagBits::eVertex,
             0,
             sizeof(math::Mat4)
-        },
+        ),
         // dummy
-        {
+        quartz::rendering::PushConstantInfo(
             vk::ShaderStageFlagBits::eFragment,
             sizeof(math::Mat4),
             sizeof(uint32_t)
-        }
+        )
     };
 
-    const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(renderingDevice, sizeof(quartz::rendering::Material::UniformBufferObject));
+    const uint32_t minUniformBufferOffsetAlignment = renderingDevice.getVulkanPhysicalDevice().getProperties().limits.minUniformBufferOffsetAlignment;
+    const uint32_t materialByteStride = quartz::rendering::UniformBufferInfo::calculateDynamicUniformBufferByteStride(minUniformBufferOffsetAlignment, sizeof(quartz::rendering::Material::UniformBufferObject));
     std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
         // the camera
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(quartz::scene::Camera::UniformBufferObject),
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             0,
@@ -105,9 +115,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(quartz::scene::Camera::UniformBufferObject),
             false,
             vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the ambient light
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(quartz::scene::AmbientLight),
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             1,
@@ -115,9 +125,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(quartz::scene::AmbientLight),
             false,
             vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the directional light
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(quartz::scene::DirectionalLight),
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             2,
@@ -125,9 +135,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(quartz::scene::DirectionalLight),
             false,
             vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the number of point lights
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(uint32_t),
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             3,
@@ -135,9 +145,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(uint32_t),
             false,
             vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the point lights
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(quartz::scene::PointLight) * QUARTZ_MAX_NUMBER_POINT_LIGHTS,
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             4,
@@ -145,9 +155,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(quartz::scene::PointLight),
             false,
             vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the number of spot lights
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(uint32_t),
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             5,
@@ -155,9 +165,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(uint32_t),
             false,
             vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the spot lights
-        {
+        quartz::rendering::UniformBufferInfo(
             sizeof(quartz::scene::SpotLight) * QUARTZ_MAX_NUMBER_SPOT_LIGHTS,
             vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
             6,
@@ -165,9 +175,9 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             sizeof(quartz::scene::SpotLight),
             false,
             vk::ShaderStageFlagBits::eFragment
-        },
+        ),
         // the materials
-        {
+        quartz::rendering::UniformBufferInfo(
             materialByteStride * QUARTZ_MAX_NUMBER_MATERIALS,
             vk::MemoryPropertyFlagBits::eHostVisible,
             9,
@@ -175,7 +185,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
             materialByteStride,
             true,
             vk::ShaderStageFlagBits::eFragment
-        },
+        )
     };
 
     quartz::rendering::UniformSamplerInfo uniformSamplerInfo(
@@ -204,6 +214,7 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         maxNumFramesInFlight,
         quartz::rendering::Vertex::getVulkanVertexInputBindingDescription(),
         quartz::rendering::Vertex::getVulkanVertexInputAttributeDescriptions(),
+        vk::PolygonMode::eFill,
         vk::CullModeFlagBits::eBack,
         true,
         pushConstantInfos,
@@ -211,6 +222,81 @@ quartz::rendering::Context::createDoodadRenderingPipeline(
         std::nullopt,
         uniformSamplerInfo,
         uniformTextureArrayInfo
+    };
+}
+
+quartz::rendering::Pipeline
+quartz::rendering::Context::createColliderRenderingPipeline(
+    const quartz::rendering::Device& renderingDevice,
+    const quartz::rendering::Window& renderingWindow,
+    const quartz::rendering::RenderPass& renderingRenderPass,
+    const uint32_t maxNumFramesInFlight
+) {
+    LOG_FUNCTION_SCOPE_DEBUG(CONTEXT, "");
+
+    const vk::VertexInputBindingDescription vertexInputBindingDescription(
+        0,
+        sizeof(math::Vec3),
+        vk::VertexInputRate::eVertex
+    );
+
+    const std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescription = {
+        vk::VertexInputAttributeDescription(
+            0,
+            0,
+            vk::Format::eR32G32B32Sfloat,
+            0
+        )
+    };
+
+    std::vector<quartz::rendering::PushConstantInfo> pushConstantInfos = {
+        // perObjectVertexPushConstant (for model matrix)
+        quartz::rendering::PushConstantInfo(
+            vk::ShaderStageFlagBits::eVertex,
+            0,
+            sizeof(math::Mat4)
+        ),
+        // perColliderVertexPushConstant (for collider id) 
+        quartz::rendering::PushConstantInfo(
+            vk::ShaderStageFlagBits::eFragment,
+            sizeof(math::Mat4),
+            sizeof(uint32_t)
+        )
+    };
+
+    std::vector<quartz::rendering::UniformBufferInfo> uniformBufferInfos = {
+        // the camera
+        quartz::rendering::UniformBufferInfo(
+            sizeof(quartz::scene::Camera::UniformBufferObject),
+            vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+            0,
+            1,
+            sizeof(quartz::scene::Camera::UniformBufferObject),
+            false,
+            vk::ShaderStageFlagBits::eVertex
+        )
+    };
+
+    LOG_DEBUG(PIPELINE, "Using {} push constants", pushConstantInfos.size());
+    LOG_DEBUG(PIPELINE, "Using {} uniform buffers", uniformBufferInfos.size());
+
+    return {
+        renderingDevice,
+        renderingWindow,
+        renderingRenderPass,
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("collider.vert"),
+        util::FileSystem::getCompiledShaderAbsoluteFilepath("collider.frag"),
+        maxNumFramesInFlight,
+        vertexInputBindingDescription,
+        vertexInputAttributeDescription,
+        vk::PolygonMode::eFill,
+        vk::CullModeFlagBits::eBack,
+        true,
+        pushConstantInfos,
+        uniformBufferInfos,
+        std::nullopt,
+        std::nullopt,
+        std::nullopt 
     };
 }
 
@@ -260,6 +346,14 @@ quartz::rendering::Context::Context(
             m_maxNumFramesInFlight
         )
     ),
+    m_colliderRenderingPipeline(
+        quartz::rendering::Context::createColliderRenderingPipeline(
+            m_renderingDevice,
+            m_renderingWindow,
+            m_renderingRenderPass,
+            m_maxNumFramesInFlight
+        )
+    ),
     m_renderingSwapchain(
         m_renderingDevice,
         m_renderingWindow,
@@ -287,14 +381,17 @@ quartz::rendering::Context::loadScene(const quartz::scene::Scene& scene) {
     m_doodadRenderingPipeline.updateSamplerDescriptorSets(m_renderingDevice, quartz::rendering::Texture::getDefaultVulkanSamplerPtr());
     m_doodadRenderingPipeline.updateTextureArrayDescriptorSets(m_renderingDevice, quartz::rendering::Texture::getMasterTextureList());
 
+    LOG_DEBUGthis("Updating collider rendering pipeline's descriptor sets");
+    m_colliderRenderingPipeline.updateUniformBufferDescriptorSets(m_renderingDevice);
+
     m_renderingSwapchain.setScreenClearColor(scene.getScreenClearColor());
 }
 
 void
 quartz::rendering::Context::draw(
     const quartz::scene::Scene& scene,
-    UNUSED const bool wireframeDoodadMode,
-    UNUSED const bool wireframeColliderMode
+    const bool wireframeDoodadMode,
+    const bool displayColliderMode
 ) {
     // set up
 
@@ -308,8 +405,15 @@ quartz::rendering::Context::draw(
         m_currentInFlightFrameIndex
     );
 
-    if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        recreateSwapchain();
+    const bool shouldRecreateDoodadPipeline = (m_doodadRenderingPipeline.getPolygonMode() == vk::PolygonMode::eFill) ?
+        wireframeDoodadMode || displayColliderMode:
+        !wireframeDoodadMode && !displayColliderMode;
+    if (
+        m_renderingSwapchain.getShouldRecreate() ||
+        m_renderingWindow.getWasResized() ||
+        shouldRecreateDoodadPipeline 
+    ) {
+        recreateSwapchain(wireframeDoodadMode, displayColliderMode);
         return;
     }
 
@@ -318,6 +422,9 @@ quartz::rendering::Context::draw(
     // update pipelines
     updateSkyBoxPipeline(cameraUBO);
     updateDoodadPipeline(scene, cameraUBO);
+    if (displayColliderMode) {
+        updateColliderPipeline(cameraUBO);
+    }
 
     // reset
     resetSwapchain(availableSwapchainImageIndex);
@@ -325,6 +432,9 @@ quartz::rendering::Context::draw(
     // record pipelines
     recordSkyBoxPipeline(scene);
     recordDoodadPipeline(scene);
+    if (displayColliderMode) {
+        recordColliderPipeline(scene);
+    }
 
     // submit
     submitImage(availableSwapchainImageIndex);
@@ -332,7 +442,7 @@ quartz::rendering::Context::draw(
     // housekeeping
 
     if (m_renderingSwapchain.getShouldRecreate() || m_renderingWindow.getWasResized()) {
-        recreateSwapchain();
+        recreateSwapchain(wireframeDoodadMode, displayColliderMode);
         return;
     }
 
@@ -340,7 +450,10 @@ quartz::rendering::Context::draw(
 }
 
 void
-quartz::rendering::Context::recreateSwapchain() {
+quartz::rendering::Context::recreateSwapchain(
+    const bool wireframeDoodadMode,
+    const bool displayColliderMode
+) {
     LOG_FUNCTION_SCOPE_INFOthis("");
     m_renderingDevice.waitIdle();
 
@@ -353,18 +466,33 @@ quartz::rendering::Context::recreateSwapchain() {
         m_renderingInstance,
         m_renderingDevice
     );
+
     m_renderingRenderPass.recreate(
         m_renderingDevice,
         m_renderingWindow
     );
+
     m_skyBoxRenderingPipeline.recreate(
         m_renderingDevice,
         m_renderingRenderPass
     );
+
+    LOG_INFOthis("Setting doodad pipeline polygon mode to: {}", wireframeDoodadMode || displayColliderMode ? "line" : "fill");
+    const vk::PolygonMode polygonMode = wireframeDoodadMode || displayColliderMode ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
+    m_doodadRenderingPipeline.setPolygonMode(polygonMode);
     m_doodadRenderingPipeline.recreate(
         m_renderingDevice,
         m_renderingRenderPass
     );
+
+    /**
+     * @todo 2025/10/02 If we are not in displayColliderMode, we do not need to recreate this pipeline. Disable it somehow??
+     */
+    m_colliderRenderingPipeline.recreate(
+        m_renderingDevice,
+        m_renderingRenderPass
+    );
+
     m_renderingSwapchain.recreate(
         m_renderingDevice,
         m_renderingWindow,
@@ -420,6 +548,13 @@ quartz::rendering::Context::updateDoodadPipeline(
 }
 
 void
+quartz::rendering::Context::updateColliderPipeline(
+    const quartz::scene::Camera::UniformBufferObject& cameraUBO
+) {
+    m_colliderRenderingPipeline.updateUniformBuffer(m_currentInFlightFrameIndex, 0, &cameraUBO);
+}
+
+void
 quartz::rendering::Context::resetSwapchain(
     const uint32_t availableSwapchainImageIndex
 ) {
@@ -468,6 +603,39 @@ quartz::rendering::Context::recordDoodadPipeline(
             m_renderingDevice,
             m_doodadRenderingPipeline,
             doodad,
+            m_currentInFlightFrameIndex
+        );
+    }
+}
+
+void
+quartz::rendering::Context::recordColliderPipeline(
+    const quartz::scene::Scene& scene
+) {
+    m_renderingSwapchain.bindPipelineToDrawingCommandBuffer(
+        m_renderingWindow,
+        m_colliderRenderingPipeline,
+        m_currentInFlightFrameIndex
+    );
+
+    for (const quartz::scene::Doodad& doodad : scene.getDoodads()) {
+        const std::optional<quartz::physics::RigidBody>& o_rigidBody = doodad.getRigidBodyOptional();
+        if (!o_rigidBody) {
+            continue;
+        }
+
+        const std::optional<quartz::physics::Collider>& o_collider = o_rigidBody->getColliderOptional();
+        if (!o_collider) {
+            continue;
+        }
+
+        math::Vec3 colliderPosition = o_rigidBody->getPosition();
+        math::Quaternion colliderRotation = o_rigidBody->getRotation();
+        m_renderingSwapchain.recordColliderToDrawingCommandBuffer(
+            m_colliderRenderingPipeline,
+            *o_collider,
+            colliderPosition,
+            colliderRotation,
             m_currentInFlightFrameIndex
         );
     }

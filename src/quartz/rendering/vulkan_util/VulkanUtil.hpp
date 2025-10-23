@@ -1,9 +1,11 @@
 #pragma once
 
+#include <ostream>
 #include <string>
 #include <vector>
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 namespace quartz {
 namespace rendering {
@@ -19,9 +21,12 @@ public: // static functions
 
     // ----- stringifying things ----- //
 
-    static std::string toString(const vk::DescriptorType descriptorType);
-    static std::string toString(const vk::ImageCreateFlags flags);
+    static std::string toString(const vk::DescriptorType type);
     static std::string toString(const vk::ImageViewType type);
+    static std::string toString(const vk::ImageCreateFlags flags);
+    static std::string toString(const vk::BufferUsageFlags flags);
+    static std::string toString(const vk::MemoryPropertyFlags flags);
+    static std::string toString(const vk::ShaderStageFlags flags);
 
     // ----- image, image view, smapler things ----- //
 
@@ -57,3 +62,9 @@ public: // static functions
         const uint32_t desiredCommandBufferCount
     );
 };
+
+std::ostream& operator<<(std::ostream& os, const vk::DescriptorType flags);
+std::ostream& operator<<(std::ostream& os, const vk::BufferUsageFlags flags);
+std::ostream& operator<<(std::ostream& os, const vk::MemoryPropertyFlags flags);
+std::ostream& operator<<(std::ostream& os, const vk::ShaderStageFlags flags);
+

@@ -43,7 +43,7 @@ public: // member functions
 
     bool getSceneDebugMode() const { return m_sceneDebugMode; }
     bool getWireframeDoodadMode() const { return m_wireframeDoodadMode; }
-    bool getWireframeColliderMode() const { return m_wireframeColliderMode; }
+    bool getWireframeColliderMode() const { return m_displayColliderMode; }
 
     void run();
 
@@ -75,7 +75,7 @@ private: // member variables
 
     bool m_sceneDebugMode;
     bool m_wireframeDoodadMode;
-    bool m_wireframeColliderMode;
+    bool m_displayColliderMode;
 
 private: // friends
     friend class quartz::unit_test::ApplicationUnitTestClient;

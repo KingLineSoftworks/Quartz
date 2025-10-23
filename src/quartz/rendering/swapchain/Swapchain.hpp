@@ -6,6 +6,7 @@
 
 #include "math/transform/Vec3.hpp"
 
+#include "quartz/physics/collider/Collider.hpp"
 #include "quartz/rendering/Loggers.hpp"
 #include "quartz/rendering/depth_buffer/DepthBuffer.hpp"
 #include "quartz/rendering/device/Device.hpp"
@@ -79,6 +80,13 @@ public: // member functions
         const quartz::scene::Doodad& doodad,
         const uint32_t inFlightFrameIndex
     );
+    void recordColliderToDrawingCommandBuffer(
+        const quartz::rendering::Pipeline& colliderRenderingPipeline,
+        const quartz::physics::Collider& collider,
+        const math::Vec3& position,
+        const math::Quaternion& rotation,
+        const uint32_t inFlightFrameIndex
+    );
     void endAndSubmitDrawingCommandBuffer(
         const quartz::rendering::Device& renderingDevice,
         const uint32_t inFlightFrameIndex
@@ -137,4 +145,12 @@ private: // member variables
     std::vector<vk::UniqueSemaphore> m_vulkanImageAvailableSemaphorePtrs;
     std::vector<vk::UniqueSemaphore> m_vulkanRenderFinishedSemaphorePtrs;
     std::vector<vk::UniqueFence> m_vulkanInFlightFencePtrs;
+
+    /**
+     * @brief 2025/10/19 I don't really think that these belong here, but I can't
+     *    think of a better place to put them
+     */
+    quartz::rendering::Primitive m_boxColliderPrimitive;
+    quartz::rendering::Primitive m_sphereColliderPrimitive;
 };
+

@@ -110,6 +110,7 @@ public: // member functions
 
     quartz::physics::Collider::CategoryProperties getCategoryProperties() const;
 
+    uint32_t getId() const { return m_id; }
     bool getIsTrigger() const;
     math::Vec3 getLocalPosition() const;
     math::Quaternion getLocalRotation() const;
@@ -145,9 +146,12 @@ private: // static functions
     static void eraseCollider(reactphysics3d::Collider* const p_collider) { quartz::physics::Collider::colliderMap.erase(p_collider); }
 
 private: // static variables
+    static uint32_t colliderCount; 
     static std::map<reactphysics3d::Collider*, quartz::physics::Collider*> colliderMap;
 
 private: // member variables
+    const uint32_t m_id;
+
     std::optional<quartz::physics::BoxShape> mo_boxShape;
     std::optional<quartz::physics::SphereShape> mo_sphereShape;
 

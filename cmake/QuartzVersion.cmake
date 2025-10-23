@@ -3,15 +3,9 @@
 # ====================================================================
 
 function(set_quartz_major_minor_patch_versions major minor patch)
-    set(QUARTZ_MAJOR_VERSION
-      ${major}
-      PARENT_SCOPE)
-    set(QUARTZ_MINOR_VERSION
-      ${minor}
-      PARENT_SCOPE)
-    set(QUARTZ_PATCH_VERSION
-      ${patch}
-      PARENT_SCOPE)
+    set(QUARTZ_MAJOR_VERSION ${major} PARENT_SCOPE)
+    set(QUARTZ_MINOR_VERSION ${minor} PARENT_SCOPE)
+    set(QUARTZ_PATCH_VERSION ${patch} PARENT_SCOPE)
 endfunction()
 
 # -----=====***** the versions *****=====----- #
@@ -47,9 +41,11 @@ endfunction()
 # set_quartz_major_minor_patch_versions(0 2 11) # scene libarary fixes
 # set_quartz_major_minor_patch_versions(0 2 12) # fixes for linux
 # set_quartz_major_minor_patch_versions(0 2 13) # RichException implementation and usage
-# set_quartz_major_minor_patch_versions(0 2 14) # Custom source_location and mocked stacktrace for Mac so we can still use rich exceptions
+# set_quartz_major_minor_patch_versions(0 2 14) # custom source_location and mocked stacktrace for Mac so we can still use rich exceptions
 
 # Minor Version 3 - Scene Debugging Capabilities
 
-set_quartz_major_minor_patch_versions(0 3 0) # Enable Quartz to enter a debugging mode
+# set_quartz_major_minor_patch_versions(0 3 0) # enable Quartz to enter a debugging mode
+# set_quartz_major_minor_patch_versions(0 3 1) # allow for wireframe display of doodads when in scene debugging mode
+set_quartz_major_minor_patch_versions(0 3 2) # allow for display of box colliders when in scene debugging mode
 
