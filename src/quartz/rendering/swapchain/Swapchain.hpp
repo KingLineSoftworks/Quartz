@@ -81,7 +81,6 @@ public: // member functions
         const uint32_t inFlightFrameIndex
     );
     void recordColliderToDrawingCommandBuffer(
-        const quartz::rendering::Device& renderingDevice,
         const quartz::rendering::Pipeline& colliderRenderingPipeline,
         const quartz::physics::Collider& collider,
         const math::Vec3& position,
@@ -152,5 +151,6 @@ private: // member variables
      *    think of a better place to put them
      */
     quartz::rendering::Primitive m_boxColliderPrimitive;
+    quartz::rendering::Primitive m_sphereColliderPrimitive;
 };
 

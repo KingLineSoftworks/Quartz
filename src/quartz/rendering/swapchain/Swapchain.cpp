@@ -6,13 +6,14 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-#include "quartz/rendering/model/Primitive.hpp"
-#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "util/errors/RichException.hpp"
+#include "util/logger/Logger.hpp"
 
 #include "math/transform/Mat4.hpp"
 
 #include "quartz/rendering/device/Device.hpp"
+#include "quartz/rendering/model/Primitive.hpp"
+#include "quartz/rendering/pipeline/PushConstantInfo.hpp"
 #include "quartz/rendering/swapchain/Swapchain.hpp"
 #include "quartz/rendering/vulkan_util/VulkanUtil.hpp"
 #include "quartz/rendering/window/Window.hpp"
@@ -283,7 +284,13 @@ quartz::rendering::Swapchain::Swapchain(
         renderingDevice,
         quartz::rendering::Primitive::getCubeVertices(),
         quartz::rendering::Primitive::getCubeIndices()
+    ),
+    m_sphereColliderPrimitive(
+        renderingDevice,
+        quartz::rendering::Primitive::getCubeVertices(),
+        quartz::rendering::Primitive::getCubeIndices()
     )
+
 {
     LOG_FUNCTION_CALL_TRACEthis("");
 }
@@ -680,23 +687,25 @@ quartz::rendering::Swapchain::recordDoodadToDrawingCommandBuffer(
 
 void
 quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
-    UNUSED const quartz::rendering::Device& renderingDevice, /** @todo 2025/10/19 remove this parameter ?? */
     const quartz::rendering::Pipeline& colliderRenderingPipeline,
     const quartz::physics::Collider& collider,
     const math::Vec3& position,
     const math::Quaternion& rotation,
     const uint32_t inFlightFrameIndex
 ) {
-    if (collider.getSphereShapeOptional()) {
-        return;
-    }
+    const quartz::rendering::Primitive& colliderPrimitive = collider.getBoxShapeOptional() ?
+        m_boxColliderPrimitive :
+        m_sphereColliderPrimitive;
     
     uint32_t offset = 0;
 
+    const math::Vec3 scale = collider.getBoxShapeOptional() ?
+        collider.getBoxShapeOptional()->getHalfExtents_m() :
+        math::Vec3(collider.getSphereShapeOptional()->getRadius_m());
     const math::Transform transform(
         position,
         rotation,
-        collider.getBoxShapeOptional()->getHalfExtents_m()
+        scale
     );
     const math::Mat4 transformationMatrix = transform.calculateTransformationMatrix();
 
@@ -734,19 +743,19 @@ quartz::rendering::Swapchain::recordColliderToDrawingCommandBuffer(
 
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindVertexBuffers(
         0,
-        *(m_boxColliderPrimitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
+        *(colliderPrimitive.getStagedVertexBuffer().getVulkanLogicalBufferPtr()),
         offset
     );
     
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->bindIndexBuffer(
-        *(m_boxColliderPrimitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
+        *(colliderPrimitive.getStagedIndexBuffer().getVulkanLogicalBufferPtr()),
         0,
         vk::IndexType::eUint32
     );
 
     // Draw using vertex and index buffer
     m_vulkanDrawingCommandBufferPtrs[inFlightFrameIndex]->drawIndexed(
-        m_boxColliderPrimitive.getIndexCount(),
+        colliderPrimitive.getIndexCount(),
         1,
         0,
         0,

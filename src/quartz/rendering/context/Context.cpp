@@ -632,7 +632,6 @@ quartz::rendering::Context::recordColliderPipeline(
         math::Vec3 colliderPosition = o_rigidBody->getPosition();
         math::Quaternion colliderRotation = o_rigidBody->getRotation();
         m_renderingSwapchain.recordColliderToDrawingCommandBuffer(
-            m_renderingDevice,
             m_colliderRenderingPipeline,
             *o_collider,
             colliderPosition,

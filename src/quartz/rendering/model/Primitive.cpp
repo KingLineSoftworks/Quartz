@@ -76,6 +76,16 @@ quartz::rendering::Primitive::getCubeIndices() {
     };
 }
 
+std::vector<math::Vec3>
+quartz::rendering::Primitive::getSphereVertices() {
+    return quartz::rendering::Primitive::getCubeVertices();
+}
+
+std::vector<uint32_t>
+quartz::rendering::Primitive::getSphereIndices() {
+    return quartz::rendering::Primitive::getCubeIndices();
+}
+
 bool
 quartz::rendering::Primitive::handleMissingVertexAttribute(
     std::vector<quartz::rendering::Vertex>& verticesToPopulate,
